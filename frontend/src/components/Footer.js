@@ -8,12 +8,21 @@ const Footer = ({ personalInfo }) => {
   };
 
   const downloadResume = () => {
-    const link = document.createElement('a');
-    link.href = '/ALTHAF_HUSSAIN_SYED_DevOps_Resume.pdf';
-    link.download = 'ALTHAF_HUSSAIN_SYED_DevOps_Resume.pdf';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      const link = document.createElement('a');
+      link.href = `${process.env.PUBLIC_URL || ''}/ALTHAF_HUSSAIN_SYED_DevOps_Resume.pdf`;
+      link.download = 'Althaf_Hussain_Syed_DevOps_Resume.pdf';
+      link.style.display = 'none';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      console.log('Resume download initiated from footer');
+    } catch (error) {
+      console.error('Download error:', error);
+      window.open(`${process.env.PUBLIC_URL || ''}/ALTHAF_HUSSAIN_SYED_DevOps_Resume.pdf`, '_blank');
+    }
   };
 
   const currentYear = new Date().getFullYear();
