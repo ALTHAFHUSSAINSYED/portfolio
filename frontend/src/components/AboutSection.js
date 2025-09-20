@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Award, TrendingUp, Shield, Zap } from 'lucide-react';
