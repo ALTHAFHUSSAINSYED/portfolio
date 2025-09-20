@@ -100,8 +100,8 @@ const Footer = ({ personalInfo }) => {
           </div>
 
           {/* Contact & Actions */}
-          <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-white mb-4">
+          <div className={`space-y-4 ${isVisible ? 'fade-in-right stagger-3' : ''}`}>
+            <h4 className="text-lg font-semibold text-white mb-4 sparkle-text">
               Get in Touch
             </h4>
             
@@ -109,25 +109,25 @@ const Footer = ({ personalInfo }) => {
             <div className="space-y-3">
               <a 
                 href={`mailto:${personalInfo.email}`}
-                className="flex items-center space-x-3 text-gray-300 hover:text-blue-400 transition-colors"
+                className="flex items-center space-x-3 text-gray-300 hover:text-cyan-soft transition-all duration-300 hover-glow glow-text"
               >
-                <Mail className="w-4 h-4" />
+                <Mail className="w-4 h-4 pulse-shine" />
                 <span>{personalInfo.email}</span>
               </a>
               <a 
                 href={`tel:${personalInfo.phone}`}
-                className="flex items-center space-x-3 text-gray-300 hover:text-blue-400 transition-colors"
+                className="flex items-center space-x-3 text-gray-300 hover:text-green-soft transition-all duration-300 hover-glow glow-text"
               >
-                <Phone className="w-4 h-4" />
+                <Phone className="w-4 h-4 pulse-shine" />
                 <span>{personalInfo.phone}</span>
               </a>
               <a 
                 href={personalInfo.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center space-x-3 text-gray-300 hover:text-blue-400 transition-colors"
+                className="flex items-center space-x-3 text-gray-300 hover:text-blue-soft transition-all duration-300 hover-glow glow-text"
               >
-                <Linkedin className="w-4 h-4" />
+                <Linkedin className="w-4 h-4 pulse-shine" />
                 <span>LinkedIn Profile</span>
               </a>
             </div>
@@ -137,7 +137,7 @@ const Footer = ({ personalInfo }) => {
               <Button
                 onClick={downloadResume}
                 size="sm"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 hover:shadow-lg"
+                className="w-full neon-button bg-gradient-to-r from-cyan-500/80 to-pink-500/80 hover:from-cyan-500 hover:to-pink-500 text-black transition-all duration-300"
               >
                 <Download className="w-4 h-4 mr-2" />
                 Download Resume
@@ -146,7 +146,7 @@ const Footer = ({ personalInfo }) => {
                 onClick={() => window.open(personalInfo.linkedin, '_blank')}
                 variant="outline"
                 size="sm"
-                className="w-full border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-gray-500 transition-all duration-200"
+                className="w-full border-cyan-400/50 text-cyan-soft bg-black/50 hover:bg-cyan-400/10 hover:border-cyan-400 transition-all duration-300 backdrop-blur-sm hover-lift sparkle-text"
               >
                 <Linkedin className="w-4 h-4 mr-2" />
                 Connect on LinkedIn
