@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios'; // Import axios for making API requests
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -42,25 +43,52 @@ const ContactSection = ({ personalInfo }) => {
     });
   };
 
+  // --- THIS IS THE UPDATED FUNCTION ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    setTimeout(() => {
+    // Create a payload object that matches the backend's expected field names
+    const payload = {
+      'Your Name': formData.name,
+      'Email Address': formData.email,
+      'Subject': formData.subject,
+      'Message': formData.message,
+    };
+
+    try {
+      // Get the backend URL from the environment variable
+      const apiUrl = `${process.env.REACT_APP_API_URL}/api/contact`;
+      
+      // Send the form data to your backend API
+      const response = await axios.post(apiUrl, payload);
+      
+      // Use the toast to show a success message
       toast({
         title: "Message Sent Successfully!",
         description: "Thank you for reaching out. I'll get back to you within 24 hours.",
       });
       
+      // Clear the form fields
       setFormData({
         name: '',
         email: '',
         subject: '',
         message: ''
       });
+
+    } catch (error) {
+      // If there's an error, show an error toast
+      toast({
+        title: "Error Sending Message",
+        description: "Something went wrong. Please try again later.",
+        variant: "destructive",
+      });
+      console.error('Error submitting form:', error);
+    } finally {
+      // Re-enable the submit button whether it succeeded or failed
       setIsSubmitting(false);
-    }, 1000);
+    }
   };
 
   const downloadResume = () => {
@@ -80,6 +108,8 @@ const ContactSection = ({ personalInfo }) => {
       window.open(`${process.env.PUBLIC_URL || ''}/ALTHAF_HUSSAIN_SYED_DevOps_Resume.pdf`, '_blank');
     }
   };
+
+  // --- NO CHANGES NEEDED BELOW THIS LINE ---
 
   return (
     <section id="contact" className="py-20 bg-black relative overflow-hidden" ref={sectionRef}>
