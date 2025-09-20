@@ -4,6 +4,9 @@ import { Badge } from './ui/badge';
 import { Award, TrendingUp, Shield, Zap } from 'lucide-react';
 
 const AboutSection = ({ personalInfo, achievements }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef(null);
+
   const iconMap = {
     'Infrastructure Automation Champion': TrendingUp,
     'Multi-Cloud Expert': Shield,
@@ -17,6 +20,23 @@ const AboutSection = ({ personalInfo, achievements }) => {
     'Incident Response Optimization': 'text-green-soft',
     'High Availability Specialist': 'text-yellow-soft'
   };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <section id="about" className="py-20 bg-gradient-to-b from-black to-gray-900 relative overflow-hidden">
