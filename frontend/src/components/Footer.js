@@ -48,16 +48,24 @@ const Footer = ({ personalInfo }) => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gray-900 text-white py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <footer className="bg-black text-white py-12 relative overflow-hidden" ref={sectionRef}>
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="bg-orb bg-orb-1"></div>
+        <div className="bg-orb bg-orb-2"></div>
+        <div className="absolute top-1/4 right-1/5 w-3 h-3 bg-cyan-400/20 rounded-full floating opacity-30"></div>
+        <div className="absolute bottom-1/3 left-1/4 w-2 h-2 bg-pink-500/20 rounded-full bounce-glow opacity-25"></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {/* Personal Info */}
-          <div className="space-y-4">
-            <h3 className="text-2xl font-bold text-white mb-4">
+          <div className={`space-y-4 ${isVisible ? 'fade-in-left stagger-1' : ''}`}>
+            <h3 className="text-2xl font-bold text-white mb-4 shine-text-slow">
               {personalInfo.name}
             </h3>
-            <p className="text-gray-300 text-lg">
+            <p className="text-gray-300 text-lg glow-text">
               {personalInfo.title}
             </p>
             <p className="text-gray-400 leading-relaxed">
