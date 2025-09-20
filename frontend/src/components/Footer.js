@@ -74,41 +74,28 @@ const Footer = ({ personalInfo }) => {
           </div>
 
           {/* Quick Links */}
-          <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-white mb-4">
+          <div className={`space-y-4 ${isVisible ? 'fade-in-up stagger-2' : ''}`}>
+            <h4 className="text-lg font-semibold text-white mb-4 sparkle-text">
               Quick Links
             </h4>
             <div className="space-y-2">
-              <button 
-                onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}
-                className="block text-gray-300 hover:text-blue-400 transition-colors text-left"
-              >
-                About Me
-              </button>
-              <button 
-                onClick={() => document.getElementById('skills')?.scrollIntoView({ behavior: 'smooth' })}
-                className="block text-gray-300 hover:text-blue-400 transition-colors text-left"
-              >
-                Technical Skills
-              </button>
-              <button 
-                onClick={() => document.getElementById('experience')?.scrollIntoView({ behavior: 'smooth' })}
-                className="block text-gray-300 hover:text-blue-400 transition-colors text-left"
-              >
-                Experience
-              </button>
-              <button 
-                onClick={() => document.getElementById('certifications')?.scrollIntoView({ behavior: 'smooth' })}
-                className="block text-gray-300 hover:text-blue-400 transition-colors text-left"
-              >
-                Certifications
-              </button>
-              <button 
-                onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-                className="block text-gray-300 hover:text-blue-400 transition-colors text-left"
-              >
-                Contact
-              </button>
+              {[
+                { id: 'about', name: 'About Me' },
+                { id: 'skills', name: 'Technical Skills' },
+                { id: 'experience', name: 'Experience' },
+                { id: 'certifications', name: 'Certifications' },
+                { id: 'contact', name: 'Contact' }
+              ].map((link, index) => (
+                <button 
+                  key={link.id}
+                  onClick={() => document.getElementById(link.id)?.scrollIntoView({ behavior: 'smooth' })}
+                  className={`block text-gray-300 hover:text-cyan-soft transition-all duration-300 text-left hover-glow glow-text nav-link ${
+                    isVisible ? `fade-in-right stagger-${index + 3}` : ''
+                  }`}
+                >
+                  {link.name}
+                </button>
+              ))}
             </div>
           </div>
 
