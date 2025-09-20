@@ -38,7 +38,7 @@ const HeroSection = ({ personalInfo }) => {
           </Badge>
 
           {/* Main Heading */}
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight neon-glow">
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight subtle-glow">
             {personalInfo.name}
           </h1>
 
