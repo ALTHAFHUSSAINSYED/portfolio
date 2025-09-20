@@ -20,12 +20,12 @@ const Header = ({ personalInfo }) => {
   };
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50 backdrop-blur-sm">
+    <header className="bg-black/95 backdrop-blur-sm border-b border-cyan-400/20 sticky top-0 z-50 shadow-lg shadow-cyan-400/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           {/* Logo/Name */}
           <div className="flex-shrink-0">
-            <h1 className="text-2xl font-bold text-gray-900 hover:text-blue-600 transition-colors cursor-pointer"
+            <h1 className="text-2xl font-bold text-white hover:text-cyan-400 transition-colors cursor-pointer neon-glow"
                 onClick={() => scrollToSection('hero')}>
               {personalInfo.name}
             </h1>
@@ -35,31 +35,31 @@ const Header = ({ personalInfo }) => {
           <nav className="hidden md:flex space-x-8">
             <button 
               onClick={() => scrollToSection('about')}
-              className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+              className="text-gray-300 hover:text-cyan-400 font-medium transition-colors hover:glow-text"
             >
               About
             </button>
             <button 
               onClick={() => scrollToSection('skills')}
-              className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+              className="text-gray-300 hover:text-cyan-400 font-medium transition-colors hover:glow-text"
             >
               Skills
             </button>
             <button 
               onClick={() => scrollToSection('experience')}
-              className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+              className="text-gray-300 hover:text-cyan-400 font-medium transition-colors hover:glow-text"
             >
               Experience
             </button>
             <button 
               onClick={() => scrollToSection('certifications')}
-              className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+              className="text-gray-300 hover:text-cyan-400 font-medium transition-colors hover:glow-text"
             >
               Certifications
             </button>
             <button 
               onClick={() => scrollToSection('contact')}
-              className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+              className="text-gray-300 hover:text-cyan-400 font-medium transition-colors hover:glow-text"
             >
               Contact
             </button>
@@ -71,7 +71,7 @@ const Header = ({ personalInfo }) => {
               onClick={downloadResume}
               variant="outline"
               size="sm"
-              className="border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
+              className="border-cyan-400 text-cyan-400 bg-black hover:bg-cyan-400 hover:text-black transition-all duration-200 neon-border"
             >
               <Download className="w-4 h-4 mr-2" />
               Resume
@@ -79,7 +79,7 @@ const Header = ({ personalInfo }) => {
             <Button
               onClick={() => scrollToSection('contact')}
               size="sm"
-              className="bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 hover:shadow-md"
+              className="bg-gradient-to-r from-pink-500 to-cyan-400 hover:from-pink-600 hover:to-cyan-500 text-black font-semibold transition-all duration-200 hover:shadow-lg hover:shadow-cyan-400/50 neon-button"
             >
               <Mail className="w-4 h-4 mr-2" />
               Contact
@@ -92,7 +92,7 @@ const Header = ({ personalInfo }) => {
               variant="ghost"
               size="sm"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-700"
+              className="text-gray-300 hover:text-cyan-400"
             >
               {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
@@ -101,35 +101,35 @@ const Header = ({ personalInfo }) => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden pb-4 border-t border-gray-100 mt-4">
+          <div className="md:hidden pb-4 border-t border-cyan-400/20 mt-4">
             <div className="flex flex-col space-y-3 pt-4">
               <button 
                 onClick={() => scrollToSection('about')}
-                className="text-left text-gray-700 hover:text-blue-600 font-medium transition-colors py-2"
+                className="text-left text-gray-300 hover:text-cyan-400 font-medium transition-colors py-2"
               >
                 About
               </button>
               <button 
                 onClick={() => scrollToSection('skills')}
-                className="text-left text-gray-700 hover:text-blue-600 font-medium transition-colors py-2"
+                className="text-left text-gray-300 hover:text-cyan-400 font-medium transition-colors py-2"
               >
                 Skills
               </button>
               <button 
                 onClick={() => scrollToSection('experience')}
-                className="text-left text-gray-700 hover:text-blue-600 font-medium transition-colors py-2"
+                className="text-left text-gray-300 hover:text-cyan-400 font-medium transition-colors py-2"
               >
                 Experience
               </button>
               <button 
                 onClick={() => scrollToSection('certifications')}
-                className="text-left text-gray-700 hover:text-blue-600 font-medium transition-colors py-2"
+                className="text-left text-gray-300 hover:text-cyan-400 font-medium transition-colors py-2"
               >
                 Certifications
               </button>
               <button 
                 onClick={() => scrollToSection('contact')}
-                className="text-left text-gray-700 hover:text-blue-600 font-medium transition-colors py-2"
+                className="text-left text-gray-300 hover:text-cyan-400 font-medium transition-colors py-2"
               >
                 Contact
               </button>
@@ -138,7 +138,7 @@ const Header = ({ personalInfo }) => {
                   onClick={downloadResume}
                   variant="outline"
                   size="sm"
-                  className="border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
+                  className="border-cyan-400 text-cyan-400 bg-black hover:bg-cyan-400 hover:text-black transition-all duration-200"
                 >
                   <Download className="w-4 h-4 mr-2" />
                   Download Resume
@@ -146,7 +146,7 @@ const Header = ({ personalInfo }) => {
                 <Button
                   onClick={() => scrollToSection('contact')}
                   size="sm"
-                  className="bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200"
+                  className="bg-gradient-to-r from-pink-500 to-cyan-400 hover:from-pink-600 hover:to-cyan-500 text-black font-semibold transition-all duration-200"
                 >
                   <Mail className="w-4 h-4 mr-2" />
                   Get in Touch
