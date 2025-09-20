@@ -60,7 +60,7 @@ const AboutSection = ({ personalInfo, achievements }) => {
 
         <div className="grid lg:grid-cols-2 gap-12 items-start">
           {/* Professional Summary */}
-          <div className="space-y-6">
+          <div className={`space-y-6 ${isVisible ? 'fade-in-left stagger-2' : ''}`}>
             <h3 className="text-2xl font-semibold mb-4 attractive-text">
               <span className="text-cyan-soft">Professional</span> <span className="text-pink-soft">Summary</span>
             </h3>
@@ -71,30 +71,30 @@ const AboutSection = ({ personalInfo, achievements }) => {
             <div className="space-y-4">
               <h4 className="text-lg font-semibold text-white">Key Expertise Areas:</h4>
               <div className="grid grid-cols-2 gap-3">
-                <Badge variant="outline" className="border-cyan-400/30 text-cyan-soft bg-black/50 px-3 py-2 justify-start hover:bg-cyan-400/5 transition-all backdrop-blur-sm">
-                  Cloud Architecture
-                </Badge>
-                <Badge variant="outline" className="border-pink-500/30 text-pink-soft bg-black/50 px-3 py-2 justify-start hover:bg-pink-500/5 transition-all backdrop-blur-sm">
-                  DevOps Automation
-                </Badge>
-                <Badge variant="outline" className="border-green-400/30 text-green-soft bg-black/50 px-3 py-2 justify-start hover:bg-green-400/5 transition-all backdrop-blur-sm">
-                  CI/CD Pipelines
-                </Badge>
-                <Badge variant="outline" className="border-yellow-400/30 text-yellow-soft bg-black/50 px-3 py-2 justify-start hover:bg-yellow-400/5 transition-all backdrop-blur-sm">
-                  Infrastructure as Code
-                </Badge>
-                <Badge variant="outline" className="border-blue-400/30 text-blue-soft bg-black/50 px-3 py-2 justify-start hover:bg-blue-400/5 transition-all backdrop-blur-sm">
-                  Container Orchestration
-                </Badge>
-                <Badge variant="outline" className="border-purple-400/30 text-purple-soft bg-black/50 px-3 py-2 justify-start hover:bg-purple-400/5 transition-all backdrop-blur-sm">
-                  Storage Solutions
-                </Badge>
+                {[
+                  { name: 'Cloud Architecture', color: 'cyan' },
+                  { name: 'DevOps Automation', color: 'pink' },
+                  { name: 'CI/CD Pipelines', color: 'green' },
+                  { name: 'Infrastructure as Code', color: 'yellow' },
+                  { name: 'Container Orchestration', color: 'blue' },
+                  { name: 'Storage Solutions', color: 'purple' }
+                ].map((skill, index) => (
+                  <Badge 
+                    key={skill.name}
+                    variant="outline" 
+                    className={`border-${skill.color}-400/30 text-${skill.color}-soft bg-black/50 px-3 py-2 justify-start hover:bg-${skill.color}-400/5 transition-all duration-300 backdrop-blur-sm hover-scale ${
+                      isVisible ? `fade-in-up stagger-${index + 3}` : ''
+                    }`}
+                  >
+                    {skill.name}
+                  </Badge>
+                ))}
               </div>
             </div>
           </div>
 
           {/* Key Achievements */}
-          <div className="space-y-6">
+          <div className={`space-y-6 ${isVisible ? 'fade-in-right stagger-3' : ''}`}>
             <h3 className="text-2xl font-semibold mb-6 attractive-text">
               <span className="text-pink-soft">Key</span> <span className="text-cyan-soft">Achievements</span>
             </h3>
@@ -105,14 +105,16 @@ const AboutSection = ({ personalInfo, achievements }) => {
                 return (
                   <Card 
                     key={index} 
-                    className="p-6 bg-black/50 border border-gray-700/30 hover:border-cyan-400/20 hover:shadow-lg hover:shadow-cyan-400/10 transition-all duration-200 group backdrop-blur-sm neon-card"
+                    className={`p-6 bg-black/50 border border-gray-700/30 hover:border-cyan-400/20 transition-all duration-300 group backdrop-blur-sm neon-card hover-lift ${
+                      isVisible ? `fade-in-up stagger-${index + 4}` : ''
+                    }`}
                   >
                     <div className="flex items-start space-x-4">
-                      <div className={`flex-shrink-0 w-12 h-12 bg-gray-900/50 rounded-lg flex items-center justify-center group-hover:bg-gray-800/50 transition-colors border border-gray-700/20`}>
+                      <div className={`flex-shrink-0 w-12 h-12 bg-gray-900/50 rounded-lg flex items-center justify-center group-hover:bg-gray-800/50 transition-all duration-300 border border-gray-700/20 hover-rotate`}>
                         <IconComponent className={`w-6 h-6 ${iconColor}`} />
                       </div>
                       <div>
-                        <h4 className="font-semibold text-white mb-2 group-hover:text-cyan-soft transition-colors">
+                        <h4 className="font-semibold text-white mb-2 group-hover:text-cyan-soft transition-colors duration-300">
                           {achievement.title}
                         </h4>
                         <p className="text-gray-300 leading-relaxed">
