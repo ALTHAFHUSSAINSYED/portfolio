@@ -13,7 +13,7 @@ import { Toaster } from './ui/toaster';
 
 const Portfolio = () => {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-black neon-theme">
       <Header personalInfo={portfolioData.personalInfo} />
       <HeroSection personalInfo={portfolioData.personalInfo} />
       <AboutSection 
