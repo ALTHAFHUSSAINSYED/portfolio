@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -14,7 +14,26 @@ const ContactSection = ({ personalInfo }) => {
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   const handleInputChange = (e) => {
     setFormData({
@@ -63,25 +82,37 @@ const ContactSection = ({ personalInfo }) => {
   };
 
   return (
-    <section id="contact" className="py-20 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="contact" className="py-20 bg-black relative overflow-hidden" ref={sectionRef}>
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="bg-orb bg-orb-1"></div>
+        <div className="bg-orb bg-orb-2"></div>
+        <div className="bg-orb bg-orb-3"></div>
+        
+        {/* Contact-themed floating elements */}
+        <div className="absolute top-1/4 left-1/6 w-4 h-4 bg-cyan-400/20 rounded-full floating opacity-40"></div>
+        <div className="absolute bottom-1/4 right-1/6 w-6 h-6 bg-pink-500/20 rounded-full bounce-glow opacity-30"></div>
+        <div className="absolute top-2/3 left-2/3 w-3 h-3 bg-green-400/20 rounded-full floating-reverse opacity-35"></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className={`text-3xl md:text-4xl font-bold mb-4 shine-text ${isVisible ? 'fade-in-up' : ''}`}>
             Let's Connect
           </h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+          <p className={`text-lg text-gray-300 max-w-3xl mx-auto glow-text ${isVisible ? 'fade-in-up stagger-1' : ''}`}>
             Ready to discuss your next DevOps project or explore opportunities? I'd love to hear from you!
           </p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12">
           {/* Contact Information */}
-          <div className="space-y-8">
+          <div className={`space-y-8 ${isVisible ? 'fade-in-left stagger-2' : ''}`}>
             <div>
-              <h3 className="text-2xl font-semibold text-gray-900 mb-6">
+              <h3 className="text-2xl font-semibold mb-6 shine-text-slow">
                 Get in Touch
               </h3>
-              <p className="text-gray-600 mb-8 text-lg leading-relaxed">
+              <p className="text-gray-300 mb-8 text-lg leading-relaxed glow-text">
                 I'm always interested in hearing about new opportunities, collaborating on exciting projects, 
                 or discussing the latest in DevOps and cloud technologies. Feel free to reach out!
               </p>
@@ -89,16 +120,18 @@ const ContactSection = ({ personalInfo }) => {
 
             {/* Contact Methods */}
             <div className="space-y-4">
-              <Card className="p-4 border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all duration-200 bg-white">
+              <Card className={`p-4 bg-black/80 border border-gray-700/30 hover:border-cyan-400/40 transition-all duration-300 backdrop-blur-sm neon-card hover-lift hover-shine ${
+                isVisible ? 'scale-in stagger-3' : ''
+              }`}>
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
-                    <Mail className="w-6 h-6 text-blue-600" />
+                  <div className="w-12 h-12 bg-cyan-400/10 rounded-lg flex items-center justify-center border border-cyan-400/30 pulse-shine">
+                    <Mail className="w-6 h-6 text-cyan-soft" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">Email</h4>
+                    <h4 className="font-semibold text-white sparkle-text">Email</h4>
                     <a 
                       href={`mailto:${personalInfo.email}`}
-                      className="text-blue-600 hover:text-blue-700 transition-colors hover:underline"
+                      className="text-cyan-soft hover:text-cyan-400 transition-colors hover:underline glow-text"
                     >
                       {personalInfo.email}
                     </a>
@@ -106,16 +139,18 @@ const ContactSection = ({ personalInfo }) => {
                 </div>
               </Card>
 
-              <Card className="p-4 border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all duration-200 bg-white">
+              <Card className={`p-4 bg-black/80 border border-gray-700/30 hover:border-green-400/40 transition-all duration-300 backdrop-blur-sm neon-card hover-lift hover-shine ${
+                isVisible ? 'scale-in stagger-4' : ''
+              }`}>
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
-                    <Phone className="w-6 h-6 text-green-600" />
+                  <div className="w-12 h-12 bg-green-400/10 rounded-lg flex items-center justify-center border border-green-400/30 pulse-shine">
+                    <Phone className="w-6 h-6 text-green-soft" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">Phone</h4>
+                    <h4 className="font-semibold text-white sparkle-text">Phone</h4>
                     <a 
                       href={`tel:${personalInfo.phone}`}
-                      className="text-green-600 hover:text-green-700 transition-colors hover:underline"
+                      className="text-green-soft hover:text-green-400 transition-colors hover:underline glow-text"
                     >
                       {personalInfo.phone}
                     </a>
@@ -123,30 +158,34 @@ const ContactSection = ({ personalInfo }) => {
                 </div>
               </Card>
 
-              <Card className="p-4 border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all duration-200 bg-white">
+              <Card className={`p-4 bg-black/80 border border-gray-700/30 hover:border-purple-400/40 transition-all duration-300 backdrop-blur-sm neon-card hover-lift hover-shine ${
+                isVisible ? 'scale-in stagger-5' : ''
+              }`}>
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center">
-                    <MapPin className="w-6 h-6 text-purple-600" />
+                  <div className="w-12 h-12 bg-purple-400/10 rounded-lg flex items-center justify-center border border-purple-400/30 pulse-shine">
+                    <MapPin className="w-6 h-6 text-purple-soft" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">Location</h4>
-                    <p className="text-gray-600">{personalInfo.location}</p>
+                    <h4 className="font-semibold text-white sparkle-text">Location</h4>
+                    <p className="text-gray-300 glow-text">{personalInfo.location}</p>
                   </div>
                 </div>
               </Card>
 
-              <Card className="p-4 border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all duration-200 bg-white">
+              <Card className={`p-4 bg-black/80 border border-gray-700/30 hover:border-blue-400/40 transition-all duration-300 backdrop-blur-sm neon-card hover-lift hover-shine ${
+                isVisible ? 'scale-in stagger-6' : ''
+              }`}>
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
-                    <Linkedin className="w-6 h-6 text-blue-600" />
+                  <div className="w-12 h-12 bg-blue-400/10 rounded-lg flex items-center justify-center border border-blue-400/30 pulse-shine">
+                    <Linkedin className="w-6 h-6 text-blue-soft" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">LinkedIn</h4>
+                    <h4 className="font-semibold text-white sparkle-text">LinkedIn</h4>
                     <a 
                       href={personalInfo.linkedin}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-700 transition-colors hover:underline"
+                      className="text-blue-soft hover:text-blue-400 transition-colors hover:underline glow-text"
                     >
                       Connect on LinkedIn
                     </a>
@@ -156,10 +195,10 @@ const ContactSection = ({ personalInfo }) => {
             </div>
 
             {/* Quick Actions */}
-            <div className="space-y-3">
+            <div className={`space-y-3 ${isVisible ? 'fade-in-up stagger-7' : ''}`}>
               <Button
                 onClick={downloadResume}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-medium hover:shadow-lg transition-all duration-200"
+                className="w-full neon-button bg-gradient-to-r from-cyan-500/80 to-pink-500/80 hover:from-cyan-500 hover:to-pink-500 text-black py-3 text-lg font-bold transition-all duration-300"
               >
                 <Download className="w-5 h-5 mr-3" />
                 Download My Resume
@@ -167,7 +206,7 @@ const ContactSection = ({ personalInfo }) => {
               <Button
                 onClick={() => window.open(personalInfo.linkedin, '_blank')}
                 variant="outline"
-                className="w-full border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 py-3 text-lg font-medium hover:shadow-lg transition-all duration-200"
+                className="w-full border-cyan-400/50 text-cyan-soft bg-black/50 hover:bg-cyan-400/10 hover:text-cyan-400 py-3 text-lg font-medium hover-lift transition-all duration-300 backdrop-blur-sm sparkle-text"
               >
                 <Linkedin className="w-5 h-5 mr-3" />
                 View LinkedIn Profile
@@ -176,12 +215,14 @@ const ContactSection = ({ personalInfo }) => {
           </div>
 
           {/* Contact Form */}
-          <Card className="p-8 border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow">
+          <Card className={`p-8 bg-black/80 border border-gray-700/30 backdrop-blur-sm neon-card hover-lift ${
+            isVisible ? 'fade-in-right stagger-8' : ''
+          }`}>
             <div className="flex items-center space-x-3 mb-6">
-              <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
-                <MessageCircle className="w-5 h-5 text-blue-600" />
+              <div className="w-10 h-10 bg-cyan-400/10 rounded-lg flex items-center justify-center border border-cyan-400/30 pulse-shine">
+                <MessageCircle className="w-5 h-5 text-cyan-soft" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900">
+              <h3 className="text-xl font-semibold text-white shine-text-slow">
                 Send me a message
               </h3>
             </div>
@@ -189,7 +230,7 @@ const ContactSection = ({ personalInfo }) => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2 sparkle-text">
                     Your Name
                   </label>
                   <Input
@@ -200,11 +241,11 @@ const ContactSection = ({ personalInfo }) => {
                     onChange={handleInputChange}
                     placeholder="Enter your full name"
                     required
-                    className="border-gray-200 focus:border-blue-300 focus:ring-blue-200"
+                    className="form-input border-gray-600/50 focus:border-cyan-400/80 focus:ring-cyan-400/20 bg-black/50 text-white placeholder-gray-400"
                   />
                 </div>
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2 sparkle-text">
                     Email Address
                   </label>
                   <Input
@@ -215,13 +256,13 @@ const ContactSection = ({ personalInfo }) => {
                     onChange={handleInputChange}
                     placeholder="your.email@example.com"
                     required
-                    className="border-gray-200 focus:border-blue-300 focus:ring-blue-200"
+                    className="form-input border-gray-600/50 focus:border-cyan-400/80 focus:ring-cyan-400/20 bg-black/50 text-white placeholder-gray-400"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="subject" className="block text-sm font-medium text-gray-300 mb-2 sparkle-text">
                   Subject
                 </label>
                 <Input
@@ -232,12 +273,12 @@ const ContactSection = ({ personalInfo }) => {
                   onChange={handleInputChange}
                   placeholder="What's this about?"
                   required
-                  className="border-gray-200 focus:border-blue-300 focus:ring-blue-200"
+                  className="form-input border-gray-600/50 focus:border-cyan-400/80 focus:ring-cyan-400/20 bg-black/50 text-white placeholder-gray-400"
                 />
               </div>
 
               <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="message" className="block text-sm font-medium text-gray-300 mb-2 sparkle-text">
                   Message
                 </label>
                 <Textarea
@@ -248,18 +289,22 @@ const ContactSection = ({ personalInfo }) => {
                   placeholder="Tell me about your project or how I can help..."
                   rows={6}
                   required
-                  className="border-gray-200 focus:border-blue-300 focus:ring-blue-200 resize-none"
+                  className="form-input border-gray-600/50 focus:border-cyan-400/80 focus:ring-cyan-400/20 bg-black/50 text-white placeholder-gray-400 resize-none"
                 />
               </div>
 
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-medium hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full neon-button bg-gradient-to-r from-cyan-500/80 to-pink-500/80 hover:from-cyan-500 hover:to-pink-500 text-black py-3 text-lg font-bold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                    <div className="loading-dots mr-3">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
                     Sending...
                   </div>
                 ) : (
@@ -274,11 +319,13 @@ const ContactSection = ({ personalInfo }) => {
         </div>
 
         {/* Availability Notice */}
-        <div className="mt-16 text-center bg-white rounded-xl p-8 shadow-sm border border-gray-100">
-          <h3 className="text-xl font-semibold text-gray-900 mb-4">
+        <div className={`mt-16 text-center bg-black/60 rounded-xl p-8 border border-gray-700/30 backdrop-blur-sm neon-card hover-lift ${
+          isVisible ? 'slide-in-bottom stagger-8' : ''
+        }`}>
+          <h3 className="text-xl font-semibold mb-4 shine-text">
             Currently Available for New Opportunities
           </h3>
-          <p className="text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-gray-300 max-w-2xl mx-auto leading-relaxed glow-text">
             I'm actively exploring exciting DevOps and cloud engineering roles where I can contribute to 
             building scalable, reliable infrastructure. Let's discuss how my expertise can help your team succeed!
           </p>
