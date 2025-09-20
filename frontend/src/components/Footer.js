@@ -192,10 +192,10 @@ const Footer = ({ personalInfo }) => {
         </div>
 
         {/* Professional Statement */}
-        <div className="mt-8 text-center">
-          <p className="text-gray-400 text-sm max-w-2xl mx-auto">
+        <div className={`mt-8 text-center ${isVisible ? 'fade-in-up stagger-6' : ''}`}>
+          <p className="text-gray-400 text-sm max-w-2xl mx-auto glow-text">
             Dedicated to delivering exceptional DevOps solutions that empower teams to build, 
-            deploy, and scale applications with confidence and reliability.
+            deploy, and scale applications with <span className="text-gradient-animate">confidence and reliability</span>.
           </p>
         </div>
       </div>
