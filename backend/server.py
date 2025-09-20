@@ -55,6 +55,11 @@ async def get_status_checks():
 # Include the router in the main app
 app.include_router(api_router)
 
+# ADD THIS NEW ROUTE FOR THE ROOT URL
+@app.get("/")
+def welcome():
+    return {"message": "Welcome! The API is available under /api"}
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
