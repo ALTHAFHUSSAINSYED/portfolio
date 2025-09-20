@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
@@ -6,15 +6,34 @@ import { Award, Calendar, Filter } from 'lucide-react';
 
 const CertificationsSection = ({ certifications }) => {
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   const categories = {
-    all: { name: 'All Certifications', color: 'text-gray-700', bg: 'bg-gray-100' },
-    aws: { name: 'AWS', color: 'text-orange-600', bg: 'bg-orange-50' },
-    gcp: { name: 'Google Cloud', color: 'text-blue-600', bg: 'bg-blue-50' },
-    azure: { name: 'Microsoft Azure', color: 'text-blue-700', bg: 'bg-blue-50' },
-    oracle: { name: 'Oracle', color: 'text-red-600', bg: 'bg-red-50' },
-    devops: { name: 'DevOps', color: 'text-green-600', bg: 'bg-green-50' },
-    ai: { name: 'AI/ML', color: 'text-purple-600', bg: 'bg-purple-50' }
+    all: { name: 'All Certifications', color: 'text-white', bg: 'bg-gray-600/20' },
+    aws: { name: 'AWS', color: 'text-orange-400', bg: 'bg-orange-500/20' },
+    gcp: { name: 'Google Cloud', color: 'text-blue-400', bg: 'bg-blue-500/20' },
+    azure: { name: 'Microsoft Azure', color: 'text-blue-500', bg: 'bg-blue-600/20' },
+    oracle: { name: 'Oracle', color: 'text-red-400', bg: 'bg-red-500/20' },
+    devops: { name: 'DevOps', color: 'text-green-400', bg: 'bg-green-500/20' },
+    ai: { name: 'AI/ML', color: 'text-purple-400', bg: 'bg-purple-500/20' }
   };
 
   const filteredCertifications = selectedCategory === 'all' 
@@ -26,38 +45,50 @@ const CertificationsSection = ({ certifications }) => {
   };
 
   const getCertificationColor = (category) => {
-    return categories[category]?.color || 'text-gray-600';
+    return categories[category]?.color || 'text-gray-400';
   };
 
   const getCertificationBg = (category) => {
-    return categories[category]?.bg || 'bg-gray-50';
+    return categories[category]?.bg || 'bg-gray-500/20';
   };
 
   return (
-    <section id="certifications" className="py-20 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="certifications" className="py-20 bg-black relative overflow-hidden" ref={sectionRef}>
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="bg-orb bg-orb-1"></div>
+        <div className="bg-orb bg-orb-2"></div>
+        <div className="bg-orb bg-orb-3"></div>
+        
+        {/* Floating certification icons */}
+        <div className="absolute top-1/4 left-1/5 w-6 h-6 bg-orange-400/20 rounded-full floating opacity-20"></div>
+        <div className="absolute top-2/3 right-1/5 w-4 h-4 bg-blue-400/20 rounded-full floating-reverse opacity-25"></div>
+        <div className="absolute bottom-1/4 left-1/3 w-5 h-5 bg-green-400/20 rounded-full bounce-glow opacity-30"></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className={`text-3xl md:text-4xl font-bold mb-4 shine-text ${isVisible ? 'fade-in-up' : ''}`}>
             Certifications & Credentials
           </h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+          <p className={`text-lg text-gray-300 max-w-3xl mx-auto glow-text ${isVisible ? 'fade-in-up stagger-1' : ''}`}>
             Industry-recognized certifications across multiple cloud platforms and technologies
           </p>
         </div>
 
         {/* Filter Buttons */}
-        <div className="flex flex-wrap justify-center gap-3 mb-12">
-          {Object.entries(categories).map(([key, category]) => (
+        <div className={`flex flex-wrap justify-center gap-3 mb-12 ${isVisible ? 'fade-in-up stagger-2' : ''}`}>
+          {Object.entries(categories).map(([key, category], index) => (
             <Button
               key={key}
               onClick={() => setSelectedCategory(key)}
               variant={selectedCategory === key ? 'default' : 'outline'}
               size="sm"
-              className={`transition-all duration-200 ${
+              className={`transition-all duration-300 hover-shine sparkle-text ${
                 selectedCategory === key 
-                  ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                  : 'border-gray-200 text-gray-700 hover:bg-gray-50'
-              }`}
+                  ? 'neon-button bg-gradient-to-r from-cyan-500/80 to-pink-500/80 text-black font-bold' 
+                  : 'border-gray-600/50 text-gray-300 bg-black/50 hover:bg-gray-800/50 hover-glow'
+              } ${isVisible ? `scale-in stagger-${index + 3}` : ''}`}
             >
               <Filter className="w-4 h-4 mr-2" />
               {category.name}
@@ -66,8 +97,12 @@ const CertificationsSection = ({ certifications }) => {
         </div>
 
         {/* Certifications Count */}
-        <div className="text-center mb-8">
-          <Badge variant="outline" className="border-blue-200 text-blue-700 bg-blue-50 px-4 py-2 text-lg">
+        <div className={`text-center mb-8 ${isVisible ? 'fade-in-up stagger-3' : ''}`}>
+          <Badge 
+            variant="outline" 
+            className="border-cyan-400/50 text-cyan-soft bg-black/50 px-6 py-3 text-lg sparkle-text hover-glow transition-all duration-300"
+          >
+            <Award className="w-5 h-5 mr-2 pulse-shine" />
             {filteredCertifications.length} {selectedCategory === 'all' ? 'Total' : categories[selectedCategory]?.name} Certifications
           </Badge>
         </div>
@@ -77,33 +112,35 @@ const CertificationsSection = ({ certifications }) => {
           {filteredCertifications.map((cert, index) => (
             <Card 
               key={index} 
-              className="p-6 border border-gray-100 hover:border-blue-200 hover:shadow-lg transition-all duration-200 bg-white group"
+              className={`p-6 bg-black/80 border border-gray-700/30 hover:border-cyan-400/40 transition-all duration-500 backdrop-blur-sm neon-card hover-lift hover-shine group ${
+                isVisible ? `rotate-in stagger-${index + 4}` : ''
+              }`}
             >
               <div className="flex items-start space-x-4">
-                <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${getCertificationBg(cert.category)} group-hover:scale-110 transition-transform`}>
-                  <div className={getCertificationColor(cert.category)}>
+                <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${getCertificationBg(cert.category)} group-hover:scale-110 transition-all duration-300 hover-rotate border border-gray-600/30`}>
+                  <div className={`${getCertificationColor(cert.category)} glow-text`}>
                     {getCertificationIcon(cert.category)}
                   </div>
                 </div>
                 
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-gray-900 mb-2 leading-tight group-hover:text-blue-700 transition-colors">
+                  <h3 className="font-semibold text-white mb-2 leading-tight group-hover:text-cyan-soft transition-all duration-300 shine-text-slow">
                     {cert.name}
                   </h3>
-                  <p className="text-gray-600 text-sm mb-3 font-medium">
+                  <p className="text-gray-300 text-sm mb-3 font-medium glow-text">
                     {cert.issuer}
                   </p>
-                  <div className="flex items-center text-gray-500 text-sm">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    <span>{cert.year}</span>
+                  <div className="flex items-center text-gray-400 text-sm">
+                    <Calendar className="w-4 h-4 mr-2 text-green-soft pulse-shine" />
+                    <span className="glow-text">{cert.year}</span>
                   </div>
                 </div>
               </div>
               
-              <div className="mt-4 pt-4 border-t border-gray-100">
+              <div className="mt-4 pt-4 border-t border-gray-700/30">
                 <Badge 
                   variant="outline" 
-                  className={`${getCertificationBg(cert.category)} ${getCertificationColor(cert.category)} border-current text-xs px-2 py-1`}
+                  className={`${getCertificationBg(cert.category)} ${getCertificationColor(cert.category)} border-current text-xs px-3 py-1 hover-scale transition-all duration-300 sparkle-text`}
                 >
                   {categories[cert.category]?.name || cert.category}
                 </Badge>
@@ -113,34 +150,36 @@ const CertificationsSection = ({ certifications }) => {
         </div>
 
         {/* Certification Summary Stats */}
-        <div className="mt-16 bg-white rounded-xl p-8 shadow-sm border border-gray-100">
-          <h3 className="text-2xl font-bold text-gray-900 text-center mb-8">
+        <div className={`mt-16 bg-black/60 rounded-xl p-8 shadow-sm border border-gray-700/30 backdrop-blur-sm neon-card hover-lift ${
+          isVisible ? 'slide-in-bottom stagger-8' : ''
+        }`}>
+          <h3 className="text-2xl font-bold text-center mb-8 shine-text">
             Certification Portfolio Overview
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="text-center p-4 bg-orange-50 rounded-lg border border-orange-100">
-              <div className="text-2xl font-bold text-orange-600 mb-2">
+            <div className="text-center p-4 bg-orange-500/10 rounded-lg border border-orange-400/20 hover:border-orange-400/40 transition-all duration-300 hover-glow">
+              <div className="text-2xl font-bold text-orange-400 mb-2 counter glow-text-strong">
                 {certifications.filter(c => c.category === 'aws').length}
               </div>
-              <div className="text-gray-600 font-medium text-sm">AWS Certs</div>
+              <div className="text-gray-300 font-medium text-sm glow-text">AWS Certs</div>
             </div>
-            <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-100">
-              <div className="text-2xl font-bold text-blue-600 mb-2">
+            <div className="text-center p-4 bg-blue-500/10 rounded-lg border border-blue-400/20 hover:border-blue-400/40 transition-all duration-300 hover-glow">
+              <div className="text-2xl font-bold text-blue-400 mb-2 counter glow-text-strong">
                 {certifications.filter(c => c.category === 'gcp').length}
               </div>
-              <div className="text-gray-600 font-medium text-sm">GCP Certs</div>
+              <div className="text-gray-300 font-medium text-sm glow-text">GCP Certs</div>
             </div>
-            <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-100">
-              <div className="text-2xl font-bold text-blue-700 mb-2">
+            <div className="text-center p-4 bg-blue-600/10 rounded-lg border border-blue-500/20 hover:border-blue-500/40 transition-all duration-300 hover-glow">
+              <div className="text-2xl font-bold text-blue-500 mb-2 counter glow-text-strong">
                 {certifications.filter(c => c.category === 'azure').length}
               </div>
-              <div className="text-gray-600 font-medium text-sm">Azure Certs</div>
+              <div className="text-gray-300 font-medium text-sm glow-text">Azure Certs</div>
             </div>
-            <div className="text-center p-4 bg-red-50 rounded-lg border border-red-100">
-              <div className="text-2xl font-bold text-red-600 mb-2">
+            <div className="text-center p-4 bg-red-500/10 rounded-lg border border-red-400/20 hover:border-red-400/40 transition-all duration-300 hover-glow">
+              <div className="text-2xl font-bold text-red-400 mb-2 counter glow-text-strong">
                 {certifications.filter(c => c.category === 'oracle').length}
               </div>
-              <div className="text-gray-600 font-medium text-sm">Oracle Certs</div>
+              <div className="text-gray-300 font-medium text-sm glow-text">Oracle Certs</div>
             </div>
           </div>
         </div>
