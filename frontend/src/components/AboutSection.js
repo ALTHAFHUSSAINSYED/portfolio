@@ -39,19 +39,21 @@ const AboutSection = ({ personalInfo, achievements }) => {
   }, []);
 
   return (
-    <section id="about" className="py-20 bg-gradient-to-b from-black to-gray-900 relative overflow-hidden">
-      {/* Subtle background effects */}
+    <section id="about" className="py-20 bg-gradient-to-b from-black to-gray-900 relative overflow-hidden" ref={sectionRef}>
+      {/* Animated background effects */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-10 right-20 w-64 h-64 bg-cyan-400/3 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 left-20 w-80 h-80 bg-pink-500/3 rounded-full blur-3xl"></div>
+        <div className="bg-orb bg-orb-1"></div>
+        <div className="bg-orb bg-orb-2"></div>
+        <div className="absolute top-1/4 right-1/4 w-1 h-1 bg-cyan-400 rounded-full floating opacity-30"></div>
+        <div className="absolute bottom-1/3 left-1/3 w-2 h-2 bg-pink-500 rounded-full bounce-slow opacity-20"></div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 section-heading">
+          <h2 className={`text-3xl md:text-4xl font-bold mb-4 text-gradient-animate ${isVisible ? 'fade-in-up' : ''}`}>
             About Me
           </h2>
-          <p className="text-lg text-gray-300 max-w-3xl mx-auto">
+          <p className={`text-lg text-gray-300 max-w-3xl mx-auto ${isVisible ? 'fade-in-up stagger-1' : ''}`}>
             Passionate DevOps engineer specializing in cloud infrastructure and automation solutions
           </p>
         </div>
