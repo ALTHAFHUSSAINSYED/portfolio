@@ -9,6 +9,7 @@ import CertificationsSection from './CertificationsSection';
 import ProjectsSection from './ProjectsSection';
 import ContactSection from './ContactSection';
 import Footer from './Footer';
+import { Toaster } from './ui/toaster';
 
 const Portfolio = () => {
   return (
