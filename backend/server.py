@@ -90,7 +90,7 @@ async def send_contact_email(form: ContactForm):
 
     try:
         sg = SendGridAPIClient(sendgrid_api_key)
-        response = await sg.send(message)
+        response = sg.send(message)
         if response.status_code >= 200 and response.status_code < 300:
             return {"message": "Email sent successfully!"}
         else:
