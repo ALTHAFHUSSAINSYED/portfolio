@@ -26,6 +26,7 @@ const Portfolio = () => {
       <ProjectsSection projects={portfolioData.projects} />
       <ContactSection personalInfo={portfolioData.personalInfo} />
       <Footer personalInfo={portfolioData.personalInfo} />
+      <Toaster />
     </div>
   );
 };
