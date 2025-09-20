@@ -130,7 +130,9 @@ const AboutSection = ({ personalInfo, achievements }) => {
         </div>
 
         {/* Personal Touch */}
-        <div className="mt-16 text-center bg-black/30 rounded-xl p-8 border border-gray-700/20 backdrop-blur-sm">
+        <div className={`mt-16 text-center bg-black/30 rounded-xl p-8 border border-gray-700/20 backdrop-blur-sm neon-card hover-lift transition-all duration-300 ${
+          isVisible ? 'slide-in-bottom stagger-6' : ''
+        }`}>
           <h3 className="text-xl font-semibold text-white mb-4">
             <span className="text-green-soft">Why I Love</span> <span className="text-blue-soft">DevOps</span>
           </h3>
