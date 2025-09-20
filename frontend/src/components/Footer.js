@@ -156,23 +156,23 @@ const Footer = ({ personalInfo }) => {
         </div>
 
         {/* Divider */}
-        <div className="border-t border-gray-800 pt-8">
+        <div className="border-t border-gray-800/50 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             {/* Copyright */}
-            <div className="text-center md:text-left">
-              <p className="text-gray-400">
-                © {currentYear} {personalInfo.name}. All rights reserved.
+            <div className={`text-center md:text-left ${isVisible ? 'fade-in-up stagger-4' : ''}`}>
+              <p className="text-gray-400 glow-text">
+                © {currentYear} <span className="sparkle-text">{personalInfo.name}</span>. All rights reserved.
               </p>
               <p className="text-gray-500 text-sm mt-1">
-                Built with React & Tailwind CSS
+                Built with React & Tailwind CSS • <span className="text-gradient-animate">Made with ❤️</span>
               </p>
             </div>
 
             {/* Availability Status */}
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-gray-300 text-sm font-medium">
+            <div className={`flex items-center space-x-4 ${isVisible ? 'fade-in-up stagger-5' : ''}`}>
+              <div className="flex items-center space-x-2 hover-glow transition-all duration-300 p-2 rounded">
+                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse pulse-shine"></div>
+                <span className="text-gray-300 text-sm font-medium glow-text">
                   Available for new opportunities
                 </span>
               </div>
@@ -182,7 +182,7 @@ const Footer = ({ personalInfo }) => {
                 onClick={scrollToTop}
                 variant="outline"
                 size="sm"
-                className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-gray-500 transition-all duration-200"
+                className="border-cyan-400/50 text-cyan-soft bg-black/50 hover:bg-cyan-400/10 hover:border-cyan-400 transition-all duration-300 hover-lift sparkle-text"
               >
                 <ArrowUp className="w-4 h-4 mr-2" />
                 Back to Top
