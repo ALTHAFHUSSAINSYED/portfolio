@@ -108,6 +108,15 @@ code {
     }
   }
 
+  @keyframes subtle-glow {
+    from {
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.3), 0 0 10px rgba(255, 255, 255, 0.2);
+    }
+    to {
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.4), 0 0 15px rgba(255, 255, 255, 0.25);
+    }
+  }
+
   @keyframes neon-border {
     from {
       box-shadow: 0 0 5px currentColor, inset 0 0 5px currentColor;
