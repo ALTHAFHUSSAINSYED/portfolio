@@ -33,12 +33,12 @@ const Header = ({ personalInfo }) => {
   };
 
   return (
-    <header className="bg-black/95 backdrop-blur-sm border-b border-cyan-400/20 sticky top-0 z-50 shadow-lg shadow-cyan-400/5">
+    <header className="bg-black/95 backdrop-blur-sm border-b border-cyan-400/20 sticky top-0 z-50 shadow-lg shadow-cyan-400/5 fade-in">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           {/* Logo/Name */}
           <div className="flex-shrink-0">
-            <h1 className="text-2xl font-bold text-white hover:text-cyan-soft transition-colors cursor-pointer"
+            <h1 className="text-2xl font-bold text-white hover:text-cyan-soft transition-all duration-300 cursor-pointer hover-scale"
                 onClick={() => scrollToSection('hero')}>
               {personalInfo.name}
             </h1>
@@ -48,31 +48,31 @@ const Header = ({ personalInfo }) => {
           <nav className="hidden md:flex space-x-8">
             <button 
               onClick={() => scrollToSection('about')}
-              className="text-gray-300 hover:text-cyan-soft font-medium transition-colors glow-text"
+              className="nav-link text-gray-300 hover:text-cyan-soft font-medium transition-all duration-300"
             >
               About
             </button>
             <button 
               onClick={() => scrollToSection('skills')}
-              className="text-gray-300 hover:text-cyan-soft font-medium transition-colors glow-text"
+              className="nav-link text-gray-300 hover:text-cyan-soft font-medium transition-all duration-300"
             >
               Skills
             </button>
             <button 
               onClick={() => scrollToSection('experience')}
-              className="text-gray-300 hover:text-cyan-soft font-medium transition-colors glow-text"
+              className="nav-link text-gray-300 hover:text-cyan-soft font-medium transition-all duration-300"
             >
               Experience
             </button>
             <button 
               onClick={() => scrollToSection('certifications')}
-              className="text-gray-300 hover:text-cyan-soft font-medium transition-colors glow-text"
+              className="nav-link text-gray-300 hover:text-cyan-soft font-medium transition-all duration-300"
             >
               Certifications
             </button>
             <button 
               onClick={() => scrollToSection('contact')}
-              className="text-gray-300 hover:text-cyan-soft font-medium transition-colors glow-text"
+              className="nav-link text-gray-300 hover:text-cyan-soft font-medium transition-all duration-300"
             >
               Contact
             </button>
@@ -84,7 +84,7 @@ const Header = ({ personalInfo }) => {
               onClick={downloadResume}
               variant="outline"
               size="sm"
-              className="border-cyan-400/50 text-cyan-soft bg-black hover:bg-cyan-400/10 hover:text-cyan-400 transition-all duration-200 neon-border"
+              className="border-cyan-400/50 text-cyan-soft bg-black hover:bg-cyan-400/10 hover:text-cyan-400 transition-all duration-300 hover-glow"
             >
               <Download className="w-4 h-4 mr-2" />
               Resume
@@ -92,7 +92,7 @@ const Header = ({ personalInfo }) => {
             <Button
               onClick={() => scrollToSection('contact')}
               size="sm"
-              className="bg-gradient-to-r from-pink-500/80 to-cyan-400/80 hover:from-pink-500 hover:to-cyan-400 text-black font-semibold transition-all duration-200 hover:shadow-lg hover:shadow-cyan-400/30"
+              className="neon-button bg-gradient-to-r from-pink-500/80 to-cyan-400/80 hover:from-pink-500 hover:to-cyan-400 text-black font-semibold transition-all duration-300"
             >
               <Mail className="w-4 h-4 mr-2" />
               Contact
@@ -105,53 +105,34 @@ const Header = ({ personalInfo }) => {
               variant="ghost"
               size="sm"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-300 hover:text-cyan-soft"
+              className="text-gray-300 hover:text-cyan-soft transition-all duration-300 hover-rotate"
             >
               {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
           </div>
         </div>
 
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden pb-4 border-t border-cyan-400/20 mt-4">
+        {/* Mobile Menu with Slide Animation */}
+        <div className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${
+          isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+        }`}>
+          <div className="pb-4 border-t border-cyan-400/20 mt-4">
             <div className="flex flex-col space-y-3 pt-4">
-              <button 
-                onClick={() => scrollToSection('about')}
-                className="text-left text-gray-300 hover:text-cyan-soft font-medium transition-colors py-2"
-              >
-                About
-              </button>
-              <button 
-                onClick={() => scrollToSection('skills')}
-                className="text-left text-gray-300 hover:text-cyan-soft font-medium transition-colors py-2"
-              >
-                Skills
-              </button>
-              <button 
-                onClick={() => scrollToSection('experience')}
-                className="text-left text-gray-300 hover:text-cyan-soft font-medium transition-colors py-2"
-              >
-                Experience
-              </button>
-              <button 
-                onClick={() => scrollToSection('certifications')}
-                className="text-left text-gray-300 hover:text-cyan-soft font-medium transition-colors py-2"
-              >
-                Certifications
-              </button>
-              <button 
-                onClick={() => scrollToSection('contact')}
-                className="text-left text-gray-300 hover:text-cyan-soft font-medium transition-colors py-2"
-              >
-                Contact
-              </button>
+              {['about', 'skills', 'experience', 'certifications', 'contact'].map((section, index) => (
+                <button 
+                  key={section}
+                  onClick={() => scrollToSection(section)}
+                  className={`text-left text-gray-300 hover:text-cyan-soft font-medium transition-all duration-300 py-2 capitalize fade-in-right stagger-${index + 1}`}
+                >
+                  {section}
+                </button>
+              ))}
               <div className="flex flex-col space-y-2 pt-2">
                 <Button
                   onClick={downloadResume}
                   variant="outline"
                   size="sm"
-                  className="border-cyan-400/50 text-cyan-soft bg-black hover:bg-cyan-400/10 hover:text-cyan-400 transition-all duration-200"
+                  className="border-cyan-400/50 text-cyan-soft bg-black hover:bg-cyan-400/10 hover:text-cyan-400 transition-all duration-300 fade-in-right stagger-6"
                 >
                   <Download className="w-4 h-4 mr-2" />
                   Download Resume
@@ -159,7 +140,7 @@ const Header = ({ personalInfo }) => {
                 <Button
                   onClick={() => scrollToSection('contact')}
                   size="sm"
-                  className="bg-gradient-to-r from-pink-500/80 to-cyan-400/80 hover:from-pink-500 hover:to-cyan-400 text-black font-semibold transition-all duration-200"
+                  className="neon-button bg-gradient-to-r from-pink-500/80 to-cyan-400/80 hover:from-pink-500 hover:to-cyan-400 text-black font-semibold transition-all duration-300 fade-in-right stagger-7"
                 >
                   <Mail className="w-4 h-4 mr-2" />
                   Get in Touch
@@ -167,7 +148,7 @@ const Header = ({ personalInfo }) => {
               </div>
             </div>
           </div>
-        )}
+        </div>
       </div>
     </header>
   );
