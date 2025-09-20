@@ -69,7 +69,6 @@ async def send_contact_email(form: ContactForm):
     if not to_email or not sendgrid_api_key:
         raise HTTPException(status_code=500, detail="Server is not configured for sending emails.")
 
-    # Use a default subject if one isn't provided
     final_subject = form.subject if form.subject else f"New message from {form.name}"
 
     html_content = f"""
@@ -82,11 +81,13 @@ async def send_contact_email(form: ContactForm):
     """
 
     message = Mail(
-        from_email=to_email, # Must be your verified SendGrid sender
+        # THIS IS THE UPDATED LINE TO SET THE SENDER'S DISPLAY NAME
+        from_email=(to_email, form.name),
         to_emails=to_email,
         subject=final_subject,
         html_content=html_content
     )
+    message.reply_to = form.email
 
     try:
         sg = SendGridAPIClient(sendgrid_api_key)
@@ -94,7 +95,7 @@ async def send_contact_email(form: ContactForm):
         if response.status_code >= 200 and response.status_code < 300:
             return {"message": "Email sent successfully!"}
         else:
-             raise HTTPException(status_code=500, detail="Failed to send email.")
+            raise HTTPException(status_code=500, detail="Failed to send email.")
     except Exception as e:
         logger.error(f"Error sending email: {e}")
         raise HTTPException(status_code=500, detail="An error occurred while sending the email.")
@@ -106,18 +107,14 @@ async def create_project(
     description: str = Form(...),
     file: UploadFile = File(...)
 ):
-    # Generate a unique filename to prevent overwrites
     file_extension = Path(file.filename).suffix
     unique_filename = f"{uuid.uuid4()}{file_extension}"
     file_path = images_dir / unique_filename
     
-    # Save the uploaded file
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
         
-    # Construct the public URL for the image
-    # IMPORTANT: Update this with your actual Render frontend URL in production
-    base_url = "https://althaf-portfolio.onrender.com" 
+    base_url = os.environ.get('BACKEND_URL', 'http://127.0.0.1:8000')
     image_url = f"{base_url}/static/images/{unique_filename}"
     
     project_data = {
@@ -144,16 +141,12 @@ async def api_root():
 
 
 # --- APP CONFIGURATION ---
-
-# Include the router in the main app
 app.include_router(api_router)
 
-# Welcome message for the main root
 @app.get("/")
 def welcome():
     return {"message": "Server is running. API is at /api"}
 
-# CORS Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
@@ -162,11 +155,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Logging configuration
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Database client shutdown event
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
