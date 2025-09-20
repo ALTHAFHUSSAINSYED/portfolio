@@ -69,6 +69,11 @@ code {
     animation: glow 2s ease-in-out infinite alternate;
   }
 
+  .subtle-glow {
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.3), 0 0 10px rgba(255, 255, 255, 0.2);
+    animation: subtle-glow 3s ease-in-out infinite alternate;
+  }
+
   .neon-text {
     text-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor;
   }
