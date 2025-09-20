@@ -45,8 +45,12 @@ const ContactSection = ({ personalInfo }) => {
   };
 
   const downloadResume = () => {
-    // In a real implementation, this would download the actual resume
-    alert('Resume download feature - to be implemented with actual resume file');
+    const link = document.createElement('a');
+    link.href = '/ALTHAF_HUSSAIN_SYED_DevOps_Resume.pdf';
+    link.download = 'ALTHAF_HUSSAIN_SYED_DevOps_Resume.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
