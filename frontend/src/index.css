@@ -57,90 +57,88 @@ code {
     }
 }
 
-/* Neon Theme Styles */
+/* Dark Theme with Subtle Effects */
 @layer components {
   .neon-theme {
     background: radial-gradient(ellipse at bottom, #0d1117 0%, #000000 100%);
     min-height: 100vh;
   }
 
-  .neon-glow {
-    text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
-    animation: glow 2s ease-in-out infinite alternate;
+  .subtle-glow {
+    text-shadow: 0 0 3px rgba(255, 255, 255, 0.2);
+    animation: gentle-glow 4s ease-in-out infinite alternate;
   }
 
-  .subtle-glow {
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.3), 0 0 10px rgba(255, 255, 255, 0.2);
-    animation: subtle-glow 3s ease-in-out infinite alternate;
+  .section-title {
+    text-shadow: 0 0 2px rgba(100, 200, 255, 0.3);
   }
 
   .neon-text {
-    text-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor;
+    text-shadow: 0 0 2px currentColor;
   }
 
   .neon-border {
-    box-shadow: 0 0 5px currentColor, inset 0 0 5px currentColor;
-    animation: neon-border 2s ease-in-out infinite alternate;
+    box-shadow: 0 0 3px currentColor;
+    transition: box-shadow 0.3s ease;
+  }
+
+  .neon-border:hover {
+    box-shadow: 0 0 8px currentColor;
   }
 
   .neon-button {
-    box-shadow: 0 0 20px rgba(34, 211, 238, 0.5), 0 0 40px rgba(236, 72, 153, 0.3);
-    animation: neon-pulse 2s ease-in-out infinite alternate;
+    box-shadow: 0 0 10px rgba(34, 211, 238, 0.3), 0 0 20px rgba(236, 72, 153, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .neon-button:hover {
+    box-shadow: 0 0 15px rgba(34, 211, 238, 0.5), 0 0 30px rgba(236, 72, 153, 0.3);
+    transform: translateY(-1px);
   }
 
   .neon-card {
     backdrop-filter: blur(10px);
-    background: rgba(0, 0, 0, 0.3);
-    animation: card-glow 3s ease-in-out infinite alternate;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.3s ease;
+  }
+
+  .neon-card:hover {
+    border-color: rgba(34, 211, 238, 0.2);
+    box-shadow: 0 0 10px rgba(34, 211, 238, 0.1);
   }
 
   .glow-text:hover {
-    text-shadow: 0 0 8px currentColor;
+    text-shadow: 0 0 5px currentColor;
     transition: text-shadow 0.3s ease;
   }
 
-  @keyframes glow {
-    from {
-      text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
-    }
-    to {
-      text-shadow: 0 0 20px currentColor, 0 0 30px currentColor, 0 0 40px currentColor;
-    }
+  .attractive-text {
+    color: #e2e8f0;
+    text-shadow: 0 0 1px rgba(148, 163, 184, 0.3);
   }
 
-  @keyframes subtle-glow {
-    from {
-      text-shadow: 0 0 5px rgba(255, 255, 255, 0.3), 0 0 10px rgba(255, 255, 255, 0.2);
-    }
-    to {
-      text-shadow: 0 0 8px rgba(255, 255, 255, 0.4), 0 0 15px rgba(255, 255, 255, 0.25);
-    }
+  .hero-title {
+    background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 50%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
   }
 
-  @keyframes neon-border {
-    from {
-      box-shadow: 0 0 5px currentColor, inset 0 0 5px currentColor;
-    }
-    to {
-      box-shadow: 0 0 15px currentColor, inset 0 0 10px currentColor;
-    }
+  .section-heading {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
-  @keyframes neon-pulse {
+  @keyframes gentle-glow {
     from {
-      box-shadow: 0 0 20px rgba(34, 211, 238, 0.5), 0 0 40px rgba(236, 72, 153, 0.3);
+      text-shadow: 0 0 3px rgba(255, 255, 255, 0.2);
     }
     to {
-      box-shadow: 0 0 30px rgba(34, 211, 238, 0.8), 0 0 60px rgba(236, 72, 153, 0.5);
-    }
-  }
-
-  @keyframes card-glow {
-    from {
-      box-shadow: 0 0 10px rgba(34, 211, 238, 0.1);
-    }
-    to {
-      box-shadow: 0 0 20px rgba(34, 211, 238, 0.2), 0 0 30px rgba(236, 72, 153, 0.1);
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.25);
     }
   }
 
@@ -161,4 +159,12 @@ code {
   ::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(45deg, #0891b2, #be185d);
   }
+
+  /* Reduced intensity colors */
+  .text-cyan-soft { color: #67e8f9; }
+  .text-pink-soft { color: #f9a8d4; }
+  .text-green-soft { color: #86efac; }
+  .text-yellow-soft { color: #fde047; }
+  .text-blue-soft { color: #93c5fd; }
+  .text-purple-soft { color: #c4b5fd; }
 }
