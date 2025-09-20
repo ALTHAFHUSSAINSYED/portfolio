@@ -117,7 +117,7 @@ async def create_project(
         
     # Construct the public URL for the image
     # IMPORTANT: Update this with your actual Render frontend URL in production
-    base_url = "https://YOUR_BACKEND_URL.onrender.com" 
+    base_url = "https://althaf-portfolio.onrender.com" 
     image_url = f"{base_url}/static/images/{unique_filename}"
     
     project_data = {
