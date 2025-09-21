@@ -1,5 +1,4 @@
-// src/components/ProjectDetailPage.js (Final Styled Version)
-
+// src/components/ProjectDetailPage.js (Final Version)
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Loader2, AlertTriangle, ArrowLeft, CheckCircle, Code, Server, Folder, Zap } from 'lucide-react';
@@ -39,12 +38,10 @@ const ProjectDetailPage = () => {
   }, [projectId]);
 
   if (loading) {
-    // ... loading JSX remains the same
     return <div className="bg-black text-white min-h-screen flex justify-center items-center"><Loader2 className="w-12 h-12 animate-spin text-cyan-soft"/></div>;
   }
 
   if (error || !project) {
-    // ... error JSX remains the same
     return <div className="bg-black text-white min-h-screen flex flex-col justify-center items-center"><AlertTriangle className="w-12 h-12 text-red-400"/><p className="mt-4">Could not load project details.</p><Link to="/" className="mt-4 text-cyan-soft">Back to Portfolio</Link></div>;
   }
 
@@ -60,7 +57,6 @@ const ProjectDetailPage = () => {
           </Link>
         </div>
 
-        {/* ✨ NEW: Card-based layout */}
         <Card className="p-6 sm:p-8 bg-black/80 border border-gray-700/30 backdrop-blur-sm neon-card">
           <div className="flex items-start space-x-4 mb-6">
             <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 bg-cyan-400/10 border border-cyan-400/30">
@@ -73,29 +69,30 @@ const ProjectDetailPage = () => {
 
           <p className="text-gray-300 mb-8 leading-relaxed">{project.summary}</p>
 
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold text-white mb-4">Technologies Used</h2>
-            <div className="flex flex-wrap gap-2">
-              {project.technologies.map((tech) => (
-                <Badge key={tech} variant="outline" className="border-cyan-400/30 text-cyan-soft bg-black/50">{tech}</Badge>
-              ))}
-            </div>
-          </div>
-
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold text-white mb-4">Key Outcomes</h2>
-            <div className="space-y-3">
-              {project.key_outcomes.map((outcome) => (
-                <div key={outcome} className="flex items-start space-x-3">
-                  <CheckCircle className="w-4 h-4 text-green-soft mt-0.5 flex-shrink-0" />
-                  <p className="text-gray-300 text-sm leading-relaxed">{outcome}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
           <div className="mb-8 rounded-lg overflow-hidden border border-gray-700/50">
             <img src={project.image_url} alt={project.name} className="w-full h-auto object-cover" />
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 mb-8">
+              <div>
+                  <h2 className="text-lg font-semibold text-white mb-4">Technologies Used</h2>
+                  <div className="flex flex-wrap gap-2">
+                      {project.technologies.map((tech) => (
+                          <Badge key={tech} variant="outline" className="border-cyan-400/30 text-cyan-soft bg-black/50">{tech}</Badge>
+                      ))}
+                  </div>
+              </div>
+              <div>
+                  <h2 className="text-lg font-semibold text-white mb-4">Key Outcomes</h2>
+                  <div className="space-y-3">
+                      {project.key_outcomes.map((outcome) => (
+                          <div key={outcome} className="flex items-start space-x-3">
+                              <CheckCircle className="w-4 h-4 text-green-soft mt-0.5 flex-shrink-0" />
+                              <p className="text-gray-300 text-sm leading-relaxed">{outcome}</p>
+                          </div>
+                      ))}
+                  </div>
+              </div>
           </div>
 
           <div>
