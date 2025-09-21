@@ -1,11 +1,11 @@
-// src/components/ProjectsSection.js (Final Version)
+/// src/components/ProjectsSection.js (Final and Corrected)
 import React, { useEffect, useRef, useState } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Folder, CheckCircle, ArrowRight, Zap, Code, Server, Loader2, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://althaf-portfolio.onrender.com';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://althaf-portfolio.onrender.com'; // Use your actual URL
 
 const ProjectsSection = () => {
   const [projects, setProjects] = useState([]);
@@ -14,7 +14,6 @@ const ProjectsSection = () => {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
   
-  // (Data fetching and other hooks remain the same)
   useEffect(() => {
     const fetchProjects = async () => {
       try {
@@ -42,17 +41,31 @@ const ProjectsSection = () => {
     return () => observer.disconnect();
   }, []);
 
-  // (Helper functions remain the same)
   const getProjectIcon = (title) => {
     if (title.toLowerCase().includes('pipeline')) return Code;
     if (title.toLowerCase().includes('infrastructure')) return Server;
     if (title.toLowerCase().includes('storage')) return Folder;
     return Zap;
   };
+  const getProjectColor = (index) => ['text-cyan-soft', 'text-pink-soft', 'text-green-soft'][index % 3];
+  const getProjectBg = (index) => ['bg-cyan-400/10', 'bg-pink-500/10', 'bg-green-400/10'][index % 3];
+  const getProjectBorder = (index) => ['border-cyan-400/30', 'border-pink-500/30', 'border-green-400/30'][index % 3];
   
-  // (Loading and Error states remain the same)
-  if (loading) { /* ... loading JSX ... */ }
-  if (error) { /* ... error JSX ... */ }
+  if (loading) {
+    return (
+      <section id="projects" className="py-20 bg-black flex justify-center items-center min-h-[50vh]">
+        <div className="text-center text-white"><Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-cyan-soft" /><p>Loading Projects...</p></div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section id="projects" className="py-20 bg-black flex justify-center items-center min-h-[50vh]">
+        <div className="text-center text-red-400"><AlertTriangle className="w-12 h-12 mx-auto mb-4" /><p>Error: {error}</p></div>
+      </section>
+    );
+  }
 
   return (
     <section id="projects" className="py-20 bg-black relative overflow-hidden" ref={sectionRef}>
@@ -71,16 +84,17 @@ const ProjectsSection = () => {
             <Card key={project.id} className={`flex flex-col p-6 bg-black/80 border border-gray-700/30 hover:border-cyan-400/40 transition-all duration-500 backdrop-blur-sm neon-card hover-lift group ${isVisible ? `scale-in stagger-${index + 2}` : ''}`}>
               <div className="flex-grow">
                 <div className="flex items-start space-x-4 mb-6">
-                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 bg-cyan-400/10 border border-cyan-400/30 group-hover:scale-110 transition-all`}>
-                    <Code className={`w-6 h-6 text-cyan-soft`} />
+                  {/* Small icon for the project card */}
+                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${getProjectBg(index)} border ${getProjectBorder(index)} group-hover:scale-110 transition-all`}>
+                    {React.createElement(getProjectIcon(project.name), { className: `w-6 h-6 ${getProjectColor(index)}` })}
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-white mb-2 group-hover:text-cyan-soft transition-all">{project.name}</h3>
                   </div>
                 </div>
+                {/* ❗️ IMPORTANT: Ensure only 'project.summary' is used here, not 'project.details' */}
                 <p className="text-gray-300 mb-6 leading-relaxed glow-text">{project.summary}</p>
                 
-                {/* ✨ NEW: Technologies Used Section */}
                 <div className="mb-6">
                   <h4 className="text-sm font-semibold text-white mb-3">Technologies Used</h4>
                   <div className="flex flex-wrap gap-2">
@@ -90,7 +104,6 @@ const ProjectsSection = () => {
                   </div>
                 </div>
 
-                {/* ✨ NEW: Key Outcomes Section */}
                 <div className="space-y-3 mb-6">
                   <h4 className="text-sm font-semibold text-white">Key Outcomes</h4>
                   {project.key_outcomes.map((outcome) => (
@@ -102,7 +115,6 @@ const ProjectsSection = () => {
                 </div>
               </div>
               
-              {/* Link at the bottom */}
               <div className="pt-4 mt-auto border-t border-gray-700/30">
                 <Link to={`/projects/${project.id}`} className="flex items-center text-cyan-soft text-sm font-medium group-hover:text-cyan-400 transition-all">
                   <span>View Implementation Details</span>
