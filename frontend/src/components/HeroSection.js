@@ -53,22 +53,34 @@ const HeroSection = ({ personalInfo }) => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center max-w-4xl mx-auto">
+
+          {/* === YOUR PROFILE IMAGE: Sizing Adjusted === */}
+          <div className={`flex justify-center mb-8 ${isVisible ? 'fade-in' : ''}`}>
+            <img 
+              src="/profile-pic.jpg"
+              alt={personalInfo.name}
+              // Changed from w-40 h-40 to w-56 h-56 for a larger size
+              // object-cover ensures it perfectly fills the circular frame without stretching
+              className="w-56 h-56 rounded-full object-cover border-4 border-cyan-400/30 shadow-lg shadow-cyan-500/20"
+            />
+          </div>
+
           {/* Professional Badge */}
           <Badge 
             variant="outline" 
-            className={`mb-6 text-cyan-soft border-cyan-400/30 bg-black/50 px-4 py-2 hover:bg-cyan-400/5 transition-colors backdrop-blur-sm hover-glow ${isVisible ? 'fade-in' : ''}`}
+            className={`mb-6 text-cyan-soft border-cyan-400/30 bg-black/50 px-4 py-2 hover:bg-cyan-400/5 transition-colors backdrop-blur-sm hover-glow ${isVisible ? 'fade-in stagger-1' : ''}`}
           >
             <span className="animate-pulse mr-2 text-green-soft">●</span>
             Available for New Opportunities
           </Badge>
 
           {/* Main Heading */}
-          <h1 className={`text-4xl md:text-6xl font-bold mb-6 leading-tight hero-title ${isVisible ? 'fade-in-up stagger-1' : ''}`}>
+          <h1 className={`text-4xl md:text-6xl font-bold mb-6 leading-tight hero-title ${isVisible ? 'fade-in-up stagger-2' : ''}`}>
             {personalInfo.name}
           </h1>
 
-          {/* Professional Title with Typewriter Effect */}
-          <div className={`text-xl md:text-2xl font-semibold mb-8 ${isVisible ? 'fade-in-up stagger-2' : ''}`}>
+          {/* Professional Title */}
+          <div className={`text-xl md:text-2xl font-semibold mb-8 ${isVisible ? 'fade-in-up stagger-3' : ''}`}>
             <span className="text-cyan-soft">{personalInfo.title.split('|')[0]}</span>
             {personalInfo.title.includes('|') && (
               <span className="text-pink-soft"> | {personalInfo.title.split('|')[1]}</span>
@@ -76,12 +88,12 @@ const HeroSection = ({ personalInfo }) => {
           </div>
 
           {/* Summary */}
-          <p className={`text-lg md:text-xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed ${isVisible ? 'fade-in-up stagger-3' : ''}`}>
+          <p className={`text-lg md:text-xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed ${isVisible ? 'fade-in-up stagger-4' : ''}`}>
             {personalInfo.summary}
           </p>
 
           {/* Contact Info Row */}
-          <div className={`flex flex-wrap justify-center items-center gap-6 mb-12 text-gray-300 ${isVisible ? 'fade-in-up stagger-4' : ''}`}>
+          <div className={`flex flex-wrap justify-center items-center gap-6 mb-12 text-gray-300 ${isVisible ? 'fade-in-up stagger-5' : ''}`}>
             <div className="flex items-center gap-2 hover:text-cyan-soft transition-all duration-300 hover-scale cursor-pointer">
               <MapPin className="w-4 h-4 text-cyan-soft" />
               <span className="text-sm font-medium">{personalInfo.location}</span>
@@ -112,7 +124,7 @@ const HeroSection = ({ personalInfo }) => {
           </div>
 
           {/* CTA Buttons */}
-          <div className={`flex flex-col sm:flex-row gap-4 justify-center items-center ${isVisible ? 'fade-in-up stagger-5' : ''}`}>
+          <div className={`flex flex-col sm:flex-row gap-4 justify-center items-center ${isVisible ? 'fade-in-up stagger-6' : ''}`}>
             <Button
               onClick={downloadResume}
               size="lg"
@@ -132,8 +144,8 @@ const HeroSection = ({ personalInfo }) => {
             </Button>
           </div>
 
-          {/* Key Stats with Counter Animation */}
-          <div className={`mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-2xl mx-auto ${isVisible ? 'slide-in-bottom stagger-6' : ''}`}>
+          {/* Key Stats */}
+          <div className={`mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-2xl mx-auto ${isVisible ? 'slide-in-bottom stagger-7' : ''}`}>
             <div className="text-center p-6 bg-black/50 rounded-lg border border-cyan-400/10 hover:border-cyan-400/20 transition-all backdrop-blur-sm neon-card hover-lift">
               <div className="text-3xl font-bold text-cyan-soft mb-2 counter">3+</div>
               <div className="text-gray-300 font-medium">Years Experience</div>
