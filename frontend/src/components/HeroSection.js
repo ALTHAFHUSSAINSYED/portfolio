@@ -54,12 +54,14 @@ const HeroSection = ({ personalInfo }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center max-w-4xl mx-auto">
 
-          {/* === YOUR PROFILE IMAGE IS ADDED HERE === */}
+          {/* === YOUR PROFILE IMAGE: Sizing Adjusted === */}
           <div className={`flex justify-center mb-8 ${isVisible ? 'fade-in' : ''}`}>
             <img 
               src="/profile-pic.jpg"
               alt={personalInfo.name}
-              className="w-40 h-40 rounded-full object-cover border-4 border-cyan-400/30 shadow-lg shadow-cyan-500/20"
+              // Changed from w-40 h-40 to w-56 h-56 for a larger size
+              // object-cover ensures it perfectly fills the circular frame without stretching
+              className="w-56 h-56 rounded-full object-cover border-4 border-cyan-400/30 shadow-lg shadow-cyan-500/20"
             />
           </div>
 
