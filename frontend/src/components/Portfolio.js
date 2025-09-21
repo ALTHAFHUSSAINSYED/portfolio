@@ -1,5 +1,8 @@
+// src/components/Portfolio.js (Updated)
+
 import React from 'react';
-import { portfolioData } from '../data/mock';
+// We still use mock data for now for the parts we haven't connected to the API yet.
+import { portfolioData } from '../data/mock'; 
 import Header from './Header';
 import HeroSection from './HeroSection';
 import AboutSection from './AboutSection';
@@ -23,7 +26,11 @@ const Portfolio = () => {
       <SkillsSection skills={portfolioData.skills} />
       <ExperienceSection experience={portfolioData.experience} />
       <CertificationsSection certifications={portfolioData.certifications} />
-      <ProjectsSection projects={portfolioData.projects} />
+      
+      {/* ✨ MODIFIED: We are no longer passing the 'projects' prop.
+          This component will now fetch its own data from your live database. */}
+      <ProjectsSection />
+      
       <ContactSection personalInfo={portfolioData.personalInfo} />
       <Footer personalInfo={portfolioData.personalInfo} />
       <Toaster />
