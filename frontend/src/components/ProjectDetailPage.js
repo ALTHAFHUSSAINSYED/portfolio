@@ -5,7 +5,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Loader2, AlertTriangle, ArrowLeft } from 'lucide-react';
 
 // You must update this URL to match the one in your ProjectsSection.js file
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://your-backend-url.onrender.com';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://althaf-portfolio.onrender.com';
 
 const ProjectDetailPage = () => {
   // Get the project ID from the URL (e.g., "some-unique-id")
