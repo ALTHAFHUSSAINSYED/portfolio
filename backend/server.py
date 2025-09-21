@@ -4,67 +4,48 @@ from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
-# (Other imports remain the same)
 import os, logging, uuid, shutil
 from pathlib import Path
 from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional
 from datetime import datetime
 
-# (Setup code remains the same)
-# --- SETUP ---
-ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
-static_dir = ROOT_DIR / 'static'
-images_dir = static_dir / 'images'
-images_dir.mkdir(parents=True, exist_ok=True)
+# (Setup and other parts of the file remain the same)
+# ...
 
-# (Database connection remains the same)
-# --- DATABASE CONNECTION ---
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
-
-# (FastAPI App instance remains the same)
-# --- FASTAPI APP INSTANCE ---
-app = FastAPI(title="Portfolio API")
-app.mount("/static", StaticFiles(directory=static_dir), name="static")
-api_router = APIRouter(prefix="/api")
-
-# --- PYDANTIC MODELS ---
-class ContactForm(BaseModel):
-    name: str = Field(..., alias="Your Name")
-    email: EmailStr = Field(..., alias="Email Address")
-    subject: Optional[str] = Field(None, alias="Subject")
-    message: str = Field(..., alias="Message")
-
-# ✨ MODIFIED: Updated Project model
+# ✨ MODIFIED: Updated Project model with new lists
 class Project(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
-    summary: str  # Short summary for the main page card
-    details: str  # Long, detailed description for the details page
+    summary: str
+    details: str
     image_url: str
+    technologies: List[str] = [] # New list for technologies
+    key_outcomes: List[str] = [] # New list for outcomes
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
-# --- API ENDPOINTS ---
-# (Contact Form Endpoint remains the same)
+# ...
 
-# ✨ MODIFIED: Updated Project Upload Endpoint
+# ✨ MODIFIED: Updated Project Upload Endpoint to handle new fields
 @api_router.post("/projects", response_model=Project)
 async def create_project(
     name: str = Form(...),
-    summary: str = Form(...), # Changed from description
-    details: str = Form(...), # Added details field
-    file: UploadFile = File(...)
+    summary: str = Form(...),
+    details: str = Form(...),
+    file: UploadFile = File(...),
+    technologies: str = Form(...), # Receive as a comma-separated string
+    key_outcomes: str = Form(...)  # Receive as a comma-separated string
 ):
+    # Process the comma-separated strings into lists
+    tech_list = [tech.strip() for tech in technologies.split(',') if tech.strip()]
+    outcomes_list = [outcome.strip() for outcome in key_outcomes.split(',') if outcome.strip()]
+    
+    # (File saving logic remains the same)
     file_extension = Path(file.filename).suffix
     unique_filename = f"{uuid.uuid4()}{file_extension}"
     file_path = images_dir / unique_filename
-    
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
-        
     base_url = os.environ.get('BACKEND_URL', 'http://127.0.0.1:8000')
     image_url = f"{base_url}/static/images/{unique_filename}"
     
@@ -72,31 +53,15 @@ async def create_project(
         "name": name,
         "summary": summary,
         "details": details,
-        "image_url": image_url
+        "image_url": image_url,
+        "technologies": tech_list,
+        "key_outcomes": outcomes_list
     }
     
     project = Project(**project_data)
-    await db.projects.insert_one(project.model_dump())
-    return project
-
-# (Get All Projects endpoint remains the same)
-@api_router.get("/projects", response_model=List[Project])
-async def get_projects():
-    projects_cursor = db.projects.find()
-    projects = await projects_cursor.to_list(length=100)
-    return projects
-
-# (Get Single Project endpoint is now correct)
-@api_router.get("/projects/{project_id}", response_model=Project)
-async def get_project_by_id(project_id: str):
-    project = await db.projects.find_one({"id": project_id})
-    if project is None:
-        # This is where your backend sends the "Not Found" if the ID is wrong
-        # The plain "Not Found" page is a Render issue we will fix next
-        raise HTTPException(status_code=404, detail="Project not found")
+    # The collection name should be 'projects', not 'myFirstCollection'
+    await db.projects.insert_one(project.model_dump()) 
     return project
 
 # (Rest of the file remains the same)
-# ... app configuration ...
-app.include_router(api_router)
-# ... etc. ...
+# ...
