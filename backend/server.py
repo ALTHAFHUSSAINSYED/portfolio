@@ -81,7 +81,6 @@ async def send_contact_email(form: ContactForm):
     """
 
     message = Mail(
-        # THIS IS THE UPDATED LINE TO SET THE SENDER'S DISPLAY NAME
         from_email=(to_email, form.name),
         to_emails=to_email,
         subject=final_subject,
@@ -124,7 +123,8 @@ async def create_project(
     }
     
     project = Project(**project_data)
-    await db.projects.insert_one(project.dict())
+    # Use model_dump() instead of the deprecated dict()
+    await db.projects.insert_one(project.model_dump()) 
     return project
 
 # Get All Projects Endpoint
@@ -133,6 +133,18 @@ async def get_projects():
     projects_cursor = db.projects.find()
     projects = await projects_cursor.to_list(length=100)
     return projects
+
+# ✨ --- NEW ENDPOINT TO GET A SINGLE PROJECT --- ✨
+@api_router.get("/projects/{project_id}", response_model=Project)
+async def get_project_by_id(project_id: str):
+    """
+    Fetches the details for a single project by its unique ID.
+    """
+    project = await db.projects.find_one({"id": project_id})
+    if project is None:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return project
+# ✨ --- END OF NEW ENDPOINT --- ✨
 
 # Welcome message for the API root
 @api_router.get("/")
