@@ -1,11 +1,11 @@
-/// src/components/ProjectsSection.js (Final and Corrected)
+// src/components/ProjectsSection.js
 import React, { useEffect, useRef, useState } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Folder, CheckCircle, ArrowRight, Zap, Code, Server, Loader2, AlertTriangle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom'; 
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://althaf-portfolio.onrender.com'; // Use your actual URL
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://althaf-portfolio.onrender.com';
 
 const ProjectsSection = () => {
   const [projects, setProjects] = useState([]);
@@ -54,7 +54,10 @@ const ProjectsSection = () => {
   if (loading) {
     return (
       <section id="projects" className="py-20 bg-black flex justify-center items-center min-h-[50vh]">
-        <div className="text-center text-white"><Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-cyan-soft" /><p>Loading Projects...</p></div>
+        <div className="text-center text-white">
+          <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-cyan-soft" />
+          <p>Loading Projects...</p>
+        </div>
       </section>
     );
   }
@@ -62,7 +65,10 @@ const ProjectsSection = () => {
   if (error) {
     return (
       <section id="projects" className="py-20 bg-black flex justify-center items-center min-h-[50vh]">
-        <div className="text-center text-red-400"><AlertTriangle className="w-12 h-12 mx-auto mb-4" /><p>Error: {error}</p></div>
+        <div className="text-center text-red-400">
+          <AlertTriangle className="w-12 h-12 mx-auto mb-4" />
+          <p>Error: {error}</p>
+        </div>
       </section>
     );
   }
@@ -70,21 +76,27 @@ const ProjectsSection = () => {
   return (
     <section id="projects" className="py-20 bg-black relative overflow-hidden" ref={sectionRef}>
       <div className="absolute inset-0 overflow-hidden">
-        <div className="bg-orb bg-orb-1"></div><div className="bg-orb bg-orb-2"></div><div className="bg-orb bg-orb-3"></div>
+        <div className="bg-orb bg-orb-1"></div>
+        <div className="bg-orb bg-orb-2"></div>
+        <div className="bg-orb bg-orb-3"></div>
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
-          <h2 className={`text-3xl md:text-4xl font-bold mb-4 shine-text ${isVisible ? 'fade-in-up' : ''}`}>Featured Projects</h2>
+          <h2 className={`text-3xl md:text-4xl font-bold mb-4 shine-text ${isVisible ? 'fade-in-up' : ''}`}>
+            Featured Projects
+          </h2>
           <p className={`text-lg text-gray-300 max-w-3xl mx-auto glow-text ${isVisible ? 'fade-in-up stagger-1' : ''}`}>
             Real-world implementations showcasing expertise in cloud infrastructure and DevOps automation
           </p>
         </div>
         <div className="grid lg:grid-cols-3 gap-8">
           {projects.map((project, index) => (
-            <Card key={project.id} className={`flex flex-col p-6 bg-black/80 border border-gray-700/30 hover:border-cyan-400/40 transition-all duration-500 backdrop-blur-sm neon-card hover-lift group ${isVisible ? `scale-in stagger-${index + 2}` : ''}`}>
+            <Card
+              key={project.id}
+              className={`flex flex-col p-6 bg-black/80 border border-gray-700/30 hover:border-cyan-400/40 transition-all duration-500 backdrop-blur-sm neon-card hover-lift group ${isVisible ? `scale-in stagger-${index + 2}` : ''}`}
+            >
               <div className="flex-grow">
                 <div className="flex items-start space-x-4 mb-6">
-                  {/* Small icon for the project card */}
                   <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${getProjectBg(index)} border ${getProjectBorder(index)} group-hover:scale-110 transition-all`}>
                     {React.createElement(getProjectIcon(project.name), { className: `w-6 h-6 ${getProjectColor(index)}` })}
                   </div>
@@ -92,8 +104,11 @@ const ProjectsSection = () => {
                     <h3 className="text-xl font-bold text-white mb-2 group-hover:text-cyan-soft transition-all">{project.name}</h3>
                   </div>
                 </div>
-                {/* ❗️ IMPORTANT: Ensure only 'project.summary' is used here, not 'project.details' */}
-                <div className="text-gray-300 mb-6 leading-relaxed glow-text whitespace-pre-wrap">{project.summary}</div>
+
+                {/* Multi-line summary */}
+                <div className="text-gray-300 mb-6 leading-relaxed glow-text whitespace-pre-wrap">
+                  {project.summary}
+                </div>
                 
                 <div className="mb-6">
                   <h4 className="text-sm font-semibold text-white mb-3">Technologies Used</h4>
@@ -128,4 +143,5 @@ const ProjectsSection = () => {
     </section>
   );
 };
+
 export default ProjectsSection;
