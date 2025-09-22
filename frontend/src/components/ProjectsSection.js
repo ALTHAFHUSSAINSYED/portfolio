@@ -93,7 +93,7 @@ const ProjectsSection = () => {
                   </div>
                 </div>
                 {/* ❗️ IMPORTANT: Ensure only 'project.summary' is used here, not 'project.details' */}
-                <p className="text-gray-300 mb-6 leading-relaxed glow-text">{project.summary}</p>
+                <div className="text-gray-300 mb-6 leading-relaxed glow-text whitespace-pre-wrap">{project.summary}</div>
                 
                 <div className="mb-6">
                   <h4 className="text-sm font-semibold text-white mb-3">Technologies Used</h4>
