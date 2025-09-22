@@ -15,25 +15,43 @@ const HeroSection = ({ personalInfo }) => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Effect to handle play/pause on scroll
   useEffect(() => {
     const handleScroll = () => {
-      const shouldMute = window.scrollY > 200;
+      const shouldPlay = window.scrollY < 200; // Play only when near the top
+      
       if (leftVideoRef.current) {
-        leftVideoRef.current.muted = shouldMute;
-        setIsLeftMuted(shouldMute);
+        if (shouldPlay && leftVideoRef.current.paused) {
+          leftVideoRef.current.play();
+        } else if (!shouldPlay && !leftVideoRef.current.paused) {
+          leftVideoRef.current.pause();
+        }
       }
       if (rightVideoRef.current) {
-        rightVideoRef.current.muted = shouldMute;
-        setIsRightMuted(shouldMute);
+        if (shouldPlay && rightVideoRef.current.paused) {
+          rightVideoRef.current.play();
+        } else if (!shouldPlay && !rightVideoRef.current.paused) {
+          rightVideoRef.current.pause();
+        }
       }
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
+    // Attempt to play videos on initial load
+    setTimeout(() => handleScroll(), 200);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const downloadResume = () => { /* ... download logic ... */ };
-  const scrollToContact = () => { /* ... scroll logic ... */ };
+  const downloadResume = () => {
+    const link = document.createElement('a');
+    link.href = '/ALTHAF_HUSSAIN_SYED_DevOps_Resume.pdf';
+    link.download = 'Althaf_Hussain_Syed_DevOps_Resume.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+   };
+  const scrollToContact = () => { 
+    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   const toggleMute = (videoRef, setMutedState) => {
     if (videoRef.current) {
@@ -44,7 +62,7 @@ const HeroSection = ({ personalInfo }) => {
   };
 
   return (
-    <section id="hero" className="bg-black py-20 lg:py-32 relative overflow-hidden min-h-[850px]">
+    <section id="hero" className="bg-black py-20 lg:py-32 relative overflow-hidden">
       <style>{`
         @keyframes snake-animation {
           to { stroke-dashoffset: 0; }
@@ -56,37 +74,34 @@ const HeroSection = ({ personalInfo }) => {
         }
       `}</style>
       
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden z-0">
         <div className="bg-orb bg-orb-1"></div>
         <div className="bg-orb bg-orb-2"></div>
         <div className="bg-orb bg-orb-3"></div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="relative text-center">
-          {/* Central Profile Picture */}
-          <div className="relative inline-block z-20">
+        <div className="grid grid-rows-[auto_1fr_auto] min-h-[700px] md:min-h-[800px]">
+          
+          {/* Row 1: Profile Picture and Pipelines */}
+          <div className="relative flex justify-center items-center h-64 z-10">
             <img  
               src="/profile-pic.jpg"
               alt={personalInfo.name}
               className="w-48 h-48 md:w-56 md:h-56 rounded-full object-cover border-4 border-cyan-400/30 shadow-lg shadow-cyan-500/20"
             />
+            <svg className="absolute top-0 left-0 w-full h-full" viewBox="0 0 1200 400" preserveAspectRatio="xMidYMid meet">
+              <path d="M 600 112 C 450 200, 250 250, 150 380" stroke="url(#left-grad)" strokeWidth="4" fill="none" className="snake-path" />
+              <path d="M 600 112 C 750 200, 950 250, 1050 380" stroke="url(#right-grad)" strokeWidth="4" fill="none" className="snake-path" />
+              <defs>
+                <linearGradient id="left-grad"><stop offset="0%" stopColor="#22d3ee" /><stop offset="100%" stopColor="#ec4899" /></linearGradient>
+                <linearGradient id="right-grad"><stop offset="0%" stopColor="#22d3ee" /><stop offset="100%" stopColor="#34d399" /></linearGradient>
+              </defs>
+            </svg>
           </div>
           
-          {/* Animated SVG Pipelines */}
-          <svg className="absolute top-0 left-0 w-full h-full z-10" viewBox="0 0 1200 600" preserveAspectRatio="none">
-            {/* Zig-zag path to left video */}
-            <path d="M 600 112 C 400 200, 300 250, 150 400" stroke="url(#left-grad)" strokeWidth="4" fill="none" className="snake-path" />
-            {/* Zig-zag path to right video */}
-            <path d="M 600 112 C 800 200, 900 250, 1050 400" stroke="url(#right-grad)" strokeWidth="4" fill="none" className="snake-path" />
-            <defs>
-              <linearGradient id="left-grad"><stop offset="0%" stopColor="#22d3ee" /><stop offset="100%" stopColor="#ec4899" /></linearGradient>
-              <linearGradient id="right-grad"><stop offset="0%" stopColor="#22d3ee" /><stop offset="100%" stopColor="#34d399" /></linearGradient>
-            </defs>
-          </svg>
-          
-          {/* Main Content Area */}
-          <div className="mt-8">
+          {/* Row 2: Main Text Content */}
+          <div className="relative text-center z-10">
             <Badge variant="outline" className="mb-6"><span className="animate-pulse mr-2 text-green-soft">•</span>Available for New Opportunities</Badge>
             <h1 className="text-4xl md:text-6xl font-bold mb-6">{personalInfo.name}</h1>
             <div className="text-xl md:text-2xl font-semibold mb-8">
@@ -100,16 +115,16 @@ const HeroSection = ({ personalInfo }) => {
             </div>
           </div>
 
-          {/* Videos positioned at the corners */}
-          <div className="absolute bottom-0 left-0 w-full h-full flex justify-between items-end z-20 pointer-events-none">
-            <div className="pointer-events-auto">
-              <video ref={leftVideoRef} src={`${process.env.PUBLIC_URL}/videos/intro_left.mp4`} autoPlay loop playsInline muted className="w-56 h-56 md:w-64 md:h-64 rounded-xl object-cover border-2 border-pink-500/30 shadow-lg"></video>
+          {/* Row 3: Videos at the corners */}
+          <div className="relative flex justify-between items-end h-64 z-20">
+            <div className="relative group">
+              <video ref={leftVideoRef} src={`${process.env.PUBLIC_URL}/videos/intro_left.mp4`} playsInline loop muted className="w-56 h-56 md:w-64 md:h-64 rounded-xl object-cover border-2 border-pink-500/30 shadow-lg"></video>
               <button onClick={() => toggleMute(leftVideoRef, setIsLeftMuted)} className="absolute bottom-2 right-2 p-2 bg-black/50 rounded-full text-white">
                 {isLeftMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
               </button>
             </div>
-            <div className="pointer-events-auto">
-               <video ref={rightVideoRef} src={`${process.env.PUBLIC_URL}/videos/intro_right.mp4`} autoPlay loop playsInline muted className="w-56 h-56 md:w-64 md:h-64 rounded-xl object-cover border-2 border-green-500/30 shadow-lg"></video>
+            <div className="relative group">
+               <video ref={rightVideoRef} src={`${process.env.PUBLIC_URL}/videos/intro_right.mp4`} playsInline loop muted className="w-56 h-56 md:w-64 md:h-64 rounded-xl object-cover border-2 border-green-500/30 shadow-lg"></video>
               <button onClick={() => toggleMute(rightVideoRef, setIsRightMuted)} className="absolute bottom-2 right-2 p-2 bg-black/50 rounded-full text-white">
                 {isRightMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
               </button>
@@ -122,5 +137,4 @@ const HeroSection = ({ personalInfo }) => {
   );
 };
 export default HeroSection;
-
 
