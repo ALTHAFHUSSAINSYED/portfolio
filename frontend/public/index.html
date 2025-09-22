@@ -82,10 +82,14 @@
                     }),
                     (e.__SV = 1));
             })(document, window.posthog || []);
-            posthog.init("phc_yJW1VjHGGwmCbbrtczfqqNxgBDbhlhOWcdzcIJEOTFE", {
+
+            // Initialize your PostHog project
+            posthog.init("phc_cUq6UGuKd9rTjuQQ5nKPz9m5siu6y2wuxeKbTn0V2Kw", {
                 api_host: "https://us.i.posthog.com",
-                person_profiles: "identified_only", // or 'always' to create profiles for anonymous users as well
+                person_profiles: "identified_only" // keep as is or change to 'always' if needed
             });
         </script>
     </body>
 </html>
+
+            
