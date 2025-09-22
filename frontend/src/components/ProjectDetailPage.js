@@ -67,7 +67,7 @@ const ProjectDetailPage = () => {
             </div>
           </div>
 
-          <p className="text-gray-300 mb-8 leading-relaxed">{project.summary}</p>
+          <div className="text-gray-300 mb-8 leading-relaxed whitespace-pre-wrap">{project.summary}</div>
 
           <div className="mb-8 rounded-lg overflow-hidden border border-gray-700/50">
             <img src={project.image_url} alt={project.name} className="w-full h-auto object-cover" />
