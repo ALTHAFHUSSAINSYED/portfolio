@@ -1,24 +1,19 @@
 from fastapi import FastAPI, APIRouter, UploadFile, File, Form, HTTPException, status
 from fastapi.responses import JSONResponse
-from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
-import logging
 from pathlib import Path
 from pydantic import BaseModel, Field
 from typing import List, Optional
 import uuid
 from datetime import datetime
-import shutil
+import base64
 
 # --- SETUP ---
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
-static_dir = ROOT_DIR / 'static'
-images_dir = static_dir / 'images'
-images_dir.mkdir(parents=True, exist_ok=True)
 
 # --- DATABASE CONNECTION ---
 mongo_url = os.environ['MONGO_URL']
@@ -27,7 +22,6 @@ db = client[os.environ['DB_NAME']]
 
 # --- FASTAPI APP INSTANCE ---
 app = FastAPI(title="Portfolio API")
-app.mount("/static", StaticFiles(directory=static_dir), name="static")
 api_router = APIRouter(prefix="/api")
 
 # --- PYDANTIC MODELS ---
@@ -36,7 +30,7 @@ class Project(BaseModel):
     name: str
     summary: str
     details: str
-    image_url: str
+    image_url: str  # now contains Base64 string
     technologies: List[str] = []
     key_outcomes: List[str] = []
     timestamp: datetime = Field(default_factory=datetime.utcnow)
@@ -64,20 +58,20 @@ async def create_project(
 ):
     tech_list = [tech.strip() for tech in technologies.split(',') if tech.strip()]
     outcomes_list = [outcome.strip() for outcome in key_outcomes.split(',') if outcome.strip()]
-    
-    file_extension = Path(file.filename).suffix
-    unique_filename = f"{uuid.uuid4()}{file_extension}"
-    file_path = images_dir / unique_filename
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-        
-    base_url = os.environ.get('BACKEND_URL', 'http://127.0.0.1:8000')
-    image_url = f"{base_url}/static/images/{unique_filename}"
-    
+
+    # Read file and encode as Base64
+    file_bytes = await file.read()
+    encoded_image = f"data:{file.content_type};base64,{base64.b64encode(file_bytes).decode()}"
+
     project_data = {
-        "name": name, "summary": summary, "details": details, "image_url": image_url,
-        "technologies": tech_list, "key_outcomes": outcomes_list
+        "name": name,
+        "summary": summary,
+        "details": details,
+        "technologies": tech_list,
+        "key_outcomes": outcomes_list,
+        "image_url": encoded_image
     }
+
     project = Project(**project_data)
     await db.projects.insert_one(project.model_dump())
     return project
@@ -121,15 +115,9 @@ async def update_project(
     if key_outcomes:
         update_data["key_outcomes"] = [o.strip() for o in key_outcomes.split(",") if o.strip()]
     if file:
-        file_extension = Path(file.filename).suffix
-        unique_filename = f"{uuid.uuid4()}{file_extension}"
-        file_path = images_dir / unique_filename
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-
-        base_url = os.environ.get('BACKEND_URL', 'http://127.0.0.1:8000')
-        image_url = f"{base_url}/static/images/{unique_filename}"
-        update_data["image_url"] = image_url
+        file_bytes = await file.read()
+        encoded_image = f"data:{file.content_type};base64,{base64.b64encode(file_bytes).decode()}"
+        update_data["image_url"] = encoded_image
 
     result = await db.projects.update_one({"id": project_id}, {"$set": update_data})
 
