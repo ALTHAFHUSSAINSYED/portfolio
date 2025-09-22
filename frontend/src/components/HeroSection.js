@@ -1,18 +1,35 @@
-// src/components/HeroSection.js (Final Version)
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Download, Mail, Linkedin, MapPin, Phone } from 'lucide-react';
 
 const HeroSection = ({ personalInfo }) => {
   const [isVisible, setIsVisible] = useState(false);
+  // ? NEW: Refs to control the video elements
+  const leftVideoRef = useRef(null);
+  const rightVideoRef = useRef(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
+  // ? NEW: Functions to handle mouse hover events on videos
+  const handleVideoHover = (videoRef) => {
+    if (videoRef.current) {
+      videoRef.current.muted = false;
+      videoRef.current.currentTime = 0; // Restart video from the beginning
+      videoRef.current.play();
+    }
+  };
+
+  const handleVideoLeave = (videoRef) => {
+    if (videoRef.current) {
+      videoRef.current.muted = true;
+    }
+  };
+
+  // --- All other functions (downloadResume, scrollToContact) remain exactly the same ---
   const downloadResume = () => {
     const resumeUrl = '/ALTHAF_HUSSAIN_SYED_DevOps_Resume.pdf';
     const link = document.createElement('a');
@@ -40,10 +57,13 @@ const HeroSection = ({ personalInfo }) => {
 
           <div className={`relative flex justify-center items-center mb-8 w-full h-56 ${isVisible ? 'fade-in' : ''}`}>
             {/* Left Video */}
-            <video 
-              src="/videos/intro-left.mp4" 
+            <video
+              ref={leftVideoRef}
+              src="/videos/intro_left.mp4"
               autoPlay loop muted playsInline
-              className="absolute left-0 lg:left-1/4 transform -translate-x-1/2 lg:translate-x-0 w-48 h-48 rounded-xl object-cover border-2 border-pink-500/30 shadow-lg shadow-pink-500/20 opacity-0 animate-fade-in-left"
+              onMouseEnter={() => handleVideoHover(leftVideoRef)}
+              onMouseLeave={() => handleVideoLeave(leftVideoRef)}
+              className="absolute left-0 lg:left-1/4 transform -translate-x-1/2 lg:translate-x-0 w-48 h-48 rounded-xl object-cover border-2 border-pink-500/30 shadow-lg shadow-pink-500/20 opacity-0 animate-fade-in-left cursor-pointer"
               style={{ animationDelay: '500ms' }}
             ></video>
             
@@ -56,13 +76,17 @@ const HeroSection = ({ personalInfo }) => {
 
             {/* Right Video */}
             <video 
-              src="/videos/intro-right.mp4" 
+              ref={rightVideoRef}
+              src="/videos/intro_right.mp4" 
               autoPlay loop muted playsInline
-              className="absolute right-0 lg:right-1/4 transform translate-x-1/2 lg:translate-x-0 w-48 h-48 rounded-xl object-cover border-2 border-green-500/30 shadow-lg shadow-green-500/20 opacity-0 animate-fade-in-right"
+              onMouseEnter={() => handleVideoHover(rightVideoRef)}
+              onMouseLeave={() => handleVideoLeave(rightVideoRef)}
+              className="absolute right-0 lg:right-1/4 transform translate-x-1/2 lg:translate-x-0 w-48 h-48 rounded-xl object-cover border-2 border-green-500/30 shadow-lg shadow-green-500/20 opacity-0 animate-fade-in-right cursor-pointer"
               style={{ animationDelay: '500ms' }}
             ></video>
           </div>
 
+          {/* --- All other JSX code for your name, title, buttons, etc. remains exactly the same --- */}
           <Badge  
             variant="outline"  
             className={`mb-6 text-cyan-soft border-cyan-400/30 bg-black/50 px-4 py-2 hover:bg-cyan-400/5 transition-colors backdrop-blur-sm hover-glow ${isVisible ? 'fade-in stagger-1' : ''}`}
@@ -86,7 +110,6 @@ const HeroSection = ({ personalInfo }) => {
             {personalInfo.summary}
           </p>
 
-          {/* ... other sections like contact info and buttons remain the same ... */}
            <div className={`flex flex-wrap justify-center items-center gap-6 mb-12 text-gray-300 ${isVisible ? 'fade-in-up stagger-5' : ''}`}>
              <div className="flex items-center gap-2 hover:text-cyan-soft transition-all duration-300 hover-scale cursor-pointer">
                <MapPin className="w-4 h-4 text-cyan-soft" />
@@ -128,3 +151,4 @@ const HeroSection = ({ personalInfo }) => {
 };
 
 export default HeroSection;
+
