@@ -1,4 +1,4 @@
-// src/components/ProjectDetailPage.js (Final Version)
+// src/components/ProjectDetailPage.js
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Loader2, AlertTriangle, ArrowLeft, CheckCircle, Code, Server, Folder, Zap } from 'lucide-react';
@@ -67,6 +67,7 @@ const ProjectDetailPage = () => {
             </div>
           </div>
 
+          {/* Multi-line summary */}
           <div className="text-gray-300 mb-8 leading-relaxed whitespace-pre-wrap">{project.summary}</div>
 
           <div className="mb-8 rounded-lg overflow-hidden border border-gray-700/50">
@@ -74,25 +75,25 @@ const ProjectDetailPage = () => {
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 mb-8">
-              <div>
-                  <h2 className="text-lg font-semibold text-white mb-4">Technologies Used</h2>
-                  <div className="flex flex-wrap gap-2">
-                      {project.technologies.map((tech) => (
-                          <Badge key={tech} variant="outline" className="border-cyan-400/30 text-cyan-soft bg-black/50">{tech}</Badge>
-                      ))}
-                  </div>
+            <div>
+              <h2 className="text-lg font-semibold text-white mb-4">Technologies Used</h2>
+              <div className="flex flex-wrap gap-2">
+                {project.technologies.map((tech) => (
+                  <Badge key={tech} variant="outline" className="border-cyan-400/30 text-cyan-soft bg-black/50">{tech}</Badge>
+                ))}
               </div>
-              <div>
-                  <h2 className="text-lg font-semibold text-white mb-4">Key Outcomes</h2>
-                  <div className="space-y-3">
-                      {project.key_outcomes.map((outcome) => (
-                          <div key={outcome} className="flex items-start space-x-3">
-                              <CheckCircle className="w-4 h-4 text-green-soft mt-0.5 flex-shrink-0" />
-                              <p className="text-gray-300 text-sm leading-relaxed">{outcome}</p>
-                          </div>
-                      ))}
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-white mb-4">Key Outcomes</h2>
+              <div className="space-y-3">
+                {project.key_outcomes.map((outcome) => (
+                  <div key={outcome} className="flex items-start space-x-3">
+                    <CheckCircle className="w-4 h-4 text-green-soft mt-0.5 flex-shrink-0" />
+                    <p className="text-gray-300 text-sm leading-relaxed">{outcome}</p>
                   </div>
+                ))}
               </div>
+            </div>
           </div>
 
           <div>
@@ -102,7 +103,6 @@ const ProjectDetailPage = () => {
             </div>
           </div>
         </Card>
-
       </div>
     </div>
   );
