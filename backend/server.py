@@ -1,14 +1,13 @@
-from fastapi import FastAPI, APIRouter, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, APIRouter, UploadFile, File, Form, HTTPException, status
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
 import os
 import logging
 from pathlib import Path
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field
 from typing import List, Optional
 import uuid
 from datetime import datetime
@@ -21,26 +20,17 @@ static_dir = ROOT_DIR / 'static'
 images_dir = static_dir / 'images'
 images_dir.mkdir(parents=True, exist_ok=True)
 
-
 # --- DATABASE CONNECTION ---
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
-
 
 # --- FASTAPI APP INSTANCE ---
 app = FastAPI(title="Portfolio API")
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
 api_router = APIRouter(prefix="/api")
 
-
 # --- PYDANTIC MODELS ---
-class ContactForm(BaseModel):
-    name: str = Field(..., alias="Your Name")
-    email: EmailStr = Field(..., alias="Email Address")
-    subject: Optional[str] = Field(None, alias="Subject")
-    message: str = Field(..., alias="Message")
-
 class Project(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
@@ -51,15 +41,18 @@ class Project(BaseModel):
     key_outcomes: List[str] = []
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
+class UpdateProjectModel(BaseModel):
+    name: str
+    summary: str
+    details: str
+    image_url: str
+    technologies: List[str] = []
+    key_outcomes: List[str] = []
 
-# --- API ENDPOINTS ---
-# (Contact form endpoint remains the same)
-@api_router.post("/contact")
-async def send_contact_email(form: ContactForm):
-    # This endpoint is ready when you configure SendGrid
-    pass
+# --- API ENDPOINTS (CRUD) ---
 
-@api_router.post("/projects", response_model=Project)
+# CREATE a new project (POST)
+@api_router.post("/projects", response_model=Project, status_code=status.HTTP_201_CREATED)
 async def create_project(
     name: str = Form(...),
     summary: str = Form(...),
@@ -81,38 +74,56 @@ async def create_project(
     image_url = f"{base_url}/static/images/{unique_filename}"
     
     project_data = {
-        "name": name,
-        "summary": summary,
-        "details": details,
-        "image_url": image_url,
-        "technologies": tech_list,
-        "key_outcomes": outcomes_list
+        "name": name, "summary": summary, "details": details, "image_url": image_url,
+        "technologies": tech_list, "key_outcomes": outcomes_list
     }
-    
     project = Project(**project_data)
-    # This code assumes your data will be in a collection named "projects"
     await db.projects.insert_one(project.model_dump())
     return project
 
+# READ all projects (GET)
 @api_router.get("/projects", response_model=List[Project])
 async def get_projects():
-    # This code reads from a collection named "projects"
     projects_cursor = db.projects.find()
     projects = await projects_cursor.to_list(length=100)
     return projects
 
+# READ a single project by ID (GET)
 @api_router.get("/projects/{project_id}", response_model=Project)
 async def get_project_by_id(project_id: str):
-    # This code reads from a collection named "projects"
     project = await db.projects.find_one({"id": project_id})
-    if project is None:
+    if project:
+        return project
+    raise HTTPException(status_code=404, detail="Project not found")
+
+# UPDATE an existing project (PUT)
+@api_router.put("/projects/{project_id}", response_model=Project)
+async def update_project(project_id: str, updated_project_data: UpdateProjectModel):
+    update_data = updated_project_data.model_dump(exclude_unset=True)
+    
+    result = await db.projects.update_one(
+        {"id": project_id},
+        {"$set": update_data}
+    )
+    
+    if result.modified_count == 1:
+        updated_project = await db.projects.find_one({"id": project_id})
+        return updated_project
+        
+    existing_project = await db.projects.find_one({"id": project_id})
+    if existing_project:
+        return existing_project # Return existing if no changes were made
+
+    raise HTTPException(status_code=404, detail="Project not found")
+
+# ? NEW: DELETE a project by ID
+@api_router.delete("/projects/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_project(project_id: str):
+    result = await db.projects.delete_one({"id": project_id})
+    if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Project not found")
-    return project
-
-@api_router.get("/")
-async def api_root():
-    return {"message": "Welcome to the API!"}
-
+    # A 204 response should not have a body, so we return nothing.
+    return
 
 # --- APP CONFIGURATION ---
 app.include_router(api_router)
@@ -121,6 +132,7 @@ app.include_router(api_router)
 def welcome():
     return {"message": "Server is running. API is at /api"}
 
+# (CORS Middleware and other app settings remain the same)
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
@@ -128,9 +140,3 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    client.close()
