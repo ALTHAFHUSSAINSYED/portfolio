@@ -3,6 +3,9 @@ from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
+# ✨ NEW: Imports for sending email
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 import os
 import logging
 from pathlib import Path
@@ -41,8 +44,7 @@ class Project(BaseModel):
     details: str
     image_url: str
     technologies: List[str] = []
-    # ✨ CORRECTED: Changed from List[str] to str to match your data
-    key_outcomes: str 
+    key_outcomes: str
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
 class UpdateProjectModel(BaseModel):
@@ -55,11 +57,44 @@ class UpdateProjectModel(BaseModel):
 
 # --- API ENDPOINTS ---
 
+# ✨ MODIFIED: Added full logic to the contact endpoint
 @api_router.post("/contact")
 async def send_contact_email(form: ContactForm):
-    # This endpoint is ready for when we fix the frontend form
-    pass
+    to_email = os.environ.get('TO_EMAIL')
+    sendgrid_api_key = os.environ.get('SENDGRID_API_KEY')
 
+    if not to_email or not sendgrid_api_key:
+        raise HTTPException(status_code=500, detail="Server is not configured for sending emails.")
+
+    final_subject = form.subject if form.subject else f"New portfolio message from {form.name}"
+    html_content = f"""
+    <h3>New Contact Form Submission</h3>
+    <p><strong>Name:</strong> {form.name}</p>
+    <p><strong>Email:</strong> {form.email}</p>
+    <p><strong>Subject:</strong> {form.subject}</p>
+    <p><strong>Message:</strong></p>
+    <p>{form.message}</p>
+    """
+    message = Mail(
+        from_email=to_email,
+        to_emails=to_email,
+        subject=final_subject,
+        html_content=html_content)
+    message.reply_to = form.email
+
+    try:
+        sg = SendGridAPIClient(sendgrid_api_key)
+        response = sg.send(message)
+        if 200 <= response.status_code < 300:
+            return {"message": "Email sent successfully!"}
+        else:
+            logging.error(f"SendGrid error: {response.status_code} {response.body}")
+            raise HTTPException(status_code=500, detail="Failed to send email.")
+    except Exception as e:
+        logging.error(f"Error sending email: {e}")
+        raise HTTPException(status_code=500, detail="An error occurred while sending the email.")
+
+# (... All your other project endpoints remain the same ...)
 @api_router.post("/projects", response_model=Project, status_code=status.HTTP_201_CREATED)
 async def create_project(name: str = Form(...), summary: str = Form(...), details: str = Form(...), technologies: str = Form(...), key_outcomes: str = Form(...), file: UploadFile = File(...)):
     tech_list = [tech.strip() for tech in technologies.split(',') if tech.strip()]
@@ -69,7 +104,7 @@ async def create_project(name: str = Form(...), summary: str = Form(...), detail
 
     project_data = {
         "name": name, "summary": summary, "details": details, "image_url": encoded_image,
-        "technologies": tech_list, "key_outcomes": key_outcomes # Stored as a plain string
+        "technologies": tech_list, "key_outcomes": key_outcomes
     }
     project = Project(**project_data)
     await db.projects.insert_one(project.model_dump())
@@ -81,7 +116,6 @@ async def get_projects():
     projects = await projects_cursor.to_list(length=100)
     return projects
 
-# ... (GET by ID, PUT, and DELETE endpoints remain the same and are correct) ...
 @api_router.get("/projects/{project_id}", response_model=Project)
 async def get_project_by_id(project_id: str):
     project = await db.projects.find_one({"id": project_id})
@@ -105,14 +139,13 @@ async def update_project(project_id: str, name: Optional[str] = Form(None), summ
         raise HTTPException(status_code=400, detail="No update data provided")
 
     result = await db.projects.update_one({"id": project_id}, {"$set": update_data})
-    if result.modified_count == 1:
+    if result.modified_count >= 0:
         updated_project = await db.projects.find_one({"id": project_id})
-        return updated_project
-    
-    existing_project = await db.projects.find_one({"id": project_id})
-    if existing_project: return existing_project
+        if updated_project:
+            return updated_project
     
     raise HTTPException(status_code=404, detail="Project not found")
+
 
 @api_router.delete("/projects/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_project(project_id: str):
