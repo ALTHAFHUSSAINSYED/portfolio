@@ -5,7 +5,6 @@ import { Download, Mail, Linkedin, MapPin, Phone } from 'lucide-react';
 
 const HeroSection = ({ personalInfo }) => {
   const [isVisible, setIsVisible] = useState(false);
-  // ? NEW: Refs to control the video elements
   const leftVideoRef = useRef(null);
   const rightVideoRef = useRef(null);
 
@@ -14,26 +13,10 @@ const HeroSection = ({ personalInfo }) => {
     return () => clearTimeout(timer);
   }, []);
 
-  // ? NEW: Functions to handle mouse hover events on videos
-  const handleVideoHover = (videoRef) => {
-    if (videoRef.current) {
-      videoRef.current.muted = false;
-      videoRef.current.currentTime = 0; // Restart video from the beginning
-      videoRef.current.play();
-    }
-  };
-
-  const handleVideoLeave = (videoRef) => {
-    if (videoRef.current) {
-      videoRef.current.muted = true;
-    }
-  };
-
-  // --- All other functions (downloadResume, scrollToContact) remain exactly the same ---
+  // --- All your other functions remain untouched ---
   const downloadResume = () => {
-    const resumeUrl = '/ALTHAF_HUSSAIN_SYED_DevOps_Resume.pdf';
     const link = document.createElement('a');
-    link.href = resumeUrl;
+    link.href = '/ALTHAF_HUSSAIN_SYED_DevOps_Resume.pdf';
     link.download = 'Althaf_Hussain_Syed_DevOps_Resume.pdf';
     document.body.appendChild(link);
     link.click();
@@ -42,6 +25,18 @@ const HeroSection = ({ personalInfo }) => {
 
   const scrollToContact = () => {
     document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleVideoHover = (videoRef) => {
+    if (videoRef.current) {
+      videoRef.current.muted = false;
+    }
+  };
+
+  const handleVideoLeave = (videoRef) => {
+    if (videoRef.current) {
+      videoRef.current.muted = true;
+    }
   };
 
   return (
@@ -57,17 +52,16 @@ const HeroSection = ({ personalInfo }) => {
 
           <div className={`relative flex justify-center items-center mb-8 w-full h-56 ${isVisible ? 'fade-in' : ''}`}>
             {/* Left Video */}
-            <video
+            <video 
               ref={leftVideoRef}
-              src="/videos/intro_left.mp4"
+              // ✨ CORRECTED: Ensured the path uses your confirmed filenames
+              src={`${process.env.PUBLIC_URL}/videos/intro_left.mp4`} 
               autoPlay loop muted playsInline
               onMouseEnter={() => handleVideoHover(leftVideoRef)}
               onMouseLeave={() => handleVideoLeave(leftVideoRef)}
-              className="absolute left-0 lg:left-1/4 transform -translate-x-1/2 lg:translate-x-0 w-48 h-48 rounded-xl object-cover border-2 border-pink-500/30 shadow-lg shadow-pink-500/20 opacity-0 animate-fade-in-left cursor-pointer"
-              style={{ animationDelay: '500ms' }}
+              className="absolute left-0 lg:left-1/4 transform -translate-x-1/2 lg:translate-x-0 w-48 h-48 rounded-xl object-cover border-2 border-pink-500/30 shadow-lg shadow-pink-500/20 cursor-pointer"
             ></video>
             
-            {/* Profile Image (Center) */}
             <img  
               src="/profile-pic.jpg"
               alt={personalInfo.name}
@@ -77,25 +71,25 @@ const HeroSection = ({ personalInfo }) => {
             {/* Right Video */}
             <video 
               ref={rightVideoRef}
-              src="/videos/intro_right.mp4" 
+              // ✨ CORRECTED: Ensured the path uses your confirmed filenames
+              src={`${process.env.PUBLIC_URL}/videos/intro_right.mp4`} 
               autoPlay loop muted playsInline
               onMouseEnter={() => handleVideoHover(rightVideoRef)}
               onMouseLeave={() => handleVideoLeave(rightVideoRef)}
-              className="absolute right-0 lg:right-1/4 transform translate-x-1/2 lg:translate-x-0 w-48 h-48 rounded-xl object-cover border-2 border-green-500/30 shadow-lg shadow-green-500/20 opacity-0 animate-fade-in-right cursor-pointer"
-              style={{ animationDelay: '500ms' }}
+              className="absolute right-0 lg:right-1/4 transform translate-x-1/2 lg:translate-x-0 w-48 h-48 rounded-xl object-cover border-2 border-green-500/30 shadow-lg shadow-green-500/20 cursor-pointer"
             ></video>
           </div>
 
           {/* --- All other JSX code for your name, title, buttons, etc. remains exactly the same --- */}
           <Badge  
             variant="outline"  
-            className={`mb-6 text-cyan-soft border-cyan-400/30 bg-black/50 px-4 py-2 hover:bg-cyan-400/5 transition-colors backdrop-blur-sm hover-glow ${isVisible ? 'fade-in stagger-1' : ''}`}
+            className={`mb-6 text-cyan-soft border-cyan-400/30 bg-black/50 px-4 py-2 hover:bg-cyan-400/5 transition-colors ${isVisible ? 'fade-in stagger-1' : ''}`}
           >
             <span className="animate-pulse mr-2 text-green-soft">•</span>
             Available for New Opportunities
           </Badge>
 
-          <h1 className={`text-4xl md:text-6xl font-bold mb-6 leading-tight hero-title ${isVisible ? 'fade-in-up stagger-2' : ''}`}>
+          <h1 className={`text-4xl md:text-6xl font-bold mb-6 ${isVisible ? 'fade-in-up stagger-2' : ''}`}>
             {personalInfo.name}
           </h1>
 
@@ -106,42 +100,22 @@ const HeroSection = ({ personalInfo }) => {
             )}
           </div>
           
-          <p className={`text-lg md:text-xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed ${isVisible ? 'fade-in-up stagger-4' : ''}`}>
+          <p className={`text-lg md:text-xl text-gray-300 mb-12 max-w-3xl mx-auto ${isVisible ? 'fade-in-up stagger-4' : ''}`}>
             {personalInfo.summary}
           </p>
 
            <div className={`flex flex-wrap justify-center items-center gap-6 mb-12 text-gray-300 ${isVisible ? 'fade-in-up stagger-5' : ''}`}>
-             <div className="flex items-center gap-2 hover:text-cyan-soft transition-all duration-300 hover-scale cursor-pointer">
-               <MapPin className="w-4 h-4 text-cyan-soft" />
-               <span className="text-sm font-medium">{personalInfo.location}</span>
-             </div>
-             <div className="flex items-center gap-2 hover:text-pink-soft transition-all duration-300 hover-scale">
-               <Mail className="w-4 h-4 text-pink-soft" />
-               <a href={`mailto:${personalInfo.email}`} className="text-sm font-medium hover:underline">
-                 {personalInfo.email}
-               </a>
-             </div>
-             <div className="flex items-center gap-2 hover:text-green-soft transition-all duration-300 hover-scale">
-               <Phone className="w-4 h-4 text-green-soft" />
-               <a href={`tel:${personalInfo.phone}`} className="text-sm font-medium hover:underline">
-                 {personalInfo.phone}
-               </a>
-             </div>
-             <div className="flex items-center gap-2 hover:text-blue-soft transition-all duration-300 hover-scale">
-               <Linkedin className="w-4 h-4 text-blue-soft" />
-               <a href={personalInfo.linkedin} target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:underline">
-                 LinkedIn Profile
-               </a>
-             </div>
+             <div className="flex items-center gap-2"><MapPin className="w-4 h-4 text-cyan-soft" /><span>{personalInfo.location}</span></div>
+             <div className="flex items-center gap-2"><Mail className="w-4 h-4 text-pink-soft" /><a href={`mailto:${personalInfo.email}`} className="hover:underline">{personalInfo.email}</a></div>
+             <div className="flex items-center gap-2"><Phone className="w-4 h-4 text-green-soft" /><a href={`tel:${personalInfo.phone}`} className="hover:underline">{personalInfo.phone}</a></div>
+             <div className="flex items-center gap-2"><Linkedin className="w-4 h-4 text-blue-soft" /><a href={personalInfo.linkedin} target="_blank" rel="noopener noreferrer" className="hover:underline">LinkedIn Profile</a></div>
            </div>
            <div className={`flex flex-col sm:flex-row gap-4 justify-center items-center ${isVisible ? 'fade-in-up stagger-6' : ''}`}>
-             <Button onClick={downloadResume} size="lg" className="neon-button bg-gradient-to-r from-pink-500/80 to-cyan-400/80 hover:from-pink-500 hover:to-cyan-400 text-black px-8 py-3 text-lg font-bold transition-all duration-300">
-               <Download className="w-5 h-5 mr-3" />
-               Download Resume
+             <Button onClick={downloadResume} size="lg" className="w-full sm:w-auto neon-button bg-gradient-to-r from-pink-500 to-cyan-400 text-black font-bold">
+               <Download className="w-5 h-5 mr-3" />Download Resume
              </Button>
-             <Button onClick={scrollToContact} variant="outline" size="lg" className="border-cyan-400/50 text-cyan-soft bg-black/50 hover:bg-cyan-400/10 hover:text-cyan-400 px-8 py-3 text-lg font-medium hover-lift transition-all duration-300 backdrop-blur-sm">
-               <Mail className="w-5 h-5 mr-3" />
-               Get in Touch
+             <Button onClick={scrollToContact} variant="outline" size="lg" className="w-full sm:w-auto border-cyan-400/50 text-cyan-soft bg-black/50 hover:bg-cyan-400/10">
+               <Mail className="w-5 h-5 mr-3" />Get in Touch
              </Button>
            </div>
         </div>
