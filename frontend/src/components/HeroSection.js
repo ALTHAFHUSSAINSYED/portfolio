@@ -49,18 +49,19 @@ const HeroSection = ({ personalInfo }) => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center max-w-4xl mx-auto">
-
-          <div className={`relative flex justify-center items-center mb-8 w-full h-56 ${isVisible ? 'fade-in' : ''}`}>
+          <div className={`relative flex justify-center items-center mb-8 w-full`}>
             {/* Left Video */}
-            <video 
-              ref={leftVideoRef}
-              // ✨ CORRECTED: Ensured the path uses your confirmed filenames
-              src={`${process.env.PUBLIC_URL}/videos/intro_left.mp4`} 
-              autoPlay loop muted playsInline
-              onMouseEnter={() => handleVideoHover(leftVideoRef)}
-              onMouseLeave={() => handleVideoLeave(leftVideoRef)}
-              className="absolute left-0 lg:left-1/4 transform -translate-x-1/2 lg:translate-x-0 w-48 h-48 rounded-xl object-cover border-2 border-pink-500/30 shadow-lg shadow-pink-500/20 cursor-pointer"
-            ></video>
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 md:left-auto md:-translate-x-48">
+              <video 
+                ref={leftVideoRef}
+                // ? CORRECTED: Changed hyphen to underscore to match your filename
+                src={`${process.env.PUBLIC_URL}/videos/intro_left.mp4`}
+                autoPlay loop muted playsInline
+                onMouseEnter={() => handleVideoHover(leftVideoRef)}
+                onMouseLeave={() => handleVideoLeave(leftVideoRef)}
+                className="w-40 h-40 md:w-48 md:h-48 rounded-xl object-cover border-2 border-pink-500/30 shadow-lg shadow-pink-500/20 cursor-pointer"
+              ></video>
+            </div>
             
             <img  
               src="/profile-pic.jpg"
@@ -69,18 +70,20 @@ const HeroSection = ({ personalInfo }) => {
             />
 
             {/* Right Video */}
-            <video 
-              ref={rightVideoRef}
-              // ✨ CORRECTED: Ensured the path uses your confirmed filenames
-              src={`${process.env.PUBLIC_URL}/videos/intro_right.mp4`} 
-              autoPlay loop muted playsInline
-              onMouseEnter={() => handleVideoHover(rightVideoRef)}
-              onMouseLeave={() => handleVideoLeave(rightVideoRef)}
-              className="absolute right-0 lg:right-1/4 transform translate-x-1/2 lg:translate-x-0 w-48 h-48 rounded-xl object-cover border-2 border-green-500/30 shadow-lg shadow-green-500/20 cursor-pointer"
-            ></video>
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 md:right-auto md:translate-x-48">
+              <video 
+                ref={rightVideoRef}
+                // ? CORRECTED: Changed hyphen to underscore to match your filename
+                src={`${process.env.PUBLIC_URL}/videos/intro_right.mp4`} 
+                autoPlay loop muted playsInline
+                onMouseEnter={() => handleVideoHover(rightVideoRef)}
+                onMouseLeave={() => handleVideoLeave(rightVideoRef)}
+                className="w-40 h-40 md:w-48 md:h-48 rounded-xl object-cover border-2 border-green-500/30 shadow-lg shadow-green-500/20 cursor-pointer"
+              ></video>
+            </div>
           </div>
 
-          {/* --- All other JSX code for your name, title, buttons, etc. remains exactly the same --- */}
+          {/* --- All other JSX code remains exactly the same --- */}
           <Badge  
             variant="outline"  
             className={`mb-6 text-cyan-soft border-cyan-400/30 bg-black/50 px-4 py-2 hover:bg-cyan-400/5 transition-colors ${isVisible ? 'fade-in stagger-1' : ''}`}
@@ -125,4 +128,3 @@ const HeroSection = ({ personalInfo }) => {
 };
 
 export default HeroSection;
-
