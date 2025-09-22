@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Folder, CheckCircle, ArrowRight, Zap, Code, Server, Loader2, AlertTriangle } from 'lucide-react';
-import { Link } from 'react-router-dom'; 
+import { Link, useLocation } from 'react-router-dom'; 
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://althaf-portfolio.onrender.com';
 
@@ -12,14 +12,31 @@ const ProjectsSection = () => {
   const [error, setError] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
-  
+  const location = useLocation();
+
+  // Restore scroll if coming back
+  useEffect(() => {
+    if (location.state && location.state.scrollY) {
+      window.scrollTo(0, location.state.scrollY);
+    }
+  }, [location]);
+
   useEffect(() => {
     const fetchProjects = async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/projects`);
         if (!response.ok) throw new Error('Something went wrong fetching projects.');
         const data = await response.json();
-        setProjects(data);
+
+        // Ensure arrays for safe mapping
+        const processedData = data.map(proj => ({
+          ...proj,
+          summary: proj.summary ? proj.summary.split('\n') : [],
+          key_outcomes: proj.key_outcomes || [],
+          technologies: proj.technologies || [],
+        }));
+
+        setProjects(processedData);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -46,10 +63,11 @@ const ProjectsSection = () => {
     if (title.toLowerCase().includes('storage')) return Folder;
     return Zap;
   };
+
   const getProjectColor = (index) => ['text-cyan-soft', 'text-pink-soft', 'text-green-soft'][index % 3];
   const getProjectBg = (index) => ['bg-cyan-400/10', 'bg-pink-500/10', 'bg-green-400/10'][index % 3];
   const getProjectBorder = (index) => ['border-cyan-400/30', 'border-pink-500/30', 'border-green-400/30'][index % 3];
-  
+
   if (loading) {
     return (
       <section id="projects" className="py-20 bg-black flex justify-center items-center min-h-[50vh]">
@@ -104,11 +122,17 @@ const ProjectsSection = () => {
                   </div>
                 </div>
 
-                {/* Multi-line summary */}
-                <div className="text-gray-300 mb-6 leading-relaxed glow-text whitespace-pre-wrap">
-                  {project.summary}
+                {/* Multi-line summary with icon */}
+                <div className="text-gray-300 mb-6 leading-relaxed glow-text space-y-2">
+                  {project.summary.map((point, i) => (
+                    <div key={i} className="flex items-start space-x-2">
+                      <Zap className="w-4 h-4 mt-1 text-cyan-soft flex-shrink-0"/>
+                      <p className="text-sm">{point}</p>
+                    </div>
+                  ))}
                 </div>
-                
+
+                {/* Technologies */}
                 <div className="mb-6">
                   <h4 className="text-sm font-semibold text-white mb-3">Technologies Used</h4>
                   <div className="flex flex-wrap gap-2">
@@ -118,16 +142,21 @@ const ProjectsSection = () => {
                   </div>
                 </div>
 
+                {/* Key Outcomes */}
                 <div className="space-y-3 mb-6">
                   <h4 className="text-sm font-semibold text-white">Key Outcomes</h4>
                   <div className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
-                    {project.key_outcomes} {/* plain multi-line text */}
+                    {project.key_outcomes}
                   </div>
                 </div>
               </div>
-              
+
               <div className="pt-4 mt-auto border-t border-gray-700/30">
-                <Link to={`/projects/${project.id}`} className="flex items-center text-cyan-soft text-sm font-medium group-hover:text-cyan-400 transition-all">
+                <Link
+                  to={`/projects/${project.id}`}
+                  state={{ scrollY: window.scrollY }} // Pass current scroll position
+                  className="flex items-center text-cyan-soft text-sm font-medium group-hover:text-cyan-400 transition-all"
+                >
                   <span>View Implementation Details</span>
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-2 transition-transform" />
                 </Link>
@@ -141,4 +170,3 @@ const ProjectsSection = () => {
 };
 
 export default ProjectsSection;
-
