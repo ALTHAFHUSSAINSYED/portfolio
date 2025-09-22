@@ -1,7 +1,7 @@
 // src/components/ProjectDetailPage.js
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Loader2, AlertTriangle, ArrowLeft, CheckCircle, Code, Server, Folder, Zap } from 'lucide-react';
+import { Loader2, AlertTriangle, ArrowLeft, CheckCircle, Zap, Code, Server, Folder } from 'lucide-react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 
@@ -15,7 +15,7 @@ const getProjectIcon = (title) => {
 };
 
 const ProjectDetailPage = () => {
-  const { projectId } = useParams(); 
+  const { projectId } = useParams();
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -40,7 +40,7 @@ const ProjectDetailPage = () => {
   if (loading) {
     return (
       <div className="bg-black text-white min-h-screen flex justify-center items-center">
-        <Loader2 className="w-12 h-12 animate-spin text-cyan-soft"/>
+        <Loader2 className="w-12 h-12 animate-spin text-cyan-soft" />
       </div>
     );
   }
@@ -48,7 +48,7 @@ const ProjectDetailPage = () => {
   if (error || !project) {
     return (
       <div className="bg-black text-white min-h-screen flex flex-col justify-center items-center">
-        <AlertTriangle className="w-12 h-12 text-red-400"/>
+        <AlertTriangle className="w-12 h-12 text-red-400" />
         <p className="mt-4">Could not load project details.</p>
         <Link to="/" className="mt-4 text-cyan-soft">Back to Portfolio</Link>
       </div>
@@ -56,6 +56,10 @@ const ProjectDetailPage = () => {
   }
 
   const IconComponent = getProjectIcon(project.name);
+
+  // Split summary and details into lines for bullets
+  const summaryLines = project.summary.split('\n').filter(line => line.trim() !== '');
+  const detailsLines = project.details.split('\n').filter(line => line.trim() !== '');
 
   return (
     <div className="bg-black text-white min-h-screen font-sans py-20">
@@ -77,13 +81,25 @@ const ProjectDetailPage = () => {
             </div>
           </div>
 
-          {/* Multi-line summary */}
-          <div className="text-gray-300 mb-8 leading-relaxed whitespace-pre-wrap">{project.summary}</div>
+          {/* Summary with icons */}
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold text-white mb-3">Summary</h2>
+            <div className="space-y-3">
+              {summaryLines.map((line, index) => (
+                <div key={index} className="flex items-start space-x-3">
+                  <Zap className="w-4 h-4 text-blue-400 mt-1 flex-shrink-0" />
+                  <p className="text-gray-300 text-sm leading-relaxed">{line}</p>
+                </div>
+              ))}
+            </div>
+          </div>
 
+          {/* Image */}
           <div className="mb-8 rounded-lg overflow-hidden border border-gray-700/50">
             <img src={project.image_url} alt={project.name} className="w-full h-auto object-cover" />
           </div>
 
+          {/* Technologies */}
           <div className="grid md:grid-cols-2 gap-8 mb-8">
             <div>
               <h2 className="text-lg font-semibold text-white mb-4">Technologies Used</h2>
@@ -93,18 +109,31 @@ const ProjectDetailPage = () => {
                 ))}
               </div>
             </div>
+
+            {/* Key Outcomes */}
             <div>
               <h2 className="text-lg font-semibold text-white mb-4">Key Outcomes</h2>
-              <div className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
-                {project.key_outcomes}
+              <div className="space-y-3">
+                {project.key_outcomes.map((outcome, index) => (
+                  <div key={index} className="flex items-start space-x-3">
+                    <CheckCircle className="w-4 h-4 text-green-soft mt-0.5 flex-shrink-0" />
+                    <p className="text-gray-300 text-sm leading-relaxed">{outcome}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
 
+          {/* Details with icons */}
           <div>
             <h2 className="text-lg font-semibold text-white mb-4">Implementation Details</h2>
-            <div className="prose prose-invert max-w-none text-gray-300 whitespace-pre-wrap">
-              {project.details}
+            <div className="space-y-3">
+              {detailsLines.map((line, index) => (
+                <div key={index} className="flex items-start space-x-3">
+                  <Code className="w-4 h-4 text-yellow-400 mt-1 flex-shrink-0" />
+                  <p className="text-gray-300 text-sm leading-relaxed">{line}</p>
+                </div>
+              ))}
             </div>
           </div>
         </Card>
