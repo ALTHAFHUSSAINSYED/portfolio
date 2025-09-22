@@ -41,7 +41,11 @@ const ProjectsSection = () => {
       }
     }, { threshold: 0.1 });
     if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => observer.disconnect();
+    return () => {
+      if(sectionRef.current) {
+        observer.unobserve(sectionRef.current);
+      }
+    };
   }, []);
 
   const getProjectIcon = (title) => {
@@ -51,7 +55,8 @@ const ProjectsSection = () => {
     return Zap;
   };
 
-  if (loading || error) { /* ... loading/error JSX ... */ }
+  if (loading) { /* ... loading JSX ... */ }
+  if (error) { /* ... error JSX ... */ }
 
   return (
     <section id="projects" className="py-20 bg-black" ref={sectionRef}>
