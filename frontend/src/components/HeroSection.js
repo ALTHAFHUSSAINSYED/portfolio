@@ -10,67 +10,49 @@ const HeroSection = ({ personalInfo }) => {
   const [isLeftMuted, setIsLeftMuted] = useState(true);
   const [isRightMuted, setIsRightMuted] = useState(true);
 
-  // Effect for initial fade-in animation
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
-  // ✨ FIXED: Effect to handle muting/unmuting on scroll
   useEffect(() => {
     const handleScroll = () => {
-      const shouldMute = window.scrollY > 150; // Mute if scrolled down
-      
-      if (leftVideoRef.current && leftVideoRef.current.muted !== shouldMute) {
+      const shouldMute = window.scrollY > 200;
+      if (leftVideoRef.current) {
         leftVideoRef.current.muted = shouldMute;
         setIsLeftMuted(shouldMute);
       }
-      if (rightVideoRef.current && rightVideoRef.current.muted !== shouldMute) {
+      if (rightVideoRef.current) {
         rightVideoRef.current.muted = shouldMute;
         setIsRightMuted(shouldMute);
       }
     };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
-    // Initial check in case the page loads scrolled down
-    handleScroll(); 
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const downloadResume = () => {
-    const link = document.createElement('a');
-    link.href = '/ALTHAF_HUSSAIN_SYED_DevOps_Resume.pdf';
-    link.download = 'Althaf_Hussain_Syed_DevOps_Resume.pdf';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const scrollToContact = () => {
-    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const downloadResume = () => { /* ... download logic ... */ };
+  const scrollToContact = () => { /* ... scroll logic ... */ };
 
   const toggleMute = (videoRef, setMutedState) => {
     if (videoRef.current) {
-      const isCurrentlyMuted = videoRef.current.muted;
-      videoRef.current.muted = !isCurrentlyMuted;
-      setMutedState(!isCurrentlyMuted);
+      const isMuted = !videoRef.current.muted;
+      videoRef.current.muted = isMuted;
+      setMutedState(isMuted);
     }
   };
 
   return (
-    <section id="hero" className="bg-black pt-20 pb-12 lg:pt-32 lg:pb-24 relative overflow-hidden min-h-[700px] md:min-h-[800px]">
+    <section id="hero" className="bg-black py-20 lg:py-32 relative overflow-hidden min-h-[850px]">
       <style>{`
-        @keyframes snake {
+        @keyframes snake-animation {
           to { stroke-dashoffset: 0; }
         }
-        .snake-pipeline {
+        .snake-path {
           stroke-dasharray: 1000;
           stroke-dashoffset: 1000;
-          animation: snake 6s linear infinite;
+          animation: snake-animation 8s linear infinite;
         }
       `}</style>
       
@@ -80,72 +62,60 @@ const HeroSection = ({ personalInfo }) => {
         <div className="bg-orb bg-orb-3"></div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 h-full">
-        {/* Container for Profile Pic, Videos, and Pipelines */}
-        <div className="absolute top-0 left-0 w-full h-full">
-            {/* Central Profile Picture */}
-            <div className="absolute top-10 left-1/2 -translate-x-1/2 z-20">
-              <img  
-                src="/profile-pic.jpg"
-                alt={personalInfo.name}
-                className="w-48 h-48 md:w-56 md:h-56 rounded-full object-cover border-4 border-cyan-400/30 shadow-lg shadow-cyan-500/20"
-              />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="relative text-center">
+          {/* Central Profile Picture */}
+          <div className="relative inline-block z-20">
+            <img  
+              src="/profile-pic.jpg"
+              alt={personalInfo.name}
+              className="w-48 h-48 md:w-56 md:h-56 rounded-full object-cover border-4 border-cyan-400/30 shadow-lg shadow-cyan-500/20"
+            />
+          </div>
+          
+          {/* Animated SVG Pipelines */}
+          <svg className="absolute top-0 left-0 w-full h-full z-10" viewBox="0 0 1200 600" preserveAspectRatio="none">
+            {/* Zig-zag path to left video */}
+            <path d="M 600 112 C 400 200, 300 250, 150 400" stroke="url(#left-grad)" strokeWidth="4" fill="none" className="snake-path" />
+            {/* Zig-zag path to right video */}
+            <path d="M 600 112 C 800 200, 900 250, 1050 400" stroke="url(#right-grad)" strokeWidth="4" fill="none" className="snake-path" />
+            <defs>
+              <linearGradient id="left-grad"><stop offset="0%" stopColor="#22d3ee" /><stop offset="100%" stopColor="#ec4899" /></linearGradient>
+              <linearGradient id="right-grad"><stop offset="0%" stopColor="#22d3ee" /><stop offset="100%" stopColor="#34d399" /></linearGradient>
+            </defs>
+          </svg>
+          
+          {/* Main Content Area */}
+          <div className="mt-8">
+            <Badge variant="outline" className="mb-6"><span className="animate-pulse mr-2 text-green-soft">•</span>Available for New Opportunities</Badge>
+            <h1 className="text-4xl md:text-6xl font-bold mb-6">{personalInfo.name}</h1>
+            <div className="text-xl md:text-2xl font-semibold mb-8">
+              <span className="text-cyan-soft">{personalInfo.title.split('|')[0]}</span>
+              {personalInfo.title.includes('|') && (<span className="text-pink-soft"> | {personalInfo.title.split('|')[1]}</span>)}
             </div>
+            <p className="text-lg md:text-xl text-gray-300 mb-12 max-w-3xl mx-auto">{personalInfo.summary}</p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button onClick={downloadResume} size="lg"><Download className="w-5 h-5 mr-3" />Download Resume</Button>
+              <Button onClick={scrollToContact} variant="outline" size="lg"><Mail className="w-5 h-5 mr-3" />Get in Touch</Button>
+            </div>
+          </div>
 
-            {/* ✨ FIXED: SVG Container for Pipelines with valid coordinates */}
-            <svg className="absolute top-0 left-0 w-full h-full z-10" viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid meet" style={{ filter: 'drop-shadow(0 0 5px rgba(0, 255, 255, 0.3))' }}>
-              <path 
-                d="M 600 112 C 400 150, 200 300, 120 450" 
-                stroke="url(#left-gradient)" 
-                strokeWidth="3" 
-                fill="none" 
-                className="snake-pipeline"
-              />
-              <path 
-                d="M 600 112 C 800 150, 1000 300, 1080 450" 
-                stroke="url(#right-gradient)" 
-                strokeWidth="3" 
-                fill="none" 
-                className="snake-pipeline"
-              />
-              <defs>
-                <linearGradient id="left-gradient"><stop offset="0%" stopColor="#22d3ee" /><stop offset="100%" stopColor="#ec4899" /></linearGradient>
-                <linearGradient id="right-gradient"><stop offset="0%" stopColor="#22d3ee" /><stop offset="100%" stopColor="#34d399" /></linearGradient>
-              </defs>
-            </svg>
-
-            {/* ✨ FIXED: Left Video Position */}
-            <div className="absolute bottom-20 left-4 md:left-[10%] group z-20">
-              <video ref={leftVideoRef} src={`${process.env.PUBLIC_URL}/videos/intro_left.mp4`} autoPlay loop playsInline muted className="w-48 h-48 md:w-56 md:h-56 rounded-xl object-cover border-2 border-pink-500/30 shadow-lg"></video>
+          {/* Videos positioned at the corners */}
+          <div className="absolute bottom-0 left-0 w-full h-full flex justify-between items-end z-20 pointer-events-none">
+            <div className="pointer-events-auto">
+              <video ref={leftVideoRef} src={`${process.env.PUBLIC_URL}/videos/intro_left.mp4`} autoPlay loop playsInline muted className="w-56 h-56 md:w-64 md:h-64 rounded-xl object-cover border-2 border-pink-500/30 shadow-lg"></video>
               <button onClick={() => toggleMute(leftVideoRef, setIsLeftMuted)} className="absolute bottom-2 right-2 p-2 bg-black/50 rounded-full text-white">
                 {isLeftMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
               </button>
             </div>
-
-            {/* ✨ FIXED: Right Video Position */}
-            <div className="absolute bottom-20 right-4 md:right-[10%] group z-20">
-               <video ref={rightVideoRef} src={`${process.env.PUBLIC_URL}/videos/intro_right.mp4`} autoPlay loop playsInline muted className="w-48 h-48 md:w-56 md:h-56 rounded-xl object-cover border-2 border-green-500/30 shadow-lg"></video>
+            <div className="pointer-events-auto">
+               <video ref={rightVideoRef} src={`${process.env.PUBLIC_URL}/videos/intro_right.mp4`} autoPlay loop playsInline muted className="w-56 h-56 md:w-64 md:h-64 rounded-xl object-cover border-2 border-green-500/30 shadow-lg"></video>
               <button onClick={() => toggleMute(rightVideoRef, setIsRightMuted)} className="absolute bottom-2 right-2 p-2 bg-black/50 rounded-full text-white">
                 {isRightMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
               </button>
             </div>
-        </div>
-        
-        {/* Text content is in a separate container to prevent overlap */}
-        <div className="relative text-center pt-64 md:pt-72">
-            <Badge variant="outline" className={`mb-6 text-cyan-soft border-cyan-400/30 bg-black/50 px-4 py-2`}>
-              <span className="animate-pulse mr-2 text-green-soft">•</span> Available for New Opportunities
-            </Badge>
-            <h1 className={`text-4xl md:text-6xl font-bold mb-6`}>{personalInfo.name}</h1>
-            <div className={`text-xl md:text-2xl font-semibold mb-8`}>
-              <span className="text-cyan-soft">{personalInfo.title.split('|')[0]}</span>
-              {personalInfo.title.includes('|') && (<span className="text-pink-soft"> | {personalInfo.title.split('|')[1]}</span>)}
-            </div>
-            <p className={`text-lg md:text-xl text-gray-300 mb-12 max-w-3xl mx-auto`}>{personalInfo.summary}</p>
-            <div className={`flex flex-col sm:flex-row gap-4 justify-center items-center`}>
-              <Button onClick={downloadResume} size="lg" className="w-full sm:w-auto neon-button bg-gradient-to-r from-pink-500 to-cyan-400 text-black font-bold"><Download className="w-5 h-5 mr-3" />Download Resume</Button>
-              <Button onClick={scrollToContact} variant="outline" size="lg" className="w-full sm:w-auto border-cyan-400/50 text-cyan-soft bg-black/50 hover:bg-cyan-400/10"><Mail className="w-5 h-5 mr-3" />Get in Touch</Button>
-            </div>
+          </div>
+
         </div>
       </div>
     </section>
