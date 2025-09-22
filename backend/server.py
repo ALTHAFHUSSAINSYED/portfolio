@@ -41,13 +41,14 @@ class Project(BaseModel):
     key_outcomes: List[str] = []
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
+# Update model (all optional fields for partial update)
 class UpdateProjectModel(BaseModel):
-    name: str
-    summary: str
-    details: str
-    image_url: str
-    technologies: List[str] = []
-    key_outcomes: List[str] = []
+    name: Optional[str] = None
+    summary: Optional[str] = None
+    details: Optional[str] = None
+    image_url: Optional[str] = None
+    technologies: Optional[List[str]] = None
+    key_outcomes: Optional[List[str]] = None
 
 # --- API ENDPOINTS (CRUD) ---
 
@@ -96,33 +97,57 @@ async def get_project_by_id(project_id: str):
         return project
     raise HTTPException(status_code=404, detail="Project not found")
 
-# UPDATE an existing project (PUT)
+# UPDATE an existing project (PUT with image + text support)
 @api_router.put("/projects/{project_id}", response_model=Project)
-async def update_project(project_id: str, updated_project_data: UpdateProjectModel):
-    update_data = updated_project_data.model_dump(exclude_unset=True)
-    
-    result = await db.projects.update_one(
-        {"id": project_id},
-        {"$set": update_data}
-    )
-    
+async def update_project(
+    project_id: str,
+    name: Optional[str] = Form(None),
+    summary: Optional[str] = Form(None),
+    details: Optional[str] = Form(None),
+    technologies: Optional[str] = Form(None),
+    key_outcomes: Optional[str] = Form(None),
+    file: Optional[UploadFile] = File(None)
+):
+    update_data = {}
+
+    if name:
+        update_data["name"] = name
+    if summary:
+        update_data["summary"] = summary
+    if details:
+        update_data["details"] = details
+    if technologies:
+        update_data["technologies"] = [t.strip() for t in technologies.split(",") if t.strip()]
+    if key_outcomes:
+        update_data["key_outcomes"] = [o.strip() for o in key_outcomes.split(",") if o.strip()]
+    if file:
+        file_extension = Path(file.filename).suffix
+        unique_filename = f"{uuid.uuid4()}{file_extension}"
+        file_path = images_dir / unique_filename
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        base_url = os.environ.get('BACKEND_URL', 'http://127.0.0.1:8000')
+        image_url = f"{base_url}/static/images/{unique_filename}"
+        update_data["image_url"] = image_url
+
+    result = await db.projects.update_one({"id": project_id}, {"$set": update_data})
+
     if result.modified_count == 1:
-        updated_project = await db.projects.find_one({"id": project_id})
-        return updated_project
-        
-    existing_project = await db.projects.find_one({"id": project_id})
-    if existing_project:
-        return existing_project # Return existing if no changes were made
+        return await db.projects.find_one({"id": project_id})
+
+    existing = await db.projects.find_one({"id": project_id})
+    if existing:
+        return existing
 
     raise HTTPException(status_code=404, detail="Project not found")
 
-# ? NEW: DELETE a project by ID
+# DELETE a project by ID
 @api_router.delete("/projects/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_project(project_id: str):
     result = await db.projects.delete_one({"id": project_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Project not found")
-    # A 204 response should not have a body, so we return nothing.
     return
 
 # --- APP CONFIGURATION ---
@@ -132,7 +157,6 @@ app.include_router(api_router)
 def welcome():
     return {"message": "Server is running. API is at /api"}
 
-# (CORS Middleware and other app settings remain the same)
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
