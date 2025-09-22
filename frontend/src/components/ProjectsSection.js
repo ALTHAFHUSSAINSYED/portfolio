@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
-import { Folder, ArrowRight, Zap, Code, Server, Loader2, AlertTriangle } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Folder, CheckCircle, ArrowRight, Zap, Code, Server, Loader2, AlertTriangle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://althaf-portfolio.onrender.com';
 
@@ -12,7 +12,6 @@ const ProjectsSection = () => {
   const [error, setError] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
-  const location = useLocation();
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -31,12 +30,15 @@ const ProjectsSection = () => {
   }, []);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        setIsVisible(true);
-        observer.unobserve(entry.target);
-      }
-    }, { threshold: 0.1 });
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.1 }
+    );
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
   }, []);
@@ -45,8 +47,9 @@ const ProjectsSection = () => {
     if (title.toLowerCase().includes('pipeline')) return Code;
     if (title.toLowerCase().includes('infrastructure')) return Server;
     if (title.toLowerCase().includes('storage')) return Folder;
-    return Zap;
+    return CheckCircle; // default icon
   };
+
   const getProjectColor = (index) => ['text-cyan-soft', 'text-pink-soft', 'text-green-soft'][index % 3];
   const getProjectBg = (index) => ['bg-cyan-400/10', 'bg-pink-500/10', 'bg-green-400/10'][index % 3];
   const getProjectBorder = (index) => ['border-cyan-400/30', 'border-pink-500/30', 'border-green-400/30'][index % 3];
@@ -80,6 +83,7 @@ const ProjectsSection = () => {
         <div className="bg-orb bg-orb-2"></div>
         <div className="bg-orb bg-orb-3"></div>
       </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
           <h2 className={`text-3xl md:text-4xl font-bold mb-4 shine-text ${isVisible ? 'fade-in-up' : ''}`}>
@@ -89,15 +93,22 @@ const ProjectsSection = () => {
             Real-world implementations showcasing expertise in cloud infrastructure and DevOps automation
           </p>
         </div>
+
         <div className="grid lg:grid-cols-3 gap-8">
           {projects.map((project, index) => (
             <Card
               key={project.id}
-              className={`flex flex-col p-6 bg-black/80 border border-gray-700/30 hover:border-cyan-400/40 transition-all duration-500 backdrop-blur-sm neon-card hover-lift group ${isVisible ? `scale-in stagger-${index + 2}` : ''}`}
+              className={`flex flex-col p-6 bg-black/80 border border-gray-700/30 hover:border-cyan-400/40 transition-all duration-500 backdrop-blur-sm neon-card hover-lift group ${
+                isVisible ? `scale-in stagger-${index + 2}` : ''
+              }`}
             >
               <div className="flex-grow">
                 <div className="flex items-start space-x-4 mb-6">
-                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${getProjectBg(index)} border ${getProjectBorder(index)} group-hover:scale-110 transition-all`}>
+                  <div
+                    className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${getProjectBg(
+                      index
+                    )} border ${getProjectBorder(index)} group-hover:scale-110 transition-all`}
+                  >
                     {React.createElement(getProjectIcon(project.name), { className: `w-6 h-6 ${getProjectColor(index)}` })}
                   </div>
                   <div>
@@ -105,12 +116,13 @@ const ProjectsSection = () => {
                   </div>
                 </div>
 
+                {/* Multi-line summary with bullets */}
                 <div className="text-gray-300 mb-6 leading-relaxed glow-text whitespace-pre-wrap">
                   {project.summary.split('\n').map((line, idx) => (
-                    <div key={idx} className="flex items-start space-x-2">
-                      <Zap className="w-4 h-4 mt-1 text-green-soft" />
-                      <span>{line}</span>
-                    </div>
+                    <p key={idx} className="flex items-start">
+                      <CheckCircle className="w-4 h-4 mt-1 mr-2 text-green-400 flex-shrink-0" />
+                      {line}
+                    </p>
                   ))}
                 </div>
 
@@ -118,26 +130,22 @@ const ProjectsSection = () => {
                   <h4 className="text-sm font-semibold text-white mb-3">Technologies Used</h4>
                   <div className="flex flex-wrap gap-2">
                     {project.technologies.map((tech) => (
-                      <Badge key={tech} variant="outline" className="border-cyan-400/30 text-cyan-soft bg-black/50">{tech}</Badge>
+                      <Badge key={tech} variant="outline" className="border-cyan-400/30 text-cyan-soft bg-black/50">
+                        {tech}
+                      </Badge>
                     ))}
                   </div>
                 </div>
 
                 <div className="space-y-3 mb-6">
                   <h4 className="text-sm font-semibold text-white">Key Outcomes</h4>
-                  {project.key_outcomes.split('\n').map((line, idx) => (
-                    <div key={idx} className="flex items-start space-x-2">
-                      <CheckCircle className="w-4 h-4 text-green-soft mt-1" />
-                      <span className="text-gray-300 text-sm">{line}</span>
-                    </div>
-                  ))}
+                  <div className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">{project.key_outcomes}</div>
                 </div>
               </div>
 
               <div className="pt-4 mt-auto border-t border-gray-700/30">
                 <Link
                   to={`/projects/${project.id}`}
-                  state={{ scrollY: window.scrollY }} // remember scroll position
                   className="flex items-center text-cyan-soft text-sm font-medium group-hover:text-cyan-400 transition-all"
                 >
                   <span>View Implementation Details</span>
