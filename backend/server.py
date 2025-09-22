@@ -3,9 +3,9 @@ from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
-# ✨ NEW: Imports for sending email
+# ? MODIFIED: Imported specific helpers for professional email formatting
 from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
+from sendgrid.helpers.mail import Mail, From, To, Subject, Content, ReplyTo
 import os
 import logging
 from pathlib import Path
@@ -57,7 +57,7 @@ class UpdateProjectModel(BaseModel):
 
 # --- API ENDPOINTS ---
 
-# ✨ MODIFIED: Added full logic to the contact endpoint
+# ? MODIFIED: This is the only section that has been changed
 @api_router.post("/contact")
 async def send_contact_email(form: ContactForm):
     to_email = os.environ.get('TO_EMAIL')
@@ -71,16 +71,19 @@ async def send_contact_email(form: ContactForm):
     <h3>New Contact Form Submission</h3>
     <p><strong>Name:</strong> {form.name}</p>
     <p><strong>Email:</strong> {form.email}</p>
-    <p><strong>Subject:</strong> {form.subject}</p>
+    <p><strong>Subject:</strong> {form.subject or 'No Subject Provided'}</p>
     <p><strong>Message:</strong></p>
     <p>{form.message}</p>
     """
+    
+    # This creates the email object with the correct display name and reply-to address
     message = Mail(
-        from_email=to_email,
-        to_emails=to_email,
-        subject=final_subject,
-        html_content=html_content)
-    message.reply_to = form.email
+        from_email=From(to_email, form.name),
+        to_emails=To(to_email),
+        subject=Subject(final_subject),
+        html_content=Content("text/html", html_content)
+    )
+    message.reply_to = ReplyTo(form.email, form.name)
 
     try:
         sg = SendGridAPIClient(sendgrid_api_key)
@@ -94,7 +97,7 @@ async def send_contact_email(form: ContactForm):
         logging.error(f"Error sending email: {e}")
         raise HTTPException(status_code=500, detail="An error occurred while sending the email.")
 
-# (... All your other project endpoints remain the same ...)
+# (... All your other project endpoints remain the same and are untouched ...)
 @api_router.post("/projects", response_model=Project, status_code=status.HTTP_201_CREATED)
 async def create_project(name: str = Form(...), summary: str = Form(...), details: str = Form(...), technologies: str = Form(...), key_outcomes: str = Form(...), file: UploadFile = File(...)):
     tech_list = [tech.strip() for tech in technologies.split(',') if tech.strip()]
@@ -168,3 +171,4 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
