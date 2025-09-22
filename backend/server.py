@@ -30,23 +30,23 @@ class Project(BaseModel):
     name: str
     summary: str
     details: str
-    image_url: str  # now contains Base64 string
+    image_url: str  # Base64 string
     technologies: List[str] = []
-    key_outcomes: List[str] = []
+    key_outcomes: str  # <-- plain multi-line text
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
-# Update model (all optional fields for partial update)
+# Update model
 class UpdateProjectModel(BaseModel):
     name: Optional[str] = None
     summary: Optional[str] = None
     details: Optional[str] = None
     image_url: Optional[str] = None
     technologies: Optional[List[str]] = None
-    key_outcomes: Optional[List[str]] = None
+    key_outcomes: Optional[str] = None
 
-# --- API ENDPOINTS (CRUD) ---
+# --- API ENDPOINTS ---
 
-# CREATE a new project (POST)
+# CREATE a new project
 @api_router.post("/projects", response_model=Project, status_code=status.HTTP_201_CREATED)
 async def create_project(
     name: str = Form(...),
@@ -57,7 +57,6 @@ async def create_project(
     file: UploadFile = File(...)
 ):
     tech_list = [tech.strip() for tech in technologies.split(',') if tech.strip()]
-    outcomes_list = [outcome.strip() for outcome in key_outcomes.split(',') if outcome.strip()]
 
     # Read file and encode as Base64
     file_bytes = await file.read()
@@ -68,7 +67,7 @@ async def create_project(
         "summary": summary,
         "details": details,
         "technologies": tech_list,
-        "key_outcomes": outcomes_list,
+        "key_outcomes": key_outcomes,  # save as string
         "image_url": encoded_image
     }
 
@@ -76,14 +75,14 @@ async def create_project(
     await db.projects.insert_one(project.model_dump())
     return project
 
-# READ all projects (GET)
+# READ all projects
 @api_router.get("/projects", response_model=List[Project])
 async def get_projects():
     projects_cursor = db.projects.find()
     projects = await projects_cursor.to_list(length=100)
     return projects
 
-# READ a single project by ID (GET)
+# READ single project
 @api_router.get("/projects/{project_id}", response_model=Project)
 async def get_project_by_id(project_id: str):
     project = await db.projects.find_one({"id": project_id})
@@ -91,7 +90,7 @@ async def get_project_by_id(project_id: str):
         return project
     raise HTTPException(status_code=404, detail="Project not found")
 
-# UPDATE an existing project (PUT with image + text support)
+# UPDATE project
 @api_router.put("/projects/{project_id}", response_model=Project)
 async def update_project(
     project_id: str,
@@ -113,7 +112,7 @@ async def update_project(
     if technologies:
         update_data["technologies"] = [t.strip() for t in technologies.split(",") if t.strip()]
     if key_outcomes:
-        update_data["key_outcomes"] = [o.strip() for o in key_outcomes.split(",") if o.strip()]
+        update_data["key_outcomes"] = key_outcomes  # plain text
     if file:
         file_bytes = await file.read()
         encoded_image = f"data:{file.content_type};base64,{base64.b64encode(file_bytes).decode()}"
@@ -130,7 +129,7 @@ async def update_project(
 
     raise HTTPException(status_code=404, detail="Project not found")
 
-# DELETE a project by ID
+# DELETE project
 @api_router.delete("/projects/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_project(project_id: str):
     result = await db.projects.delete_one({"id": project_id})
