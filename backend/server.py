@@ -28,18 +28,18 @@ api_router = APIRouter(prefix="/api")
 class Project(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
-    summary: List[str] = []         # store as list for multi-line
-    details: List[str] = []         # store as list for multi-line
-    image_url: str                  # Base64 string
+    summary: str              # <-- plain multi-line text
+    details: str              # <-- plain multi-line text
+    image_url: str            # Base64 string
     technologies: List[str] = []
-    key_outcomes: str               # plain multi-line text
+    key_outcomes: str         # plain multi-line text (old check-circle icon style)
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
 # Update model
 class UpdateProjectModel(BaseModel):
     name: Optional[str] = None
-    summary: Optional[List[str]] = None
-    details: Optional[List[str]] = None
+    summary: Optional[str] = None
+    details: Optional[str] = None
     image_url: Optional[str] = None
     technologies: Optional[List[str]] = None
     key_outcomes: Optional[str] = None
@@ -57,8 +57,6 @@ async def create_project(
     file: UploadFile = File(...)
 ):
     tech_list = [tech.strip() for tech in technologies.split(',') if tech.strip()]
-    summary_list = [line.strip() for line in summary.split('\n') if line.strip()]
-    details_list = [line.strip() for line in details.split('\n') if line.strip()]
 
     # Read file and encode as Base64
     file_bytes = await file.read()
@@ -66,10 +64,10 @@ async def create_project(
 
     project_data = {
         "name": name,
-        "summary": summary_list,
-        "details": details_list,
+        "summary": summary,          # plain text
+        "details": details,          # plain text
         "technologies": tech_list,
-        "key_outcomes": key_outcomes,
+        "key_outcomes": key_outcomes, # plain text
         "image_url": encoded_image
     }
 
@@ -108,9 +106,9 @@ async def update_project(
     if name:
         update_data["name"] = name
     if summary:
-        update_data["summary"] = [line.strip() for line in summary.split('\n') if line.strip()]
+        update_data["summary"] = summary
     if details:
-        update_data["details"] = [line.strip() for line in details.split('\n') if line.strip()]
+        update_data["details"] = details
     if technologies:
         update_data["technologies"] = [t.strip() for t in technologies.split(",") if t.strip()]
     if key_outcomes:
