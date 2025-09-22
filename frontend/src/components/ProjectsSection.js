@@ -1,4 +1,3 @@
-// src/components/ProjectsSection.js
 import React, { useEffect, useRef, useState } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
@@ -121,12 +120,9 @@ const ProjectsSection = () => {
 
                 <div className="space-y-3 mb-6">
                   <h4 className="text-sm font-semibold text-white">Key Outcomes</h4>
-                  {project.key_outcomes.map((outcome) => (
-                    <div key={outcome} className="flex items-start space-x-3">
-                      <CheckCircle className="w-4 h-4 text-green-soft mt-0.5 flex-shrink-0" />
-                      <p className="text-gray-300 text-sm leading-relaxed">{outcome}</p>
-                    </div>
-                  ))}
+                  <div className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
+                    {project.key_outcomes} {/* plain multi-line text */}
+                  </div>
                 </div>
               </div>
               
@@ -145,3 +141,4 @@ const ProjectsSection = () => {
 };
 
 export default ProjectsSection;
+
