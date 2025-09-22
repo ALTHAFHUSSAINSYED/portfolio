@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
-import { CheckCircle, ArrowLeft, Loader2, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertTriangle, Zap, Code } from 'lucide-react';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://althaf-portfolio.onrender.com';
 
@@ -11,6 +11,8 @@ const ProjectDetailsPage = () => {
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -26,90 +28,57 @@ const ProjectDetailsPage = () => {
       }
     };
     fetchProject();
+    window.scrollTo(0, 0);
   }, [projectId]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex justify-center items-center bg-black">
-        <Loader2 className="w-12 h-12 animate-spin text-cyan-soft" />
-        <p className="text-white ml-4">Loading Project...</p>
-      </div>
-    );
-  }
+  const handleGoBack = () => {
+    navigate('/', { state: { scrollPosition: location.state?.scrollPosition } });
+  };
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex justify-center items-center bg-black">
-        <AlertTriangle className="w-12 h-12 text-red-400" />
-        <p className="text-red-400 ml-4">{error}</p>
-      </div>
-    );
-  }
+  if (loading) { /* ... loading JSX ... */ }
+  if (error) { /* ... error JSX ... */ }
 
   return (
     <div className="min-h-screen bg-black py-16 px-4 sm:px-6 lg:px-8">
-      <Link to="/projects" className="flex items-center text-cyan-soft mb-8 hover:text-cyan-400 transition-all">
-        <ArrowLeft className="w-5 h-5 mr-2" />
-        Back to Projects
-      </Link>
+      <button onClick={handleGoBack} className="flex items-center text-cyan-soft mb-8 hover:text-cyan-400 transition-all group">
+        <ArrowLeft className="w-5 h-5 mr-2 transition-transform group-hover:-translate-x-1" />
+        Back to All Projects
+      </button>
 
-      <Card className="max-w-4xl mx-auto p-8 bg-black/80 border border-gray-700/30 backdrop-blur-sm">
-        <h1 className="text-3xl font-bold text-white mb-4">{project.name}</h1>
+      {project && (
+        <Card className="max-w-4xl mx-auto p-8 bg-black/80 border border-gray-700/30 backdrop-blur-sm">
+          <h1 className="text-3xl font-bold text-white mb-6">{project.name}</h1>
+          {project.image_url && (<div className="mb-8"><img src={project.image_url} alt={project.name} className="w-full h-auto rounded-md border border-gray-700/30"/></div>)}
 
-        {project.image_url && (
-          <div className="mb-6">
-            <img
-              src={project.image_url}
-              alt={project.name}
-              className="w-full h-auto rounded-md border border-gray-700/30"
-            />
-          </div>
-        )}
+          <section className="mb-8">
+            <h2 className="text-xl font-semibold text-white mb-4">Summary</h2>
+            <div className="flex items-start space-x-3 text-gray-300 leading-relaxed">
+              <Zap className="w-5 h-5 text-blue-400 mt-1 flex-shrink-0" />
+              <div className="whitespace-pre-wrap">{project.summary}</div>
+            </div>
+          </section>
 
-        {/* Summary */}
-        <section className="mb-6">
-          <h2 className="text-xl font-semibold text-white mb-2">Summary</h2>
-          <div className="text-gray-300 leading-relaxed space-y-2">
-            {project.summary.split('\n').map((line, idx) => (
-              <p key={idx} className="flex items-start">
-                <CheckCircle className="w-4 h-4 mt-1 mr-2 text-green-400 flex-shrink-0" />
-                {line}
-              </p>
-            ))}
-          </div>
-        </section>
+          <section className="mb-8">
+            <h2 className="text-xl font-semibold text-white mb-4">Implementation Details</h2>
+            <div className="flex items-start space-x-3 text-gray-300 leading-relaxed">
+              <Code className="w-5 h-5 text-purple-400 mt-1 flex-shrink-0" />
+              <div className="whitespace-pre-wrap">{project.details}</div>
+            </div>
+          </section>
 
-        {/* Details */}
-        <section className="mb-6">
-          <h2 className="text-xl font-semibold text-white mb-2">Details</h2>
-          <div className="text-gray-300 leading-relaxed space-y-2">
-            {project.details.split('\n').map((line, idx) => (
-              <p key={idx} className="flex items-start">
-                <CheckCircle className="w-4 h-4 mt-1 mr-2 text-green-400 flex-shrink-0" />
-                {line}
-              </p>
-            ))}
-          </div>
-        </section>
+          <section className="mb-8">
+            <h2 className="text-xl font-semibold text-white mb-4">Technologies Used</h2>
+            <div className="flex flex-wrap gap-2">
+              {project.technologies.map((tech) => (<Badge key={tech} variant="outline" className="border-cyan-400/30 text-cyan-soft bg-black/50">{tech}</Badge>))}
+            </div>
+          </section>
 
-        {/* Technologies */}
-        <section className="mb-6">
-          <h2 className="text-xl font-semibold text-white mb-2">Technologies Used</h2>
-          <div className="flex flex-wrap gap-2">
-            {project.technologies.map((tech) => (
-              <Badge key={tech} variant="outline" className="border-cyan-400/30 text-cyan-soft bg-black/50">
-                {tech}
-              </Badge>
-            ))}
-          </div>
-        </section>
-
-        {/* Key Outcomes */}
-        <section className="mb-6">
-          <h2 className="text-xl font-semibold text-white mb-2">Key Outcomes</h2>
-          <div className="text-gray-300 whitespace-pre-wrap">{project.key_outcomes}</div>
-        </section>
-      </Card>
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-4">Key Outcomes</h2>
+            <div className="text-gray-300 whitespace-pre-wrap">{project.key_outcomes}</div>
+          </section>
+        </Card>
+      )}
     </div>
   );
 };
