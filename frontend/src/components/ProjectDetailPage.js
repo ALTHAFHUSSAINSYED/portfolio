@@ -38,11 +38,21 @@ const ProjectDetailPage = () => {
   }, [projectId]);
 
   if (loading) {
-    return <div className="bg-black text-white min-h-screen flex justify-center items-center"><Loader2 className="w-12 h-12 animate-spin text-cyan-soft"/></div>;
+    return (
+      <div className="bg-black text-white min-h-screen flex justify-center items-center">
+        <Loader2 className="w-12 h-12 animate-spin text-cyan-soft"/>
+      </div>
+    );
   }
 
   if (error || !project) {
-    return <div className="bg-black text-white min-h-screen flex flex-col justify-center items-center"><AlertTriangle className="w-12 h-12 text-red-400"/><p className="mt-4">Could not load project details.</p><Link to="/" className="mt-4 text-cyan-soft">Back to Portfolio</Link></div>;
+    return (
+      <div className="bg-black text-white min-h-screen flex flex-col justify-center items-center">
+        <AlertTriangle className="w-12 h-12 text-red-400"/>
+        <p className="mt-4">Could not load project details.</p>
+        <Link to="/" className="mt-4 text-cyan-soft">Back to Portfolio</Link>
+      </div>
+    );
   }
 
   const IconComponent = getProjectIcon(project.name);
@@ -85,13 +95,8 @@ const ProjectDetailPage = () => {
             </div>
             <div>
               <h2 className="text-lg font-semibold text-white mb-4">Key Outcomes</h2>
-              <div className="space-y-3">
-                {project.key_outcomes.map((outcome) => (
-                  <div key={outcome} className="flex items-start space-x-3">
-                    <CheckCircle className="w-4 h-4 text-green-soft mt-0.5 flex-shrink-0" />
-                    <p className="text-gray-300 text-sm leading-relaxed">{outcome}</p>
-                  </div>
-                ))}
+              <div className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
+                {project.key_outcomes}
               </div>
             </div>
           </div>
