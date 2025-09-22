@@ -6,6 +6,13 @@ import { ArrowLeft, Loader2, AlertTriangle, Zap, Code, CheckCircle } from 'lucid
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://althaf-portfolio.onrender.com';
 
+// Helper function to check if a line is a code example
+const isCodeLine = (line) => {
+  const trimmedLine = line.trim();
+  const codeKeywords = ['FROM', 'WORKDIR', 'COPY', 'RUN', 'ENV', 'CMD', 'pipeline', 'agent', 'stages', 'stage', 'steps', 'sh', 'docker', 'kubectl', 'helm'];
+  return trimmedLine.startsWith('#') || codeKeywords.some(keyword => trimmedLine.toLowerCase().startsWith(keyword)) || line.startsWith('    ') || trimmedLine.startsWith('-');
+};
+
 const ProjectDetailsPage = () => {
   const { projectId } = useParams();
   const [project, setProject] = useState(null);
@@ -35,9 +42,9 @@ const ProjectDetailsPage = () => {
   if (loading) { /* ... loading JSX ... */ }
   if (error) { /* ... error JSX ... */ }
 
-  // ✨ NEW: Safety check to prevent crash before project data is loaded
+  // ✨ CRASH FIX: This safety check prevents the page from crashing before data is loaded
   if (!project) {
-    return null; // or return loading state
+    return null; // Render nothing until the project data is available
   }
 
   return (
@@ -54,7 +61,6 @@ const ProjectDetailsPage = () => {
         <section className="mb-8">
           <h2 className="text-xl font-semibold text-white mb-4">Summary</h2>
           <div className="space-y-2">
-            {/* ✨ MODIFIED: Safely split and map summary with Zap icons */}
             {(project.summary || '').split('\n').filter(line => line.trim() !== '').map((line, idx) => (
               <div key={idx} className="flex items-start space-x-3 text-gray-300">
                 <Zap className="w-4 h-4 text-blue-400 mt-1 flex-shrink-0" />
@@ -67,14 +73,13 @@ const ProjectDetailsPage = () => {
         <section className="mb-8">
           <h2 className="text-xl font-semibold text-white mb-4">Technologies Used</h2>
           <div className="flex flex-wrap gap-2">
-            {project.technologies.map((tech) => (<Badge key={tech} variant="outline" className="border-cyan-400/30 text-cyan-soft bg-black/50">{tech}</Badge>))}
+            {(project.technologies || []).map((tech) => (<Badge key={tech} variant="outline" className="border-cyan-400/30 text-cyan-soft bg-black/50">{tech}</Badge>))}
           </div>
         </section>
 
         <section className="mb-8">
           <h2 className="text-xl font-semibold text-white mb-4">Key Outcomes</h2>
           <div className="space-y-2">
-            {/* ✨ MODIFIED: Safely split and map outcomes with CheckCircle icons */}
             {(project.key_outcomes || '').split('\n').filter(line => line.trim() !== '').map((line, idx) => (
               <div key={idx} className="flex items-start space-x-3 text-gray-300">
                 <CheckCircle className="w-4 h-4 text-green-soft mt-1 flex-shrink-0" />
@@ -83,14 +88,17 @@ const ProjectDetailsPage = () => {
             ))}
           </div>
         </section>
-
+        
         <section>
           <h2 className="text-xl font-semibold text-white mb-4">Implementation Details</h2>
           <div className="space-y-2">
-            {/* ✨ MODIFIED: Safely split and map details with Code icons */}
             {(project.details || '').split('\n').map((line, idx) => (
               <div key={idx} className="flex items-start space-x-3 text-gray-300">
-                <Code className="w-4 h-4 text-purple-400 mt-1 flex-shrink-0" />
+                {isCodeLine(line) || line.trim() === '' ? (
+                  <div className="w-4 flex-shrink-0"></div>
+                ) : (
+                  <Code className="w-4 h-4 text-purple-400 mt-1 flex-shrink-0" />
+                )}
                 <p className="whitespace-pre-wrap font-mono text-sm">{line}</p>
               </div>
             ))}
