@@ -1,8 +1,6 @@
-// src/components/Portfolio.js (Updated)
-
-import React from 'react';
-// We still use mock data for now for the parts we haven't connected to the API yet.
-import { portfolioData } from '../data/mock'; 
+import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import { portfolioData } from '../data/mock';
 import Header from './Header';
 import HeroSection from './HeroSection';
 import AboutSection from './AboutSection';
@@ -15,22 +13,27 @@ import Footer from './Footer';
 import { Toaster } from './ui/toaster';
 
 const Portfolio = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    // This effect runs when the page loads or when you navigate back to it
+    if (location.state && location.state.scrollPosition) {
+      // Use a small timeout to ensure the content has rendered before scrolling
+      setTimeout(() => {
+        window.scrollTo({ top: location.state.scrollPosition, behavior: 'auto' });
+      }, 0);
+    }
+  }, [location.state]);
+
   return (
     <div className="min-h-screen bg-black neon-theme">
       <Header personalInfo={portfolioData.personalInfo} />
       <HeroSection personalInfo={portfolioData.personalInfo} />
-      <AboutSection 
-        personalInfo={portfolioData.personalInfo} 
-        achievements={portfolioData.achievements}
-      />
+      <AboutSection personalInfo={portfolioData.personalInfo} achievements={portfolioData.achievements}/>
       <SkillsSection skills={portfolioData.skills} />
       <ExperienceSection experience={portfolioData.experience} />
       <CertificationsSection certifications={portfolioData.certifications} />
-      
-      {/* ✨ MODIFIED: We are no longer passing the 'projects' prop.
-          This component will now fetch its own data from your live database. */}
       <ProjectsSection />
-      
       <ContactSection personalInfo={portfolioData.personalInfo} />
       <Footer personalInfo={portfolioData.personalInfo} />
       <Toaster />
