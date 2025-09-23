@@ -33,6 +33,5 @@ const ThemeProvider = ({ children }) => {
   );
 };
 
-// ✨ THIS IS THE MISSING LINE: Make the ThemeProvider the default export
+// Make the ThemeProvider the default export so it can be imported easily
 export default ThemeProvider;
-
