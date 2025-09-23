@@ -20,24 +20,31 @@ const HeroSection = ({ personalInfo }) => {
     const handleScroll = () => {
       const shouldPlay = window.scrollY < 200; // Play only when near the top
       
-      if (leftVideoRef.current) {
-        if (shouldPlay && leftVideoRef.current.paused) {
-          leftVideoRef.current.play();
-        } else if (!shouldPlay && !leftVideoRef.current.paused) {
-          leftVideoRef.current.pause();
+      const playVideo = (videoElement) => {
+        if (videoElement && videoElement.paused) {
+          videoElement.play().catch(error => console.log("Video autoplay prevented by browser"));
         }
-      }
-      if (rightVideoRef.current) {
-        if (shouldPlay && rightVideoRef.current.paused) {
-          rightVideoRef.current.play();
-        } else if (!shouldPlay && !rightVideoRef.current.paused) {
-          rightVideoRef.current.pause();
+      };
+      
+      const pauseVideo = (videoElement) => {
+         if (videoElement && !videoElement.paused) {
+          videoElement.pause();
         }
+      };
+
+      if (shouldPlay) {
+        playVideo(leftVideoRef.current);
+        playVideo(rightVideoRef.current);
+      } else {
+        pauseVideo(leftVideoRef.current);
+        pauseVideo(rightVideoRef.current);
       }
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
-    // Attempt to play videos on initial load
-    setTimeout(() => handleScroll(), 200);
+    
+    // Attempt to play videos on initial load after a short delay
+    setTimeout(() => handleScroll(), 500);
+
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
