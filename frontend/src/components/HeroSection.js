@@ -10,10 +10,8 @@ const HeroSection = ({ personalInfo }) => {
   const [isLeftMuted, setIsLeftMuted] = useState(true);
   const [isRightMuted, setIsRightMuted] = useState(true);
 
-  // Memoized function to handle video play/pause on scroll
   const handleVideoScroll = useCallback(() => {
     const videoElements = [leftVideoRef.current, rightVideoRef.current];
-    // A lower threshold ensures the video is more fully in view before playing
     const threshold = 150; 
 
     videoElements.forEach((videoRef) => {
@@ -40,8 +38,7 @@ const HeroSection = ({ personalInfo }) => {
   }, []);
 
   useEffect(() => {
-    // Initial check on mount
-    setTimeout(handleVideoScroll, 100); // Small delay for videos to load
+    setTimeout(handleVideoScroll, 100);
     window.addEventListener('scroll', handleVideoScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleVideoScroll);
   }, [handleVideoScroll]);
@@ -86,7 +83,7 @@ const HeroSection = ({ personalInfo }) => {
         <div className="bg-orb bg-orb-3"></div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="relative flex flex-col items-center">
         
           <div className="relative z-20 mb-8">
@@ -96,25 +93,28 @@ const HeroSection = ({ personalInfo }) => {
               className="w-48 h-48 md:w-56 md:h-56 rounded-full object-cover border-4 border-cyan-400/30 shadow-lg shadow-cyan-500/20"
             />
           </div>
-
-          {/* --- SVG PATHS UPDATED --- */}
-          {/* viewBox, and path 'd' attributes were adjusted to widen the curves and reconnect to the top of the videos. */}
-          <svg className="absolute top-0 left-0 w-full h-full z-10" viewBox="0 0 1400 900" preserveAspectRatio="xMidYMid meet">
-            {/* Left path: Wider curve, connects to top of left video */}
-            <path d="M 700 112 C 300 280, 250 420, 210 520" stroke="url(#left-grad)" strokeWidth="4" fill="none" className="snake-path" />
-            {/* Right path: Wider curve, connects to top of right video */}
-            <path d="M 700 112 C 1100 280, 1150 420, 1190 520" stroke="url(#right-grad)" strokeWidth="4" fill="none" className="snake-path" />
+          
+          {/* viewBox and paths slightly tweaked for better alignment with wide videos */}
+          <svg className="absolute top-0 left-0 w-full h-full z-10" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet">
+            <path d="M 800 128 C 400 300, 300 420, 250 520" stroke="url(#left-grad)" strokeWidth="4" fill="none" className="snake-path" />
+            <path d="M 800 128 C 1200 300, 1300 420, 1350 520" stroke="url(#right-grad)" strokeWidth="4" fill="none" className="snake-path" />
             <defs>
-              <linearGradient id="left-grad"><stop offset="0%" stopColor="#22d3ee" /><stop offset="100%" stopColor="#ec4899" /></linearGradient>
-              <linearGradient id="right-grad"><stop offset="0%" stopColor="#22d3ee" /><stop offset="100%" stopColor="#34d399" /></linearGradient>
+              {/* --- SYNTAX FIX --- */}
+              {/* Added self-closing slashes '/>' to each <stop> tag */}
+              <linearGradient id="left-grad">
+                <stop offset="0%" stopColor="#22d3ee" />
+                <stop offset="100%" stopColor="#ec4899" />
+              </linearGradient>
+              <linearGradient id="right-grad">
+                <stop offset="0%" stopColor="#22d3ee" />
+                <stop offset="100%" stopColor="#34d399" />
+              </linearGradient>
             </defs>
           </svg>
 
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-16 items-start w-full mt-8">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-4 items-start w-full mt-8">
             
-            {/* --- VIDEO SIZE UPDATED --- */}
-            {/* Left Video: Width increased to lg:w-96 */}
-            <div className="z-20 order-2 lg:order-1 lg:col-span-1 flex justify-center lg:justify-start pt-12">
+            <div className="z-20 order-2 lg:order-1 lg:col-span-1 flex justify-center lg:justify-start pt-4">
               <div className="relative group">
                 <video 
                   ref={leftVideoRef} 
@@ -123,7 +123,7 @@ const HeroSection = ({ personalInfo }) => {
                   playsInline 
                   loop 
                   muted={isLeftMuted}
-                  className="w-72 h-72 lg:w-96 lg:h-80 rounded-xl object-cover border-2 border-pink-500/30 shadow-lg"
+                  className="w-72 h-72 lg:w-[500px] lg:h-80 rounded-xl object-cover border-2 border-pink-500/30 shadow-lg"
                 />
                 <button onClick={() => toggleMute(leftVideoRef, setIsLeftMuted)} className="absolute bottom-2 right-2 p-2 bg-black/50 rounded-full text-white hover:bg-black/75 transition-colors">
                   {isLeftMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
@@ -131,7 +131,6 @@ const HeroSection = ({ personalInfo }) => {
               </div>
             </div>
 
-            {/* Main Text Content - Unchanged as requested */}
             <div className="relative text-center z-20 order-1 lg:order-2 lg:col-span-3">
               <Badge variant="outline" className="mb-6"><span className="animate-pulse mr-2 text-green-soft">•</span>Available for New Opportunities</Badge>
               <h1 className="text-5xl md:text-7xl font-bold mb-6">{personalInfo.name}</h1>
@@ -146,9 +145,7 @@ const HeroSection = ({ personalInfo }) => {
               </div>
             </div>
 
-            {/* --- VIDEO SIZE UPDATED --- */}
-            {/* Right Video: Width increased to lg:w-96 */}
-            <div className="z-20 order-3 lg:order-3 lg:col-span-1 flex justify-center lg:justify-end pt-12">
+            <div className="z-20 order-3 lg:order-3 lg:col-span-1 flex justify-center lg:justify-end pt-4">
               <div className="relative group">
                 <video 
                   ref={rightVideoRef} 
@@ -157,7 +154,7 @@ const HeroSection = ({ personalInfo }) => {
                   playsInline 
                   loop 
                   muted={isRightMuted}
-                  className="w-72 h-72 lg:w-96 lg:h-80 rounded-xl object-cover border-2 border-green-500/30 shadow-lg"
+                  className="w-72 h-72 lg:w-[500px] lg:h-80 rounded-xl object-cover border-2 border-green-500/30 shadow-lg"
                 />
                 <button onClick={() => toggleMute(rightVideoRef, setIsRightMuted)} className="absolute bottom-2 right-2 p-2 bg-black/50 rounded-full text-white hover:bg-black/75 transition-colors">
                   {isRightMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
