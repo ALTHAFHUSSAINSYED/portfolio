@@ -1,16 +1,53 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Download, Mail, Volume2, VolumeX } from 'lucide-react';
 
 const HeroSection = ({ personalInfo }) => {
-  // Refs for video elements
   const leftVideoRef = useRef(null);
   const rightVideoRef = useRef(null);
   
-  // State for mute toggles
   const [isLeftMuted, setIsLeftMuted] = useState(true);
   const [isRightMuted, setIsRightMuted] = useState(true);
+
+  // Use useCallback for scroll handling to memoize the function
+  const handleVideoScroll = useCallback(() => {
+    const videoElements = [leftVideoRef.current, rightVideoRef.current];
+    const threshold = 300; // Pixels from top of the viewport to consider video "in view"
+
+    videoElements.forEach((videoRef) => {
+      if (videoRef) {
+        const rect = videoRef.getBoundingClientRect();
+        const isInView = (
+          rect.top <= (window.innerHeight - threshold) &&
+          rect.bottom >= threshold
+        );
+
+        if (isInView) {
+          if (videoRef.paused) {
+            videoRef.play().catch(error => {
+              console.log("Video autoplay prevented by browser:", error);
+              // Fallback to ensuring it's muted if autoplay failed with sound
+              if (!videoRef.muted) videoRef.muted = true;
+            });
+          }
+        } else {
+          if (!videoRef.paused) {
+            videoRef.pause();
+          }
+        }
+      }
+    });
+  }, []); // Empty dependency array means this function is created once
+
+  useEffect(() => {
+    // Initial check when component mounts
+    handleVideoScroll();
+
+    window.addEventListener('scroll', handleVideoScroll, { passive: true });
+    // Cleanup event listener
+    return () => window.removeEventListener('scroll', handleVideoScroll);
+  }, [handleVideoScroll]); // Re-run effect if handleVideoScroll changes (though with useCallback it won't)
 
   const downloadResume = () => {
     const link = document.createElement('a');
@@ -25,7 +62,6 @@ const HeroSection = ({ personalInfo }) => {
     document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Generic toggle mute function for either video
   const toggleMute = (videoRef, setMutedState) => {
     if (videoRef.current) {
       const isMuted = !videoRef.current.muted;
@@ -36,7 +72,6 @@ const HeroSection = ({ personalInfo }) => {
 
   return (
     <section id="hero" className="bg-black py-20 lg:py-32 relative overflow-hidden">
-      {/* Inline style for SVG animation */}
       <style>{`
         @keyframes snake-draw {
           to { stroke-dashoffset: 0; }
@@ -67,18 +102,23 @@ const HeroSection = ({ personalInfo }) => {
             />
           </div>
 
-          {/* SVG Container for Pipelines */}
-          <svg className="absolute top-0 left-0 w-full h-full z-10" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid meet">
-            <path d="M 600 112 C 400 250, 300 350, 200 500" stroke="url(#left-grad)" strokeWidth="4" fill="none" className="snake-path" />
-            <path d="M 600 112 C 800 250, 900 350, 1000 500" stroke="url(#right-grad)" strokeWidth="4" fill="none" className="snake-path" />
+          {/* SVG Container for Pipelines - Adjusted viewBox and path for better positioning */}
+          {/* viewBox dimensions adjusted to ensure lines appear correctly and have enough space */}
+          {/* Path d-attributes adjusted to connect visually to videos without overlapping text */}
+          <svg className="absolute top-0 left-0 w-full h-full z-10" viewBox="0 0 1400 900" preserveAspectRatio="xMidYMid meet">
+            {/* Left path: starts below central image, curves to left video's top-center */}
+            <path d="M 700 112 C 450 300, 300 450, 150 580" stroke="url(#left-grad)" strokeWidth="4" fill="none" className="snake-path" />
+            {/* Right path: starts below central image, curves to right video's top-center */}
+            <path d="M 700 112 C 950 300, 1100 450, 1250 580" stroke="url(#right-grad)" strokeWidth="4" fill="none" className="snake-path" />
             <defs>
               <linearGradient id="left-grad"><stop offset="0%" stopColor="#22d3ee" /><stop offset="100%" stopColor="#ec4899" /></linearGradient>
               <linearGradient id="right-grad"><stop offset="0%" stopColor="#22d3ee" /><stop offset="100%" stopColor="#34d399" /></linearGradient>
             </defs>
           </svg>
 
-          {/* REFACTORED Grid container for Text and Videos */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-16 items-center w-full mt-8">
+          {/* Grid container for Text and Videos */}
+          {/* Increased gap for wider video separation, adjusted video sizes */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-24 items-center w-full mt-8">
             
             {/* Left Video */}
             <div className="z-20 order-2 lg:order-1 lg:col-span-1 flex justify-center lg:justify-start">
@@ -89,8 +129,8 @@ const HeroSection = ({ personalInfo }) => {
                   autoPlay 
                   playsInline 
                   loop 
-                  muted 
-                  className="w-56 h-56 lg:w-72 lg:h-72 rounded-xl object-cover border-2 border-pink-500/30 shadow-lg"
+                  muted={isLeftMuted} // Control mute state via state
+                  className="w-64 h-64 lg:w-80 lg:h-80 rounded-xl object-cover border-2 border-pink-500/30 shadow-lg"
                 />
                 <button onClick={() => toggleMute(leftVideoRef, setIsLeftMuted)} className="absolute bottom-2 right-2 p-2 bg-black/50 rounded-full text-white hover:bg-black/75 transition-colors">
                   {isLeftMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
@@ -99,6 +139,7 @@ const HeroSection = ({ personalInfo }) => {
             </div>
 
             {/* Main Text Content */}
+            {/* Kept text sizing as requested */}
             <div className="relative text-center z-20 order-1 lg:order-2 lg:col-span-3">
               <Badge variant="outline" className="mb-6"><span className="animate-pulse mr-2 text-green-soft">•</span>Available for New Opportunities</Badge>
               <h1 className="text-5xl md:text-7xl font-bold mb-6">{personalInfo.name}</h1>
@@ -122,8 +163,8 @@ const HeroSection = ({ personalInfo }) => {
                   autoPlay 
                   playsInline 
                   loop 
-                  muted 
-                  className="w-56 h-56 lg:w-72 lg:h-72 rounded-xl object-cover border-2 border-green-500/30 shadow-lg"
+                  muted={isRightMuted} // Control mute state via state
+                  className="w-64 h-64 lg:w-80 lg:h-80 rounded-xl object-cover border-2 border-green-500/30 shadow-lg"
                 />
                 <button onClick={() => toggleMute(rightVideoRef, setIsRightMuted)} className="absolute bottom-2 right-2 p-2 bg-black/50 rounded-full text-white hover:bg-black/75 transition-colors">
                   {isRightMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
