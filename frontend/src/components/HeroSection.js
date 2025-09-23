@@ -3,12 +3,32 @@ import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Download, Mail, Volume2, VolumeX } from 'lucide-react';
 
+// A simple custom hook for media queries
+const useMediaQuery = (query) => {
+  const [matches, setMatches] = useState(false);
+  useEffect(() => {
+    const media = window.matchMedia(query);
+    if (media.matches !== matches) {
+      setMatches(media.matches);
+    }
+    const listener = () => setMatches(media.matches);
+    media.addEventListener('change', listener);
+    return () => media.removeEventListener('change', listener);
+  }, [matches, query]);
+  return matches;
+};
+
 const HeroSection = ({ personalInfo }) => {
   const leftVideoRef = useRef(null);
   const rightVideoRef = useRef(null);
-  
+  const profilePicRef = useRef(null); // Ref for the profile picture
+
   const [isLeftMuted, setIsLeftMuted] = useState(true);
   const [isRightMuted, setIsRightMuted] = useState(true);
+  const [profilePicLoaded, setProfilePicLoaded] = useState(false); // State to track profile pic load
+
+  // Use useMediaQuery hook to check for large screens (Tailwind's 'lg' breakpoint)
+  const isLargeScreen = useMediaQuery('(min-width: 1024px)'); 
 
   const handleVideoScroll = useCallback(() => {
     const videoElements = [leftVideoRef.current, rightVideoRef.current];
@@ -43,6 +63,20 @@ const HeroSection = ({ personalInfo }) => {
     return () => window.removeEventListener('scroll', handleVideoScroll);
   }, [handleVideoScroll]);
 
+  // Effect to handle profile picture loading
+  useEffect(() => {
+    const img = profilePicRef.current;
+    if (img && img.complete) {
+      setProfilePicLoaded(true);
+    } else if (img) {
+      img.addEventListener('load', () => setProfilePicLoaded(true));
+      img.addEventListener('error', () => {
+        console.error("Failed to load profile picture.");
+        setProfilePicLoaded(true); // Still set to true to allow animation to proceed
+      });
+    }
+  }, []);
+
   const downloadResume = () => {
     const link = document.createElement('a');
     link.href = '/ALTHAF_HUSSAIN_SYED_DevOps_Resume.pdf';
@@ -70,7 +104,8 @@ const HeroSection = ({ personalInfo }) => {
         @keyframes snake-draw {
           to { stroke-dashoffset: 0; }
         }
-        .snake-path {
+        /* Conditionally apply animation based on profilePicLoaded state */
+        .snake-path-animated {
           stroke-dasharray: 1200;
           stroke-dashoffset: 1200;
           animation: snake-draw 8s linear infinite;
@@ -88,29 +123,32 @@ const HeroSection = ({ personalInfo }) => {
         
           <div className="relative z-20 mb-8">
             <img  
+              ref={profilePicRef} // Attach ref to profile picture
               src="/profile-pic.jpg"
               alt={personalInfo.name}
               className="w-48 h-48 md:w-56 md:h-56 rounded-full object-cover border-4 border-cyan-400/30 shadow-lg shadow-cyan-500/20"
             />
           </div>
           
-          {/* viewBox and paths slightly tweaked for better alignment with wide videos */}
-          <svg className="absolute top-0 left-0 w-full h-full z-10" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet">
-            <path d="M 800 128 C 400 300, 300 420, 250 520" stroke="url(#left-grad)" strokeWidth="4" fill="none" className="snake-path" />
-            <path d="M 800 128 C 1200 300, 1300 420, 1350 520" stroke="url(#right-grad)" strokeWidth="4" fill="none" className="snake-path" />
-            <defs>
-              {/* --- SYNTAX FIX --- */}
-              {/* Added self-closing slashes '/>' to each <stop> tag */}
-              <linearGradient id="left-grad">
-                <stop offset="0%" stopColor="#22d3ee" />
-                <stop offset="100%" stopColor="#ec4899" />
-              </linearGradient>
-              <linearGradient id="right-grad">
-                <stop offset="0%" stopColor="#22d3ee" />
-                <stop offset="100%" stopColor="#34d399" />
-              </linearGradient>
-            </defs>
-          </svg>
+          {/* Conditionally render SVG only on large screens */}
+          {isLargeScreen && (
+            <svg className="absolute top-0 left-0 w-full h-full z-10" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet">
+              {/* --- SVG PATHS UPDATED for top-center connection --- */}
+              {/* Added conditional class for animation */}
+              <path d="M 800 128 C 300 300, 200 400, 250 510" stroke="url(#left-grad)" strokeWidth="4" fill="none" className={profilePicLoaded ? "snake-path-animated" : ""} />
+              <path d="M 800 128 C 1300 300, 1400 400, 1350 510" stroke="url(#right-grad)" strokeWidth="4" fill="none" className={profilePicLoaded ? "snake-path-animated" : ""} />
+              <defs>
+                <linearGradient id="left-grad">
+                  <stop offset="0%" stopColor="#22d3ee" />
+                  <stop offset="100%" stopColor="#ec4899" />
+                </linearGradient>
+                <linearGradient id="right-grad">
+                  <stop offset="0%" stopColor="#22d3ee" />
+                  <stop offset="100%" stopColor="#34d399" />
+                </linearGradient>
+              </defs>
+            </svg>
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-4 items-start w-full mt-8">
             
