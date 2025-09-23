@@ -10,7 +10,6 @@ const HeroSection = ({ personalInfo }) => {
   const [isLeftMuted, setIsLeftMuted] = useState(true);
   const [isRightMuted, setIsRightMuted] = useState(true);
 
-  // Memoized function to handle video play/pause on scroll
   const handleVideoScroll = useCallback(() => {
     const videoElements = [leftVideoRef.current, rightVideoRef.current];
     const threshold = 150; 
@@ -84,8 +83,6 @@ const HeroSection = ({ personalInfo }) => {
         <div className="bg-orb bg-orb-3"></div>
       </div>
 
-      {/* --- CONTAINER WIDTH INCREASED --- */}
-      {/* Changed from max-w-7xl to max-w-screen-2xl to give more space for videos */}
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="relative flex flex-col items-center">
         
@@ -96,23 +93,27 @@ const HeroSection = ({ personalInfo }) => {
               className="w-48 h-48 md:w-56 md:h-56 rounded-full object-cover border-4 border-cyan-400/30 shadow-lg shadow-cyan-500/20"
             />
           </div>
-
-          {/* --- SVG PATHS UPDATED --- */}
-          {/* Path 'd' attributes were adjusted to connect to the very top of the wider videos. */}
-          <svg className="absolute top-0 left-0 w-full h-full z-10" viewBox="0 0 1400 900" preserveAspectRatio="xMidYMid meet">
-            <path d="M 700 112 C 300 280, 200 400, 150 490" stroke="url(#left-grad)" strokeWidth="4" fill="none" className="snake-path" />
-            <path d="M 700 112 C 1100 280, 1200 400, 1250 490" stroke="url(#right-grad)" strokeWidth="4" fill="none" className="snake-path" />
+          
+          {/* viewBox and paths slightly tweaked for better alignment with wide videos */}
+          <svg className="absolute top-0 left-0 w-full h-full z-10" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet">
+            <path d="M 800 128 C 400 300, 300 420, 250 520" stroke="url(#left-grad)" strokeWidth="4" fill="none" className="snake-path" />
+            <path d="M 800 128 C 1200 300, 1300 420, 1350 520" stroke="url(#right-grad)" strokeWidth="4" fill="none" className="snake-path" />
             <defs>
-              <linearGradient id="left-grad"><stop offset="0%" stopColor="#22d3ee" /><stop offset="100%" stopColor="#ec4899" /></linearGradient>
-              <linearGradient id="right-grad"><stop offset="0%" stopColor="#22d3ee" /><stop offset="100%" stopColor="#34d399" /></linearGradient>
-            defs>
+              {/* --- SYNTAX FIX --- */}
+              {/* Added self-closing slashes '/>' to each <stop> tag */}
+              <linearGradient id="left-grad">
+                <stop offset="0%" stopColor="#22d3ee" />
+                <stop offset="100%" stopColor="#ec4899" />
+              </linearGradient>
+              <linearGradient id="right-grad">
+                <stop offset="0%" stopColor="#22d3ee" />
+                <stop offset="100%" stopColor="#34d399" />
+              </linearGradient>
+            </defs>
           </svg>
 
-          {/* Reduced gap to allow videos to expand without compressing text */}
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-4 items-start w-full mt-8">
             
-            {/* --- VIDEO SIZE UPDATED --- */}
-            {/* Left Video: Width increased significantly to lg:w-[500px] */}
             <div className="z-20 order-2 lg:order-1 lg:col-span-1 flex justify-center lg:justify-start pt-4">
               <div className="relative group">
                 <video 
@@ -130,7 +131,6 @@ const HeroSection = ({ personalInfo }) => {
               </div>
             </div>
 
-            {/* Main Text Content - Unchanged */}
             <div className="relative text-center z-20 order-1 lg:order-2 lg:col-span-3">
               <Badge variant="outline" className="mb-6"><span className="animate-pulse mr-2 text-green-soft">•</span>Available for New Opportunities</Badge>
               <h1 className="text-5xl md:text-7xl font-bold mb-6">{personalInfo.name}</h1>
@@ -145,8 +145,6 @@ const HeroSection = ({ personalInfo }) => {
               </div>
             </div>
 
-            {/* --- VIDEO SIZE UPDATED --- */}
-            {/* Right Video: Width increased significantly to lg:w-[500px] */}
             <div className="z-20 order-3 lg:order-3 lg:col-span-1 flex justify-center lg:justify-end pt-4">
               <div className="relative group">
                 <video 
