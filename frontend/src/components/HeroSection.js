@@ -152,7 +152,7 @@ const HeroSection = ({ personalInfo }) => {
                  <div className="relative group">
                     <video ref={rightVideoRef} src={`${process.env.PUBLIC_URL}/videos/intro_right.mp4`} playsInline loop muted className="w-48 h-48 rounded-xl object-cover border-2 border-green-500/30 shadow-lg"></video>
                     <button onClick={() => toggleMute(rightVideoRef, setIsRightMuted)} className="absolute bottom-2 right-2 p-2 bg-black/50 rounded-full text-white">
-                        {isRightMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+                        {isRightMuted ? <Volume2 size={20} /> : <VolumeX size={20} />}
                     </button>
                 </div>
             </div>
