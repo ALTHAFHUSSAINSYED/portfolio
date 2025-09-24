@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Folder, CheckCircle, ArrowRight, Zap, Code, Server, Loader2, AlertTriangle } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom'; // ✨ MODIFIED: useLocation is no longer needed
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://althaf-portfolio.onrender.com';
 
@@ -12,24 +12,7 @@ const ProjectsSection = () => {
   const [error, setError] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
-  const location = useLocation();
-
-  // ✨ NEW: Definitive scroll restoration logic
-  // This effect runs when you navigate BACK to this page.
-  // It reads the saved position from session storage and scrolls the window there.
-  useEffect(() => {
-    const savedPosition = sessionStorage.getItem('scrollPosition');
-    if (savedPosition) {
-      window.scrollTo(0, parseInt(savedPosition, 10));
-      sessionStorage.removeItem('scrollPosition'); // Clean up the stored value
-    }
-  }, [location]); // Reruns when the page location changes
-
-  // This function is now attached to each project link.
-  // It saves the current scroll position right before you navigate away.
-  const handleProjectClick = () => {
-    sessionStorage.setItem('scrollPosition', window.scrollY);
-  };
+  // ✨ REMOVED: All manual scroll restoration logic is now handled by the global hook.
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -128,8 +111,8 @@ const ProjectsSection = () => {
                   </div>
                 </div>
                 <div className="pt-4 mt-auto border-t border-border/30">
-                  {/* ✨ MODIFIED: Added onClick to manually save scroll position */}
-                  <Link to={`/projects/${project.id}`} onClick={handleProjectClick} className="flex items-center text-cyan-soft text-sm font-medium">
+                  {/* ✨ REMOVED: The onClick handler is gone; our global hook handles this now. */}
+                  <Link to={`/projects/${project.id}`} className="flex items-center text-cyan-soft text-sm font-medium">
                     <span>View Implementation Details</span><ArrowRight className="w-4 h-4 ml-2" />
                   </Link>
                 </div>
