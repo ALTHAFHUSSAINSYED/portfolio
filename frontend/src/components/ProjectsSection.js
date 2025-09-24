@@ -84,7 +84,8 @@ const ProjectsSection = () => {
           {projects.map((project, index) => {
             const IconComponent = getProjectIcon(project.name);
             return (
-              <Card key={project.id} className={`flex flex-col p-6 neon-card group ${isVisible ? `scale-in stagger-${index + 2}` : ''}`}>
+              // ✨ MODIFIED: Added a min-height to prevent layout shift while content loads.
+              <Card key={project.id} className={`flex flex-col p-6 neon-card group min-h-[520px] ${isVisible ? `scale-in stagger-${index + 2}` : ''}`}>
                 <div className="flex-grow">
                   <div className="flex items-start space-x-4 mb-6">
                     <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 bg-cyan-400/10 border border-cyan-400/30"><IconComponent className="w-6 h-6 text-cyan-soft" /></div>
@@ -115,7 +116,6 @@ const ProjectsSection = () => {
                   </div>
                 </div>
                 <div className="pt-4 mt-auto border-t border-border/30">
-                  {/* ✨ --- MODIFIED: The conflicting "state" prop has been removed from this Link --- ✨ */}
                   <Link to={`/projects/${project.id}`} className="flex items-center text-cyan-soft text-sm font-medium">
                     <span>View Implementation Details</span><ArrowRight className="w-4 h-4 ml-2" />
                   </Link>
