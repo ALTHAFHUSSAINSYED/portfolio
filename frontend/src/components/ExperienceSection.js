@@ -21,11 +21,16 @@ const ExperienceSection = ({ experience }) => {
       observer.observe(sectionRef.current);
     }
 
-    return () => observer.disconnect();
+    return () => {
+        if (sectionRef.current) {
+            observer.unobserve(sectionRef.current);
+        }
+    };
   }, []);
 
   return (
-    <section id="experience" className="py-20 bg-black relative overflow-hidden" ref={sectionRef}>
+    // ✨ MODIFIED: Changed bg-black to bg-background
+    <section id="experience" className="py-20 bg-background relative overflow-hidden" ref={sectionRef}>
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="bg-orb bg-orb-1"></div>
@@ -40,16 +45,18 @@ const ExperienceSection = ({ experience }) => {
           <h2 className={`text-3xl md:text-4xl font-bold mb-4 shine-text ${isVisible ? 'fade-in-up' : ''}`}>
             Professional Experience
           </h2>
-          <p className={`text-lg text-gray-300 max-w-3xl mx-auto glow-text ${isVisible ? 'fade-in-up stagger-1' : ''}`}>
+          {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
+          <p className={`text-lg text-muted-foreground max-w-3xl mx-auto glow-text ${isVisible ? 'fade-in-up stagger-1' : ''}`}>
             Building robust, scalable infrastructure solutions at leading technology companies
           </p>
         </div>
 
         <div className="space-y-8">
           {experience.map((job, index) => (
+            // ✨ MODIFIED: Removed redundant/conflicting color classes to let neon-card work
             <Card 
               key={index} 
-              className={`p-8 bg-black/80 border border-gray-700/30 hover:border-cyan-400/40 transition-all duration-500 backdrop-blur-sm neon-card hover-lift hover-shine ${
+              className={`p-8 transition-all duration-500 backdrop-blur-sm neon-card hover-lift hover-shine ${
                 isVisible ? `fade-in-up stagger-${index + 2}` : ''
               }`}
             >
@@ -70,11 +77,13 @@ const ExperienceSection = ({ experience }) => {
                 </div>
                 
                 <div className="flex flex-col md:items-end space-y-2">
-                  <div className="flex items-center text-gray-300 glow-text">
+                  {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
+                  <div className="flex items-center text-muted-foreground glow-text">
                     <Calendar className="w-4 h-4 mr-2 text-cyan-soft" />
                     <span className="font-medium">{job.duration}</span>
                   </div>
-                  <div className="flex items-center text-gray-300 glow-text">
+                   {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
+                  <div className="flex items-center text-muted-foreground glow-text">
                     <MapPin className="w-4 h-4 mr-2 text-pink-soft" />
                     <span>{job.location}</span>
                   </div>
@@ -95,7 +104,8 @@ const ExperienceSection = ({ experience }) => {
                       }`}
                     >
                       <CheckCircle className="w-5 h-5 text-green-soft mt-0.5 flex-shrink-0 pulse-shine" />
-                      <p className="text-gray-300 leading-relaxed glow-text">
+                      {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
+                      <p className="text-muted-foreground leading-relaxed glow-text">
                         {achievement}
                       </p>
                     </div>
@@ -113,7 +123,8 @@ const ExperienceSection = ({ experience }) => {
                     <Badge 
                       key={techIndex} 
                       variant="outline" 
-                      className={`border-cyan-400/30 text-cyan-soft bg-black/50 px-3 py-1 hover:bg-cyan-400/10 transition-all duration-300 hover-scale hover-glow sparkle-text ${
+                      // ✨ MODIFIED: Changed bg-black/50 to bg-background/50
+                      className={`border-cyan-400/30 text-cyan-soft bg-background/50 px-3 py-1 hover:bg-cyan-400/10 transition-all duration-300 hover-scale hover-glow sparkle-text ${
                         isVisible ? `scale-in stagger-${techIndex + 1}` : ''
                       }`}
                     >
@@ -127,7 +138,8 @@ const ExperienceSection = ({ experience }) => {
         </div>
 
         {/* Experience Summary */}
-        <div className={`mt-16 bg-black/60 rounded-xl p-8 border border-gray-700/30 backdrop-blur-sm neon-card hover-lift ${
+        {/* ✨ MODIFIED: Removed redundant/conflicting color classes to let neon-card work */}
+        <div className={`mt-16 rounded-xl p-8 backdrop-blur-sm neon-card hover-lift ${
           isVisible ? 'slide-in-bottom stagger-6' : ''
         }`}>
           <div className="text-center">
@@ -137,18 +149,22 @@ const ExperienceSection = ({ experience }) => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
               <div className="text-center hover-glow transition-all duration-300 p-4 rounded-lg">
                 <div className="text-3xl font-bold text-cyan-soft mb-2 counter glow-text-strong">40%</div>
-                <div className="text-gray-300 font-medium glow-text">Reduction in Manual Effort</div>
+                {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
+                <div className="text-muted-foreground font-medium glow-text">Reduction in Manual Effort</div>
               </div>
               <div className="text-center hover-glow transition-all duration-300 p-4 rounded-lg">
                 <div className="text-3xl font-bold text-green-soft mb-2 counter glow-text-strong">30%</div>
-                <div className="text-gray-300 font-medium glow-text">Faster Incident Response</div>
+                {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
+                <div className="text-muted-foreground font-medium glow-text">Faster Incident Response</div>
               </div>
               <div className="text-center hover-glow transition-all duration-300 p-4 rounded-lg">
                 <div className="text-3xl font-bold text-pink-soft mb-2 counter glow-text-strong">99.9%</div>
-                <div className="text-gray-300 font-medium glow-text">Infrastructure Uptime</div>
+                {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
+                <div className="text-muted-foreground font-medium glow-text">Infrastructure Uptime</div>
               </div>
             </div>
-            <p className="text-gray-300 mt-6 max-w-2xl mx-auto glow-text">
+            {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
+            <p className="text-muted-foreground mt-6 max-w-2xl mx-auto glow-text">
               Consistently delivering measurable business impact through innovative DevOps practices 
               and cloud infrastructure solutions.
             </p>
