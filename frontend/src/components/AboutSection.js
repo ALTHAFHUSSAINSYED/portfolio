@@ -39,7 +39,8 @@ const AboutSection = ({ personalInfo, achievements }) => {
   }, []);
 
   return (
-    <section id="about" className="py-20 bg-gradient-to-b from-black to-gray-900 relative overflow-hidden" ref={sectionRef}>
+    // ✨ MODIFIED: Changed gradient to be theme-aware
+    <section id="about" className="py-20 bg-gradient-to-b from-background to-secondary relative overflow-hidden" ref={sectionRef}>
       {/* Animated background effects */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="bg-orb bg-orb-1"></div>
@@ -53,7 +54,8 @@ const AboutSection = ({ personalInfo, achievements }) => {
           <h2 className={`text-3xl md:text-4xl font-bold mb-4 text-gradient-animate ${isVisible ? 'fade-in-up' : ''}`}>
             About Me
           </h2>
-          <p className={`text-lg text-gray-300 max-w-3xl mx-auto ${isVisible ? 'fade-in-up stagger-1' : ''}`}>
+          {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
+          <p className={`text-lg text-muted-foreground max-w-3xl mx-auto ${isVisible ? 'fade-in-up stagger-1' : ''}`}>
             Passionate DevOps engineer specializing in cloud infrastructure and automation solutions
           </p>
         </div>
@@ -64,12 +66,14 @@ const AboutSection = ({ personalInfo, achievements }) => {
             <h3 className="text-2xl font-semibold mb-4 attractive-text">
               <span className="text-cyan-soft">Professional</span> <span className="text-pink-soft">Summary</span>
             </h3>
-            <p className="text-gray-300 leading-relaxed text-lg">
+            {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
+            <p className="text-muted-foreground leading-relaxed text-lg">
               {personalInfo.summary}
             </p>
             
             <div className="space-y-4">
-              <h4 className="text-lg font-semibold text-white">Key Expertise Areas:</h4>
+              {/* ✨ MODIFIED: Changed text-white to text-foreground */}
+              <h4 className="text-lg font-semibold text-foreground">Key Expertise Areas:</h4>
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { name: 'Cloud Architecture', color: 'cyan' },
@@ -82,7 +86,8 @@ const AboutSection = ({ personalInfo, achievements }) => {
                   <Badge 
                     key={skill.name}
                     variant="outline" 
-                    className={`border-${skill.color}-400/30 text-${skill.color}-soft bg-black/50 px-3 py-2 justify-start hover:bg-${skill.color}-400/5 transition-all duration-300 backdrop-blur-sm hover-scale ${
+                    // ✨ MODIFIED: Changed bg-black/50 to bg-background/50
+                    className={`border-${skill.color}-400/30 text-${skill.color}-soft bg-background/50 px-3 py-2 justify-start hover:bg-${skill.color}-400/5 transition-all duration-300 backdrop-blur-sm hover-scale ${
                       isVisible ? `fade-in-up stagger-${index + 3}` : ''
                     }`}
                   >
@@ -103,21 +108,25 @@ const AboutSection = ({ personalInfo, achievements }) => {
                 const IconComponent = iconMap[achievement.title] || Award;
                 const iconColor = iconColors[achievement.title] || 'text-cyan-soft';
                 return (
+                  // ✨ MODIFIED: Removed redundant/conflicting color classes to let neon-card work
                   <Card 
                     key={index} 
-                    className={`p-6 bg-black/50 border border-gray-700/30 hover:border-cyan-400/20 transition-all duration-300 group backdrop-blur-sm neon-card hover-lift ${
+                    className={`p-6 transition-all duration-300 group backdrop-blur-sm neon-card hover-lift ${
                       isVisible ? `fade-in-up stagger-${index + 4}` : ''
                     }`}
                   >
                     <div className="flex items-start space-x-4">
-                      <div className={`flex-shrink-0 w-12 h-12 bg-gray-900/50 rounded-lg flex items-center justify-center group-hover:bg-gray-800/50 transition-all duration-300 border border-gray-700/20 hover-rotate`}>
+                       {/* ✨ MODIFIED: Changed background and border to be theme-aware */}
+                      <div className={`flex-shrink-0 w-12 h-12 bg-secondary/50 rounded-lg flex items-center justify-center group-hover:bg-secondary/80 transition-all duration-300 border border-border/20 hover-rotate`}>
                         <IconComponent className={`w-6 h-6 ${iconColor}`} />
                       </div>
                       <div>
-                        <h4 className="font-semibold text-white mb-2 group-hover:text-cyan-soft transition-colors duration-300">
+                        {/* ✨ MODIFIED: Changed text-white to text-foreground */}
+                        <h4 className="font-semibold text-foreground mb-2 group-hover:text-cyan-soft transition-colors duration-300">
                           {achievement.title}
                         </h4>
-                        <p className="text-gray-300 leading-relaxed">
+                         {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
+                        <p className="text-muted-foreground leading-relaxed">
                           {achievement.description}
                         </p>
                       </div>
@@ -130,13 +139,16 @@ const AboutSection = ({ personalInfo, achievements }) => {
         </div>
 
         {/* Personal Touch */}
-        <div className={`mt-16 text-center bg-black/30 rounded-xl p-8 border border-gray-700/20 backdrop-blur-sm neon-card hover-lift transition-all duration-300 ${
+        {/* ✨ MODIFIED: Removed redundant/conflicting color classes to let neon-card work */}
+        <div className={`mt-16 text-center rounded-xl p-8 backdrop-blur-sm neon-card hover-lift transition-all duration-300 ${
           isVisible ? 'slide-in-bottom stagger-6' : ''
         }`}>
-          <h3 className="text-xl font-semibold text-white mb-4">
+          {/* ✨ MODIFIED: Changed text-white to text-foreground */}
+          <h3 className="text-xl font-semibold text-foreground mb-4">
             <span className="text-green-soft">Why I Love</span> <span className="text-blue-soft">DevOps</span>
           </h3>
-          <p className="text-gray-300 max-w-3xl mx-auto text-lg leading-relaxed">
+          {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
+          <p className="text-muted-foreground max-w-3xl mx-auto text-lg leading-relaxed">
             I'm passionate about bridging the gap between development and operations, creating robust, 
             scalable systems that enable teams to deliver value faster and more reliably. Every 
             automation script, every pipeline optimization, and every infrastructure improvement 
