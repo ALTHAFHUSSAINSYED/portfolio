@@ -9,8 +9,8 @@ body {
         "Helvetica Neue", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: #000000;
-    color: #ffffff;
+    /* ✨ NEW: Smooth transition for theme changes */
+    transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 code {
@@ -18,34 +18,59 @@ code {
         monospace;
 }
 
+/* ✨ MODIFIED: CSS variables for both light and dark themes */
 @layer base {
   :root {
-        --background: 0 0% 0%;
-        --foreground: 0 0% 100%;
-        --card: 0 0% 0%;
-        --card-foreground: 0 0% 95%;
-        --popover: 0 0% 0%;
-        --popover-foreground: 0 0% 95%;
-        --primary: 180 100% 50%;
-        --primary-foreground: 0 0% 0%;
-        --secondary: 0 0% 5%;
-        --secondary-foreground: 0 0% 90%;
-        --muted: 0 0% 5%;
-        --muted-foreground: 0 0% 65%;
-        --accent: 300 100% 50%;
-        --accent-foreground: 0 0% 0%;
-        --destructive: 0 84.2% 60.2%;
-        --destructive-foreground: 0 0% 98%;
-        --border: 180 100% 50%;
-        --input: 0 0% 5%;
-        --ring: 180 100% 50%;
-        --chart-1: 180 100% 50%;
-        --chart-2: 300 100% 50%;
-        --chart-3: 120 100% 50%;
-        --chart-4: 60 100% 50%;
-        --chart-5: 240 100% 50%;
-        --radius: 0.5rem;
-    }
+      /* Light Theme Variables (Default) */
+      --background: 0 0% 100%;       /* White */
+      --foreground: 0 0% 3.9%;      /* Black */
+      --card: 0 0% 100%;
+      --card-foreground: 0 0% 3.9%;
+      --popover: 0 0% 100%;
+      --popover-foreground: 0 0% 3.9%;
+      --primary: 210 40% 98%;
+      --primary-foreground: 210 40% 9.8%;
+      --secondary: 0 0% 96.1%;
+      --secondary-foreground: 0 0% 9%;
+      --muted: 0 0% 96.1%;
+      --muted-foreground: 0 0% 45.1%;
+      --accent: 300 100% 50%;
+      --accent-foreground: 0 0% 98%;
+      --destructive: 0 84.2% 60.2%;
+      --destructive-foreground: 0 0% 98%;
+      --border: 0 0% 89.8%;
+      --input: 0 0% 89.8%;
+      --ring: 0 0% 3.9%;
+      --chart-1: 180 100% 50%;
+      --chart-2: 300 100% 50%;
+      --chart-3: 120 100% 50%;
+      --chart-4: 60 100% 50%;
+      --chart-5: 240 100% 50%;
+      --radius: 0.5rem;
+  }
+
+  .dark {
+      /* Dark Theme Variables */
+      --background: 0 0% 0%;         /* Black */
+      --foreground: 0 0% 100%;       /* White */
+      --card: 0 0% 0%;
+      --card-foreground: 0 0% 95%;
+      --popover: 0 0% 0%;
+      --popover-foreground: 0 0% 95%;
+      --primary: 180 100% 50%;
+      --primary-foreground: 0 0% 0%;
+      --secondary: 0 0% 5%;
+      --secondary-foreground: 0 0% 90%;
+      --muted: 0 0% 5%;
+      --muted-foreground: 0 0% 65%;
+      --accent: 300 100% 50%;
+      --accent-foreground: 0 0% 0%;
+      --destructive: 0 84.2% 60.2%;
+      --destructive-foreground: 0 0% 98%;
+      --border: 180 100% 50%;
+      --input: 0 0% 5%;
+      --ring: 180 100% 50%;
+  }
 }
 
 @layer base {
@@ -53,7 +78,8 @@ code {
     @apply border-border;
     }
   body {
-    @apply bg-black text-foreground;
+    /* ✨ MODIFIED: Uses CSS variables for background and text color */
+    @apply bg-background text-foreground;
     }
 }
 
@@ -289,15 +315,6 @@ code {
   }
 
   /* Enhanced Card Animations */
-  .neon-card {
-    backdrop-filter: blur(10px);
-    background: rgba(0, 0, 0, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-  }
-
   .neon-card::before {
     content: '';
     position: absolute;
@@ -311,16 +328,9 @@ code {
     opacity: 0;
   }
 
-  .neon-card:hover::before {
+  .dark .neon-card:hover::before {
     transform: rotate(45deg) translate(50%, 50%);
     opacity: 1;
-  }
-
-  .neon-card:hover {
-    border-color: rgba(34, 211, 238, 0.5);
-    box-shadow: 0 15px 35px rgba(34, 211, 238, 0.2), 0 0 30px rgba(34, 211, 238, 0.1);
-    transform: translateY(-8px) scale(1.02);
-    background: rgba(0, 0, 0, 0.9);
   }
 
   /* Progress Bar Animation */
@@ -365,13 +375,6 @@ code {
   }
 
   /* Navigation Animations */
-  .nav-link {
-    position: relative;
-    transition: all 0.4s ease;
-    color: #ffffff;
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
-  }
-
   .nav-link::after {
     content: '';
     position: absolute;
@@ -384,24 +387,17 @@ code {
     border-radius: 2px;
   }
 
-  .nav-link:hover::after {
+  .dark .nav-link:hover::after {
     width: 100%;
   }
 
-  .nav-link:hover {
+  .dark .nav-link:hover {
     color: #67e8f9;
     text-shadow: 0 0 15px rgba(103, 232, 249, 0.8);
     transform: translateY(-2px);
   }
 
   /* Form Animations */
-  .form-input {
-    transition: all 0.4s ease;
-    background: rgba(0, 0, 0, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #ffffff;
-  }
-
   .form-input:focus {
     transform: scale(1.02);
     box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2), 0 0 20px rgba(34, 211, 238, 0.3);
@@ -422,6 +418,66 @@ code {
     -webkit-text-fill-color: transparent;
     background-clip: text;
     animation: gradientShift 6s ease infinite;
+  }
+
+  /* ✨ NEW: Theme-specific styles for components */
+  .neon-card, .form-input, header {
+      transition: background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+  
+  .dark .neon-card {
+    backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .dark .neon-card:hover {
+    border-color: rgba(34, 211, 238, 0.5);
+    box-shadow: 0 15px 35px rgba(34, 211, 238, 0.2), 0 0 30px rgba(34, 211, 238, 0.1);
+    transform: translateY(-8px) scale(1.02);
+    background: rgba(0, 0, 0, 0.9);
+  }
+
+  .light .neon-card {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+  }
+
+  .light .neon-card:hover {
+    border-color: rgba(0, 119, 255, 0.5);
+    box-shadow: 0 10px 25px rgba(0, 119, 255, 0.15);
+    transform: translateY(-8px) scale(1.02);
+    background: white;
+  }
+  
+  .dark .form-input {
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+  }
+
+  .light .form-input {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    color: #000000;
+  }
+  
+  .dark .nav-link {
+    position: relative;
+    transition: all 0.4s ease;
+    color: #ffffff;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+  }
+
+  .light .nav-link {
+    position: relative;
+    transition: all 0.4s ease;
+    color: #1f2937; /* A dark gray for light mode text */
+  }
+
+  .light .nav-link:hover {
+    color: #0077ff; /* A standard blue for hover in light mode */
   }
 
   /* Keyframe Animations */
@@ -600,7 +656,8 @@ code {
   .text-green-soft { color: #86efac; }
   .text-yellow-soft { color: #fde047; }
   .text-blue-soft { color: #93c5fd; }
-  .text-purple-soft { color: #c4b5fd; }
+  /* ✨ MODIFIED: Changed color for better vibrancy */
+  .text-purple-soft { color: #c084fc; }
 
   /* Custom scrollbar */
   ::-webkit-scrollbar {
@@ -609,6 +666,10 @@ code {
 
   ::-webkit-scrollbar-track {
     background: #000;
+  }
+
+  .light ::-webkit-scrollbar-track {
+    background: #f1f1f1;
   }
 
   ::-webkit-scrollbar-thumb {
