@@ -2,19 +2,22 @@
 
 import React from "react";
 import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+// ✨ MODIFIED: Import ScrollRestoration
+import { BrowserRouter, Routes, Route, ScrollRestoration } from "react-router-dom";
 import Portfolio from "./components/Portfolio";
-import ProjectDetailPage from "./components/ProjectDetailPage"; // ✨ NEW: Import the new component
+import ProjectDetailPage from "./components/ProjectDetailPage";
 
 function App() {
   return (
     <div className="App">
       <BrowserRouter>
+        {/* ✨ NEW: Add the official ScrollRestoration component here */}
+        <ScrollRestoration />
         <Routes>
           {/* This is the route for your main portfolio homepage */}
           <Route path="/" element={<Portfolio />} />
 
-          {/* ✨ NEW: This is the new route for the project details page */}
+          {/* This is the new route for the project details page */}
           <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
         </Routes>
       </BrowserRouter>
