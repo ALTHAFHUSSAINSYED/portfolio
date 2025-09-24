@@ -69,66 +69,70 @@ const ProjectDetailsPage = () => {
   }
 
   return (
-    <div className="bg-background text-foreground flex flex-col items-center min-h-screen">
-      <div className="w-full max-w-4xl px-4 sm:px-6 lg:px-8 py-16">
-        <button onClick={handleGoBack} className="flex items-center text-cyan-soft mb-8 hover:text-cyan-400 group transition-colors">
-          <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
-          Back to All Projects
-        </button>
+    // ✨ MODIFIED: Removed min-h-screen and flexbox properties. App.js now controls the page layout.
+    <div className="w-full max-w-4xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
+      <button onClick={handleGoBack} className="flex items-center text-cyan-soft mb-8 hover:text-cyan-400 group transition-colors">
+        <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
+        Back to All Projects
+      </button>
 
-        <Card className="w-full p-8 neon-card">
-          <h1 className="text-3xl font-bold text-foreground mb-6">{project.name}</h1>
-          {project.image_url && (<div className="mb-8"><img src={project.image_url} alt={project.name} className="w-full h-auto rounded-md"/></div>)}
+      <Card className="w-full p-8 neon-card">
+        <h1 className="text-3xl font-bold text-foreground mb-6">{project.name}</h1>
+        
+        {/* ✨ MODIFIED: Added a container with an aspect ratio to prevent layout shift when the image loads. */}
+        {project.image_url && (
+          <div className="mb-8 w-full aspect-video bg-muted/50 rounded-lg overflow-hidden">
+            <img src={project.image_url} alt={project.name} className="w-full h-full object-cover"/>
+          </div>
+        )}
 
-          <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">Summary</h2>
-            <div className="space-y-2">
-              {(project.summary || '').split('\n').filter(line => line.trim() !== '').map((line, idx) => (
-                <div key={idx} className="flex items-start space-x-3 text-muted-foreground">
-                  <Zap className="w-4 h-4 text-blue-400 mt-1 flex-shrink-0" />
-                  <p>{line}</p>
-                </div>
-              ))}
-            </div>
-          </section>
+        <section className="mb-8">
+          <h2 className="text-xl font-semibold text-foreground mb-4">Summary</h2>
+          <div className="space-y-2">
+            {(project.summary || '').split('\n').filter(line => line.trim() !== '').map((line, idx) => (
+              <div key={idx} className="flex items-start space-x-3 text-muted-foreground">
+                <Zap className="w-4 h-4 text-blue-400 mt-1 flex-shrink-0" />
+                <p>{line}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
-          <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">Technologies Used</h2>
-            <div className="flex flex-wrap gap-2">
-              {(project.technologies || []).map((tech) => (<Badge key={tech} variant="outline" className="border-cyan-400/30 text-cyan-soft bg-background/50">{tech}</Badge>))}
-            </div>
-          </section>
+        <section className="mb-8">
+          <h2 className="text-xl font-semibold text-foreground mb-4">Technologies Used</h2>
+          <div className="flex flex-wrap gap-2">
+            {(project.technologies || []).map((tech) => (<Badge key={tech} variant="outline" className="border-cyan-400/30 text-cyan-soft bg-background/50">{tech}</Badge>))}
+          </div>
+        </section>
 
-          <section className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">Key Outcomes</h2>
-            <div className="space-y-2">
-              {(project.key_outcomes || '').split('\n').filter(line => line.trim() !== '').map((line, idx) => (
-                <div key={idx} className="flex items-start space-x-3 text-muted-foreground">
-                  <CheckCircle className="w-4 h-4 text-green-soft mt-1 flex-shrink-0" />
-                  <p>{line}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-          
-          <section>
-            <h2 className="text-xl font-semibold text-foreground mb-4">Implementation Details</h2>
-            <div className="space-y-2">
-              {(project.details || '').split('\n').map((line, idx) => (
-                <div key={idx} className="flex items-start space-x-3 text-muted-foreground">
-                  {isCodeLine(line) || line.trim() === '' ? (
-                    <div className="w-4 flex-shrink-0"></div>
-                  ) : (
-                    <Code className="w-4 h-4 text-purple-400 mt-1 flex-shrink-0" />
-                  )}
-                  {/* ✨ MODIFIED: Added "break-words" to prevent horizontal overflow on mobile */}
-                  <p className="whitespace-pre-wrap font-mono text-sm break-words">{line}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-        </Card>
-      </div>
+        <section className="mb-8">
+          <h2 className="text-xl font-semibold text-foreground mb-4">Key Outcomes</h2>
+          <div className="space-y-2">
+            {(project.key_outcomes || '').split('\n').filter(line => line.trim() !== '').map((line, idx) => (
+              <div key={idx} className="flex items-start space-x-3 text-muted-foreground">
+                <CheckCircle className="w-4 h-4 text-green-soft mt-1 flex-shrink-0" />
+                <p>{line}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+        
+        <section>
+          <h2 className="text-xl font-semibold text-foreground mb-4">Implementation Details</h2>
+          <div className="space-y-2">
+            {(project.details || '').split('\n').map((line, idx) => (
+              <div key={idx} className="flex items-start space-x-3 text-muted-foreground">
+                {isCodeLine(line) || line.trim() === '' ? (
+                  <div className="w-4 flex-shrink-0"></div>
+                ) : (
+                  <Code className="w-4 h-4 text-purple-400 mt-1 flex-shrink-0" />
+                )}
+                <p className="whitespace-pre-wrap font-mono text-sm break-words">{line}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </Card>
     </div>
   );
 };
