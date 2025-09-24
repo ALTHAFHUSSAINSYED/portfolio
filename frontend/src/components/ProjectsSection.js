@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Folder, CheckCircle, ArrowRight, Zap, Code, Server, Loader2, AlertTriangle } from 'lucide-react';
-// ✨ MODIFIED: useNavigate is needed for the new scroll restoration logic
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://althaf-portfolio.onrender.com';
@@ -13,15 +12,9 @@ const ProjectsSection = () => {
   const [error, setError] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
-  const location = useLocation();
-  const navigate = useNavigate(); // ✨ NEW: Hook for navigation state changes
-
-  // ✨ REMOVED: The old, unreliable useEffect for scroll restoration is gone from here.
-  // useEffect(() => {
-  //   if (location.state && location.state.scrollPosition) {
-  //     window.scrollTo(0, location.state.scrollPosition);
-  //   }
-  // }, [location.state]);
+  
+  // ✨ REMOVED: All manual scroll restoration logic (useEffect hooks related to location.state) is now gone.
+  // The official <ScrollRestoration /> component in App.js will handle this automatically.
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -35,17 +28,6 @@ const ProjectsSection = () => {
     };
     fetchProjects();
   }, []);
-
-  // ✨ NEW: A more reliable effect for scroll restoration that runs only after projects have loaded.
-  useEffect(() => {
-    if (projects.length > 0 && location.state?.scrollPosition) {
-      setTimeout(() => {
-        window.scrollTo({ top: location.state.scrollPosition, behavior: 'smooth' });
-        // We clear the state from the location to prevent re-scrolling if the user navigates elsewhere and comes back.
-        navigate(location.pathname, { replace: true, state: {} });
-      }, 100); // A small delay to ensure the browser has time to render the content.
-    }
-  }, [projects, location.state, navigate]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
