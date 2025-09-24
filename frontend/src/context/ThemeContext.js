@@ -1,30 +1,23 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 
 // Create the context
 const ThemeContext = createContext();
 
-// Create a custom hook to use the theme context easily (this is a named export)
-export const useTheme = () => useContext(ThemeContext);
+// Create a provider component
+export const ThemeProvider = ({ children }) => {
+  // Set the default theme to 'dark' as requested
+  const [theme, setTheme] = useState('dark');
 
-// Create the provider component
-const ThemeProvider = ({ children }) => {
-  // State to hold the current theme, defaulting to 'dark' or what's in localStorage
-  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
-
-  // Effect to apply the theme class to the HTML element
+  const toggleTheme = () => {
+    setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+  };
+  
+  // Effect to apply the theme class to the root element
   useEffect(() => {
     const root = window.document.documentElement;
-    // Remove the opposite theme class and add the current one
-    root.classList.remove(theme === 'dark' ? 'light' : 'dark');
-    root.classList.add(theme);
-    // Save the current theme to localStorage
-    localStorage.setItem('theme', theme);
+    root.classList.remove('light', 'dark'); // Remove previous theme
+    root.classList.add(theme); // Add current theme
   }, [theme]);
-
-  // Function to toggle the theme
-  const toggleTheme = () => {
-    setTheme(prevTheme => (prevTheme === 'dark' ? 'light' : 'dark'));
-  };
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
@@ -33,5 +26,7 @@ const ThemeProvider = ({ children }) => {
   );
 };
 
-// Make the ThemeProvider the default export so it can be imported easily
-export default ThemeProvider;
+// Custom hook to use the theme context easily
+export const useTheme = () => {
+  return useContext(ThemeContext);
+};
