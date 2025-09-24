@@ -23,7 +23,11 @@ const CertificationsSection = ({ certifications }) => {
       observer.observe(sectionRef.current);
     }
 
-    return () => observer.disconnect();
+    return () => {
+        if (sectionRef.current) {
+            observer.unobserve(sectionRef.current);
+        }
+    };
   }, []);
 
   const categories = {
@@ -53,7 +57,8 @@ const CertificationsSection = ({ certifications }) => {
   };
 
   return (
-    <section id="certifications" className="py-20 bg-black relative overflow-hidden" ref={sectionRef}>
+    // ✨ MODIFIED: Changed bg-black to bg-background
+    <section id="certifications" className="py-20 bg-background relative overflow-hidden" ref={sectionRef}>
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="bg-orb bg-orb-1"></div>
@@ -71,7 +76,8 @@ const CertificationsSection = ({ certifications }) => {
           <h2 className={`text-3xl md:text-4xl font-bold mb-4 shine-text ${isVisible ? 'fade-in-up' : ''}`}>
             Certifications & Credentials
           </h2>
-          <p className={`text-lg text-gray-300 max-w-3xl mx-auto glow-text ${isVisible ? 'fade-in-up stagger-1' : ''}`}>
+          {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
+          <p className={`text-lg text-muted-foreground max-w-3xl mx-auto glow-text ${isVisible ? 'fade-in-up stagger-1' : ''}`}>
             Industry-recognized certifications across multiple cloud platforms and technologies
           </p>
         </div>
@@ -84,10 +90,11 @@ const CertificationsSection = ({ certifications }) => {
               onClick={() => setSelectedCategory(key)}
               variant={selectedCategory === key ? 'default' : 'outline'}
               size="sm"
+              // ✨ MODIFIED: Unselected state is now theme-aware
               className={`transition-all duration-300 hover-shine sparkle-text ${
                 selectedCategory === key 
                   ? 'neon-button bg-gradient-to-r from-cyan-500/80 to-pink-500/80 text-black font-bold' 
-                  : 'border-gray-600/50 text-gray-300 bg-black/50 hover:bg-gray-800/50 hover-glow'
+                  : 'border-border/50 text-muted-foreground bg-background/50 hover:bg-secondary/50 hover-glow'
               } ${isVisible ? `scale-in stagger-${index + 3}` : ''}`}
             >
               <Filter className="w-4 h-4 mr-2" />
@@ -100,7 +107,8 @@ const CertificationsSection = ({ certifications }) => {
         <div className={`text-center mb-8 ${isVisible ? 'fade-in-up stagger-3' : ''}`}>
           <Badge 
             variant="outline" 
-            className="border-cyan-400/50 text-cyan-soft bg-black/50 px-6 py-3 text-lg sparkle-text hover-glow transition-all duration-300"
+            // ✨ MODIFIED: Changed bg-black/50 to bg-background/50
+            className="border-cyan-400/50 text-cyan-soft bg-background/50 px-6 py-3 text-lg sparkle-text hover-glow transition-all duration-300"
           >
             <Award className="w-5 h-5 mr-2 pulse-shine" />
             {filteredCertifications.length} {selectedCategory === 'all' ? 'Total' : categories[selectedCategory]?.name} Certifications
@@ -110,34 +118,40 @@ const CertificationsSection = ({ certifications }) => {
         {/* Certifications Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCertifications.map((cert, index) => (
+            // ✨ MODIFIED: Removed redundant/conflicting color classes to let neon-card work
             <Card 
               key={index} 
-              className={`p-6 bg-black/80 border border-gray-700/30 hover:border-cyan-400/40 transition-all duration-500 backdrop-blur-sm neon-card hover-lift hover-shine group ${
+              className={`p-6 transition-all duration-500 backdrop-blur-sm neon-card hover-lift hover-shine group ${
                 isVisible ? `rotate-in stagger-${index + 4}` : ''
               }`}
             >
               <div className="flex items-start space-x-4">
-                <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${getCertificationBg(cert.category)} group-hover:scale-110 transition-all duration-300 hover-rotate border border-gray-600/30`}>
+                {/* ✨ MODIFIED: Changed border to be theme-aware */}
+                <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${getCertificationBg(cert.category)} group-hover:scale-110 transition-all duration-300 hover-rotate border border-border/30`}>
                   <div className={`${getCertificationColor(cert.category)} glow-text`}>
                     {getCertificationIcon(cert.category)}
                   </div>
                 </div>
                 
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-white mb-2 leading-tight group-hover:text-cyan-soft transition-all duration-300 shine-text-slow">
+                  {/* ✨ MODIFIED: Changed text-white to text-foreground */}
+                  <h3 className="font-semibold text-foreground mb-2 leading-tight group-hover:text-cyan-soft transition-all duration-300 shine-text-slow">
                     {cert.name}
                   </h3>
-                  <p className="text-gray-300 text-sm mb-3 font-medium glow-text">
+                  {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
+                  <p className="text-muted-foreground text-sm mb-3 font-medium glow-text">
                     {cert.issuer}
                   </p>
-                  <div className="flex items-center text-gray-400 text-sm">
+                  {/* ✨ MODIFIED: Changed text-gray-400 to text-muted-foreground */}
+                  <div className="flex items-center text-muted-foreground text-sm">
                     <Calendar className="w-4 h-4 mr-2 text-green-soft pulse-shine" />
                     <span className="glow-text">{cert.year}</span>
                   </div>
                 </div>
               </div>
               
-              <div className="mt-4 pt-4 border-t border-gray-700/30">
+              {/* ✨ MODIFIED: Changed border to be theme-aware */}
+              <div className="mt-4 pt-4 border-t border-border/30">
                 <Badge 
                   variant="outline" 
                   className={`${getCertificationBg(cert.category)} ${getCertificationColor(cert.category)} border-current text-xs px-3 py-1 hover-scale transition-all duration-300 sparkle-text`}
@@ -150,7 +164,8 @@ const CertificationsSection = ({ certifications }) => {
         </div>
 
         {/* Certification Summary Stats */}
-        <div className={`mt-16 bg-black/60 rounded-xl p-8 shadow-sm border border-gray-700/30 backdrop-blur-sm neon-card hover-lift ${
+        {/* ✨ MODIFIED: Removed redundant/conflicting color classes to let neon-card work */}
+        <div className={`mt-16 rounded-xl p-8 shadow-sm backdrop-blur-sm neon-card hover-lift ${
           isVisible ? 'slide-in-bottom stagger-8' : ''
         }`}>
           <h3 className="text-2xl font-bold text-center mb-8 shine-text">
@@ -161,25 +176,29 @@ const CertificationsSection = ({ certifications }) => {
               <div className="text-2xl font-bold text-orange-400 mb-2 counter glow-text-strong">
                 {certifications.filter(c => c.category === 'aws').length}
               </div>
-              <div className="text-gray-300 font-medium text-sm glow-text">AWS Certs</div>
+              {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
+              <div className="text-muted-foreground font-medium text-sm glow-text">AWS Certs</div>
             </div>
             <div className="text-center p-4 bg-blue-500/10 rounded-lg border border-blue-400/20 hover:border-blue-400/40 transition-all duration-300 hover-glow">
               <div className="text-2xl font-bold text-blue-400 mb-2 counter glow-text-strong">
                 {certifications.filter(c => c.category === 'gcp').length}
               </div>
-              <div className="text-gray-300 font-medium text-sm glow-text">GCP Certs</div>
+              {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
+              <div className="text-muted-foreground font-medium text-sm glow-text">GCP Certs</div>
             </div>
             <div className="text-center p-4 bg-blue-600/10 rounded-lg border border-blue-500/20 hover:border-blue-500/40 transition-all duration-300 hover-glow">
               <div className="text-2xl font-bold text-blue-500 mb-2 counter glow-text-strong">
                 {certifications.filter(c => c.category === 'azure').length}
               </div>
-              <div className="text-gray-300 font-medium text-sm glow-text">Azure Certs</div>
+              {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
+              <div className="text-muted-foreground font-medium text-sm glow-text">Azure Certs</div>
             </div>
             <div className="text-center p-4 bg-red-500/10 rounded-lg border border-red-400/20 hover:border-red-400/40 transition-all duration-300 hover-glow">
               <div className="text-2xl font-bold text-red-400 mb-2 counter glow-text-strong">
                 {certifications.filter(c => c.category === 'oracle').length}
               </div>
-              <div className="text-gray-300 font-medium text-sm glow-text">Oracle Certs</div>
+              {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
+              <div className="text-muted-foreground font-medium text-sm glow-text">Oracle Certs</div>
             </div>
           </div>
         </div>
