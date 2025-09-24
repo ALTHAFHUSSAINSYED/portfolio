@@ -2,25 +2,27 @@
 
 import React from "react";
 import "./App.css";
-// ✨ MODIFIED: Import ScrollRestoration
-import { BrowserRouter, Routes, Route, ScrollRestoration } from "react-router-dom";
-import Portfolio from "./components/Portfolio";
-import ProjectDetailPage from "./components/ProjectDetailPage";
+// ✨ MODIFIED: Outlet renders the current page's content, ScrollRestoration handles scrolling
+import { Outlet, ScrollRestoration } from "react-router-dom";
+import { portfolioData } from './data/mock';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import { Toaster } from './components/ui/toaster';
 
 function App() {
   return (
-    <div className="App">
-      <BrowserRouter>
-        {/* ✨ NEW: Add the official ScrollRestoration component here */}
-        <ScrollRestoration />
-        <Routes>
-          {/* This is the route for your main portfolio homepage */}
-          <Route path="/" element={<Portfolio />} />
+    // This div now serves as the main layout container
+    <div className="min-h-screen bg-background">
+      {/* This component will now correctly manage scroll positions */}
+      <ScrollRestoration />
 
-          {/* This is the new route for the project details page */}
-          <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
-        </Routes>
-      </BrowserRouter>
+      <Header personalInfo={portfolioData.personalInfo} />
+      <main>
+        {/* The content for your routes (Portfolio or ProjectDetailPage) will be rendered here */}
+        <Outlet />
+      </main>
+      <Footer personalInfo={portfolioData.personalInfo} />
+      <Toaster />
     </div>
   );
 }
