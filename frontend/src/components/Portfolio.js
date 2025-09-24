@@ -20,8 +20,9 @@ const Portfolio = () => {
     if (location.state && location.state.scrollPosition) {
       // Use a small timeout to ensure the content has rendered before scrolling
       setTimeout(() => {
-        window.scrollTo({ top: location.state.scrollPosition, behavior: 'auto' });
-      }, 0);
+        // ✨ MODIFIED: Changed behavior to 'smooth' and increased delay for reliability
+        window.scrollTo({ top: location.state.scrollPosition, behavior: 'smooth' });
+      }, 100);
     }
   }, [location.state]);
 
