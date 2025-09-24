@@ -326,6 +326,8 @@ code {
     transform: rotate(45deg);
     transition: transform 0.8s ease;
     opacity: 0;
+    /* ✨ FIX: Prevents the hover layer from capturing mouse clicks */
+    @apply pointer-events-none; 
   }
 
   .dark .neon-card:hover::before {
@@ -685,5 +687,25 @@ code {
   @keyframes scrollbarShine {
     0%, 100% { opacity: 0.8; }
     50% { opacity: 1; }
+  }
+
+  /* ✨ NEW: Animation for Project Detail Link */
+  .detail-link-pulse {
+    animation: detail-link-pulse 2s infinite;
+  }
+
+  @keyframes detail-link-pulse {
+    0% {
+      transform: scale(1);
+      text-shadow: 0 0 5px rgba(103, 232, 249, 0.5);
+    }
+    50% {
+      transform: scale(1.03);
+      text-shadow: 0 0 15px rgba(103, 232, 249, 0.8);
+    }
+    100% {
+      transform: scale(1);
+      text-shadow: 0 0 5px rgba(103, 232, 249, 0.5);
+    }
   }
 }
