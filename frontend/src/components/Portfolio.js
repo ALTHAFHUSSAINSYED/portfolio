@@ -1,6 +1,6 @@
 // src/components/Portfolio.js
 
-import React from 'react'; // useEffect is no longer needed here
+import React from 'react';
 import { portfolioData } from '../data/mock';
 import HeroSection from './HeroSection';
 import AboutSection from './AboutSection';
@@ -15,7 +15,8 @@ import ContactSection from './ContactSection';
 
 const Portfolio = () => {
   return (
-    <div className="min-h-screen bg-background">
+    // ✨ MODIFIED: Added "relative" to create a stable anchor for the page layout.
+    <div className="min-h-screen bg-background relative">
       <HeroSection personalInfo={portfolioData.personalInfo} />
       <AboutSection personalInfo={portfolioData.personalInfo} achievements={portfolioData.achievements}/>
       <SkillsSection skills={portfolioData.skills} />
