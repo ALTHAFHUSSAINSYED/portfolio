@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom'; // ✨ MODIFIED: useLocation is no longer needed
+import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { ArrowLeft, Loader2, AlertTriangle, Zap, Code, CheckCircle } from 'lucide-react';
@@ -19,7 +19,6 @@ const ProjectDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  // ✨ REMOVED: useLocation is no longer needed
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -32,10 +31,8 @@ const ProjectDetailsPage = () => {
       finally { setLoading(false); }
     };
     fetchProject();
-    // ✨ REMOVED: The conflicting window.scrollTo(0, 0) has been removed.
   }, [projectId]);
 
-  // ✨ MODIFIED: Simplified go back logic. navigate(-1) just goes back one step in browser history.
   const handleGoBack = () => {
     navigate(-1);
   };
@@ -72,9 +69,9 @@ const ProjectDetailsPage = () => {
   }
 
   return (
-    // ✨ MODIFIED: The layout now uses flexbox to properly center the content and fix the "empty space" issue.
-    <div className="bg-background text-foreground flex flex-col items-center justify-center py-16 px-4 sm:px-6 lg:px-8" style={{ minHeight: 'calc(100vh - 80px)' }}> {/* Adjust 80px based on your header/footer height */}
-      <div className="w-full max-w-4xl">
+    // ✨ MODIFIED: Switched to a flex column layout to ensure content fills height correctly.
+    <div className="bg-background text-foreground flex flex-col items-center min-h-screen">
+      <div className="w-full max-w-4xl px-4 sm:px-6 lg:px-8 py-16">
         <button onClick={handleGoBack} className="flex items-center text-cyan-soft mb-8 hover:text-cyan-400 group transition-colors">
           <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
           Back to All Projects
