@@ -10,17 +10,17 @@ import { Toaster } from './components/ui/toaster';
 
 function App() {
   return (
-    // ✨ --- ROBUST FIX: Added "relative isolate" classes --- ✨
-    // "relative" creates the containing block for the orbs.
-    // "isolate" creates a new stacking context, a best practice for complex layouts.
-    <div className="min-h-screen bg-background relative isolate">
-      
+    // ✨ MODIFIED: Changed to a flex column layout for a sticky footer.
+    <div className="min-h-screen bg-background flex flex-col">
       <ScrollRestoration />
 
       <Header personalInfo={portfolioData.personalInfo} />
-      <main>
+      
+      {/* ✨ MODIFIED: The main content area now grows to fill available space. */}
+      <main className="flex-grow">
         <Outlet />
       </main>
+      
       <Footer personalInfo={portfolioData.personalInfo} />
       <Toaster />
     </div>
