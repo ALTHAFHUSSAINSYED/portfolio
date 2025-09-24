@@ -1,8 +1,10 @@
+// src/components/ProjectsSection.js
+
 import React, { useEffect, useRef, useState } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Folder, CheckCircle, ArrowRight, Zap, Code, Server, Loader2, AlertTriangle } from 'lucide-react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://althaf-portfolio.onrender.com';
 
@@ -12,7 +14,7 @@ const ProjectsSection = () => {
   const [error, setError] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
-  
+
   // ✨ REMOVED: All manual scroll restoration logic (useEffect hooks related to location.state) is now gone.
   // The official <ScrollRestoration /> component in App.js will handle this automatically.
 
@@ -125,4 +127,5 @@ const ProjectsSection = () => {
     </section>
   );
 };
+
 export default ProjectsSection;
