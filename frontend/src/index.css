@@ -11,6 +11,8 @@ body {
     -moz-osx-font-smoothing: grayscale;
     /* ✨ NEW: Smooth transition for theme changes */
     transition: background-color 0.4s ease, color 0.4s ease;
+    /* ✨ --- FIX: This is the only line that has been added --- ✨ */
+    overflow-x: hidden;
 }
 
 code {
@@ -22,7 +24,7 @@ code {
 @layer base {
   :root {
       /* Light Theme Variables (Default) */
-      --background: 0 0% 100%;       /* White */
+      --background: 0 0% 100%;      /* White */
       --foreground: 0 0% 3.9%;      /* Black */
       --card: 0 0% 100%;
       --card-foreground: 0 0% 3.9%;
@@ -51,8 +53,8 @@ code {
 
   .dark {
       /* Dark Theme Variables */
-      --background: 0 0% 0%;         /* Black */
-      --foreground: 0 0% 100%;       /* White */
+      --background: 0 0% 0%;        /* Black */
+      --foreground: 0 0% 100%;      /* White */
       --card: 0 0% 0%;
       --card-foreground: 0 0% 95%;
       --popover: 0 0% 0%;
@@ -426,13 +428,13 @@ code {
   .neon-card, .form-input, header {
       transition: background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
   }
-  
+ 
   .dark .neon-card {
     backdrop-filter: blur(10px);
     background: rgba(0, 0, 0, 0.8);
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
-  
+ 
   .dark .neon-card:hover {
     border-color: rgba(34, 211, 238, 0.5);
     box-shadow: 0 15px 35px rgba(34, 211, 238, 0.2), 0 0 30px rgba(34, 211, 238, 0.1);
@@ -452,7 +454,7 @@ code {
     transform: translateY(-8px) scale(1.02);
     background: white;
   }
-  
+ 
   .dark .form-input {
     background: rgba(0, 0, 0, 0.8);
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -464,7 +466,7 @@ code {
     border: 1px solid rgba(0, 0, 0, 0.2);
     color: #000000;
   }
-  
+ 
   .dark .nav-link {
     position: relative;
     transition: all 0.4s ease;
