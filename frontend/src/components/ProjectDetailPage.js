@@ -80,7 +80,6 @@ const ProjectDetailsPage = () => {
         
         {project.image_url && (
           <div className="mb-8 w-full aspect-video bg-muted/50 rounded-lg overflow-hidden">
-            {/* ✨ MODIFIED: Changed object-cover to object-contain to make the full image visible */}
             <img src={project.image_url} alt={project.name} className="w-full h-full object-contain"/>
           </div>
         )}
