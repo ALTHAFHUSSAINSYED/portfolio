@@ -39,30 +39,58 @@ const ProjectDetailsPage = () => {
     navigate('/', { state: { scrollPosition: location.state?.scrollPosition } });
   };
 
-  if (loading) { /* ... loading JSX ... */ }
-  if (error) { /* ... error JSX ... */ }
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 mx-auto animate-spin" />
+          <p className="mt-4">Loading Project Details...</p>
+        </div>
+      </div>
+    );
+  }
 
-  // ✨ CRASH FIX: This safety check prevents the page from crashing before data is loaded
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background text-destructive-foreground flex items-center justify-center p-4">
+        <div className="text-center bg-destructive p-6 rounded-md max-w-md mx-auto">
+          <AlertTriangle className="w-8 h-8 mx-auto" />
+          <p className="mt-4 font-semibold">Error Loading Project</p>
+          <p className="text-sm">{error}</p>
+          <button onClick={handleGoBack} className="mt-4 flex items-center text-destructive-foreground underline mx-auto">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!project) {
     return null; // Render nothing until the project data is available
   }
 
   return (
-    <div className="min-h-screen bg-black py-16 px-4 sm:px-6 lg:px-8">
-      <button onClick={handleGoBack} className="flex items-center text-cyan-soft mb-8 hover:text-cyan-400 group">
-        <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1" />
+    // ✨ MODIFIED: Changed bg-black to bg-background
+    <div className="min-h-screen bg-background py-16 px-4 sm:px-6 lg:px-8">
+      <button onClick={handleGoBack} className="flex items-center text-cyan-soft mb-8 hover:text-cyan-400 group transition-colors">
+        <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
         Back to All Projects
       </button>
 
-      <Card className="max-w-4xl mx-auto p-8 bg-black/80 border border-gray-700/30">
-        <h1 className="text-3xl font-bold text-white mb-6">{project.name}</h1>
+      {/* ✨ MODIFIED: Replaced hardcoded colors with neon-card */}
+      <Card className="max-w-4xl mx-auto p-8 neon-card">
+        {/* ✨ MODIFIED: Changed text-white to text-foreground */}
+        <h1 className="text-3xl font-bold text-foreground mb-6">{project.name}</h1>
         {project.image_url && (<div className="mb-8"><img src={project.image_url} alt={project.name} className="w-full h-auto rounded-md"/></div>)}
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-white mb-4">Summary</h2>
+          {/* ✨ MODIFIED: Changed text-white to text-foreground */}
+          <h2 className="text-xl font-semibold text-foreground mb-4">Summary</h2>
           <div className="space-y-2">
             {(project.summary || '').split('\n').filter(line => line.trim() !== '').map((line, idx) => (
-              <div key={idx} className="flex items-start space-x-3 text-gray-300">
+              // ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground
+              <div key={idx} className="flex items-start space-x-3 text-muted-foreground">
                 <Zap className="w-4 h-4 text-blue-400 mt-1 flex-shrink-0" />
                 <p>{line}</p>
               </div>
@@ -71,17 +99,21 @@ const ProjectDetailsPage = () => {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-white mb-4">Technologies Used</h2>
+          {/* ✨ MODIFIED: Changed text-white to text-foreground */}
+          <h2 className="text-xl font-semibold text-foreground mb-4">Technologies Used</h2>
           <div className="flex flex-wrap gap-2">
-            {(project.technologies || []).map((tech) => (<Badge key={tech} variant="outline" className="border-cyan-400/30 text-cyan-soft bg-black/50">{tech}</Badge>))}
+            {/* ✨ MODIFIED: Changed bg-black/50 to bg-background/50 */}
+            {(project.technologies || []).map((tech) => (<Badge key={tech} variant="outline" className="border-cyan-400/30 text-cyan-soft bg-background/50">{tech}</Badge>))}
           </div>
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-white mb-4">Key Outcomes</h2>
+          {/* ✨ MODIFIED: Changed text-white to text-foreground */}
+          <h2 className="text-xl font-semibold text-foreground mb-4">Key Outcomes</h2>
           <div className="space-y-2">
             {(project.key_outcomes || '').split('\n').filter(line => line.trim() !== '').map((line, idx) => (
-              <div key={idx} className="flex items-start space-x-3 text-gray-300">
+              // ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground
+              <div key={idx} className="flex items-start space-x-3 text-muted-foreground">
                 <CheckCircle className="w-4 h-4 text-green-soft mt-1 flex-shrink-0" />
                 <p>{line}</p>
               </div>
@@ -90,10 +122,12 @@ const ProjectDetailsPage = () => {
         </section>
         
         <section>
-          <h2 className="text-xl font-semibold text-white mb-4">Implementation Details</h2>
+          {/* ✨ MODIFIED: Changed text-white to text-foreground */}
+          <h2 className="text-xl font-semibold text-foreground mb-4">Implementation Details</h2>
           <div className="space-y-2">
             {(project.details || '').split('\n').map((line, idx) => (
-              <div key={idx} className="flex items-start space-x-3 text-gray-300">
+              // ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground
+              <div key={idx} className="flex items-start space-x-3 text-muted-foreground">
                 {isCodeLine(line) || line.trim() === '' ? (
                   <div className="w-4 flex-shrink-0"></div>
                 ) : (
