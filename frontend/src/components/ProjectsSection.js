@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Folder, CheckCircle, ArrowRight, Zap, Code, Server, Loader2, AlertTriangle } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+// ✨ MODIFIED: useNavigate is needed for the new scroll restoration logic
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://althaf-portfolio.onrender.com';
 
@@ -13,12 +14,14 @@ const ProjectsSection = () => {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
   const location = useLocation();
+  const navigate = useNavigate(); // ✨ NEW: Hook for navigation state changes
 
-  useEffect(() => {
-    if (location.state && location.state.scrollPosition) {
-      window.scrollTo(0, location.state.scrollPosition);
-    }
-  }, [location.state]);
+  // ✨ REMOVED: The old, unreliable useEffect for scroll restoration is gone from here.
+  // useEffect(() => {
+  //   if (location.state && location.state.scrollPosition) {
+  //     window.scrollTo(0, location.state.scrollPosition);
+  //   }
+  // }, [location.state]);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -32,6 +35,17 @@ const ProjectsSection = () => {
     };
     fetchProjects();
   }, []);
+
+  // ✨ NEW: A more reliable effect for scroll restoration that runs only after projects have loaded.
+  useEffect(() => {
+    if (projects.length > 0 && location.state?.scrollPosition) {
+      setTimeout(() => {
+        window.scrollTo({ top: location.state.scrollPosition, behavior: 'smooth' });
+        // We clear the state from the location to prevent re-scrolling if the user navigates elsewhere and comes back.
+        navigate(location.pathname, { replace: true, state: {} });
+      }, 100); // A small delay to ensure the browser has time to render the content.
+    }
+  }, [projects, location.state, navigate]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
@@ -79,7 +93,6 @@ const ProjectsSection = () => {
   }
 
   return (
-    // ✨ MODIFIED: Changed bg-black to bg-background
     <section id="projects" className="py-20 bg-background" ref={sectionRef}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16"><h2 className={`text-3xl md:text-4xl font-bold mb-4 text-foreground ${isVisible ? 'fade-in-up' : ''}`}>Featured Projects</h2></div>
@@ -87,12 +100,10 @@ const ProjectsSection = () => {
           {projects.map((project, index) => {
             const IconComponent = getProjectIcon(project.name);
             return (
-              // ✨ MODIFIED: Replaced hardcoded colors with neon-card
               <Card key={project.id} className={`flex flex-col p-6 neon-card group ${isVisible ? `scale-in stagger-${index + 2}` : ''}`}>
                 <div className="flex-grow">
                   <div className="flex items-start space-x-4 mb-6">
                     <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 bg-cyan-400/10 border border-cyan-400/30"><IconComponent className="w-6 h-6 text-cyan-soft" /></div>
-                    {/* ✨ MODIFIED: Changed text-white to text-foreground */}
                     <div><h3 className="text-xl font-bold text-foreground">{project.name}</h3></div>
                   </div>
                   
@@ -100,31 +111,25 @@ const ProjectsSection = () => {
                     {(project.summary || '').split('\n').filter(line => line.trim() !== '').map((line, idx) => (
                       <div key={idx} className="flex items-start space-x-3">
                         <ArrowRight className="w-4 h-4 text-cyan-soft mt-1 flex-shrink-0" />
-                        {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
                         <p className="text-muted-foreground text-sm">{line}</p>
                       </div>
                     ))}
                   </div>
 
                   <div className="mb-6">
-                    {/* ✨ MODIFIED: Changed text-white to text-foreground */}
                     <h4 className="text-sm font-semibold text-foreground mb-3">Technologies Used</h4>
-                     {/* ✨ MODIFIED: Changed bg-black/50 to bg-background/50 */}
                     <div className="flex flex-wrap gap-2">{project.technologies.map((tech) => (<Badge key={tech} variant="outline" className="border-cyan-400/30 text-cyan-soft bg-background/50">{tech}</Badge>))}</div>
                   </div>
                   <div className="space-y-2 mb-6">
-                    {/* ✨ MODIFIED: Changed text-white to text-foreground */}
                     <h4 className="text-sm font-semibold text-foreground">Key Outcomes</h4>
                     {(project.key_outcomes || '').split('\n').filter(line => line.trim() !== '').map((outcome, idx) => (
                       <div key={idx} className="flex items-start space-x-3">
                         <CheckCircle className="w-4 h-4 text-green-soft mt-1 flex-shrink-0" />
-                        {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
                         <p className="text-muted-foreground text-sm">{outcome}</p>
                       </div>
                     ))}
                   </div>
                 </div>
-                 {/* ✨ MODIFIED: Changed border to be theme-aware */}
                 <div className="pt-4 mt-auto border-t border-border/30">
                   <Link to={`/projects/${project.id}`} state={{ scrollPosition: window.scrollY }} className="flex items-center text-cyan-soft text-sm font-medium">
                     <span>View Implementation Details</span><ArrowRight className="w-4 h-4 ml-2" />
