@@ -64,7 +64,11 @@ const SkillsSection = ({ skills }) => {
       observer.observe(sectionRef.current);
     }
 
-    return () => observer.disconnect();
+    return () => {
+      if (sectionRef.current) {
+        observer.unobserve(sectionRef.current);
+      }
+    };
   }, []);
 
   const getSkillLevel = (level) => {
@@ -82,9 +86,11 @@ const SkillsSection = ({ skills }) => {
       'Expert': 'text-green-soft',
       'Advanced': 'text-cyan-soft',
       'Intermediate': 'text-yellow-soft',
-      'Beginner': 'text-gray-400'
+      // ✨ MODIFIED: Changed for better visibility in light mode
+      'Beginner': 'text-muted-foreground' 
     };
-    return colors[level] || 'text-gray-400';
+    // ✨ MODIFIED: Changed for better visibility in light mode
+    return colors[level] || 'text-muted-foreground'; 
   };
 
   const getProgressColor = (level) => {
@@ -92,13 +98,16 @@ const SkillsSection = ({ skills }) => {
       'Expert': 'bg-green-soft',
       'Advanced': 'bg-cyan-soft',
       'Intermediate': 'bg-yellow-soft',
-      'Beginner': 'bg-gray-400'
+      // ✨ MODIFIED: Changed for better visibility in light mode
+      'Beginner': 'bg-muted' 
     };
-    return colors[level] || 'bg-gray-400';
+     // ✨ MODIFIED: Changed for better visibility in light mode
+    return colors[level] || 'bg-muted';
   };
 
   return (
-    <section id="skills" className="py-20 bg-gradient-to-b from-gray-900 to-black relative overflow-hidden" ref={sectionRef}>
+    // ✨ MODIFIED: Changed gradient to be theme-aware
+    <section id="skills" className="py-20 bg-gradient-to-b from-secondary to-background relative overflow-hidden" ref={sectionRef}>
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="bg-orb bg-orb-1"></div>
@@ -110,7 +119,8 @@ const SkillsSection = ({ skills }) => {
           <h2 className={`text-3xl md:text-4xl font-bold mb-4 text-gradient-animate ${isVisible ? 'fade-in-up' : ''}`}>
             Technical Skills
           </h2>
-          <p className={`text-lg text-gray-300 max-w-3xl mx-auto ${isVisible ? 'fade-in-up stagger-1' : ''}`}>
+          {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
+          <p className={`text-lg text-muted-foreground max-w-3xl mx-auto ${isVisible ? 'fade-in-up stagger-1' : ''}`}>
             Comprehensive expertise across cloud platforms, DevOps tools, and modern infrastructure technologies
           </p>
         </div>
@@ -119,17 +129,20 @@ const SkillsSection = ({ skills }) => {
           {skillCategories.map((category, categoryIndex) => {
             const IconComponent = category.icon;
             return (
+              // ✨ MODIFIED: Removed redundant/conflicting color classes to let neon-card work
               <Card 
                 key={categoryIndex} 
-                className={`p-6 bg-black/50 border border-gray-700/30 hover:border-cyan-400/30 transition-all duration-500 backdrop-blur-sm neon-card hover-lift ${
+                className={`p-6 transition-all duration-500 backdrop-blur-sm neon-card hover-lift ${
                   isVisible ? `fade-in-up stagger-${categoryIndex + 2}` : ''
                 }`}
               >
                 <div className="flex items-center mb-6">
                   <div className={`w-12 h-12 rounded-lg flex items-center justify-center mr-4 bg-gradient-to-r ${category.gradient} hover-rotate transition-all duration-300`}>
-                    <IconComponent className="w-6 h-6 text-white" />
+                    {/* ✨ MODIFIED: text-white changed to text-primary-foreground for better contrast */}
+                    <IconComponent className="w-6 h-6 text-primary-foreground" /> 
                   </div>
-                  <h3 className="text-xl font-semibold text-white">
+                  {/* ✨ MODIFIED: Changed text-white to text-foreground */}
+                  <h3 className="text-xl font-semibold text-foreground">
                     {category.title}
                   </h3>
                 </div>
@@ -142,7 +155,8 @@ const SkillsSection = ({ skills }) => {
                     >
                       <div className="flex justify-between items-center">
                         <div className="flex items-center space-x-3">
-                          <span className="font-medium text-white hover:text-cyan-soft transition-colors duration-300">
+                          {/* ✨ MODIFIED: Changed text-white to text-foreground */}
+                          <span className="font-medium text-foreground hover:text-cyan-soft transition-colors duration-300">
                             {skill.name}
                           </span>
                           {skill.certifications && (
@@ -160,7 +174,8 @@ const SkillsSection = ({ skills }) => {
                         </span>
                       </div>
                       <div className="relative">
-                        <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+                        {/* ✨ MODIFIED: Changed bg-gray-800 to bg-secondary */}
+                        <div className="h-2 bg-secondary rounded-full overflow-hidden">
                           <div 
                             className={`h-full ${getProgressColor(skill.level)} progress-fill transition-all duration-2000 ease-out`}
                             style={{ 
@@ -181,21 +196,25 @@ const SkillsSection = ({ skills }) => {
         {/* Skills Summary with Animation */}
         <div className={`mt-16 text-center ${isVisible ? 'slide-in-bottom stagger-6' : ''}`}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto">
-            <div className="bg-black/50 rounded-lg p-6 border border-cyan-400/20 hover:border-cyan-400/40 transition-all duration-300 neon-card hover-lift">
+            {/* ✨ MODIFIED: Removed bg-black/50, changed text-gray-300 */}
+            <div className="rounded-lg p-6 border border-cyan-400/20 hover:border-cyan-400/40 transition-all duration-300 neon-card hover-lift">
               <div className="text-2xl font-bold text-cyan-soft mb-2 counter">4</div>
-              <div className="text-gray-300 font-medium text-sm">Cloud Platforms</div>
+              <div className="text-muted-foreground font-medium text-sm">Cloud Platforms</div>
             </div>
-            <div className="bg-black/50 rounded-lg p-6 border border-green-400/20 hover:border-green-400/40 transition-all duration-300 neon-card hover-lift">
+             {/* ✨ MODIFIED: Removed bg-black/50, changed text-gray-300 */}
+            <div className="rounded-lg p-6 border border-green-400/20 hover:border-green-400/40 transition-all duration-300 neon-card hover-lift">
               <div className="text-2xl font-bold text-green-soft mb-2 counter">6+</div>
-              <div className="text-gray-300 font-medium text-sm">DevOps Tools</div>
+              <div className="text-muted-foreground font-medium text-sm">DevOps Tools</div>
             </div>
-            <div className="bg-black/50 rounded-lg p-6 border border-purple-400/20 hover:border-purple-400/40 transition-all duration-300 neon-card hover-lift">
+             {/* ✨ MODIFIED: Removed bg-black/50, changed text-gray-300 */}
+            <div className="rounded-lg p-6 border border-purple-400/20 hover:border-purple-400/40 transition-all duration-300 neon-card hover-lift">
               <div className="text-2xl font-bold text-purple-soft mb-2 counter">3</div>
-              <div className="text-gray-300 font-medium text-sm">Languages</div>
+              <div className="text-muted-foreground font-medium text-sm">Languages</div>
             </div>
-            <div className="bg-black/50 rounded-lg p-6 border border-orange-400/20 hover:border-orange-400/40 transition-all duration-300 neon-card hover-lift">
+             {/* ✨ MODIFIED: Removed bg-black/50, changed text-gray-300 */}
+            <div className="rounded-lg p-6 border border-orange-400/20 hover:border-orange-400/40 transition-all duration-300 neon-card hover-lift">
               <div className="text-2xl font-bold text-yellow-soft mb-2 counter">4+</div>
-              <div className="text-gray-300 font-medium text-sm">Storage Systems</div>
+              <div className="text-muted-foreground font-medium text-sm">Storage Systems</div>
             </div>
           </div>
         </div>
