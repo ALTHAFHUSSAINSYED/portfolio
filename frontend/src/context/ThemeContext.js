@@ -5,19 +5,28 @@ const ThemeContext = createContext();
 
 // Create a provider component
 export const ThemeProvider = ({ children }) => {
-  // Set the default theme to 'dark' as requested
+  // ✨ MODIFIED: Theme now ALWAYS defaults to 'dark' on initial load.
   const [theme, setTheme] = useState('dark');
 
-  const toggleTheme = () => {
-    setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
-  };
-  
-  // Effect to apply the theme class to the root element
+  // This effect runs only once to apply the default dark theme.
   useEffect(() => {
-    const root = window.document.documentElement;
-    root.classList.remove('light', 'dark'); // Remove previous theme
-    root.classList.add(theme); // Add current theme
-  }, [theme]);
+    const body = window.document.body;
+    body.classList.add('dark');
+  }, []); // Empty dependency array ensures this runs only once.
+
+  const toggleTheme = () => {
+    setTheme(prevTheme => {
+      const newTheme = prevTheme === 'light' ? 'dark' : 'light';
+      
+      // ✨ MODIFIED: Logic is simplified to only update the class for the current session.
+      // No localStorage is used.
+      const body = window.document.body;
+      body.classList.remove('light', 'dark');
+      body.classList.add(newTheme);
+      
+      return newTheme;
+    });
+  };
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
