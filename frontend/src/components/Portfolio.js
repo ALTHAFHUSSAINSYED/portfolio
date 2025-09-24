@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react'; // Removed useEffect as it's no longer needed here
 import { useLocation } from 'react-router-dom';
 import { portfolioData } from '../data/mock';
 import Header from './Header';
@@ -13,21 +13,10 @@ import Footer from './Footer';
 import { Toaster } from './ui/toaster';
 
 const Portfolio = () => {
-  const location = useLocation();
-
-  useEffect(() => {
-    // This effect runs when the page loads or when you navigate back to it
-    if (location.state && location.state.scrollPosition) {
-      // Use a small timeout to ensure the content has rendered before scrolling
-      setTimeout(() => {
-        // ✨ MODIFIED: Changed behavior to 'smooth' and increased delay for reliability
-        window.scrollTo({ top: location.state.scrollPosition, behavior: 'smooth' });
-      }, 100);
-    }
-  }, [location.state]);
+  // The useEffect for scroll restoration has been removed from this file.
+  // The new, more reliable logic will be added to ProjectsSection.js in the next step.
 
   return (
-    // ✨ MODIFIED: Replaced 'bg-black neon-theme' with 'bg-background' for theme compatibility
     <div className="min-h-screen bg-background">
       <Header personalInfo={portfolioData.personalInfo} />
       <HeroSection personalInfo={portfolioData.personalInfo} />
