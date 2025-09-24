@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Folder, CheckCircle, ArrowRight, Zap, Code, Server, Loader2, AlertTriangle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom'; // ✨ MODIFIED: useLocation is no longer needed
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://althaf-portfolio.onrender.com';
 
@@ -12,7 +12,7 @@ const ProjectsSection = () => {
   const [error, setError] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
-  // ✨ All previous manual scroll logic has been removed to allow the global system to work on a stable layout.
+  // ✨ REMOVED: All manual scroll restoration logic is now handled by the global hook.
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -80,21 +80,13 @@ const ProjectsSection = () => {
           {projects.map((project, index) => {
             const IconComponent = getProjectIcon(project.name);
             return (
-              // ✨ MODIFIED: The min-height is removed from the card itself to let content define the height.
-              <Card key={project.id} className={`flex flex-col p-6 neon-card group ${isVisible ? `scale-in stagger-${index + 2}` : ''}`}>
-                <div className="flex-grow flex flex-col">
-                  <div className="flex items-start space-x-4 mb-4">
+              <Card key={project.id} className={`flex flex-col p-6 neon-card group min-h-[520px] ${isVisible ? `scale-in stagger-${index + 2}` : ''}`}>
+                <div className="flex-grow">
+                  <div className="flex items-start space-x-4 mb-6">
                     <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 bg-cyan-400/10 border border-cyan-400/30"><IconComponent className="w-6 h-6 text-cyan-soft" /></div>
                     <div><h3 className="text-xl font-bold text-foreground">{project.name}</h3></div>
                   </div>
                   
-                  {/* ✨ DEFINITIVE FIX FOR IMAGE SIZE & JUMP ✨ */}
-                  {project.image_url && (
-                    <div className="my-4 w-full aspect-video bg-muted/30 rounded-lg overflow-hidden">
-                      <img src={project.image_url} alt={project.name} className="w-full h-full object-contain"/>
-                    </div>
-                  )}
-
                   <div className="space-y-2 mb-6">
                     {(project.summary || '').split('\n').filter(line => line.trim() !== '').map((line, idx) => (
                       <div key={idx} className="flex items-start space-x-3">
@@ -108,15 +100,21 @@ const ProjectsSection = () => {
                     <h4 className="text-sm font-semibold text-foreground mb-3">Technologies Used</h4>
                     <div className="flex flex-wrap gap-2">{project.technologies.map((tech) => (<Badge key={tech} variant="outline" className="border-cyan-400/30 text-cyan-soft bg-background/50">{tech}</Badge>))}</div>
                   </div>
-
-                  {/* This ensures the link is always pushed to the bottom */}
-                  <div className="flex-grow"></div> 
-
-                  <div className="pt-4 mt-auto border-t border-border/30">
-                    <Link to={`/projects/${project.id}`} className="flex items-center text-cyan-soft text-sm font-medium">
-                      <span>View Implementation Details</span><ArrowRight className="w-4 h-4 ml-2" />
-                    </Link>
+                  <div className="space-y-2 mb-6">
+                    <h4 className="text-sm font-semibold text-foreground">Key Outcomes</h4>
+                    {(project.key_outcomes || '').split('\n').filter(line => line.trim() !== '').map((outcome, idx) => (
+                      <div key={idx} className="flex items-start space-x-3">
+                        <CheckCircle className="w-4 h-4 text-green-soft mt-1 flex-shrink-0" />
+                        <p className="text-muted-foreground text-sm">{outcome}</p>
+                      </div>
+                    ))}
                   </div>
+                </div>
+                <div className="pt-4 mt-auto border-t border-border/30">
+                  {/* ✨ REMOVED: The onClick handler is gone; our global hook handles this now. */}
+                  <Link to={`/projects/${project.id}`} className="flex items-center text-cyan-soft text-sm font-medium">
+                    <span>View Implementation Details</span><ArrowRight className="w-4 h-4 ml-2" />
+                  </Link>
                 </div>
               </Card>
             );
