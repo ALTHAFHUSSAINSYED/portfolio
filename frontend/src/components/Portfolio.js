@@ -26,7 +26,8 @@ const Portfolio = () => {
   }, [location.state]);
 
   return (
-    <div className="min-h-screen bg-black neon-theme">
+    // ✨ MODIFIED: Replaced 'bg-black neon-theme' with 'bg-background' for theme compatibility
+    <div className="min-h-screen bg-background">
       <Header personalInfo={portfolioData.personalInfo} />
       <HeroSection personalInfo={portfolioData.personalInfo} />
       <AboutSection personalInfo={portfolioData.personalInfo} achievements={portfolioData.achievements}/>
