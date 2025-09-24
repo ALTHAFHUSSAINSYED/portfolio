@@ -99,7 +99,8 @@ const HeroSection = ({ personalInfo }) => {
   };
 
   return (
-    <section id="hero" className="bg-black py-20 lg:py-32 relative overflow-hidden">
+    // ✨ MODIFIED: Changed bg-black to bg-background
+    <section id="hero" className="bg-background py-20 lg:py-32 relative overflow-hidden">
       <style>{`
         @keyframes snake-draw {
           to { stroke-dashoffset: 0; }
@@ -163,7 +164,8 @@ const HeroSection = ({ personalInfo }) => {
                   muted={isLeftMuted}
                   className="w-72 h-72 lg:w-[500px] lg:h-80 rounded-xl object-cover border-2 border-pink-500/30 shadow-lg"
                 />
-                <button onClick={() => toggleMute(leftVideoRef, setIsLeftMuted)} className="absolute bottom-2 right-2 p-2 bg-black/50 rounded-full text-white hover:bg-black/75 transition-colors">
+                {/* ✨ MODIFIED: Changed bg-black/50 to bg-background/50 and text-white to text-foreground */}
+                <button onClick={() => toggleMute(leftVideoRef, setIsLeftMuted)} className="absolute bottom-2 right-2 p-2 bg-background/50 rounded-full text-foreground hover:bg-background/75 transition-colors">
                   {isLeftMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
                 </button>
               </div>
@@ -176,7 +178,8 @@ const HeroSection = ({ personalInfo }) => {
                 <span className="text-cyan-soft">{personalInfo.title.split('|')[0]}</span>
                 {personalInfo.title.includes('|') && (<span className="text-pink-soft"> | {personalInfo.title.split('|')[1]}</span>)}
               </div>
-              <p className="text-lg md:text-xl text-gray-300 mb-12 max-w-3xl mx-auto">{personalInfo.summary}</p>
+              {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
+              <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-3xl mx-auto">{personalInfo.summary}</p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <Button onClick={downloadResume} size="lg"><Download className="w-5 h-5 mr-3" />Download Resume</Button>
                 <Button onClick={scrollToContact} variant="outline" size="lg"><Mail className="w-5 h-5 mr-3" />Get in Touch</Button>
@@ -194,7 +197,8 @@ const HeroSection = ({ personalInfo }) => {
                   muted={isRightMuted}
                   className="w-72 h-72 lg:w-[500px] lg:h-80 rounded-xl object-cover border-2 border-green-500/30 shadow-lg"
                 />
-                <button onClick={() => toggleMute(rightVideoRef, setIsRightMuted)} className="absolute bottom-2 right-2 p-2 bg-black/50 rounded-full text-white hover:bg-black/75 transition-colors">
+                {/* ✨ MODIFIED: Changed bg-black/50 to bg-background/50 and text-white to text-foreground */}
+                <button onClick={() => toggleMute(rightVideoRef, setIsRightMuted)} className="absolute bottom-2 right-2 p-2 bg-background/50 rounded-full text-foreground hover:bg-background/75 transition-colors">
                   {isRightMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
                 </button>
               </div>
