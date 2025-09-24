@@ -69,7 +69,6 @@ const ProjectDetailsPage = () => {
   }
 
   return (
-    // ✨ MODIFIED: Removed min-h-screen and flexbox properties. App.js now controls the page layout.
     <div className="w-full max-w-4xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
       <button onClick={handleGoBack} className="flex items-center text-cyan-soft mb-8 hover:text-cyan-400 group transition-colors">
         <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
@@ -79,10 +78,10 @@ const ProjectDetailsPage = () => {
       <Card className="w-full p-8 neon-card">
         <h1 className="text-3xl font-bold text-foreground mb-6">{project.name}</h1>
         
-        {/* ✨ MODIFIED: Added a container with an aspect ratio to prevent layout shift when the image loads. */}
         {project.image_url && (
           <div className="mb-8 w-full aspect-video bg-muted/50 rounded-lg overflow-hidden">
-            <img src={project.image_url} alt={project.name} className="w-full h-full object-cover"/>
+            {/* ✨ MODIFIED: Changed object-cover to object-contain to make the full image visible */}
+            <img src={project.image_url} alt={project.name} className="w-full h-full object-contain"/>
           </div>
         )}
 
