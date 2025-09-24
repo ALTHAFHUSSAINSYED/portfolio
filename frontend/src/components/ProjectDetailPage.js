@@ -69,7 +69,6 @@ const ProjectDetailsPage = () => {
   }
 
   return (
-    // ✨ MODIFIED: Switched to a flex column layout to ensure content fills height correctly.
     <div className="bg-background text-foreground flex flex-col items-center min-h-screen">
       <div className="w-full max-w-4xl px-4 sm:px-6 lg:px-8 py-16">
         <button onClick={handleGoBack} className="flex items-center text-cyan-soft mb-8 hover:text-cyan-400 group transition-colors">
@@ -122,7 +121,8 @@ const ProjectDetailsPage = () => {
                   ) : (
                     <Code className="w-4 h-4 text-purple-400 mt-1 flex-shrink-0" />
                   )}
-                  <p className="whitespace-pre-wrap font-mono text-sm">{line}</p>
+                  {/* ✨ MODIFIED: Added "break-words" to prevent horizontal overflow on mobile */}
+                  <p className="whitespace-pre-wrap font-mono text-sm break-words">{line}</p>
                 </div>
               ))}
             </div>
