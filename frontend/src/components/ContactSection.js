@@ -4,17 +4,11 @@ import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
-// ✨ MODIFIED: Added MessageSquare for the WhatsApp icon
-import { Mail, Phone, MapPin, Linkedin, Send, Download, MessageCircle, MessageSquare } from 'lucide-react';
+import { Mail, Phone, Send, MessageCircle, MessageSquare } from 'lucide-react'; 
 import { useToast } from '../hooks/use-toast';
 
 const ContactSection = ({ personalInfo }) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: ''
-  });
+  const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
@@ -79,9 +73,7 @@ const ContactSection = ({ personalInfo }) => {
       setIsSubmitting(false);
     }
   };
-
-  // ✨ NEW: WhatsApp URL generation logic
-  // Assumes Indian country code +91 for the 10-digit number
+  
   const phoneNumber = personalInfo.phone.replace(/\D/g, '');
   const prefilledMessage = "Hello Althaf, I saw your portfolio and would like to connect!";
   const whatsappUrl = `https://wa.me/91${phoneNumber}?text=${encodeURIComponent(prefilledMessage)}`;
@@ -95,17 +87,16 @@ const ContactSection = ({ personalInfo }) => {
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
-          <h2 className={`text-3xl md:text-4xl font-bold mb-4 shine-text ${isVisible ? 'fade-in-up' : ''}`}>Let's Connect</h2>
-          <p className={`text-lg text-gray-300 max-w-3xl mx-auto glow-text ${isVisible ? 'fade-in-up stagger-1' : ''}`}>Ready to discuss your next DevOps project or explore opportunities? I'd love to hear from you!</p>
+          <h2 className={`text-3xl md:text-4xl font-bold mb-4 text-foreground shine-text ${isVisible ? 'fade-in-up' : ''}`}>Let's Connect</h2>
+          <p className={`text-lg text-muted-foreground max-w-3xl mx-auto glow-text ${isVisible ? 'fade-in-up stagger-1' : ''}`}>Ready to discuss your next DevOps project or explore opportunities? I'd love to hear from you!</p>
         </div>
         <div className="grid lg:grid-cols-2 gap-12">
           <div className={`space-y-8 ${isVisible ? 'fade-in-left stagger-2' : ''}`}>
             <div>
-              <h3 className="text-2xl font-semibold mb-6 shine-text-slow">Get in Touch</h3>
-              <p className="text-gray-300 mb-8 text-lg leading-relaxed glow-text">I'm always interested in hearing about new opportunities, collaborating on exciting projects, or discussing the latest in DevOps and cloud technologies. Feel free to reach out!</p>
+              <h3 className="text-2xl font-semibold mb-6 text-foreground shine-text-slow">Get in Touch</h3>
+              <p className="text-muted-foreground mb-8 text-lg leading-relaxed glow-text">I'm always interested in hearing about new opportunities, collaborating on exciting projects, or discussing the latest in DevOps and cloud technologies. Feel free to reach out!</p>
             </div>
             <div className="space-y-4">
-              {/* ✨ MODIFIED: Replaced hardcoded color with neon-card for theme compatibility */}
               <Card className={`p-4 neon-card transition-all ${isVisible ? 'scale-in stagger-3' : ''}`}>
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-cyan-400/10 rounded-lg flex items-center justify-center border border-cyan-400/30"><Mail className="w-6 h-6 text-cyan-soft" /></div>
@@ -115,7 +106,6 @@ const ContactSection = ({ personalInfo }) => {
                   </div>
                 </div>
               </Card>
-               {/* ✨ MODIFIED: Replaced hardcoded color with neon-card for theme compatibility */}
               <Card className={`p-4 neon-card transition-all ${isVisible ? 'scale-in stagger-4' : ''}`}>
                  <div className="flex items-center space-x-4">
                    <div className="w-12 h-12 bg-green-400/10 rounded-lg flex items-center justify-center border border-green-400/30"><Phone className="w-6 h-6 text-green-soft" /></div>
@@ -125,7 +115,6 @@ const ContactSection = ({ personalInfo }) => {
                    </div>
                  </div>
                </Card>
-              {/* ✨ NEW: WhatsApp Contact Card */}
               <Card className={`p-4 neon-card transition-all ${isVisible ? 'scale-in stagger-5' : ''}`}>
                  <div className="flex items-center space-x-4">
                    <div className="w-12 h-12 bg-purple-400/10 rounded-lg flex items-center justify-center border border-purple-400/30">
@@ -147,20 +136,20 @@ const ContactSection = ({ personalInfo }) => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">Your Name</label>
+                  <label htmlFor="name" className="block text-sm font-medium text-muted-foreground mb-2">Your Name</label>
                   <Input id="name" name="name" type="text" value={formData.name} onChange={handleInputChange} placeholder="Enter your full name" required className="form-input"/>
                 </div>
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                  <label htmlFor="email" className="block text-sm font-medium text-muted-foreground mb-2">Email Address</label>
                   <Input id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="your.email@example.com" required className="form-input"/>
                 </div>
               </div>
               <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-gray-300 mb-2">Subject</label>
+                <label htmlFor="subject" className="block text-sm font-medium text-muted-foreground mb-2">Subject</label>
                 <Input id="subject" name="subject" type="text" value={formData.subject} onChange={handleInputChange} placeholder="What's this about?" className="form-input"/>
               </div>
               <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-300 mb-2">Message</label>
+                <label htmlFor="message" className="block text-sm font-medium text-muted-foreground mb-2">Message</label>
                 <Textarea id="message" name="message" value={formData.message} onChange={handleInputChange} placeholder="Tell me about your project..." rows={6} required className="form-input"/>
               </div>
               <Button type="submit" disabled={isSubmitting} className="w-full neon-button bg-gradient-to-r from-cyan-500 to-pink-500 text-black py-3 text-lg font-bold disabled:opacity-50">
