@@ -78,10 +78,9 @@ const ProjectDetailsPage = () => {
       <Card className="w-full p-8 neon-card">
         <h1 className="text-3xl font-bold text-foreground mb-6">{project.name}</h1>
         
+        {/* ✨ MODIFIED: Removed the container div to allow the image to use its natural dimensions */}
         {project.image_url && (
-          <div className="mb-8 w-full aspect-video bg-muted/50 rounded-lg overflow-hidden">
-            <img src={project.image_url} alt={project.name} className="w-full h-full object-contain"/>
-          </div>
+          <img src={project.image_url} alt={project.name} className="w-full h-auto rounded-lg mb-8"/>
         )}
 
         <section className="mb-8">
