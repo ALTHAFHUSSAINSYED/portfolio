@@ -1,10 +1,8 @@
-// src/components/ProjectsSection.js
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Folder, CheckCircle, ArrowRight, Zap, Code, Server, Loader2, AlertTriangle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://althaf-portfolio.onrender.com';
 
@@ -14,9 +12,24 @@ const ProjectsSection = () => {
   const [error, setError] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
+  const location = useLocation();
 
-  // ✨ REMOVED: All manual scroll restoration logic (useEffect hooks related to location.state) is now gone.
-  // The official <ScrollRestoration /> component in App.js will handle this automatically.
+  // ✨ NEW: Definitive scroll restoration logic
+  // This effect runs when you navigate BACK to this page.
+  // It reads the saved position from session storage and scrolls the window there.
+  useEffect(() => {
+    const savedPosition = sessionStorage.getItem('scrollPosition');
+    if (savedPosition) {
+      window.scrollTo(0, parseInt(savedPosition, 10));
+      sessionStorage.removeItem('scrollPosition'); // Clean up the stored value
+    }
+  }, [location]); // Reruns when the page location changes
+
+  // This function is now attached to each project link.
+  // It saves the current scroll position right before you navigate away.
+  const handleProjectClick = () => {
+    sessionStorage.setItem('scrollPosition', window.scrollY);
+  };
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -84,7 +97,6 @@ const ProjectsSection = () => {
           {projects.map((project, index) => {
             const IconComponent = getProjectIcon(project.name);
             return (
-              // ✨ MODIFIED: Added a min-height to prevent layout shift while content loads.
               <Card key={project.id} className={`flex flex-col p-6 neon-card group min-h-[520px] ${isVisible ? `scale-in stagger-${index + 2}` : ''}`}>
                 <div className="flex-grow">
                   <div className="flex items-start space-x-4 mb-6">
@@ -116,7 +128,8 @@ const ProjectsSection = () => {
                   </div>
                 </div>
                 <div className="pt-4 mt-auto border-t border-border/30">
-                  <Link to={`/projects/${project.id}`} className="flex items-center text-cyan-soft text-sm font-medium">
+                  {/* ✨ MODIFIED: Added onClick to manually save scroll position */}
+                  <Link to={`/projects/${project.id}`} onClick={handleProjectClick} className="flex items-center text-cyan-soft text-sm font-medium">
                     <span>View Implementation Details</span><ArrowRight className="w-4 h-4 ml-2" />
                   </Link>
                 </div>
