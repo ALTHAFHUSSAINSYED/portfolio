@@ -115,7 +115,8 @@ const ProjectsSection = () => {
                   </div>
                 </div>
                 <div className="pt-4 mt-auto border-t border-border/30">
-                  <Link to={`/projects/${project.id}`} state={{ scrollPosition: window.scrollY }} className="flex items-center text-cyan-soft text-sm font-medium">
+                  {/* ✨ --- MODIFIED: The conflicting "state" prop has been removed from this Link --- ✨ */}
+                  <Link to={`/projects/${project.id}`} className="flex items-center text-cyan-soft text-sm font-medium">
                     <span>View Implementation Details</span><ArrowRight className="w-4 h-4 ml-2" />
                   </Link>
                 </div>
