@@ -12,7 +12,6 @@ const ProjectsSection = () => {
   const [error, setError] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
-  // ✨ All previous manual scroll logic has been removed to allow the global system to work on a stable layout.
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -80,7 +79,6 @@ const ProjectsSection = () => {
           {projects.map((project, index) => {
             const IconComponent = getProjectIcon(project.name);
             return (
-              // ✨ MODIFIED: The min-height is removed from the card itself to let content define the height.
               <Card key={project.id} className={`flex flex-col p-6 neon-card group ${isVisible ? `scale-in stagger-${index + 2}` : ''}`}>
                 <div className="flex-grow flex flex-col">
                   <div className="flex items-start space-x-4 mb-4">
@@ -88,12 +86,7 @@ const ProjectsSection = () => {
                     <div><h3 className="text-xl font-bold text-foreground">{project.name}</h3></div>
                   </div>
                   
-                  {/* ✨ DEFINITIVE FIX FOR IMAGE SIZE & JUMP ✨ */}
-                  {project.image_url && (
-                    <div className="my-4 w-full aspect-video bg-muted/30 rounded-lg overflow-hidden">
-                      <img src={project.image_url} alt={project.name} className="w-full h-full object-contain"/>
-                    </div>
-                  )}
+                  {/* ✨ REMOVED: The project image has been removed from this view. */}
 
                   <div className="space-y-2 mb-6">
                     {(project.summary || '').split('\n').filter(line => line.trim() !== '').map((line, idx) => (
@@ -109,7 +102,6 @@ const ProjectsSection = () => {
                     <div className="flex flex-wrap gap-2">{project.technologies.map((tech) => (<Badge key={tech} variant="outline" className="border-cyan-400/30 text-cyan-soft bg-background/50">{tech}</Badge>))}</div>
                   </div>
 
-                  {/* This ensures the link is always pushed to the bottom */}
                   <div className="flex-grow"></div> 
 
                   <div className="pt-4 mt-auto border-t border-border/30">
