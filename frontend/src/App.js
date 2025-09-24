@@ -1,19 +1,22 @@
 import React from "react";
 import "./App.css";
-import { Outlet } from "react-router-dom"; // ✨ MODIFIED: ScrollRestoration removed
+// ✨ MODIFIED: Re-added ScrollRestoration, removed the custom hook import
+import { Outlet, ScrollRestoration } from "react-router-dom"; 
 import { portfolioData } from './data/mock';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import { Toaster } from './components/ui/toaster';
-import useManualScroll from './hooks/useManualScroll'; // ✨ NEW: Import our custom hook
+// ✨ REMOVED: The custom hook is no longer needed.
+// import useManualScroll from './hooks/useManualScroll'; 
 
 function App() {
-  // ✨ NEW: Activate our custom scroll restoration hook globally
-  useManualScroll();
+  // ✨ REMOVED: The call to the custom hook is gone.
+  // useManualScroll();
 
   return (
     <div className="min-h-screen bg-background flex flex-col overflow-hidden">
-      {/* ✨ REMOVED: The conflicting <ScrollRestoration /> component is gone */}
+      {/* ✨ MODIFIED: The official <ScrollRestoration /> component is back. */}
+      <ScrollRestoration />
       
       <Header personalInfo={portfolioData.personalInfo} />
       
