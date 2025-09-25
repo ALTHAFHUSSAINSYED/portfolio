@@ -978,8 +978,66 @@ code {
     letter-spacing: -0.2px;
   }
 
-  /* End of light-mode enhancements */
-  /* ===================== */
+  /* Gradient, glow, and blink for header name and nav (light theme only) */
+  html:not(.dark) .gradient-glow-blink {
+    background: linear-gradient(90deg, #f472b6, #10b981, #f472b6, #10b981);
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+    animation: gradientGlowBlink 2.5s linear infinite;
+    text-shadow: 0 0 12px #f472b6, 0 0 24px #10b981;
+  }
+  @keyframes gradientGlowBlink {
+    0%, 100% { background-position: 0% 50%; filter: brightness(1.2); }
+    25% { background-position: 50% 100%; filter: brightness(1.5); }
+    50% { background-position: 100% 50%; filter: brightness(2); }
+    75% { background-position: 50% 0%; filter: brightness(1.5); }
+  }
+
+  /* Theme toggle: extra large, bright, blinking, glowing (light theme only) */
+  html:not(.dark) .theme-toggle-blink-glow {
+    box-shadow: 0 0 24px 6px #f472b6, 0 0 48px 12px #10b981;
+    animation: toggleBlinkGlow 1.2s infinite alternate, toggleScale 2s infinite;
+    background: linear-gradient(135deg, #f472b6 40%, #10b981 100%);
+    border-radius: 50%;
+    filter: drop-shadow(0 0 8px #f472b6) drop-shadow(0 0 12px #10b981);
+  }
+  @keyframes toggleBlinkGlow {
+    0% { box-shadow: 0 0 24px 6px #f472b6, 0 0 48px 12px #10b981; filter: brightness(1.2); }
+    50% { box-shadow: 0 0 48px 16px #10b981, 0 0 64px 24px #f472b6; filter: brightness(2); }
+    100% { box-shadow: 0 0 24px 6px #f472b6, 0 0 48px 12px #10b981; filter: brightness(1.2); }
+  }
+  @keyframes toggleScale {
+    0%, 100% { transform: scale(1.08); }
+    50% { transform: scale(1.18); }
+  }
+
+  /* Resume button animation (light theme only) */
+  html:not(.dark) .resume-animate {
+    animation: resumePulse 1.5s infinite alternate;
+    box-shadow: 0 0 0 0 #f472b6, 0 0 0 0 #10b981;
+    border-image: linear-gradient(90deg, #f472b6, #10b981) 1;
+  }
+  @keyframes resumePulse {
+    0% { box-shadow: 0 0 0 0 #f472b6, 0 0 0 0 #10b981; }
+    50% { box-shadow: 0 0 16px 4px #f472b6, 0 0 32px 8px #10b981; }
+    100% { box-shadow: 0 0 0 0 #f472b6, 0 0 0 0 #10b981; }
+  }
+
+  /* Pink-green gradient scrollbar thumb (light theme only) */
+  html:not(.dark)::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #f472b6 0%, #10b981 100%);
+    border-radius: 8px;
+    border: 3px solid #f5f5f5;
+  }
+  html:not(.dark)::-webkit-scrollbar {
+    background: #f5f5f5;
+  }
+  html:not(.dark) {
+    scrollbar-color: #f472b6 #10b981;
+  }
 }
 
 /* =====================
