@@ -1506,13 +1506,6 @@ html.dark::-webkit-scrollbar {
 }
 
 /* Remove header/nav/button background glow for both themes */
-.header-animate, .nav-animate, .resume-animate-strong, .theme-toggle-animate {
-  text-shadow: none !important;
-  box-shadow: none !important;
-  background: none !important;
-  filter: none !important;
-  animation: none !important;
-}
 
 /* Glassmorphic gradient button for section blocks */
 .glassmorphic-btn {
