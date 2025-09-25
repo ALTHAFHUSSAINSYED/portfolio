@@ -193,11 +193,6 @@ const SkillsSection = ({ skills }) => {
           })}
         </div>
 
-        {/* Glassmorphic Button */}
-        <div className="mt-8 text-center">
-          <button className="glassmorphic-btn">See All Skills</button>
-        </div>
-
         {/* Skills Summary with Animation */}
         <div className={`mt-16 text-center ${isVisible ? 'slide-in-bottom stagger-6' : ''}`}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto">
