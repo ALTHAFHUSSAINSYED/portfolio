@@ -1563,6 +1563,7 @@ html.dark::-webkit-scrollbar {
 }
 
 /* Pink to Neon Green gradient for site name in dark theme */
+.dark .site-title-gradient {
   background: linear-gradient(90deg, #ff3fb4, #3dff8c);
   background-size: 200% 100%;
   -webkit-background-clip: text;
@@ -1577,6 +1578,7 @@ html.dark::-webkit-scrollbar {
 }
 
 /* Pink to Neon Green gradient for site name in light theme */
+.name-text-light {
   background: linear-gradient(90deg, #ff3fb4, #3dff8c);
   background-size: 200% 100%;
   -webkit-background-clip: text;
