@@ -734,9 +734,8 @@ code {
     width: 10px;
   }
 
-  ::-webkit-scrollbar-track {
-    background: #000;
-  }
+  /* Default track color kept neutral; dark theme overrides below */
+  ::-webkit-scrollbar-track { background: #f1f5f9; }
 
   /* Ensure page/root scrollbar uses light palette when body has .light */
   .light ::-webkit-scrollbar { width: 10px; background-color: #f8fafc; }
@@ -746,26 +745,27 @@ code {
   .light html::-webkit-scrollbar-track { background: #f8fafc; }
   .light ::-webkit-scrollbar-corner { background: #f8fafc; }
 
-  ::-webkit-scrollbar-thumb {
+  /* Dark theme scrollbar (original look) */
+  .dark ::-webkit-scrollbar-track { background: #000; }
+  .dark ::-webkit-scrollbar-thumb {
     background: linear-gradient(45deg, #22d3ee, #ec4899);
     border-radius: 5px;
     animation: scrollbarShine 3s ease-in-out infinite;
   }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(45deg, #0891b2, #be185d);
-  }
+  .dark ::-webkit-scrollbar-thumb:hover { background: linear-gradient(45deg, #0891b2, #be185d); }
 
   /* Light-mode thumb uses warm gradients (no blue) */
   .light body::-webkit-scrollbar-thumb,
   .light html::-webkit-scrollbar-thumb,
   .light ::-webkit-scrollbar-thumb {
     background: linear-gradient(45deg, #f59e0b, #d946ef);
+    border: 2px solid #f8fafc; /* ensure edge blends with track */
   }
   .light body::-webkit-scrollbar-thumb:hover,
   .light html::-webkit-scrollbar-thumb:hover,
   .light ::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(45deg, #f97316, #e11d48);
+    border-color: #f8fafc;
   }
 
   /* Firefox light scrollbar colors */
