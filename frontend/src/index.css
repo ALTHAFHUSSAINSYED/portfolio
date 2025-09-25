@@ -28,26 +28,28 @@ code {
 }
 
 /* =========== CUSTOM SCROLLBAR STYLING =========== */
-/* Width */
+/* Base scrollbar width for all themes */
 ::-webkit-scrollbar {
     width: 10px;
 }
 
-/* Track */
+/* Base track style - will be overridden by theme-specific styles */
 ::-webkit-scrollbar-track {
     background: rgba(0, 0, 0, 0.1);
     border-radius: 10px;
 }
 
-/* Thumb */
+/* Base thumb style with neutral gradient (fallback) */
 ::-webkit-scrollbar-thumb {
     background: linear-gradient(135deg, #E60073, #00D4FF);
     border-radius: 10px;
     border: 2px solid transparent;
     background-clip: padding-box;
+    transition: background 0.3s ease;
+    animation: scrollbarGlow 3s ease-in-out infinite;
 }
 
-/* Thumb on hover */
+/* Base hover style with brighter gradient (fallback) */
 ::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(135deg, #FF0088, #00E5FF);
     border-radius: 10px;
@@ -55,10 +57,16 @@ code {
     background-clip: padding-box;
 }
 
-/* For Firefox */
+/* Firefox scrollbar base styling */
 * {
     scrollbar-width: thin;
     scrollbar-color: #E60073 rgba(0, 0, 0, 0.1);
+}
+
+/* Scrollbar animation for glowing effect */
+@keyframes scrollbarGlow {
+    0%, 100% { opacity: 0.8; box-shadow: 0 0 5px rgba(230, 0, 115, 0.5); }
+    50% { opacity: 1; box-shadow: 0 0 10px rgba(0, 212, 255, 0.7); }
 }
 
 /* ✨ MODIFIED: CSS variables for both light and dark themes */
@@ -182,7 +190,8 @@ code {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0.5rem 1rem;
+    /* Reduced padding by ~15-20% for smaller size */
+    padding: 0.4rem 0.8rem; 
     border-radius: 9999px;
     backdrop-filter: blur(12px);
     background: linear-gradient(to right, rgba(236, 72, 153, 0.3), rgba(34, 211, 238, 0.3));
@@ -191,6 +200,8 @@ code {
     transition: all 0.3s ease;
     color: hsl(var(--foreground));
     font-weight: 500;
+    /* Reduced font size for better proportion with smaller buttons */
+    font-size: 0.9rem;
   }
   
   .glassmorphic-nav-btn:hover {
@@ -824,19 +835,33 @@ code {
   .light html::-webkit-scrollbar, .light body::-webkit-scrollbar { background-color: #f8fafc; }
   .light ::-webkit-scrollbar-track { background: #f8fafc; }
   .light body::-webkit-scrollbar-track { background: #f8fafc; }
-  .light html::-webkit-scrollbar-track { background: #f8fafc; }
+  /* Light theme scrollbar track and corner */
+  .light html::-webkit-scrollbar-track { 
+    background: #f8fafc; 
+    border-radius: 10px;
+    box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.05);
+  }
   .light ::-webkit-scrollbar-corner { background: #f8fafc; }
 
-  /* Dark theme scrollbar (original look) */
-  .dark ::-webkit-scrollbar-track { background: #000; }
-  .dark ::-webkit-scrollbar-thumb {
-    background: linear-gradient(45deg, #22d3ee, #ec4899);
-    border-radius: 5px;
-    animation: scrollbarShine 3s ease-in-out infinite;
+  /* Dark theme scrollbar - fuchsia to cyan gradient for consistency with other UI elements */
+  .dark ::-webkit-scrollbar-track { 
+    background: rgba(0, 0, 0, 0.3); 
+    border-radius: 10px;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
   }
-  .dark ::-webkit-scrollbar-thumb:hover { background: linear-gradient(45deg, #0891b2, #be185d); }
+  .dark ::-webkit-scrollbar-thumb {
+    background: linear-gradient(45deg, #d946ef, #22d3ee);
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    animation: scrollbarGlowDark 3s ease-in-out infinite;
+  }
+  .dark ::-webkit-scrollbar-thumb:hover { 
+    background: linear-gradient(45deg, #e879f9, #06b6d4); 
+    box-shadow: 0 0 8px rgba(217, 70, 239, 0.6);
+  }
 
-  /* Light-mode thumb uses warm gradients (no blue) */
+  /* Light theme scrollbar - warm gradient with pink/purple tones */
   .light body::-webkit-scrollbar-thumb,
   .light html::-webkit-scrollbar-thumb,
   .light ::-webkit-scrollbar-thumb,
@@ -844,7 +869,8 @@ code {
     background: linear-gradient(45deg, #f59e0b, #d946ef);
     border: 2px solid #f8fafc; /* ensure edge blends with track */
     background-clip: padding-box;
-    border-radius: 6px;
+    border-radius: 8px;
+    animation: scrollbarGlowLight 3s ease-in-out infinite;
   }
   .light body::-webkit-scrollbar-thumb:hover,
   .light html::-webkit-scrollbar-thumb:hover,
@@ -852,6 +878,18 @@ code {
   .light *::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(45deg, #f97316, #e11d48);
     border-color: #f8fafc;
+    box-shadow: 0 0 8px rgba(249, 115, 22, 0.4);
+  }
+  
+  /* Theme-specific animations for scrollbar */
+  @keyframes scrollbarGlowDark {
+    0%, 100% { opacity: 0.8; box-shadow: 0 0 6px rgba(217, 70, 239, 0.4); }
+    50% { opacity: 1; box-shadow: 0 0 12px rgba(34, 211, 238, 0.6); }
+  }
+  
+  @keyframes scrollbarGlowLight {
+    0%, 100% { opacity: 0.8; box-shadow: 0 0 6px rgba(245, 158, 11, 0.3); }
+    50% { opacity: 1; box-shadow: 0 0 10px rgba(217, 70, 239, 0.4); }
   }
 
   /* Ensure any scrollable element in light mode has a light track */
@@ -861,10 +899,16 @@ code {
   .light body, .light html { scrollbar-color: #d946ef #f8fafc; }
   /* Ensure light theme explicitly paints white on root to avoid dark gutter */
   .light html, .light body { background-color: #ffffff; scrollbar-gutter: stable; }
-
-  @keyframes scrollbarShine {
-    0%, 100% { opacity: 0.8; }
-    50% { opacity: 1; }
+  
+  /* Enhanced Firefox scrollbar styling for both themes */
+  .dark {
+    scrollbar-width: thin;
+    scrollbar-color: #d946ef rgba(0, 0, 0, 0.3);
+  }
+  
+  .light {
+    scrollbar-width: thin;
+    scrollbar-color: #f59e0b #f8fafc;
   }
 
   /* ✨ NEW: Animation for Project Detail Link */
@@ -1382,14 +1426,17 @@ html.dark::-webkit-scrollbar {
   transform: translateY(-2px) scale(1.04);
 }
 
-/* Bigger, brighter, gradient theme toggle icon */
+/* Bigger, brighter, gradient theme toggle icon with glassmorphic effect */
 .theme-toggle-btn.theme-toggle-animate {
-  width: 3.5rem !important;
-  height: 3.5rem !important;
-  min-width: 3.5rem !important;
-  min-height: 3.5rem !important;
-  background: linear-gradient(135deg, #ec4899 0%, #06b6d4 100%);
-  box-shadow: 0 0 32px 8px #ec4899, 0 0 48px 16px #06b6d4;
+  width: 4.2rem !important;  /* Increased by ~25% from 3.5rem */
+  height: 4.2rem !important;
+  min-width: 4.2rem !important;
+  min-height: 4.2rem !important;
+  backdrop-filter: blur(8px);
+  background: linear-gradient(120deg, rgba(230, 0, 115, 0.4), rgba(0, 212, 255, 0.4));
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  box-shadow: 0 4px 8px -1px rgba(0, 0, 0, 0.1), 0 0 15px rgba(230, 0, 115, 0.3);
   filter: drop-shadow(0 0 12px #ec4899) drop-shadow(0 0 18px #06b6d4);
   border-radius: 50%;
   display: flex;
@@ -1402,12 +1449,20 @@ html.dark::-webkit-scrollbar {
   transform: scale(1.12);
 }
 
-/* White-pink combo for site name in dark theme */
+/* Fuchsia to Cyan gradient for site name in dark theme */
 .dark .site-title-gradient {
-  background: linear-gradient(90deg, #fff 0%, #ec4899 100%);
+  background: linear-gradient(90deg, #E60073, #00D4FF);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   color: transparent;
+  background-size: 200% 100%;
+  animation: textShine 6s linear infinite;
+}
+
+/* Dark gray text for site name in light theme */
+.name-text-light {
+  color: #111827; /* Very dark gray for light theme */
+  font-weight: 700; /* Ensure bold weight for contrast */
 }
 

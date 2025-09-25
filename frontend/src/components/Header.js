@@ -33,11 +33,19 @@ const Header = ({ personalInfo }) => {
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      // Smooth scroll to the section with improved behavior
-      element.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
-      });
+      // For Contact section, the dedicated smooth-scroll.js handles this
+      // This avoids duplicate event handling for the contact button
+      if (sectionId !== 'contact') {
+        // Get header height for proper scroll positioning
+        const headerHeight = document.querySelector('header').offsetHeight;
+        const targetPosition = element.getBoundingClientRect().top + window.pageYOffset - headerHeight;
+      
+        // Use enhanced smooth scrolling with better positioning
+        window.scrollTo({
+          top: targetPosition,
+          behavior: 'smooth'
+        });
+      }
     }
     setIsMenuOpen(false);
   };
@@ -46,11 +54,11 @@ const Header = ({ personalInfo }) => {
     // ✨ MODIFIED: Uses bg-background for theme compatibility
     <header className="bg-background/95 backdrop-blur-sm border-b border-cyan-400/20 sticky top-0 z-50 shadow-lg shadow-cyan-400/5 fade-in">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-4">
+        <div className="flex justify-between items-center py-3">
           {/* Logo/Name */}
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 mr-6"> {/* Added mr-6 to reduce spacing to About button */}
             <h1
-              className={`text-2xl font-bold header-animate transition-all duration-300 cursor-pointer hover-scale ${theme === 'dark' ? 'site-title-gradient' : ''}`}
+              className={`text-2xl font-bold header-animate transition-all duration-300 cursor-pointer hover-scale ${theme === 'dark' ? 'site-title-gradient' : 'name-text-light'}`}
               onClick={() => scrollToSection('hero')}
             >
               {personalInfo.name}
@@ -58,7 +66,7 @@ const Header = ({ personalInfo }) => {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-6">
+          <nav className="hidden md:flex space-x-4"> {/* Reduced space between nav buttons */}
             <button 
               onClick={() => scrollToSection('about')}
               className="glassmorphic-nav-btn font-medium"
@@ -102,16 +110,16 @@ const Header = ({ personalInfo }) => {
               onClick={toggleTheme}
               variant="ghost"
               size="icon"
-              className="theme-toggle-btn theme-toggle-animate mr-2"
+              className="theme-toggle-btn theme-toggle-animate mr-2 theme-toggle-glassmorphic"
             >
-              {theme === 'dark' ? <Sun className="w-12 h-12 animate-pulse" /> : <Moon className="w-12 h-12 animate-pulse" />}
+              {theme === 'dark' ? <Sun className="w-15 h-15 animate-pulse" /> : <Moon className="w-15 h-15 animate-pulse" />}
               <span className="sr-only">Toggle theme</span>
             </Button>
             <Button
               onClick={downloadResume}
-              variant="outline"
+              variant="ghost"
               size="sm"
-              className="resume-animate-strong transition-all duration-300 hover-glow"
+              className="glassmorphic-nav-btn resume-animate-strong transition-all duration-300"
             >
               <Download className="w-4 h-4 mr-2" />
               Resume
@@ -185,6 +193,7 @@ const Header = ({ personalInfo }) => {
                 <Button
                   onClick={() => scrollToSection('contact')}
                   size="sm"
+                  id="contact-nav-button-mobile"
                   className="neon-button bg-gradient-to-r from-pink-500/80 to-cyan-400/80 hover:from-pink-500 hover:to-cyan-400 text-black font-semibold transition-all duration-300 fade-in-right stagger-7"
                 >
                   <Mail className="w-4 h-4 mr-2" />
