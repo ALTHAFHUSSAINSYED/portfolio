@@ -1467,20 +1467,24 @@ html.dark::-webkit-scrollbar {
 }
 
 .theme-toggle-animate {
-  background: linear-gradient(135deg, #e11d74 40%, #39ff14 100%);
-  box-shadow: 0 0 16px #e11d74, 0 0 24px #39ff14;
+  background: linear-gradient(90deg, #FF00AA, #00D4FF);
+  box-shadow: 0 0 16px #FF00AA, 0 0 24px #00D4FF;
   border-radius: 50%;
-  filter: drop-shadow(0 0 8px #e11d74) drop-shadow(0 0 12px #39ff14);
-  animation: toggleScale 2s infinite, toggleGlowPulse 1.2s infinite alternate;
+  filter: drop-shadow(0 0 8px #FF00AA) drop-shadow(0 0 12px #00D4FF);
+  animation: toggleScale 2s infinite, toggleGlowPulse 1.2s infinite alternate, toggleBlink 2.5s infinite;
 }
 @keyframes toggleGlowPulse {
-  0% { box-shadow: 0 0 16px #e11d74, 0 0 24px #39ff14; }
-  50% { box-shadow: 0 0 32px #39ff14, 0 0 40px #e11d74; }
-  100% { box-shadow: 0 0 16px #e11d74, 0 0 24px #39ff14; }
+  0% { box-shadow: 0 0 16px #FF00AA, 0 0 24px #00D4FF; }
+  50% { box-shadow: 0 0 32px #00D4FF, 0 0 40px #FF00AA; }
+  100% { box-shadow: 0 0 16px #FF00AA, 0 0 24px #00D4FF; }
 }
 @keyframes toggleScale {
   0%, 100% { transform: scale(1.08); }
   50% { transform: scale(1.18); }
+}
+@keyframes toggleBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
 /* Remove header/nav/button background glow for both themes */
@@ -1517,17 +1521,17 @@ html.dark::-webkit-scrollbar {
 .theme-toggle-glassmorphic {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  background: linear-gradient(120deg, rgba(230, 0, 115, 0.2), rgba(0, 212, 255, 0.2));
+  background: linear-gradient(120deg, rgba(255, 0, 170, 0.3), rgba(0, 212, 255, 0.3));
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 50%;
-  box-shadow: 0 4px 8px -1px rgba(0, 0, 0, 0.1), 0 0 15px rgba(230, 0, 115, 0.3);
+  box-shadow: 0 4px 8px -1px rgba(0, 0, 0, 0.1), 0 0 15px rgba(255, 0, 170, 0.4);
   transform: scale(1.25); /* 25% size increase */
   transition: transform 0.4s ease, box-shadow 0.3s ease, background 0.3s ease;
 }
 
 .theme-toggle-glassmorphic:hover {
-  background: linear-gradient(135deg, rgba(230, 0, 115, 0.3), rgba(0, 212, 255, 0.3));
-  box-shadow: 0 8px 25px rgba(230, 0, 115, 0.2), 0 4px 10px rgba(0, 212, 255, 0.2);
+  background: linear-gradient(135deg, rgba(255, 0, 170, 0.4), rgba(0, 212, 255, 0.4));
+  box-shadow: 0 8px 25px rgba(255, 0, 170, 0.3), 0 4px 10px rgba(0, 212, 255, 0.3);
   transform: scale(1.3) rotate(90deg);
 }
 
@@ -1540,9 +1544,9 @@ html.dark::-webkit-scrollbar {
   50% { opacity: 1; }
 }
 
-/* Fuchsia to Cyan gradient for site name in dark theme */
+/* Pink to Neon Green gradient for site name in dark theme */
 .dark .site-title-gradient {
-  background: linear-gradient(90deg, #E60073, #00D4FF);
+  background: linear-gradient(90deg, #FF00AA, #39FF14);
   background-size: 200% 100%;
   -webkit-background-clip: text;
   background-clip: text;
@@ -1556,9 +1560,9 @@ html.dark::-webkit-scrollbar {
   display: inline-block; /* Required for gradient text */
 }
 
-/* Dark gray gradient for site name in light theme */
+/* Pink to Neon Green gradient for site name in light theme */
 .name-text-light {
-  background: linear-gradient(135deg, #333333, #666666);
+  background: linear-gradient(90deg, #FF00AA, #39FF14);
   background-size: 200% 100%;
   -webkit-background-clip: text;
   background-clip: text;
@@ -1567,5 +1571,6 @@ html.dark::-webkit-scrollbar {
   color: #111827; /* Fallback */
   font-weight: 700;
   display: inline-block; /* Required for gradient text */
+  animation: textShine 6s linear infinite; /* Added animation for light theme */
 }
 

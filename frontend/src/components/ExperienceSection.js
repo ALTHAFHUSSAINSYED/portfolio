@@ -170,9 +170,6 @@ const ExperienceSection = ({ experience }) => {
             </p>
           </div>
         </div>
-        <div className="mt-8 text-center">
-          <button className="glassmorphic-btn">See Full Experience</button>
-        </div>
       </div>
     </section>
   );

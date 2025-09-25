@@ -202,9 +202,6 @@ const CertificationsSection = ({ certifications }) => {
             </div>
           </div>
         </div>
-        <div className="mt-8 text-center">
-          <button className="glassmorphic-btn">See All Certifications</button>
-        </div>
       </div>
     </section>
   );

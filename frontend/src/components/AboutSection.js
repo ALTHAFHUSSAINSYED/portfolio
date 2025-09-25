@@ -96,9 +96,6 @@ const AboutSection = ({ personalInfo, achievements }) => {
                 ))}
               </div>
             </div>
-            <div className="mt-8">
-              <button className="glassmorphic-btn">Learn More About Me</button>
-            </div>
           </div>
 
           {/* Key Achievements */}
