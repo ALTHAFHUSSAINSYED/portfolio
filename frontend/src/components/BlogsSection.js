@@ -119,6 +119,9 @@ const BlogsSection = () => {
             ))}
           </div>
         )}
+        <div className="mt-8 text-center">
+          <button className="glassmorphic-btn">See All Blogs</button>
+        </div>
       </div>
     </section>
   );
