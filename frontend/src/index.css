@@ -50,7 +50,7 @@ code {
 
 /* Base thumb style with neutral gradient (fallback) */
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(90deg, #ff3fb4 0%, #3dff8c 100%);
+  background: linear-gradient(90deg, #f472b6 0%, #38bdf8 100%);
     border-radius: 10px;
     border: 2px solid transparent;
     background-clip: padding-box;
@@ -60,7 +60,7 @@ code {
 
 /* Base hover style with brighter gradient (fallback) */
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(90deg, #ff3fb4 0%, #3dff8c 100%);
+  background: linear-gradient(90deg, #f472b6 0%, #38bdf8 100%);
     border-radius: 10px;
     border: 2px solid transparent;
     background-clip: padding-box;
@@ -860,7 +860,7 @@ code {
 
   .dark ::-webkit-scrollbar-thumb,
   .dark *::-webkit-scrollbar-thumb {
-  background: linear-gradient(90deg, #ff3fb4 0%, #3dff8c 100%);
+  background: linear-gradient(90deg, #f472b6 0%, #38bdf8 100%);
     border-radius: 8px;
     border: 2px solid transparent;
     background-clip: padding-box;
@@ -869,7 +869,7 @@ code {
 
   .dark ::-webkit-scrollbar-thumb:hover,
   .dark *::-webkit-scrollbar-thumb:hover { 
-  background: linear-gradient(90deg, #ff3fb4 0%, #3dff8c 100%);
+  background: linear-gradient(90deg, #f472b6 0%, #38bdf8 100%);
     box-shadow: 0 0 8px rgba(217, 70, 239, 0.6);
   }
 
@@ -892,7 +892,7 @@ code {
   .light html::-webkit-scrollbar-thumb,
   .light ::-webkit-scrollbar-thumb,
   .light *::-webkit-scrollbar-thumb {
-  background: linear-gradient(90deg, #ff3fb4 0%, #3dff8c 100%);
+  background: linear-gradient(90deg, #f472b6 0%, #38bdf8 100%);
     border: 2px solid #f8fafc; /* ensure edge blends with track */
     background-clip: padding-box;
     border-radius: 8px;
@@ -903,7 +903,7 @@ code {
   .light html::-webkit-scrollbar-thumb:hover,
   .light ::-webkit-scrollbar-thumb:hover,
   .light *::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(90deg, #ff3fb4 0%, #3dff8c 100%);
+  background: linear-gradient(90deg, #f472b6 0%, #38bdf8 100%);
     border-color: #f8fafc;
     box-shadow: 0 0 8px rgba(249, 115, 22, 0.4);
   }
@@ -1353,12 +1353,12 @@ html::-webkit-scrollbar {
   background: #f5f5f5;
 }
 html::-webkit-scrollbar-thumb {
-  background: linear-gradient(90deg, #ff3fb4 0%, #3dff8c 100%);
+  background: linear-gradient(90deg, #f472b6 0%, #38bdf8 100%);
   border-radius: 8px;
   border: 3px solid #f5f5f5;
 }
 html.dark::-webkit-scrollbar-thumb {
-  background: linear-gradient(90deg, #ff3fb4 0%, #3dff8c 100%);
+  background: linear-gradient(90deg, #f472b6 0%, #38bdf8 100%);
   border: 3px solid #18181b;
 }
 html.dark::-webkit-scrollbar {
@@ -1571,7 +1571,7 @@ html.dark::-webkit-scrollbar {
 
 /* Pink to Neon Green gradient for site name in light theme */
 .name-text-light {
-  color: #e94fc2 !important;
+  color: #38bdf8 !important;
   background: none !important;
   -webkit-background-clip: unset !important;
   background-clip: unset !important;
