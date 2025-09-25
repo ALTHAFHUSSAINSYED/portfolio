@@ -77,10 +77,10 @@ const Header = ({ personalInfo }) => {
               Certifications
             </button>
             <button 
-              onClick={() => scrollToSection('contact')}
+              onClick={() => scrollToSection('blogs')}
               className="nav-link font-medium nav-animate transition-all duration-300"
             >
-              Contact
+              Blogs
             </button>
           </nav>
 
@@ -105,12 +105,12 @@ const Header = ({ personalInfo }) => {
               Resume
             </Button>
             <Button
-              onClick={() => scrollToSection('contact')}
+              onClick={() => scrollToSection('blogs')}
               size="sm"
               className="neon-button bg-gradient-to-r from-pink-500/80 to-cyan-400/80 hover:from-pink-500 hover:to-cyan-400 text-black font-semibold transition-all duration-300"
             >
               <Mail className="w-4 h-4 mr-2" />
-              Contact
+              Blogs
             </Button>
           </div>
 
@@ -143,13 +143,13 @@ const Header = ({ personalInfo }) => {
         }`}>
           <div className="pb-4 border-t border-cyan-400/20 mt-4">
             <div className="flex flex-col space-y-3 pt-4">
-              {['about', 'skills', 'experience', 'certifications', 'contact'].map((section, index) => (
+              {['about', 'skills', 'experience', 'certifications', 'blogs'].map((section, index) => (
                 <button 
                   key={section}
                   onClick={() => scrollToSection(section)}
                   className={`text-left text-foreground hover:text-cyan-soft font-medium transition-all duration-300 py-2 capitalize fade-in-right stagger-${index + 1}`}
                 >
-                  {section}
+                  {section.charAt(0).toUpperCase() + section.slice(1)}
                 </button>
               ))}
               <div className="flex flex-col space-y-2 pt-2">
@@ -163,12 +163,12 @@ const Header = ({ personalInfo }) => {
                   Download Resume
                 </Button>
                 <Button
-                  onClick={() => scrollToSection('contact')}
+                  onClick={() => scrollToSection('blogs')}
                   size="sm"
                   className="neon-button bg-gradient-to-r from-pink-500/80 to-cyan-400/80 hover:from-pink-500 hover:to-cyan-400 text-black font-semibold transition-all duration-300 fade-in-right stagger-7"
                 >
                   <Mail className="w-4 h-4 mr-2" />
-                  Get in Touch
+                  Blogs
                 </Button>
               </div>
             </div>

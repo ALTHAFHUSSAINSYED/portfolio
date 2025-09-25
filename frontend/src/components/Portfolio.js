@@ -8,7 +8,7 @@ import SkillsSection from './SkillsSection';
 import ExperienceSection from './ExperienceSection';
 import CertificationsSection from './CertificationsSection';
 import ProjectsSection from './ProjectsSection';
-import ContactSection from './ContactSection';
+import BlogsSection from './BlogsSection';
 
 // NOTE: Header, Footer, and Toaster are intentionally NOT included here.
 // The global layout (Header/Footer/Toaster) is provided by App.js to avoid duplicates.
@@ -23,7 +23,7 @@ const Portfolio = () => {
       <ExperienceSection experience={portfolioData.experience} />
       <CertificationsSection certifications={portfolioData.certifications} />
       <ProjectsSection />
-      <ContactSection personalInfo={portfolioData.personalInfo} />
+  <BlogsSection />
     </div>
   );
 };
