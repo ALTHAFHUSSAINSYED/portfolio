@@ -1,4 +1,8 @@
 name: Deploy Backend to Render
+permissions:
+  contents: none
+  issues: none
+  pull-requests: none
 
 on:
   push:
