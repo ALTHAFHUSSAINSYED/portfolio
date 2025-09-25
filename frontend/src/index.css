@@ -992,9 +992,9 @@ code {
     50% { transform: scale(1.18); }
   }
 
-  /* Pink-cyan gradient thumb for both themes, white track for light, black for dark */
+  /* Fuchsia-to-Cyan gradient thumb for both themes, track as in images */
   html::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #ec4899 0%, #06b6d4 100%);
+    background: linear-gradient(180deg, #d946ef 0%, #06b6d4 100%);
     border-radius: 8px;
     border: 3px solid transparent;
   }
@@ -1005,10 +1005,10 @@ code {
     background: #000;
   }
   html {
-    scrollbar-color: #ec4899 #fff;
+    scrollbar-color: #d946ef #fff;
   }
   html.dark {
-    scrollbar-color: #ec4899 #000;
+    scrollbar-color: #d946ef #000;
   }
 }
 
@@ -1268,5 +1268,14 @@ html.dark::-webkit-scrollbar {
 @keyframes toggleScale {
   0%, 100% { transform: scale(1.08); }
   50% { transform: scale(1.18); }
+}
+
+/* Remove header/nav/button background glow for both themes */
+.header-animate, .nav-animate, .resume-animate-strong, .theme-toggle-animate {
+  text-shadow: none !important;
+  box-shadow: none !important;
+  background: none !important;
+  filter: none !important;
+  animation: none !important;
 }
 
