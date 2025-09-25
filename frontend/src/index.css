@@ -13,13 +13,52 @@ body {
     -moz-osx-font-smoothing: grayscale;
     /* ✨ NEW: Smooth transition for theme changes */
     transition: background-color 0.4s ease, color 0.4s ease;
-    /* ✨ --- FIX: This is the only line that has been added --- ✨ */
+    /* Prevent horizontal scrolling */
     overflow-x: hidden;
+    
+    /* Custom Scrollbar Styling */
+    /* Basic Firefox scrollbar support */
+    scrollbar-width: thin;
+    scrollbar-color: #E60073 rgba(0, 0, 0, 0.1);
 }
 
 code {
     font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
         monospace;
+}
+
+/* =========== CUSTOM SCROLLBAR STYLING =========== */
+/* Width */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+/* Thumb */
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #E60073, #00D4FF);
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+/* Thumb on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #FF0088, #00E5FF);
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+/* For Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #E60073 rgba(0, 0, 0, 0.1);
 }
 
 /* ✨ MODIFIED: CSS variables for both light and dark themes */
@@ -118,6 +157,8 @@ code {
   html {
     /* Ensure root element paints the page background (fixes right gutter) */
     background-color: hsl(var(--background));
+    /* Basic smooth scrolling fallback (JavaScript solution is also implemented) */
+    scroll-behavior: smooth;
   }
   body {
     /* ✨ MODIFIED: Uses CSS variables for background and text color */
@@ -136,6 +177,47 @@ code {
 
 /* Enhanced Black Theme with Shining Effects */
 @layer components {
+  /* Glassmorphic Navigation Button */
+  .glassmorphic-nav-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    backdrop-filter: blur(12px);
+    background: linear-gradient(to right, rgba(236, 72, 153, 0.3), rgba(34, 211, 238, 0.3));
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 6px -1px rgba(236, 72, 153, 0.1);
+    transition: all 0.3s ease;
+    color: hsl(var(--foreground));
+    font-weight: 500;
+  }
+  
+  .glassmorphic-nav-btn:hover {
+    background: linear-gradient(to right, rgba(236, 72, 153, 0.5), rgba(34, 211, 238, 0.5));
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 10px 15px -3px rgba(34, 211, 238, 0.2);
+  }
+  
+  .glassmorphic-nav-btn.active {
+    background: linear-gradient(to right, rgba(236, 72, 153, 0.7), rgba(34, 211, 238, 0.7));
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 10px 15px -3px rgba(34, 211, 238, 0.3);
+  }
+  
+  /* Dark theme adjustments for glassmorphic buttons */
+  .dark .glassmorphic-nav-btn {
+    background: linear-gradient(to right, rgba(236, 72, 153, 0.4), rgba(34, 211, 238, 0.4));
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: white;
+  }
+  
+  .dark .glassmorphic-nav-btn:hover {
+    background: linear-gradient(to right, rgba(236, 72, 153, 0.6), rgba(34, 211, 238, 0.6));
+    border: 1px solid rgba(255, 255, 255, 0.4);
+  }
+
   .neon-theme {
     background: #000000;
     min-height: 100vh;
