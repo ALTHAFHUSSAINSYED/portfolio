@@ -25,22 +25,36 @@ code {
   :root {
       /* Light Theme Variables (Default) */
       --background: 0 0% 100%;      /* White */
-      --foreground: 0 0% 7%;        /* stronger/darker primary text for readability */
+
+      /*
+        REPLACED --foreground (was near-black) with a deep-indigo HSL value
+        so body text on light theme uses a colored (indigo) tone instead of plain black.
+        This is used via hsl(var(--foreground)) throughout the theme.
+      */
+      --foreground: 231 60% 32%;    /* deep indigo for primary text */
+
       --card: 0 0% 100%;
-      --card-foreground: 0 0% 10%;
+      --card-foreground: 231 60% 26%; /* slightly darker indigo for card text */
       --popover: 0 0% 100%;
-      --popover-foreground: 0 0% 10%;
+      --popover-foreground: 231 60% 26%;
       --primary: 210 40% 98%;
       --primary-foreground: 210 40% 9.8%;
+
+      /* Light-mode secondary and muted text now use softer blue/purple hues (not gray/black) */
       --secondary: 0 0% 96.1%;
-      --secondary-foreground: 0 0% 14%;
+      --secondary-foreground: 224 56% 28%; /* nav / secondary text on light theme */
+
       --muted: 0 0% 96.1%;
-      --muted-foreground: 0 0% 22%;
+      --muted-foreground: 231 35% 48%;    /* lighter indigo/purple for muted text */
+
       --accent: 300 100% 50%;
       --accent-foreground: 0 0% 98%;
       --destructive: 0 84.2% 60.2%;
       --destructive-foreground: 0 0% 98%;
-      --border: 0 0% 78%;
+
+      /* Slightly brighter border for light mode (keeps contrast without pure black) */
+      --border: 215 10% 86%;
+
       --input: 0 0% 94%;
       --ring: 0 0% 3.9%;
       --chart-1: 180 100% 50%;
@@ -49,13 +63,23 @@ code {
       --chart-4: 60 100% 50%;
       --chart-5: 240 100% 50%;
       --radius: 0.5rem;
-      /* Soft color fallbacks for light mode (updated to avoid pale skyblue) */
+
+      /* Soft color fallbacks for light mode (kept and used) */
       --cyan-soft-hex: #0891b2;
       --pink-soft-hex: #f472b6;
       --green-soft-hex: #16a34a;
       --yellow-soft-hex: #f59e0b;
-      --blue-soft-hex: #1e3a8a;   /* indigo (not pale skyblue) */
+      --blue-soft-hex: #1e3a8a;   /* indigo (preferred over pale skyblue) */
       --purple-soft-hex: #8b5cf6;
+
+      /* Additional named variables for consistent light-mode text usage */
+      --text-primary-h: 231 60% 32%; /* same as --foreground (indigo) */
+      --text-heading-h: 224 68% 22%; /* darker indigo for headings */
+      --text-muted-h: 321 20% 45%;   /* a softer muted pink/purple */
+      --text-primary-hex: #1e3a8a;   /* indigo hex (for places easier to read as hex) */
+      --text-accent-pink-hex: #f472b6;
+      --text-accent-green-hex: #16a34a;
+      --text-accent-red-hex: #ef4444;
   }
 
   .dark {
@@ -412,11 +436,13 @@ code {
   .light .nav-link {
     position: relative;
     transition: all 0.4s ease;
-    color: #0f172a; /* stronger dark gray for light mode */
+    /* Use the heading color variable (no plain black) */
+    color: hsl(var(--text-heading-h));
   }
 
   .light .nav-link:hover {
-    color: #0056d6; /* stronger blue on hover for visibility */
+    /* stronger blue hover for visibility using the indigo hex variable */
+    color: var(--text-primary-hex);
   }
 
   /* Form Animations */
@@ -484,7 +510,8 @@ code {
   .light .form-input {
     background: rgba(255, 255, 255, 0.98);
     border: 1px solid rgba(0, 0, 0, 0.22);
-    color: #0f172a; /* stronger text color for readability */
+    /* Use the indigo (not plain black) for inputs text in light mode */
+    color: hsl(var(--text-primary-h));
   }
  
   .dark .nav-link {
@@ -497,11 +524,12 @@ code {
   .light .nav-link {
     position: relative;
     transition: all 0.4s ease;
-    color: #0f172a; /* A dark gray for light mode text */
+    /* replaced hard black with indigo heading color */
+    color: hsl(var(--text-heading-h));
   }
 
   .light .nav-link:hover {
-    color: #0056d6; /* A stronger blue for hover in light mode */
+    color: var(--text-primary-hex); /* indigo hex hover */
   }
 
   /* Keyframe Animations */
@@ -740,7 +768,7 @@ code {
   .light .glow-text,
   .light .glow-text-strong {
     /* Use the foreground variable for color and replace bright white glows with subtle dark micro-shadow */
-    color: hsl(var(--foreground));
+    color: hsl(var(--text-primary-h));
     text-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 0 2px rgba(0, 0, 0, 0.03);
     /* keep animations (do not disable), only reduce the visible glowing effect */
   }
@@ -758,7 +786,7 @@ code {
   }
 
   .light .section-title {
-    background: linear-gradient(90deg, #0f172a 0%, #1e3a8a 50%, #0f172a 100%);
+    background: linear-gradient(90deg, hsl(var(--text-heading-h)) 0%, #1e3a8a 50%, hsl(var(--text-heading-h)) 100%);
     background-size: 200% 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -768,11 +796,11 @@ code {
 
   /* Slightly stronger nav colors for light mode so header links are readable */
   .light .nav-link {
-    color: #0f172a; /* stronger dark gray */
+    color: hsl(var(--text-heading-h)); /* replaced plain black with indigo heading color */
   }
 
   .light .nav-link:hover {
-    color: #0047b3;
+    color: var(--text-primary-hex);
     text-shadow: none;
   }
 
@@ -795,7 +823,8 @@ code {
   /* Inputs clearer in light mode */
   .light .form-input {
     border: 1px solid rgba(0, 0, 0, 0.22);
-    color: #0f172a;
+    /* Use indigo (not pure black) for input text */
+    color: hsl(var(--text-primary-h));
     background: rgba(255,255,255,0.98);
   }
 
@@ -831,7 +860,7 @@ code {
 
   /* Project Details prominent text — replaces plain black with deep indigo + subtle entrance */
   .light .project-detail-text {
-    color: #1e3a8a; /* deep indigo — high contrast on white */
+    color: var(--text-primary-hex); /* deep indigo — high contrast on white */
     font-weight: 600;
     line-height: 1.45;
     animation: fadeInUp 0.9s ease both;
@@ -839,13 +868,14 @@ code {
 
   /* Sub-headings and body with pleasant warm/dense color instead of plain black */
   .light .body-text {
-    color: #0b1220; /* near-black but not pure black; warmer */
+    /* Use the deep indigo as body text (not plain black) */
+    color: hsl(var(--text-primary-h));
     font-weight: 400;
     line-height: 1.6;
   }
 
   .light .muted-text {
-    color: hsl(var(--muted-foreground)); /* uses adjusted muted variable */
+    color: hsl(var(--muted-foreground)); /* uses adjusted muted variable (now colorful) */
   }
 
   /* Color highlight utilities (use in ProjectDetail and other sections) */
@@ -874,7 +904,8 @@ code {
 
   /* Replace any accidental white text in light mode (target common classes) */
   .light .text-white, .light .glow-text-white {
-    color: hsl(var(--foreground)) !important;
+    /* White text on white backgrounds replaced with the foreground indigo */
+    color: hsl(var(--text-primary-h)) !important;
     text-shadow: 0 1px 0 rgba(0,0,0,0.04) !important;
   }
 
@@ -885,7 +916,8 @@ code {
 
   /* Small helper: stronger link color on light backgrounds */
   .light a {
-    color: var(--blue-soft-hex);
+    /* links use indigo for clarity on white */
+    color: var(--text-primary-hex);
     text-decoration: none;
     transition: color 0.2s ease;
   }
@@ -895,7 +927,8 @@ code {
 
   /* Ensure headings are slightly more prominent on light mode */
   .light h1, .light h2, .light h3 {
-    color: #0b1220;
+    /* headings use the heading HSL (darker indigo) */
+    color: hsl(var(--text-heading-h));
     letter-spacing: -0.2px;
   }
 
