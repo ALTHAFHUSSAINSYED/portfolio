@@ -43,7 +43,7 @@ const Header = ({ personalInfo }) => {
           {/* Logo/Name */}
           <div className="flex-shrink-0">
             <h1
-              className="text-2xl font-bold text-foreground hover:text-cyan-soft transition-all duration-300 cursor-pointer hover-scale gradient-glow-blink"
+              className="text-2xl font-bold header-animate transition-all duration-300 cursor-pointer hover-scale"
               onClick={() => scrollToSection('hero')}
             >
               {personalInfo.name}
@@ -54,31 +54,31 @@ const Header = ({ personalInfo }) => {
           <nav className="hidden md:flex space-x-8">
             <button 
               onClick={() => scrollToSection('about')}
-              className="nav-link font-medium transition-all duration-300 gradient-glow-blink"
+              className="nav-link font-medium nav-animate transition-all duration-300"
             >
               About
             </button>
             <button 
               onClick={() => scrollToSection('skills')}
-              className="nav-link font-medium transition-all duration-300 gradient-glow-blink"
+              className="nav-link font-medium nav-animate transition-all duration-300"
             >
               Skills
             </button>
             <button 
               onClick={() => scrollToSection('experience')}
-              className="nav-link font-medium transition-all duration-300 gradient-glow-blink"
+              className="nav-link font-medium nav-animate transition-all duration-300"
             >
               Experience
             </button>
             <button 
               onClick={() => scrollToSection('certifications')}
-              className="nav-link font-medium transition-all duration-300 gradient-glow-blink"
+              className="nav-link font-medium nav-animate transition-all duration-300"
             >
               Certifications
             </button>
             <button 
               onClick={() => scrollToSection('contact')}
-              className="nav-link font-medium transition-all duration-300 gradient-glow-blink"
+              className="nav-link font-medium nav-animate transition-all duration-300"
             >
               Contact
             </button>
@@ -90,7 +90,7 @@ const Header = ({ personalInfo }) => {
               onClick={toggleTheme}
               variant="ghost"
               size="icon"
-              className="theme-toggle-btn theme-toggle-blink-glow mr-2"
+              className="theme-toggle-btn theme-toggle-animate mr-2"
             >
               {theme === 'dark' ? <Sun className="w-12 h-12 animate-pulse" /> : <Moon className="w-12 h-12 animate-pulse" />}
               <span className="sr-only">Toggle theme</span>
@@ -99,7 +99,7 @@ const Header = ({ personalInfo }) => {
               onClick={downloadResume}
               variant="outline"
               size="sm"
-              className="resume-animate border-cyan-400/50 text-cyan-soft bg-transparent hover:bg-cyan-400/10 hover:text-cyan-400 transition-all duration-300 hover-glow"
+              className="resume-animate-strong transition-all duration-300 hover-glow"
             >
               <Download className="w-4 h-4 mr-2" />
               Resume
