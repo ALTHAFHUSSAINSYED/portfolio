@@ -1,12 +1,14 @@
+/* Webfonts for headings and body (loaded before Tailwind layers) */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,800&family=Satoshi:wght@400;500;700&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=Lato:wght@400;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
-        "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
-        "Helvetica Neue", sans-serif;
+    /* Use theme-aware body font stack */
+    font-family: var(--font-body, Inter, Manrope, "DM Sans", Lato, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     /* ✨ NEW: Smooth transition for theme changes */
@@ -23,6 +25,9 @@ code {
 /* ✨ MODIFIED: CSS variables for both light and dark themes */
 @layer base {
   :root {
+      /* Global font variables */
+      --font-heading: "Outfit", "Poppins", "Space Grotesk", "Fraunces", "Satoshi", Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-body: "Inter", "Manrope", "DM Sans", Lato, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       /* Light Theme Variables (Default) */
       --background: 0 0% 100%;      /* White */
 
@@ -114,6 +119,15 @@ code {
     /* ✨ MODIFIED: Uses CSS variables for background and text color */
     @apply bg-background text-foreground;
     }
+  /* Apply heading and body fonts globally */
+  h1, h2, h3, h4, h5, h6 { 
+    font-family: var(--font-heading);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  p, li, blockquote, input, textarea, button { 
+    font-family: var(--font-body);
+  }
 }
 
 /* Enhanced Black Theme with Shining Effects */
@@ -935,3 +949,114 @@ code {
   /* End of light-mode enhancements */
   /* ===================== */
 }
+
+/* =====================
+   LIGHT-MODE SECTION GRADIENT TYPOGRAPHY
+   (Distinct, soft gradients per section. Dark mode unaffected.)
+   The selectors are resilient: use any of the following in markup
+   - container id: #about, #projects, #skills, #experience, #certifications, #contact, #hero, #header, #footer, #project-detail
+   - container class: .about-section, .projects-section, .skills-section, .experience-section, .certifications-section, .contact-section, .hero-section, .header, .footer, .project-detail
+   - data attribute: [data-section="AboutSection"], etc.
+   Apply to headings and any element with .section-title or .gradient-text within the section.
+===================== */
+
+/* Helper mixin style: gradient text utility */
+.light .gradient-text, .light .section-title, .light .title-gradient {
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Hero */
+.light #hero .section-title,
+.light .hero-section .section-title,
+.light [data-section="HeroSection"] .section-title,
+.light #hero h1, .light .hero-section h1, .light [data-section="HeroSection"] h1,
+.light #hero .gradient-text, .light .hero-section .gradient-text {
+  background-image: linear-gradient(120deg, #1e3a8a 0%, #06b6d4 25%, #f472b6 55%, #22c55e 80%, #8b5cf6 100%);
+}
+
+/* Header */
+.light #header .section-title,
+.light .header .section-title,
+.light [data-section="Header"] .section-title,
+.light #header h1, .light .header h1, .light [data-section="Header"] h1,
+.light #header .gradient-text, .light .header .gradient-text {
+  background-image: linear-gradient(90deg, #0ea5e9 0%, #8b5cf6 50%, #f472b6 100%);
+}
+
+/* About */
+.light #about .section-title,
+.light .about-section .section-title,
+.light [data-section="AboutSection"] .section-title,
+.light #about h2, .light .about-section h2, .light [data-section="AboutSection"] h2,
+.light #about .gradient-text, .light .about-section .gradient-text {
+  background-image: linear-gradient(90deg, #16a34a 0%, #22d3ee 45%, #a78bfa 100%);
+}
+
+/* Experience */
+.light #experience .section-title,
+.light .experience-section .section-title,
+.light [data-section="ExperienceSection"] .section-title,
+.light #experience h2, .light .experience-section h2, .light [data-section="ExperienceSection"] h2,
+.light #experience .gradient-text, .light .experience-section .gradient-text {
+  background-image: linear-gradient(100deg, #0ea5e9 0%, #22c55e 40%, #f59e0b 90%);
+}
+
+/* Certifications */
+.light #certifications .section-title,
+.light .certifications-section .section-title,
+.light [data-section="CertificationsSection"] .section-title,
+.light #certifications h2, .light .certifications-section h2, .light [data-section="CertificationsSection"] h2,
+.light #certifications .gradient-text, .light .certifications-section .gradient-text {
+  background-image: linear-gradient(90deg, #06b6d4 0%, #f472b6 50%, #22c55e 100%);
+}
+
+/* Projects */
+.light #projects .section-title,
+.light .projects-section .section-title,
+.light [data-section="ProjectsSection"] .section-title,
+.light #projects h2, .light .projects-section h2, .light [data-section="ProjectsSection"] h2,
+.light #projects .gradient-text, .light .projects-section .gradient-text {
+  background-image: linear-gradient(110deg, #8b5cf6 0%, #06b6d4 40%, #f59e0b 85%);
+}
+
+/* Project Detail Page */
+.light #project-detail .section-title,
+.light .project-detail .section-title,
+.light [data-section="ProjectDetailPage"] .section-title,
+.light #project-detail h1, .light .project-detail h1, .light [data-section="ProjectDetailPage"] h1,
+.light #project-detail .gradient-text, .light .project-detail .gradient-text {
+  background-image: linear-gradient(100deg, #1e3a8a 0%, #22d3ee 35%, #f472b6 70%, #22c55e 100%);
+}
+
+/* Skills */
+.light #skills .section-title,
+.light .skills-section .section-title,
+.light [data-section="SkillsSection"] .section-title,
+.light #skills h2, .light .skills-section h2, .light [data-section="SkillsSection"] h2,
+.light #skills .gradient-text, .light .skills-section .gradient-text {
+  background-image: linear-gradient(95deg, #06b6d4 0%, #a78bfa 50%, #16a34a 100%);
+}
+
+/* Contact */
+.light #contact .section-title,
+.light .contact-section .section-title,
+.light [data-section="ContactSection"] .section-title,
+.light #contact h2, .light .contact-section h2, .light [data-section="ContactSection"] h2,
+.light #contact .gradient-text, .light .contact-section .gradient-text {
+  background-image: linear-gradient(90deg, #22c55e 0%, #06b6d4 50%, #f472b6 100%);
+}
+
+/* Footer owner name gradient only */
+.light footer .owner-name,
+.light .footer .owner-name,
+.light [data-section="Footer"] .owner-name {
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  background-image: linear-gradient(90deg, #06b6d4 0%, #f472b6 50%, #8b5cf6 100%);
+}
+

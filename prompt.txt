@@ -1,0 +1,3 @@
+ please integrate your code within my code, and give full updated code so that I can directly copy and paste it in my existing file. make sure don't edit or remove lines of other functions.
+
+okay,good, please proceed with the next file and give me full updated code , make sure not to change any lines of code that has other functionalities,integrate your code into my given code and give me full updated code, before giving me the full updated code , double-check once from your end whether you have given full updated code by integrating your new code into my existing code with out changing any other functionalities of my code.and make sure to give full updated code, not your module code..
