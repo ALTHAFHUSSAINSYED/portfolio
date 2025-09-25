@@ -757,16 +757,23 @@ code {
   /* Light-mode thumb uses warm gradients (no blue) */
   .light body::-webkit-scrollbar-thumb,
   .light html::-webkit-scrollbar-thumb,
-  .light ::-webkit-scrollbar-thumb {
+  .light ::-webkit-scrollbar-thumb,
+  .light *::-webkit-scrollbar-thumb {
     background: linear-gradient(45deg, #f59e0b, #d946ef);
     border: 2px solid #f8fafc; /* ensure edge blends with track */
+    background-clip: padding-box;
+    border-radius: 6px;
   }
   .light body::-webkit-scrollbar-thumb:hover,
   .light html::-webkit-scrollbar-thumb:hover,
-  .light ::-webkit-scrollbar-thumb:hover {
+  .light ::-webkit-scrollbar-thumb:hover,
+  .light *::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(45deg, #f97316, #e11d48);
     border-color: #f8fafc;
   }
+
+  /* Ensure any scrollable element in light mode has a light track */
+  .light *::-webkit-scrollbar-track { background: #f8fafc; }
 
   /* Firefox light scrollbar colors */
   .light body, .light html { scrollbar-color: #d946ef #f8fafc; }
