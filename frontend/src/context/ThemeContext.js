@@ -12,17 +12,22 @@ export const ThemeProvider = ({ children }) => {
   useEffect(() => {
     const body = window.document.body;
     body.classList.add('dark');
+
+    // ✨ NEW: Optional smooth transition for theme toggle
+    body.style.transition = 'background-color 0.4s ease, color 0.4s ease';
   }, []); // Empty dependency array ensures this runs only once.
 
   const toggleTheme = () => {
     setTheme(prevTheme => {
       const newTheme = prevTheme === 'light' ? 'dark' : 'light';
       
-      // ✨ MODIFIED: Logic is simplified to only update the class for the current session.
-      // No localStorage is used.
+      // ✨ MODIFIED: Simplified logic to only update body classes
       const body = window.document.body;
       body.classList.remove('light', 'dark');
       body.classList.add(newTheme);
+
+      // ✨ NEW: Ensure smoother transition even after toggle
+      body.style.transition = 'background-color 0.4s ease, color 0.4s ease';
       
       return newTheme;
     });
