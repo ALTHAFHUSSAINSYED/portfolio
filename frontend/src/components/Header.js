@@ -108,9 +108,9 @@ const Header = ({ personalInfo }) => {
               onClick={toggleTheme}
               variant="ghost"
               size="icon"
-              className="text-foreground hover:text-cyan-soft transition-all duration-300 hover-rotate"
+              className="text-foreground hover:text-cyan-soft transition-all duration-300 hover-rotate hover-scale"
             >
-              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {theme === 'dark' ? <Sun className="w-6 h-6 animate-pulse" /> : <Moon className="w-6 h-6 animate-pulse" />}
               <span className="sr-only">Toggle theme</span>
             </Button>
           </div>
@@ -122,9 +122,9 @@ const Header = ({ personalInfo }) => {
               onClick={toggleTheme}
               variant="ghost"
               size="sm"
-              className="text-foreground hover:text-cyan-soft"
+              className="text-foreground hover:text-cyan-soft hover-scale"
             >
-              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {theme === 'dark' ? <Sun className="w-6 h-6 animate-pulse" /> : <Moon className="w-6 h-6 animate-pulse" />}
             </Button>
              {/* Mobile Menu Button */}
             <Button
