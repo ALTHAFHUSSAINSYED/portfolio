@@ -1367,14 +1367,14 @@ html.dark::-webkit-scrollbar {
 
 /* Increase theme toggle icon size in header */
 .theme-toggle-btn {
-  width: 2.5rem !important;
-  height: 2.5rem !important;
-  min-width: 2.5rem !important;
-  min-height: 2.5rem !important;
+  width: 2rem !important;
+  height: 2rem !important;
+  min-width: 2rem !important;
+  min-height: 2rem !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.7rem;
+  font-size: 1.2rem;
   position: relative;
   /* Enhanced transitions for smooth animation */
   transition: transform 0.4s ease-in-out, box-shadow 0.3s ease, background 0.3s ease;
@@ -1502,7 +1502,7 @@ html.dark::-webkit-scrollbar {
 }
 @keyframes toggleBlink {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  50% { opacity: 0.75; }
 }
 
 /* Remove header/nav/button background glow for both themes */
@@ -1532,11 +1532,11 @@ html.dark::-webkit-scrollbar {
 .theme-toggle-glassmorphic {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  background: linear-gradient(120deg, rgba(255, 0, 170, 0.3), rgba(0, 212, 255, 0.3));
+  background: linear-gradient(120deg, rgba(255, 0, 170, 0.15), rgba(0, 212, 255, 0.15));
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 50%;
   box-shadow: 0 4px 8px -1px rgba(0, 0, 0, 0.1), 0 0 15px rgba(255, 0, 170, 0.4);
-  transform: scale(1.25); /* 25% size increase */
+  transform: scale(1);
   transition: transform 0.4s ease, box-shadow 0.3s ease, background 0.3s ease;
 }
 
@@ -1557,29 +1557,28 @@ html.dark::-webkit-scrollbar {
 
 /* Pink to Neon Green gradient for site name in dark theme */
 .dark .site-title-gradient {
-  background: linear-gradient(90deg, #ff3fb4, #3dff8c);
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-fill-color: transparent;
-  color: transparent; /* Fallback */
-  font-weight: 700;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: #ff3fb4 !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  -webkit-text-fill-color: unset !important;
+  text-fill-color: unset !important;
+  font-weight: 800;
+  text-shadow: 0 2px 8px #ff3fb4, 0 0 2px #fff;
   position: relative;
-  display: inline-block; /* Required for gradient text */
+  display: inline-block;
 }
 
 /* Pink to Neon Green gradient for site name in light theme */
 .name-text-light {
-  background: linear-gradient(90deg, #ff3fb4, #3dff8c);
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-fill-color: transparent;
-  color: transparent; /* Ensure gradient visible in all supporting browsers */
-  font-weight: 700;
-  display: inline-block; /* Required for gradient text */
+  color: #ff3fb4 !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  -webkit-text-fill-color: unset !important;
+  text-fill-color: unset !important;
+  font-weight: 800;
+  text-shadow: 0 2px 8px #ff3fb4, 0 0 2px #fff;
+  display: inline-block;
 }
 

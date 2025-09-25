@@ -97,7 +97,7 @@ const Header = ({ personalInfo }) => {
             </button>
             <button 
               onClick={() => scrollToSection('blogs')}
-              className="glassmorphic-nav-btn font-medium"
+              className="glassmorphic-nav-btn font-medium nav-blink-gradient"
             >
               <BookOpen className="w-4 h-4 mr-2" />
               Blogs
