@@ -42,9 +42,10 @@ const Header = ({ personalInfo }) => {
         <div className="flex justify-between items-center py-4">
           {/* Logo/Name */}
           <div className="flex-shrink-0">
-             {/* ✨ MODIFIED: Uses text-foreground for theme compatibility */}
-            <h1 className="text-2xl font-bold text-foreground hover:text-cyan-soft transition-all duration-300 cursor-pointer hover-scale"
-                onClick={() => scrollToSection('hero')}>
+            <h1
+              className="text-2xl font-bold text-foreground hover:text-cyan-soft transition-all duration-300 cursor-pointer hover-scale gradient-glow-blink"
+              onClick={() => scrollToSection('hero')}
+            >
               {personalInfo.name}
             </h1>
           </div>
@@ -53,44 +54,52 @@ const Header = ({ personalInfo }) => {
           <nav className="hidden md:flex space-x-8">
             <button 
               onClick={() => scrollToSection('about')}
-              className="nav-link font-medium transition-all duration-300"
+              className="nav-link font-medium transition-all duration-300 gradient-glow-blink"
             >
               About
             </button>
             <button 
               onClick={() => scrollToSection('skills')}
-              className="nav-link font-medium transition-all duration-300"
+              className="nav-link font-medium transition-all duration-300 gradient-glow-blink"
             >
               Skills
             </button>
             <button 
               onClick={() => scrollToSection('experience')}
-              className="nav-link font-medium transition-all duration-300"
+              className="nav-link font-medium transition-all duration-300 gradient-glow-blink"
             >
               Experience
             </button>
             <button 
               onClick={() => scrollToSection('certifications')}
-              className="nav-link font-medium transition-all duration-300"
+              className="nav-link font-medium transition-all duration-300 gradient-glow-blink"
             >
               Certifications
             </button>
             <button 
               onClick={() => scrollToSection('contact')}
-              className="nav-link font-medium transition-all duration-300"
+              className="nav-link font-medium transition-all duration-300 gradient-glow-blink"
             >
               Contact
             </button>
           </nav>
 
-          {/* Action Buttons */}
           <div className="hidden md:flex items-center space-x-3">
+            {/* Theme Toggle left of Resume */}
+            <Button
+              onClick={toggleTheme}
+              variant="ghost"
+              size="icon"
+              className="theme-toggle-btn theme-toggle-blink-glow mr-2"
+            >
+              {theme === 'dark' ? <Sun className="w-12 h-12 animate-pulse" /> : <Moon className="w-12 h-12 animate-pulse" />}
+              <span className="sr-only">Toggle theme</span>
+            </Button>
             <Button
               onClick={downloadResume}
               variant="outline"
               size="sm"
-              // ✨ MODIFIED: Uses bg-transparent for theme compatibility
-              className="border-cyan-400/50 text-cyan-soft bg-transparent hover:bg-cyan-400/10 hover:text-cyan-400 transition-all duration-300 hover-glow"
+              className="resume-animate border-cyan-400/50 text-cyan-soft bg-transparent hover:bg-cyan-400/10 hover:text-cyan-400 transition-all duration-300 hover-glow"
             >
               <Download className="w-4 h-4 mr-2" />
               Resume
@@ -102,16 +111,6 @@ const Header = ({ personalInfo }) => {
             >
               <Mail className="w-4 h-4 mr-2" />
               Contact
-            </Button>
-            {/* ✨ NEW: Theme Toggle Button for Desktop */}
-            <Button
-              onClick={toggleTheme}
-              variant="ghost"
-              size="icon"
-              className="theme-toggle-btn text-foreground hover:text-cyan-soft transition-all duration-300 hover-rotate hover-scale"
-            >
-              {theme === 'dark' ? <Sun className="w-8 h-8 animate-pulse" /> : <Moon className="w-8 h-8 animate-pulse" />}
-              <span className="sr-only">Toggle theme</span>
             </Button>
           </div>
 
