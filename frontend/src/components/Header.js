@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Card } from './ui/card'; // This was in your original file, so I've kept it.
 import { useTheme } from '../context/ThemeContext'; // ✨ NEW: Import useTheme hook
-// ✨ MODIFIED: Added Sun and Moon icons
-import { Download, Mail, Phone, MapPin, Linkedin, Menu, X, Sun, Moon } from 'lucide-react'; 
+// ✨ MODIFIED: Added icons for navigation items
+import { 
+  Download, Mail, Phone, MapPin, Linkedin, Menu, X, Sun, Moon,
+  User, Sparkles, Briefcase, Award, BookOpen
+} from 'lucide-react'; 
 
 const Header = ({ personalInfo }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -30,7 +33,11 @@ const Header = ({ personalInfo }) => {
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      // Smooth scroll to the section with improved behavior
+      element.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
     }
     setIsMenuOpen(false);
   };
@@ -51,35 +58,40 @@ const Header = ({ personalInfo }) => {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
+          <nav className="hidden md:flex space-x-6">
             <button 
               onClick={() => scrollToSection('about')}
-              className="nav-link font-medium nav-animate transition-all duration-300"
+              className="glassmorphic-nav-btn font-medium"
             >
+              <User className="w-4 h-4 mr-2" />
               About
             </button>
             <button 
               onClick={() => scrollToSection('skills')}
-              className="nav-link font-medium nav-animate transition-all duration-300"
+              className="glassmorphic-nav-btn font-medium"
             >
+              <Sparkles className="w-4 h-4 mr-2" />
               Skills
             </button>
             <button 
               onClick={() => scrollToSection('experience')}
-              className="nav-link font-medium nav-animate transition-all duration-300"
+              className="glassmorphic-nav-btn font-medium"
             >
+              <Briefcase className="w-4 h-4 mr-2" />
               Experience
             </button>
             <button 
               onClick={() => scrollToSection('certifications')}
-              className="nav-link font-medium nav-animate transition-all duration-300"
+              className="glassmorphic-nav-btn font-medium"
             >
+              <Award className="w-4 h-4 mr-2" />
               Certifications
             </button>
             <button 
               onClick={() => scrollToSection('blogs')}
-              className="nav-link font-medium nav-animate transition-all duration-300"
+              className="glassmorphic-nav-btn font-medium"
             >
+              <BookOpen className="w-4 h-4 mr-2" />
               Blogs
             </button>
           </nav>
@@ -107,6 +119,7 @@ const Header = ({ personalInfo }) => {
             <Button
               onClick={() => scrollToSection('contact')}
               size="sm"
+              id="contact-nav-button"
               className="neon-button bg-gradient-to-r from-pink-500/80 to-cyan-400/80 hover:from-pink-500 hover:to-cyan-400 text-black font-semibold transition-all duration-300"
             >
               <Mail className="w-4 h-4 mr-2" />
@@ -143,12 +156,19 @@ const Header = ({ personalInfo }) => {
         }`}>
           <div className="pb-4 border-t border-cyan-400/20 mt-4">
             <div className="flex flex-col space-y-3 pt-4">
-              {['about', 'skills', 'experience', 'certifications', 'blogs'].map((section, index) => (
+              {[
+                {section: 'about', icon: <User className="w-4 h-4 mr-2" />},
+                {section: 'skills', icon: <Sparkles className="w-4 h-4 mr-2" />},
+                {section: 'experience', icon: <Briefcase className="w-4 h-4 mr-2" />},
+                {section: 'certifications', icon: <Award className="w-4 h-4 mr-2" />},
+                {section: 'blogs', icon: <BookOpen className="w-4 h-4 mr-2" />}
+              ].map(({section, icon}, index) => (
                 <button 
                   key={section}
                   onClick={() => scrollToSection(section)}
-                  className={`text-left text-foreground hover:text-cyan-soft font-medium transition-all duration-300 py-2 capitalize fade-in-right stagger-${index + 1}`}
+                  className={`text-left text-foreground hover:text-cyan-soft font-medium transition-all duration-300 py-2 capitalize fade-in-right stagger-${index + 1} flex items-center`}
                 >
+                  {icon}
                   {section.charAt(0).toUpperCase() + section.slice(1)}
                 </button>
               ))}
@@ -163,12 +183,12 @@ const Header = ({ personalInfo }) => {
                   Download Resume
                 </Button>
                 <Button
-                  onClick={() => scrollToSection('blogs')}
+                  onClick={() => scrollToSection('contact')}
                   size="sm"
                   className="neon-button bg-gradient-to-r from-pink-500/80 to-cyan-400/80 hover:from-pink-500 hover:to-cyan-400 text-black font-semibold transition-all duration-300 fade-in-right stagger-7"
                 >
                   <Mail className="w-4 h-4 mr-2" />
-                  Blogs
+                  Contact
                 </Button>
               </div>
             </div>

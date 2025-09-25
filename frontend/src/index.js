@@ -9,6 +9,8 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Portfolio from "./components/Portfolio";
 import ProjectDetailPage from "./components/ProjectDetailPage";
+// Import the smooth scroll functionality
+import "./smooth-scroll";
 
 // ✨ NEW: Define the application routes using the modern object-based approach
 const router = createBrowserRouter([
