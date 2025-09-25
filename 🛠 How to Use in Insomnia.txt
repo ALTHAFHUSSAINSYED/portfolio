@@ -1,0 +1,62 @@
+🛠 How to Use in Insomnia
+
+POST (Create Project)
+
+Method: POST
+
+URL: https://althaf-portfolio-c9ul.onrender.com/api/projects
+
+Body type: Multipart Form
+
+Fields:
+
+name (text)
+
+summary (text)
+
+details (text)
+
+technologies (text, comma separated) → Python,React,MongoDB
+
+key_outcomes (text, comma separated) → FastAPI Backend, Render Deployment
+
+file (file upload, choose an image)
+
+PUT (Update Project)
+
+Method: PUT
+
+URL: https://althaf-portfolio-c9ul.onrender.com/api/projects/{project_id}
+Example:
+
+https://althaf-portfolio-c9ul.onrender.com/api/projects/e2e5f0d6-5f68-43b8-9bd0-5f30a610d343
+
+
+Body type: Multipart Form
+
+Fields: (all optional, send only what you want to update)
+
+name (text)
+
+summary (text)
+
+details (text)
+
+technologies (text, comma separated)
+
+key_outcomes (text, comma separated)
+
+file (new image file upload)
+
+DELETE (Remove Project)
+
+Method: DELETE
+
+URL:
+
+https://althaf-portfolio-c9ul.onrender.com/api/projects/{project_id}
+
+
+No body needed.
+
+If successful → returns 204 No Content (empty).
