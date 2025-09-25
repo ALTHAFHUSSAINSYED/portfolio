@@ -1546,7 +1546,7 @@ html.dark::-webkit-scrollbar {
 
 /* Pink to Neon Green gradient for site name in dark theme */
 .dark .site-title-gradient {
-  background: linear-gradient(90deg, #FF00AA, #39FF14);
+  background: linear-gradient(90deg, #ff3fb4, #3dff8c);
   background-size: 200% 100%;
   -webkit-background-clip: text;
   background-clip: text;
@@ -1555,22 +1555,20 @@ html.dark::-webkit-scrollbar {
   color: transparent; /* Fallback */
   font-weight: 700;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  animation: textShine 6s linear infinite;
   position: relative;
   display: inline-block; /* Required for gradient text */
 }
 
 /* Pink to Neon Green gradient for site name in light theme */
 .name-text-light {
-  background: linear-gradient(90deg, #FF00AA, #39FF14);
+  background: linear-gradient(90deg, #ff3fb4, #3dff8c);
   background-size: 200% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   text-fill-color: transparent;
-  color: #111827; /* Fallback */
+  color: transparent; /* Ensure gradient visible in all supporting browsers */
   font-weight: 700;
   display: inline-block; /* Required for gradient text */
-  animation: textShine 6s linear infinite; /* Added animation for light theme */
 }
 
