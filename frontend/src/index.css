@@ -735,9 +735,10 @@ code {
   }
 
   /* Ensure page/root scrollbar uses light palette when body has .light */
-  .light ::-webkit-scrollbar-track { background: #f1f1f1; }
-  .light body::-webkit-scrollbar-track { background: #f1f5f9; }
-  .light html::-webkit-scrollbar-track { background: #f1f5f9; }
+  .light ::-webkit-scrollbar-track { background: #f8fafc; }
+  .light body::-webkit-scrollbar-track { background: #f8fafc; }
+  .light html::-webkit-scrollbar-track { background: #f8fafc; }
+  .light ::-webkit-scrollbar-corner { background: #f8fafc; }
 
   ::-webkit-scrollbar-thumb {
     background: linear-gradient(45deg, #22d3ee, #ec4899);
@@ -762,7 +763,7 @@ code {
   }
 
   /* Firefox light scrollbar colors */
-  .light body, .light html { scrollbar-color: #d946ef #f1f5f9; }
+  .light body, .light html { scrollbar-color: #d946ef #f8fafc; }
 
   @keyframes scrollbarShine {
     0%, 100% { opacity: 0.8; }
@@ -1066,6 +1067,7 @@ code {
 }
 
 /* Footer owner name gradient only */
+/* Footer owner name gradient: pink spectrum (light theme only) */
 .light footer .owner-name,
 .light .footer .owner-name,
 .light [data-section="Footer"] .owner-name {
@@ -1073,7 +1075,7 @@ code {
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-  background-image: linear-gradient(90deg, #06b6d4 0%, #f472b6 50%, #8b5cf6 100%);
+  background-image: linear-gradient(90deg, #f43f5e 0%, #f472b6 50%, #fb7185 100%);
 }
 
 /* =====================
