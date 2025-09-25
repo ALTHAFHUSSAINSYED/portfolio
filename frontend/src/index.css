@@ -1475,6 +1475,7 @@ html.dark::-webkit-scrollbar {
 }
 
 /* Blinking, gradient theme toggle button (matches Resume/Contact) */
+/* Blinking, gradient theme toggle button (matches Resume/Contact) */
 .theme-toggle-animate {
   background: linear-gradient(90deg, #ff3fb4, #3dff8c);
   box-shadow: 0 0 16px #ff3fb4, 0 0 24px #3dff8c;
@@ -1482,6 +1483,13 @@ html.dark::-webkit-scrollbar {
   filter: drop-shadow(0 0 8px #ff3fb4) drop-shadow(0 0 12px #3dff8c);
   animation: toggleBlink 1.2s infinite;
 }
+/* Blinking, gradient nav button for header */
+.nav-blink-gradient {
+  background: linear-gradient(90deg, #ff3fb4, #3dff8c);
+  color: #111827;
+  animation: toggleBlink 1.2s infinite;
+  border-radius: 9999px;
+  font-weight: 600;
 }
 @keyframes toggleGlowPulse {
   0% { box-shadow: 0 0 16px #FF00AA, 0 0 24px #00D4FF; }
