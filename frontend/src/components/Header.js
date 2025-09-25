@@ -58,7 +58,7 @@ const Header = ({ personalInfo }) => {
           {/* Logo/Name */}
           <div className="flex-shrink-0 mr-6"> {/* Added mr-6 to reduce spacing to About button */}
             <h1
-              className={`text-2xl font-bold header-animate transition-all duration-300 cursor-pointer hover-scale ${theme === 'dark' ? 'site-title-gradient' : 'name-text-light'}`}
+              className={`text-2xl font-bold transition-all duration-300 cursor-pointer hover-scale ${theme === 'dark' ? 'site-title-gradient' : 'name-text-light'}`}
               onClick={() => scrollToSection('hero')}
             >
               {personalInfo.name}
