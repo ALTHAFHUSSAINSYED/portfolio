@@ -735,6 +735,8 @@ code {
   }
 
   /* Ensure page/root scrollbar uses light palette when body has .light */
+  .light ::-webkit-scrollbar { width: 10px; background-color: #f8fafc; }
+  .light html::-webkit-scrollbar, .light body::-webkit-scrollbar { background-color: #f8fafc; }
   .light ::-webkit-scrollbar-track { background: #f8fafc; }
   .light body::-webkit-scrollbar-track { background: #f8fafc; }
   .light html::-webkit-scrollbar-track { background: #f8fafc; }
