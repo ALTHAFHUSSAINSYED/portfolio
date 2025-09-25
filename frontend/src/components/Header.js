@@ -43,7 +43,7 @@ const Header = ({ personalInfo }) => {
           {/* Logo/Name */}
           <div className="flex-shrink-0">
             <h1
-              className="text-2xl font-bold header-animate transition-all duration-300 cursor-pointer hover-scale"
+              className={`text-2xl font-bold header-animate transition-all duration-300 cursor-pointer hover-scale ${theme === 'dark' ? 'site-title-gradient' : ''}`}
               onClick={() => scrollToSection('hero')}
             >
               {personalInfo.name}
@@ -105,12 +105,12 @@ const Header = ({ personalInfo }) => {
               Resume
             </Button>
             <Button
-              onClick={() => scrollToSection('blogs')}
+              onClick={() => scrollToSection('contact')}
               size="sm"
               className="neon-button bg-gradient-to-r from-pink-500/80 to-cyan-400/80 hover:from-pink-500 hover:to-cyan-400 text-black font-semibold transition-all duration-300"
             >
               <Mail className="w-4 h-4 mr-2" />
-              Blogs
+              Contact
             </Button>
           </div>
 
