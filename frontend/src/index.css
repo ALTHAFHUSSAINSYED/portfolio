@@ -115,6 +115,10 @@ code {
   * {
     @apply border-border;
     }
+  html {
+    /* Ensure root element paints the page background (fixes right gutter) */
+    background-color: hsl(var(--background));
+  }
   body {
     /* ✨ MODIFIED: Uses CSS variables for background and text color */
     @apply bg-background text-foreground;
@@ -766,6 +770,8 @@ code {
 
   /* Firefox light scrollbar colors */
   .light body, .light html { scrollbar-color: #d946ef #f8fafc; }
+  /* Ensure light theme explicitly paints white on root to avoid dark gutter */
+  .light html, .light body { background-color: #ffffff; scrollbar-gutter: stable; }
 
   @keyframes scrollbarShine {
     0%, 100% { opacity: 0.8; }
