@@ -1,3 +1,11 @@
+/* Blinking, gradient nav button for header */
+.nav-blink-gradient {
+  background: linear-gradient(90deg, #ff3fb4, #3dff8c);
+  color: #111827;
+  animation: toggleBlink 1.2s infinite;
+  border-radius: 9999px;
+  font-weight: 600;
+}
 /* Webfonts for headings and body (loaded before Tailwind layers) */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,800&family=Satoshi:wght@400;500;700&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=Lato:wght@400;700&display=swap');
 
@@ -1466,12 +1474,14 @@ html.dark::-webkit-scrollbar {
   border-color: rgba(249, 115, 22, 0.2);
 }
 
+/* Blinking, gradient theme toggle button (matches Resume/Contact) */
 .theme-toggle-animate {
-  background: linear-gradient(90deg, #FF00AA, #00D4FF);
-  box-shadow: 0 0 16px #FF00AA, 0 0 24px #00D4FF;
+  background: linear-gradient(90deg, #ff3fb4, #3dff8c);
+  box-shadow: 0 0 16px #ff3fb4, 0 0 24px #3dff8c;
   border-radius: 50%;
-  filter: drop-shadow(0 0 8px #FF00AA) drop-shadow(0 0 12px #00D4FF);
-  animation: toggleScale 2s infinite, toggleGlowPulse 1.2s infinite alternate, toggleBlink 2.5s infinite;
+  filter: drop-shadow(0 0 8px #ff3fb4) drop-shadow(0 0 12px #3dff8c);
+  animation: toggleBlink 1.2s infinite;
+}
 }
 @keyframes toggleGlowPulse {
   0% { box-shadow: 0 0 16px #FF00AA, 0 0 24px #00D4FF; }
@@ -1484,7 +1494,7 @@ html.dark::-webkit-scrollbar {
 }
 @keyframes toggleBlink {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  50% { opacity: 0.5; }
 }
 
 /* Remove header/nav/button background glow for both themes */
@@ -1545,7 +1555,6 @@ html.dark::-webkit-scrollbar {
 }
 
 /* Pink to Neon Green gradient for site name in dark theme */
-.dark .site-title-gradient {
   background: linear-gradient(90deg, #ff3fb4, #3dff8c);
   background-size: 200% 100%;
   -webkit-background-clip: text;
@@ -1560,7 +1569,6 @@ html.dark::-webkit-scrollbar {
 }
 
 /* Pink to Neon Green gradient for site name in light theme */
-.name-text-light {
   background: linear-gradient(90deg, #ff3fb4, #3dff8c);
   background-size: 200% 100%;
   -webkit-background-clip: text;

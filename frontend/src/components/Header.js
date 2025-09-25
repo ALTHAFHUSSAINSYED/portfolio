@@ -69,28 +69,28 @@ const Header = ({ personalInfo }) => {
           <nav className="hidden md:flex space-x-4"> {/* Reduced space between nav buttons */}
             <button 
               onClick={() => scrollToSection('about')}
-              className="glassmorphic-nav-btn font-medium"
+              className="glassmorphic-nav-btn font-medium nav-blink-gradient"
             >
               <User className="w-4 h-4 mr-2" />
               About
             </button>
             <button 
               onClick={() => scrollToSection('skills')}
-              className="glassmorphic-nav-btn font-medium"
+              className="glassmorphic-nav-btn font-medium nav-blink-gradient"
             >
               <Sparkles className="w-4 h-4 mr-2" />
               Skills
             </button>
             <button 
               onClick={() => scrollToSection('experience')}
-              className="glassmorphic-nav-btn font-medium"
+              className="glassmorphic-nav-btn font-medium nav-blink-gradient"
             >
               <Briefcase className="w-4 h-4 mr-2" />
               Experience
             </button>
             <button 
               onClick={() => scrollToSection('certifications')}
-              className="glassmorphic-nav-btn font-medium"
+              className="glassmorphic-nav-btn font-medium nav-blink-gradient"
             >
               <Award className="w-4 h-4 mr-2" />
               Certifications
