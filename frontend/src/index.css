@@ -1060,3 +1060,59 @@ code {
   background-image: linear-gradient(90deg, #06b6d4 0%, #f472b6 50%, #8b5cf6 100%);
 }
 
+/* =====================
+   LIGHT-ONLY: Paragraph-specific gradient utilities (p1..p11)
+   Strong, readable gradients on white. Avoids blue/skyblue/white.
+   Usage: <p className="text-gradient-p1">...</p>
+   These do not affect dark mode.
+===================== */
+.light .text-gradient-p1,
+.light .text-gradient-p2,
+.light .text-gradient-p3,
+.light .text-gradient-p4,
+.light .text-gradient-p5,
+.light .text-gradient-p6,
+.light .text-gradient-p7,
+.light .text-gradient-p8,
+.light .text-gradient-p9,
+.light .text-gradient-p10,
+.light .text-gradient-p11 {
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* p1: orange -> pink */
+.light .text-gradient-p1 { background-image: linear-gradient(90deg, #f97316, #ec4899); }
+
+/* p2: emerald -> amber */
+.light .text-gradient-p2 { background-image: linear-gradient(90deg, #10b981, #f59e0b); }
+
+/* p3: rose -> fuchsia */
+.light .text-gradient-p3 { background-image: linear-gradient(90deg, #f43f5e, #d946ef); }
+
+/* p4: violet -> orange */
+.light .text-gradient-p4 { background-image: linear-gradient(90deg, #8b5cf6, #f97316); }
+
+/* p5: emerald -> rose */
+.light .text-gradient-p5 { background-image: linear-gradient(90deg, #10b981, #f43f5e); }
+
+/* p6: amber -> red */
+.light .text-gradient-p6 { background-image: linear-gradient(90deg, #f59e0b, #ef4444); }
+
+/* p7: purple -> emerald */
+.light .text-gradient-p7 { background-image: linear-gradient(90deg, #a855f7, #10b981); }
+
+/* p8: fuchsia -> orange */
+.light .text-gradient-p8 { background-image: linear-gradient(90deg, #d946ef, #f97316); }
+
+/* p9: red -> violet */
+.light .text-gradient-p9 { background-image: linear-gradient(90deg, #ef4444, #8b5cf6); }
+
+/* p10: lime -> emerald -> amber (three-stop) */
+.light .text-gradient-p10 { background-image: linear-gradient(100deg, #84cc16 0%, #10b981 55%, #f59e0b 100%); }
+
+/* p11: magenta -> purple (footer line or any paragraph) */
+.light .text-gradient-p11 { background-image: linear-gradient(90deg, #e11d48, #7c3aed); }
+
