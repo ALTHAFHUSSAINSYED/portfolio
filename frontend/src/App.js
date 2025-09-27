@@ -10,6 +10,7 @@ import { Toaster } from './components/ui/toaster';
 import './smooth-scroll';
 // ✨ REMOVED: The custom hook is no longer needed.
 // import useManualScroll from './hooks/useManualScroll'; 
+import Chatbot from './components/Chatbot';
 
 function App() {
   // ✨ REMOVED: The call to the custom hook is gone.
@@ -28,6 +29,7 @@ function App() {
       
       <Footer personalInfo={portfolioData.personalInfo} />
       <Toaster />
+      <Chatbot />
     </div>
   );
 }
