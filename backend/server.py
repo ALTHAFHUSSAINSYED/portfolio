@@ -9,6 +9,7 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail, From, To, Subject, Content, ReplyTo
 import os
 import logging
+import threading
 from pathlib import Path
 from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional
@@ -209,3 +210,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# --- Start the blog agent in a background thread ---
+def start_blog_agent_thread():
+    try:
+        from blog_agent import start_blog_agent
+        start_blog_agent()
+        logging.info("Blog agent started successfully in background thread")
+    except Exception as e:
+        logging.error(f"Failed to start blog agent: {e}")
+
+# Start the blog agent when the server starts
+blog_agent_thread = threading.Thread(target=start_blog_agent_thread)
+blog_agent_thread.daemon = True
+blog_agent_thread.start()

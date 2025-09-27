@@ -31,6 +31,43 @@ def ask_allu_bot():
         if not user_message:
             return jsonify({"reply": "It seems like you didn't send any message. How can I help you?"}), 400
 
+        # Import web scraper and search engine
+        from web_scraper import WebScraper
+        from search_engine import SearchEngine
+        
+        # Initialize tools
+        scraper = WebScraper()
+        search_engine = SearchEngine()
+        
+        # Check if the message is requesting internet information
+        internet_keywords = ["latest", "news", "current", "today", "recent", "update", "trend", "2025", "new"]
+        is_internet_query = any(keyword in user_message.lower() for keyword in internet_keywords)
+        
+        # Get internet content if it seems like a query needing fresh data
+        internet_context = ""
+        if is_internet_query:
+            try:
+                # Extract search terms
+                search_terms = user_message.replace("?", "").replace(".", "").replace("!", "").split()
+                search_query = " ".join([term for term in search_terms if len(term) > 3])
+                
+                # Get search results
+                search_results = search_engine.search(search_query, num_results=3)
+                articles = scraper.fetch_articles(limit=2)
+                
+                if search_results:
+                    internet_context += "\nRelevant search results:\n"
+                    for result in search_results:
+                        internet_context += f"- {result.get('title')}: {result.get('snippet', '')[:100]}...\n"
+                
+                if articles:
+                    internet_context += "\nRecent tech articles:\n"
+                    for article in articles:
+                        internet_context += f"- {article.get('title')}: {article.get('summary', '')[:100]}...\n"
+            except Exception as e:
+                print(f"Error fetching internet data: {e}")
+                # Continue even if internet fetch fails
+
         # Query MongoDB for portfolio-related questions and skills
         portfolio_data = db.portfolio.find_one({"type": "general"})
         skills_data = db.skills.find({})
@@ -40,12 +77,15 @@ def ask_allu_bot():
         skills_context = ", ".join([skill.get("name", "") for skill in skills_data]) if skills_data else ""
         
         context = f"Portfolio information: {portfolio_context}\nSkills: {skills_context}"
+        
+        if internet_context:
+            context += f"\n\nInternet Information (current as of {datetime.now().strftime('%B %d, %Y')}):{internet_context}"
 
         # Call OpenAI GPT-4 API
         response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": "You are Allu Bot, a witty, helpful, and tech-focused chatbot for a portfolio website. You specialize in discussing technologies, answering questions about the portfolio owner's experience, projects, and skills. For any malicious, harmful, or completely unrelated questions, respond with a humorous deflection. Keep responses concise, professional, yet conversational. If you don't know something specific about the portfolio owner, be honest and say so."},
+                {"role": "system", "content": "You are Allu Bot, a witty, helpful, and tech-focused chatbot for a portfolio website. You specialize in discussing technologies, answering questions about the portfolio owner's experience, projects, and skills. You can also provide up-to-date information on tech topics by accessing internet data. For any malicious, harmful, or completely unrelated questions, respond with a humorous deflection. Keep responses concise, professional, yet conversational. If you don't know something specific, be honest and say so."},
                 {"role": "system", "content": context},
                 {"role": "user", "content": user_message}
             ]
@@ -57,7 +97,8 @@ def ask_allu_bot():
         db.chat_logs.insert_one({
             "user_message": user_message,
             "bot_reply": bot_reply,
-            "timestamp": datetime.now()
+            "timestamp": datetime.now(),
+            "internet_query": is_internet_query
         })
         
         return jsonify({"reply": bot_reply})
