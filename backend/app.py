@@ -27,26 +27,44 @@ def ask_allu_bot():
     try:
         data = request.get_json()
         user_message = data.get("message", "")
+        
+        if not user_message:
+            return jsonify({"reply": "It seems like you didn't send any message. How can I help you?"}), 400
 
-        # Query MongoDB for portfolio-related questions
+        # Query MongoDB for portfolio-related questions and skills
         portfolio_data = db.portfolio.find_one({"type": "general"})
+        skills_data = db.skills.find({})
+        
+        # Build context from portfolio and skills data
         portfolio_context = portfolio_data.get("content", "") if portfolio_data else ""
+        skills_context = ", ".join([skill.get("name", "") for skill in skills_data]) if skills_data else ""
+        
+        context = f"Portfolio information: {portfolio_context}\nSkills: {skills_context}"
 
         # Call OpenAI GPT-4 API
         response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": "You are Allu Bot, a witty, helpful, and tech-focused chatbot. You only answer questions related to technologies, portfolio details, and specified topics. For malicious or unrelated questions, respond humorously and decently."},
-                {"role": "user", "content": user_message},
-                {"role": "assistant", "content": portfolio_context}
+                {"role": "system", "content": "You are Allu Bot, a witty, helpful, and tech-focused chatbot for a portfolio website. You specialize in discussing technologies, answering questions about the portfolio owner's experience, projects, and skills. For any malicious, harmful, or completely unrelated questions, respond with a humorous deflection. Keep responses concise, professional, yet conversational. If you don't know something specific about the portfolio owner, be honest and say so."},
+                {"role": "system", "content": context},
+                {"role": "user", "content": user_message}
             ]
         )
 
         bot_reply = response["choices"][0]["message"]["content"]
+        
+        # Log the interaction
+        db.chat_logs.insert_one({
+            "user_message": user_message,
+            "bot_reply": bot_reply,
+            "timestamp": datetime.now()
+        })
+        
         return jsonify({"reply": bot_reply})
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"Error in Allu Bot API: {str(e)}")
+        return jsonify({"reply": "I'm having trouble connecting right now. Please try again later."}), 500
 
 @app.route("/api/post-blog", methods=["POST"])
 def post_blog():
