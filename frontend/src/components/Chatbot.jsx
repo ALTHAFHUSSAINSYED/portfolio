@@ -51,18 +51,46 @@ const Chatbot = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/ask-all-u-bot", {
+      // Check if running in development or production
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://althaf-portfolio.onrender.com' 
+        : '';
+      
+      const response = await fetch(`${baseUrl}/api/ask-all-u-bot`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userInput }),
+        // Adding timeout and credentials
+        credentials: 'include',
+        signal: AbortSignal.timeout(15000) // 15 second timeout
       });
 
-      const data = await response.json();
-      const botMessage = { sender: "bot", text: data.reply || "Sorry, I couldn't process your request." };
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`);
+      }
+
+      const responseText = await response.text();
+      let data;
+      
+      try {
+        // Try to parse as JSON if there's content
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch (parseError) {
+        console.error("Failed to parse response as JSON:", parseError);
+        throw new Error("Invalid response format from server");
+      }
+
+      const botMessage = { 
+        sender: "bot", 
+        text: data.reply || "Sorry, I couldn't process your request." 
+      };
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
       console.error("Error communicating with Allu Bot:", error);
-      const errorMessage = { sender: "bot", text: "Sorry, there was an error processing your request. Please try again later." };
+      const errorMessage = { 
+        sender: "bot", 
+        text: "Sorry, there was an error connecting to the server. Please try again later." 
+      };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
@@ -71,15 +99,19 @@ const Chatbot = () => {
 
   return (
     <div className={`chatbot-container ${welcomeAnimation ? "welcome-animation" : ""}`}>
-      <button className="chatbot-toggle" onClick={toggleChat}>
-        {isOpen ? "Close" : "Chat with Allu Bot 🤖"}
+      <button 
+        className="chatbot-toggle" 
+        onClick={toggleChat}
+        aria-label={isOpen ? "Close chat" : "Open chat"}
+      >
+        {isOpen ? "×" : "💬"}
       </button>
 
       {isOpen && (
         <div className="chatbot-window">
           <div className="chatbot-header">
             <div className="chatbot-title">Allu Bot</div>
-            <button className="close-button" onClick={toggleChat}>×</button>
+            <button className="close-button" onClick={toggleChat} aria-label="Close chat">×</button>
           </div>
           <div className="chatbot-messages">
             {messages.map((msg, index) => (
