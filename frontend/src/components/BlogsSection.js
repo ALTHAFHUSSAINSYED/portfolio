@@ -3,7 +3,6 @@ import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Mail } from 'lucide-react';
-import BlogForm from './BlogForm';
 import { Link } from 'react-router-dom';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://althaf-portfolio.onrender.com';
@@ -12,8 +11,6 @@ const BlogsSection = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showForm, setShowForm] = useState(false);
-  const [editBlog, setEditBlog] = useState(null);
   const sectionRef = useRef(null);
 
   useEffect(() => {
@@ -32,37 +29,6 @@ const BlogsSection = () => {
       setError(err.message);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleCreate = async (blog) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/blogs`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(blog),
-      });
-      if (!response.ok) throw new Error('Failed to create blog');
-      setShowForm(false);
-      fetchBlogs();
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  const handleUpdate = async (blog) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/blogs/${editBlog._id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(blog),
-      });
-      if (!response.ok) throw new Error('Failed to update blog');
-      setEditBlog(null);
-      setShowForm(false);
-      fetchBlogs();
-    } catch (err) {
-      setError(err.message);
     }
   };
 
@@ -86,16 +52,6 @@ const BlogsSection = () => {
             Explore my latest blog posts and updates.
           </p>
         </div>
-        <div className="mb-8 text-right">
-          <Button onClick={() => { setShowForm(true); setEditBlog(null); }} className="bg-cyan-500 text-white">Add Blog</Button>
-        </div>
-        {showForm && (
-          <BlogForm
-            onSubmit={editBlog ? handleUpdate : handleCreate}
-            initialData={editBlog}
-            onCancel={() => { setShowForm(false); setEditBlog(null); }}
-          />
-        )}
         {loading ? (
           <p className="mt-4">Loading Blogs...</p>
         ) : error ? (
