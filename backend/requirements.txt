@@ -29,6 +29,6 @@ sendgrid
 python-multipart
 Flask==2.3.3
 Flask-Cors==3.0.10
-openai==0.27.8
-anthropic==0.3.0
+openai==0.28.0
 beautifulsoup4==4.12.2
+schedule==1.2.0
