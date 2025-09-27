@@ -55,12 +55,65 @@ const Chatbot = () => {
     setIsLoading(true);
 
     try {
-      // For testing/fallback when API is unavailable
-      const fallbackResponse = {
-        reply: `I understand you asked about "${userInput}", but I'm currently having trouble connecting to my knowledge base. Please try again shortly.`
+      // Set up smart fallback responses
+      const getFallbackResponse = (input) => {
+        // Predefined responses to common queries
+        const responses = {
+          greetings: {
+            match: /^(hi|hello|hey|greetings|howdy|hola)/i,
+            replies: [
+              "Hello there! I'm Allu Bot, your friendly portfolio assistant. How can I help you today?",
+              "Hi! Welcome to Althaf's portfolio. What would you like to know about his skills or projects?",
+              "Hey! Great to meet you. Feel free to ask about Althaf's work, technologies, or experience!"
+            ]
+          },
+          about: {
+            match: /^(who|what|tell me about|about)/i,
+            replies: [
+              "I'm Allu Bot, an AI assistant for Althaf Hussain Syed's portfolio. Althaf is a skilled developer with expertise in web development, cloud technologies, and DevOps.",
+              "Althaf Hussain Syed is a developer with strong skills in React, Node.js, Python, and cloud technologies. His portfolio showcases various projects demonstrating these skills."
+            ]
+          },
+          skills: {
+            match: /^(skills|technologies|tech stack|what can you|what do you know)/i,
+            replies: [
+              "Althaf works with React, Node.js, Python, MongoDB, AWS, Azure, and various DevOps tools. Which technology would you like to know more about?",
+              "The tech stack includes: React/Next.js for frontend, Node.js/Python for backend, MongoDB/PostgreSQL for databases, and AWS/Azure for cloud deployment."
+            ]
+          },
+          projects: {
+            match: /^(projects|work|portfolio|showcase)/i,
+            replies: [
+              "Althaf's portfolio includes web applications, automation tools, and cloud-based solutions. You can explore the projects section on this website for details.",
+              "Check out the Projects section for a showcase of work including this portfolio site, e-commerce platforms, and various technical implementations."
+            ]
+          },
+          default: {
+            replies: [
+              "I'm designed to answer questions about Althaf's portfolio and skills. Could you try asking something more specific?",
+              "I can tell you about Althaf's projects, skills, and experience. What would you like to know?",
+              "I'd be happy to help with information about Althaf's work and skills. Could you rephrase your question?"
+            ]
+          }
+        };
+
+        // Try to match input to a category
+        for (const [category, data] of Object.entries(responses)) {
+          if (category !== 'default' && data.match.test(input)) {
+            return { reply: data.replies[Math.floor(Math.random() * data.replies.length)] };
+          }
+        }
+
+        // Default response if no matches
+        const defaultReplies = responses.default.replies;
+        return { reply: defaultReplies[Math.floor(Math.random() * defaultReplies.length)] };
       };
       
-      // Try multiple possible endpoints to handle different deployment configurations
+      // Try to use the API first
+      let data = null;
+      let apiCallSucceeded = false;
+      
+      // Try each possible endpoint URL
       const possibleBaseUrls = [
         '', // Same domain (relative URL)
         'https://althaf-portfolio.onrender.com',
@@ -68,59 +121,45 @@ const Chatbot = () => {
         'http://localhost:5000'
       ];
       
-      let response = null;
-      let apiCallSucceeded = false;
-      
-      // Try each possible URL until one works
       for (const baseUrl of possibleBaseUrls) {
         try {
           console.log(`Attempting API call to: ${baseUrl}/api/ask-all-u-bot`);
-          const tempResponse = await fetch(`${baseUrl}/api/ask-all-u-bot`, {
+          const response = await fetch(`${baseUrl}/api/ask-all-u-bot`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ message: userInput }),
-            credentials: 'omit', // Don't send credentials to avoid CORS issues
-            signal: AbortSignal.timeout(5000) // 5 second timeout per attempt
+            credentials: 'omit',
+            signal: AbortSignal.timeout(3000) // Reduced timeout to 3 seconds
           });
           
-          if (tempResponse.ok) {
+          if (response.ok) {
             console.log(`Successful response from: ${baseUrl}/api/ask-all-u-bot`);
-            response = tempResponse;
-            apiCallSucceeded = true;
-            break;
+            const responseText = await response.text();
+            console.log('Response text:', responseText);
+            
+            if (responseText && responseText.trim()) {
+              try {
+                data = JSON.parse(responseText);
+                apiCallSucceeded = true;
+                break; // Exit loop if we get a successful response with data
+              } catch (parseError) {
+                console.error("Failed to parse response as JSON:", parseError);
+              }
+            } else {
+              console.warn("Empty response received from server");
+            }
           } else {
-            console.log(`Failed with status ${tempResponse.status} from: ${baseUrl}/api/ask-all-u-bot`);
+            console.log(`Failed with status ${response.status} from: ${baseUrl}/api/ask-all-u-bot`);
           }
         } catch (e) {
           console.log(`Error with ${baseUrl}/api/ask-all-u-bot:`, e.message);
-          // Continue to next URL
         }
       }
-
-      // If no API call succeeded, use fallback
-      let data = fallbackResponse;
       
-      if (apiCallSucceeded && response) {
-        try {
-          const responseText = await response.text();
-          console.log('Response text:', responseText);
-          
-          if (responseText && responseText.trim()) {
-            try {
-              data = JSON.parse(responseText);
-            } catch (parseError) {
-              console.error("Failed to parse response as JSON:", parseError);
-              // Use fallback if JSON parsing fails
-              data = fallbackResponse;
-            }
-          } else {
-            console.warn("Empty response received from server");
-            data = fallbackResponse;
-          }
-        } catch (readError) {
-          console.error("Error reading response:", readError);
-          data = fallbackResponse;
-        }
+      // If API calls failed, use local fallback system
+      if (!apiCallSucceeded || !data) {
+        data = getFallbackResponse(userInput);
+        console.log("Using local fallback system for response");
       }
 
       const botMessage = { 
