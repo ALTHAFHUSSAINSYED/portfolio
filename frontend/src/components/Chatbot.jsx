@@ -11,11 +11,15 @@ const Chatbot = () => {
 
   // Initialize with welcome message
   useEffect(() => {
-    setMessages([{
-      sender: "bot",
-      text: "👋 Hi there! I'm Allu Bot. How can I assist you with tech questions or portfolio information today?"
-    }]);
+    if (isOpen && messages.length === 0) {
+      setMessages([{
+        sender: "bot",
+        text: "👋 Hi there! I'm Allu Bot. How can I assist you with tech questions or portfolio information today?"
+      }]);
+    }
+  }, [isOpen, messages.length]);
 
+  useEffect(() => {
     const theme = document.documentElement.getAttribute("data-theme");
     document.documentElement.style.setProperty(
       "--chat-bg-color",
@@ -51,33 +55,72 @@ const Chatbot = () => {
     setIsLoading(true);
 
     try {
-      // Check if running in development or production
-      const baseUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://althaf-portfolio.onrender.com' 
-        : '';
+      // For testing/fallback when API is unavailable
+      const fallbackResponse = {
+        reply: `I understand you asked about "${userInput}", but I'm currently having trouble connecting to my knowledge base. Please try again shortly.`
+      };
       
-      const response = await fetch(`${baseUrl}/api/ask-all-u-bot`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userInput }),
-        // Adding timeout and credentials
-        credentials: 'include',
-        signal: AbortSignal.timeout(15000) // 15 second timeout
-      });
-
-      if (!response.ok) {
-        throw new Error(`Server responded with status: ${response.status}`);
+      // Try multiple possible endpoints to handle different deployment configurations
+      const possibleBaseUrls = [
+        '', // Same domain (relative URL)
+        'https://althaf-portfolio.onrender.com',
+        'https://althaf-portfolio.vercel.app',
+        'http://localhost:5000'
+      ];
+      
+      let response = null;
+      let apiCallSucceeded = false;
+      
+      // Try each possible URL until one works
+      for (const baseUrl of possibleBaseUrls) {
+        try {
+          console.log(`Attempting API call to: ${baseUrl}/api/ask-all-u-bot`);
+          const tempResponse = await fetch(`${baseUrl}/api/ask-all-u-bot`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: userInput }),
+            credentials: 'omit', // Don't send credentials to avoid CORS issues
+            signal: AbortSignal.timeout(5000) // 5 second timeout per attempt
+          });
+          
+          if (tempResponse.ok) {
+            console.log(`Successful response from: ${baseUrl}/api/ask-all-u-bot`);
+            response = tempResponse;
+            apiCallSucceeded = true;
+            break;
+          } else {
+            console.log(`Failed with status ${tempResponse.status} from: ${baseUrl}/api/ask-all-u-bot`);
+          }
+        } catch (e) {
+          console.log(`Error with ${baseUrl}/api/ask-all-u-bot:`, e.message);
+          // Continue to next URL
+        }
       }
 
-      const responseText = await response.text();
-      let data;
+      // If no API call succeeded, use fallback
+      let data = fallbackResponse;
       
-      try {
-        // Try to parse as JSON if there's content
-        data = responseText ? JSON.parse(responseText) : {};
-      } catch (parseError) {
-        console.error("Failed to parse response as JSON:", parseError);
-        throw new Error("Invalid response format from server");
+      if (apiCallSucceeded && response) {
+        try {
+          const responseText = await response.text();
+          console.log('Response text:', responseText);
+          
+          if (responseText && responseText.trim()) {
+            try {
+              data = JSON.parse(responseText);
+            } catch (parseError) {
+              console.error("Failed to parse response as JSON:", parseError);
+              // Use fallback if JSON parsing fails
+              data = fallbackResponse;
+            }
+          } else {
+            console.warn("Empty response received from server");
+            data = fallbackResponse;
+          }
+        } catch (readError) {
+          console.error("Error reading response:", readError);
+          data = fallbackResponse;
+        }
       }
 
       const botMessage = { 
@@ -85,6 +128,7 @@ const Chatbot = () => {
         text: data.reply || "Sorry, I couldn't process your request." 
       };
       setMessages((prev) => [...prev, botMessage]);
+      
     } catch (error) {
       console.error("Error communicating with Allu Bot:", error);
       const errorMessage = { 
