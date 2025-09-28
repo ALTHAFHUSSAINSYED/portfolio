@@ -1,0 +1,1 @@
+web: cd backend && sh render_start.sh
