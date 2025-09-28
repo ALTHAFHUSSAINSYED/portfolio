@@ -1,4 +1,4 @@
-# backend.py
+# backend.py - Portfolio Backend Server with Chatbot API
 
 from fastapi import FastAPI, APIRouter, UploadFile, File, Form, HTTPException, status, BackgroundTasks
 from fastapi.staticfiles import StaticFiles
