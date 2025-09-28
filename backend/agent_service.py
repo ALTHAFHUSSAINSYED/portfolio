@@ -715,14 +715,313 @@ class AgentScheduler:
 def handle_agent_query(query):
     """Handle a direct query to the agent from the chatbot"""
     try:
-        # If AI services are not available, provide a basic response
+        # Portfolio-specific knowledge base for Althaf Hussain Syed
+        portfolio_knowledge = {
+            "personal_info": {
+                "name": "Althaf Hussain Syed",
+                "title": "DevOps Engineer | Cloud & Infrastructure Specialist",
+                "email": "allualthaf42@gmail.com",
+                "phone": "8184812249",
+                "location": "Hyderabad, India",
+                "linkedin": "https://linkedin.com/in/althafhussainsyed",
+                "summary": "Certified DevOps Engineer with 3+ years of experience in cloud infrastructure, automation, and CI/CD pipeline engineering. Multi-cloud certified professional with expertise in AWS, GCP, Azure, and Oracle Cloud. Proven track record of reducing operational overhead by 40% and improving incident response time by 30%."
+            },
+            "skills": {
+                "cloud_platforms": ["AWS (Expert)", "Google Cloud Platform (Advanced)", "Microsoft Azure (Advanced)", "Oracle Cloud (Intermediate)"],
+                "devops_tools": ["Jenkins (Expert)", "Docker (Advanced)", "Kubernetes (Advanced)", "Terraform (Advanced)", "Ansible (Advanced)", "GitHub Actions (Intermediate)"],
+                "programming": ["Python (Advanced)", "Bash Scripting (Advanced)", "Java (Intermediate)"],
+                "storage": ["Brocade SAN (Expert)", "HPE 3PAR (Expert)", "HPE Primera (Advanced)", "Dell EMC (Advanced)"]
+            },
+            "experience": {
+                "current_role": "Analyst III Infrastructure Services / DevOps Engineer at DXC Technology (Aug 2022 – Present)",
+                "key_achievements": [
+                    "Automated infrastructure provisioning using Terraform and Ansible, reducing manual effort by 40%",
+                    "Designed and deployed CI/CD pipelines using Jenkins and AWS CodePipeline",
+                    "Containerized applications with Docker and orchestrated them using Kubernetes (EKS, GKE, AKS)",
+                    "Implemented comprehensive monitoring solutions with AWS CloudWatch and GCP Cloud Monitoring, improving incident response time by 30%",
+                    "Managed enterprise storage solutions ensuring 99.9% uptime"
+                ]
+            },
+            "certifications": [
+                "AWS Certified Solutions Architect – Associate",
+                "Google Cloud Professional Cloud Architect",
+                "Microsoft Azure Administrator Associate (AZ-104)",
+                "Oracle Cloud Infrastructure Architect Associate",
+                "AWS Certified AI Practitioner",
+                "AWS Cloud Practitioner",
+                "Azure Fundamentals (AZ-900)",
+                "GitHub Foundations",
+                "Generative AI Certified Professional (Oracle)"
+            ],
+            "education": [
+                "Master of Science in Computer Science - Acharya Nagarjuna University (Dec 2022 – June 2024)",
+                "Bachelor of Science in Computer Science - Acharya Nagarjuna University (June 2019 – June 2022)"
+            ],
+            "projects": [
+                {
+                    "name": "Multi-Cloud CI/CD Pipeline",
+                    "description": "Designed and implemented end-to-end CI/CD pipelines across AWS, GCP, and Azure environments",
+                    "technologies": ["Jenkins", "AWS CodePipeline", "GCP Cloud Build", "Docker", "Kubernetes"],
+                    "achievements": ["Reduced deployment time by 60%", "Improved code quality through automated testing"]
+                },
+                {
+                    "name": "Infrastructure as Code Implementation", 
+                    "description": "Automated infrastructure provisioning using Terraform and Ansible across multiple cloud platforms",
+                    "technologies": ["Terraform", "Ansible", "AWS", "GCP", "Azure"],
+                    "achievements": ["40% reduction in manual provisioning", "Standardized infrastructure deployment"]
+                },
+                {
+                    "name": "Enterprise Storage Optimization",
+                    "description": "Managed and optimized enterprise storage solutions for high-performance computing environments", 
+                    "technologies": ["Brocade SAN", "HPE 3PAR", "HPE Primera", "Dell EMC"],
+                    "achievements": ["99.9% uptime achievement", "30% improvement in storage efficiency"]
+                }
+            ],
+            "recent_blogs": [
+                {
+                    "title": "Unlocking Enterprise Agility: Low-Code Integration Platforms in 2025",
+                    "summary": "Low-code integration platforms empower enterprises to connect systems, automate workflows, and drive digital transformation with unprecedented speed and efficiency.",
+                    "category": "Low-Code/No-Code",
+                    "tags": ["low-code", "integration", "enterprise integration", "automation", "digital transformation"]
+                },
+                {
+                    "title": "Architecting for the IoT Tsunami: Building Scalable IoT Systems",
+                    "summary": "Explores key architectural patterns for building scalable IoT solutions, including Lambda, Kappa, Microservices, Edge Computing architectures.",
+                    "category": "IoT Development", 
+                    "tags": ["IoT", "Scalability", "Architecture", "Cloud Computing", "Data Streaming", "Edge Computing", "Microservices"]
+                },
+                {
+                    "title": "Unlocking the Potential of Edge-Cloud Hybrid Applications: A Developer's Guide",
+                    "summary": "Edge-cloud hybrid applications combine the strengths of edge and cloud computing to deliver faster, more responsive, and reliable applications.",
+                    "category": "Edge Computing",
+                    "tags": ["Edge Computing", "Cloud Computing", "Hybrid Cloud", "Application Development", "IoT", "Cloud-Native"]
+                }
+            ]
+        }
+        
+        # Convert query to lowercase for better matching
+        query_lower = query.lower()
+        
+        # Define allowed topics and keywords
+        allowed_tech_keywords = [
+            # Portfolio-specific
+            'althaf', 'portfolio', 'skills', 'experience', 'projects', 'certifications', 'education', 'contact', 'blogs',
+            # DevOps & Cloud
+            'devops', 'cloud', 'aws', 'azure', 'gcp', 'google cloud', 'oracle cloud', 'kubernetes', 'docker', 'jenkins',
+            'terraform', 'ansible', 'ci/cd', 'pipeline', 'automation', 'infrastructure', 'monitoring', 'deployment',
+            # Programming & Tech
+            'programming', 'python', 'java', 'bash', 'scripting', 'development', 'software', 'architecture',
+            'microservices', 'api', 'database', 'storage', 'networking', 'security', 'linux', 'containers',
+            # Emerging Tech
+            'ai', 'artificial intelligence', 'machine learning', 'iot', 'edge computing', 'blockchain', 'serverless',
+            'low-code', 'no-code', 'integration', 'data', 'analytics', 'big data', 'streaming'
+        ]
+        
+        # Define blocked topics
+        blocked_keywords = [
+            # Inappropriate content
+            'sex', 'sexy', 'porn', 'adult', 'nude', 'explicit', 'dating', 'relationship', 'romance',
+            # Violence & illegal
+            'kill', 'murder', 'violence', 'weapon', 'bomb', 'terrorist', 'illegal', 'drug', 'hack', 'exploit',
+            # Personal attacks
+            'stupid', 'idiot', 'dumb', 'hate', 'racist', 'discrimination',
+            # Off-topic entertainment
+            'movie', 'film', 'celebrity', 'gossip', 'sport', 'football', 'cricket', 'music', 'song',
+            # Random topics
+            'weather', 'food', 'recipe', 'travel', 'vacation', 'shopping', 'fashion', 'beauty'
+        ]
+        
+        # Check for blocked content first
+        if any(blocked_word in query_lower for blocked_word in blocked_keywords):
+            return {
+                "reply": "I'm focused on technical discussions and Althaf's portfolio. Please ask about DevOps, cloud technologies, programming, or Althaf's professional experience.",
+                "source": "Portfolio"
+            }
+        
+        # Check if query contains allowed tech topics or portfolio keywords
+        is_tech_related = any(keyword in query_lower for keyword in allowed_tech_keywords)
+        
+        # If not tech-related and longer than 3 words, redirect
+        if not is_tech_related and len(query.split()) > 2:
+            return {
+                "reply": "I specialize in technical topics and Althaf's portfolio information. Please ask about:\n• DevOps tools and practices\n• Cloud technologies (AWS, Azure, GCP)\n• Programming and software development\n• Althaf's projects and experience\n• Technical certifications and skills",
+                "source": "Portfolio"
+            }
+        
+        # Handle greeting and basic interactions first
+        if any(keyword in query_lower for keyword in ['hi', 'hello', 'hey', 'thanks', 'thank you']):
+            if any(keyword in query_lower for keyword in ['hi', 'hello', 'hey']):
+                return {
+                    "reply": "Hi! I'm Allu Bot, Althaf's technical portfolio assistant. Ask me about his DevOps skills, cloud experience, programming projects, or any tech-related topics!",
+                    "source": "Portfolio"
+                }
+            elif any(keyword in query_lower for keyword in ['thanks', 'thank you']):
+                return {
+                    "reply": "You're welcome! Feel free to ask more about Althaf's technical skills or any tech topics.",
+                    "source": "Portfolio"
+                }
+        
+        # Handle inappropriate or irrelevant queries with strict guardrails
+        inappropriate_keywords = ['fuck', 'shit', 'damn', 'wtf', 'sexy', 'porn', 'sex', 'dating', 'violence', 'drugs', 'gambling']
+        if any(keyword in query_lower for keyword in inappropriate_keywords):
+            return {
+                "reply": "Let's keep our discussion professional and technical. Please ask about Althaf's portfolio, DevOps skills, or technology topics.",
+                "source": "Portfolio"
+            }
+        
+        # Strict topic filtering - only allow tech and portfolio topics
+        allowed_topics = [
+            # Portfolio specific
+            'althaf', 'portfolio', 'skills', 'experience', 'projects', 'certifications', 'education', 'contact', 'resume', 'cv',
+            # Tech topics - Core areas
+            'devops', 'cloud', 'aws', 'azure', 'gcp', 'google cloud', 'oracle cloud', 'kubernetes', 'docker', 
+            'jenkins', 'terraform', 'ansible', 'ci/cd', 'infrastructure', 'automation', 'monitoring',
+            'programming', 'python', 'java', 'bash', 'scripting', 'coding', 'development', 'software',
+            'storage', 'database', 'brocade', 'hpe', 'dell emc', 'san', '3par', 'primera',
+            # Advanced tech topics
+            'microservices', 'containers', 'orchestration', 'pipeline', 'deployment', 'serverless',
+            'iot', 'edge computing', 'hybrid cloud', 'integration', 'api', 'architecture', 'blockchain',
+            'security', 'networking', 'virtualization', 'linux', 'windows', 'server', 'ai', 'ml', 'machine learning',
+            'artificial intelligence', 'data science', 'analytics', 'big data', 'streaming', 'kafka', 'redis',
+            'nosql', 'sql', 'mongodb', 'postgresql', 'mysql', 'elasticsearch', 'nginx', 'apache'
+        ]
+        
+        # Check if query contains any allowed topics
+        has_allowed_topic = any(topic in query_lower for topic in allowed_topics)
+        
+        # Check for greeting keywords
+        greeting_keywords = ['hi', 'hello', 'hey', 'thanks', 'thank you', 'good morning', 'good evening', 'good afternoon']
+        is_greeting = any(greeting in query_lower for greeting in greeting_keywords)
+        
+        # Check for chatbot meta questions
+        meta_keywords = ['what can you', 'how does this bot', 'what do you know', 'internet access', 'what topics']
+        is_meta_question = any(meta in query_lower for meta in meta_keywords)
+        
+        # Reject queries that don't contain allowed topics (unless it's a greeting or meta question)
+        if not has_allowed_topic and not is_greeting and not is_meta_question and len(query_lower.strip()) > 5:
+            return {
+                "reply": "I'm specialized in discussing Althaf's portfolio and technology topics. Please ask about:\n• Althaf's DevOps skills and experience\n• Cloud technologies (AWS, Azure, GCP)\n• Programming and software development\n• DevOps tools and practices\n• General tech topics in my expertise areas\n\nWhat specific tech topic interests you?",
+                "source": "Portfolio"
+            }
+        
+        # Check if the query is about portfolio-specific information
+        if any(keyword in query_lower for keyword in ['skills', 'devops', 'tools', 'aws', 'azure', 'gcp', 'cloud', 'kubernetes', 'docker', 'jenkins', 'terraform', 'ansible']):
+            if 'skills' in query_lower or 'devops' in query_lower or 'tools' in query_lower:
+                return {
+                    "reply": f"**Althaf's DevOps Tools:**\n\n• **Cloud:** {', '.join(portfolio_knowledge['skills']['cloud_platforms'])}\n• **DevOps:** {', '.join(portfolio_knowledge['skills']['devops_tools'])}\n• **Programming:** {', '.join(portfolio_knowledge['skills']['programming'])}",
+                    "source": "Portfolio"
+                }
+        
+        # Handle chatbot-specific questions
+        if any(keyword in query_lower for keyword in ['how does this chatbot work', 'chatbot work', 'bot work']):
+            return {
+                "reply": "I'm Allu Bot, built specifically for Althaf's technical portfolio. I can discuss:\n• Althaf's DevOps and cloud expertise\n• Technical projects and achievements\n• Programming skills and certifications\n• General tech topics (AI, cloud, DevOps, programming)\n• Industry trends and best practices\n\nI'm designed to keep discussions technical and professional.",
+                "source": "Portfolio"
+            }
+        
+        # Handle general tech topic requests
+        if any(keyword in query_lower for keyword in ['what can you discuss', 'what topics', 'what do you know']):
+            return {
+                "reply": "I can help with:\n\n**Althaf's Portfolio:**\n• DevOps skills & experience\n• Cloud certifications (AWS, Azure, GCP)\n• Technical projects & achievements\n• Programming expertise\n\n**Tech Topics:**\n• Cloud computing & DevOps practices\n• Programming languages & frameworks\n• AI/ML, IoT, Edge computing\n• Software architecture & development\n\nWhat would you like to explore?",
+                "source": "Portfolio"
+            }
+        
+        # Handle internet access questions
+        if any(keyword in query_lower for keyword in ['internet access', 'internet', 'online']):
+            return {
+                "reply": "I have limited internet access and primarily focus on Althaf's portfolio information. For the most accurate details about his skills and experience, I use his portfolio data directly.",
+                "source": "Portfolio"
+            }
+        
+        if any(keyword in query_lower for keyword in ['experience', 'work', 'job', 'role', 'achievements']):
+            return {
+                "reply": f"**Current Role:** {portfolio_knowledge['experience']['current_role']}\n\n**Key Achievements:**\n• Reduced manual effort by 40% with automation\n• Improved incident response time by 30%\n• Managed enterprise storage with 99.9% uptime",
+                "source": "Portfolio"
+            }
+        
+        if any(keyword in query_lower for keyword in ['certifications', 'certified', 'cert']):
+            return {
+                "reply": f"Althaf holds the following certifications:\n" + "\n".join([f"• {cert}" for cert in portfolio_knowledge['certifications']]),
+                "source": "Portfolio"
+            }
+        
+        if any(keyword in query_lower for keyword in ['education', 'degree', 'university', 'college']):
+            return {
+                "reply": f"Althaf's education:\n" + "\n".join([f"• {edu}" for edu in portfolio_knowledge['education']]),
+                "source": "Portfolio"
+            }
+        
+        if any(keyword in query_lower for keyword in ['contact', 'email', 'phone', 'linkedin', 'reach']):
+            return {
+                "reply": f"You can contact Althaf:\n• Email: {portfolio_knowledge['personal_info']['email']}\n• Phone: {portfolio_knowledge['personal_info']['phone']}\n• LinkedIn: {portfolio_knowledge['personal_info']['linkedin']}\n• Location: {portfolio_knowledge['personal_info']['location']}",
+                "source": "Portfolio"
+            }
+        
+        if any(keyword in query_lower for keyword in ['projects', 'project', 'work samples', 'portfolio projects']):
+            projects_text = ""
+            for i, project in enumerate(portfolio_knowledge['projects'], 1):
+                projects_text += f"**{i}. {project['name']}**\n{project['description']}\n• Technologies: {', '.join(project['technologies'])}\n• Key Results: {', '.join(project['achievements'])}\n\n"
+            return {
+                "reply": f"**Althaf's Key Projects:**\n\n{projects_text.strip()}",
+                "source": "Portfolio"
+            }
+        
+        if any(keyword in query_lower for keyword in ['blogs', 'blog', 'articles', 'writing', 'content']):
+            blogs_text = ""
+            for i, blog in enumerate(portfolio_knowledge['recent_blogs'], 1):
+                blogs_text += f"**{i}. {blog['title']}**\n{blog['summary']}\n• Category: {blog['category']}\n• Tags: {', '.join(blog['tags'][:3])}\n\n"
+            return {
+                "reply": f"**Althaf's Recent Blog Posts:**\n\n{blogs_text.strip()}",
+                "source": "Portfolio"
+            }
+        
+        if any(keyword in query_lower for keyword in ['about', 'who', 'introduction', 'summary']):
+            return {
+                "reply": f"**{portfolio_knowledge['personal_info']['name']}** is a {portfolio_knowledge['personal_info']['title']} based in {portfolio_knowledge['personal_info']['location']}.\n\n{portfolio_knowledge['personal_info']['summary'][:150]}...",
+                "source": "Portfolio"
+            }
+        
+        # STRICT GUARDRAIL: Only use internet search for very specific technical queries 
+        # that are NOT already covered by portfolio data
+        portfolio_covered_keywords = ['althaf', 'portfolio', 'skills', 'experience', 'projects', 'certifications', 'education', 'contact', 'devops tools', 'aws', 'azure', 'gcp', 'jenkins', 'docker', 'kubernetes', 'terraform', 'ansible']
+        
+        # If query is about portfolio-covered topics, don't search internet
+        if any(keyword in query_lower for keyword in portfolio_covered_keywords):
+            return {
+                "reply": "I have comprehensive information about Althaf's portfolio and skills. Please ask more specifically about his DevOps experience, cloud certifications, technical projects, or contact details.",
+                "source": "Portfolio"
+            }
+        
+        # CREDIT PROTECTION: Only search internet for very general tech concepts not specific to Althaf
+        general_tech_keywords = ['what is', 'how does', 'explain', 'difference between', 'comparison of', 'best practices for', 'trends in']
+        is_general_tech_query = any(phrase in query_lower for phrase in general_tech_keywords)
+        
+        if not is_general_tech_query:
+            return {
+                "reply": "I'm designed to discuss Althaf's portfolio and provide general tech insights. For Althaf-specific information, I have comprehensive data. For general tech topics, try phrasing your question like 'What is...?' or 'How does...?' or 'Explain...'",
+                "source": "Portfolio"
+            }
+        
+        # Final check: Only proceed with internet search for truly technical queries
+        advanced_tech_keywords = ['machine learning', 'artificial intelligence', 'blockchain', 'quantum computing', 'edge computing', 'serverless', 'microservices', 'containerization', 'orchestration']
+        if not any(tech in query_lower for tech in advanced_tech_keywords) and not any(tech in query_lower for tech in ['programming', 'software', 'development', 'architecture', 'framework', 'database', 'api']):
+            return {
+                "reply": "I focus on technical discussions. Please ask about advanced technologies, programming concepts, software architecture, or Althaf's technical expertise.",
+                "source": "Portfolio"
+            }
+        
+        # FINAL CREDIT PROTECTION: Add a warning before using internet search
+        # This ensures users are aware when we're using external API
+        internet_search_warning = "\n\n⚠️ *Using limited internet search for this tech query*"
+        
+        # Only use internet search as a last resort for tech-related queries
         if not gemini_client:
             return {
-                "reply": "I'm currently operating with limited capabilities. My AI services are unavailable at the moment. I can still help with basic portfolio information that doesn't require external searches.",
+                "reply": "I can provide information about Althaf's technical portfolio and skills. Please ask about his DevOps experience, cloud certifications, or programming projects.",
                 "source": None
             }
-            
-        # Initialize web search engine
+        
+        # Initialize web search engine for non-portfolio queries
         search_engine = WebSearchEngine()
         
         # Search for information
@@ -730,62 +1029,56 @@ def handle_agent_query(query):
         
         if not search_results:
             return {
-                "reply": "I couldn't find specific information about that. My search capabilities might be limited right now. Could you try asking about Althaf's portfolio directly?",
+                "reply": "I couldn't find specific information about that. Please try asking about Althaf's portfolio - his skills, experience, certifications, or contact information.",
                 "source": None
             }
         
         # Get the first relevant result
         top_result = search_results[0]
         
-        # Fetch more detailed content if there's a link
-        detailed_content = None
-        if top_result.get("link"):
-            detailed_content = search_engine.fetch_webpage_content(top_result.get("link"))
+        # For internet queries, provide brief responses
+        context = [{
+            'title': top_result.get('title', 'Search Result'),
+            'content': top_result.get('snippet', '')[:500]  # Limit content
+        }]
         
-        # Prepare context for AI
-        context = []
-        if detailed_content and detailed_content.get('content'):
-            context.append({
-                'title': top_result.get('title', 'Search Result'),
-                'content': detailed_content.get('content', '')[:2000]
-            })
-        else:
-            # Use snippets as context
-            for result in search_results[:3]:  # Use top 3 results
-                context.append({
-                    'title': result.get('title', 'Search Result'),
-                    'content': result.get('snippet', '')
-                })
-        
-        # Try using Gemini service first (preferred)
+        # Try using Gemini service for concise, tech-focused responses
         if gemini_client:
             try:
-                reply = gemini_client.answer_query(query, context)
+                # Modified prompt for tech-focused, concise responses
+                tech_query = f"Provide a brief, technical answer (2-3 sentences max) about this technology topic: {query}. Focus on technical aspects, use cases, or industry relevance."
+                reply = gemini_client.answer_query(tech_query, context)
                 return {
-                    "reply": reply,
+                    "reply": reply + internet_search_warning,
                     "source": top_result.get("link")
                 }
             except Exception as e:
                 logger.error(f"Gemini API error: {e}")
-                # No fallback available since we've removed OpenAI
+                # Fallback to portfolio information instead of generic error
+                return {
+                    "reply": f"I had trouble accessing external tech information. However, I can tell you about Althaf's expertise:\n\n• **Cloud Platforms:** {', '.join(portfolio_knowledge['skills']['cloud_platforms'])}\n• **DevOps Tools:** {', '.join(portfolio_knowledge['skills']['devops_tools'])}\n• **Programming:** {', '.join(portfolio_knowledge['skills']['programming'])}\n\nPlease ask about his specific experience or projects!",
+                    "source": "Portfolio"
+                }
         
-        # Use a simple response from the search results
-        return {
-            "reply": f"Based on what I found: {top_result.get('title')}\n\n{top_result.get('snippet', 'I found some information but cannot provide complete details at the moment.')}",
-            "source": top_result.get("link")
-        }
-                # If Gemini call fails, fall back to search snippet
+        # Fallback to brief snippet with tech focus check
+        snippet = top_result.get('snippet', 'I found some information but cannot provide complete details.')
         
-        # Final fallback to a simple response with the search snippet
+        # Final tech-relevance check before providing external content
+        if not any(tech_word in snippet.lower() for tech_word in ['technology', 'software', 'development', 'programming', 'cloud', 'system', 'data', 'computing', 'technical']):
+            return {
+                "reply": "I couldn't find relevant technical information about that topic. Please ask about Althaf's portfolio or technology-related subjects.",
+                "source": None
+            }
+        
         return {
-            "reply": f"Based on what I found: {top_result.get('snippet', 'I found some information but cannot provide complete details at the moment.')}",
+            "reply": f"{snippet[:200]}...",
             "source": top_result.get("link")
         }
             
     except Exception as e:
         logger.error(f"Error handling agent query: {e}")
         return {
-            "reply": "Sorry, I encountered an error while processing your request.",
+            "reply": "Sorry, I encountered an error. Please ask about Althaf's portfolio information.",
             "source": None
         }
 

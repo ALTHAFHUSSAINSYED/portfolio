@@ -377,7 +377,10 @@ async def ask_agent(query: AgentQuery):
         # Call the agent service to handle the query if available
         if HAS_AGENT_SERVICE:
             result = agent_service.handle_agent_query(query.message)
-            return result
+            return JSONResponse(
+                status_code=200,
+                content=result
+            )
         else:
             return JSONResponse(
                 status_code=200,
