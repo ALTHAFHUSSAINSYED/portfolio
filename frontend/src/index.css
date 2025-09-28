@@ -1,0 +1,1584 @@
+/* Blinking, gradient nav button for header */
+.nav-blink-gradient {
+  background: linear-gradient(90deg, #ff3fb4, #3dff8c);
+  color: #111827;
+  animation: toggleBlink 1.2s infinite;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+/* Webfonts for headings and body (loaded before Tailwind layers) */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,800&family=Satoshi:wght@400;500;700&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=Lato:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    margin: 0;
+    /* Use theme-aware body font stack */
+    font-family: var(--font-body, Inter, Manrope, "DM Sans", Lato, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* ✨ NEW: Smooth transition for theme changes */
+    transition: background-color 0.4s ease, color 0.4s ease;
+    /* Prevent horizontal scrolling */
+    overflow-x: hidden;
+    
+    /* Custom Scrollbar Styling */
+    /* Basic Firefox scrollbar support */
+    scrollbar-width: thin;
+    scrollbar-color: #E60073 rgba(0, 0, 0, 0.1);
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+        monospace;
+}
+
+/* =========== CUSTOM SCROLLBAR STYLING =========== */
+/* Base scrollbar sizing - consistent across all themes */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+/* Base track style - will be overridden by theme-specific styles */
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+/* Base thumb style with neutral gradient (fallback) */
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #f472b6 0%, #38bdf8 100%);
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: background 0.3s ease;
+    animation: scrollbarGlow 3s ease-in-out infinite;
+}
+
+/* Base hover style with brighter gradient (fallback) */
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #f472b6 0%, #38bdf8 100%);
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    box-shadow: 0 0 8px rgba(230, 0, 115, 0.4);
+}
+
+/* Universal Firefox scrollbar styling - will be overridden by theme classes */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #E60073 rgba(0, 0, 0, 0.1);
+}
+
+/* Base scrollbar corner style */
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* Scrollbar animation for glowing effect */
+@keyframes scrollbarGlow {
+    0%, 100% { opacity: 0.8; box-shadow: 0 0 5px rgba(230, 0, 115, 0.5); }
+    50% { opacity: 1; box-shadow: 0 0 10px rgba(0, 212, 255, 0.7); }
+}
+
+/* ✨ MODIFIED: CSS variables for both light and dark themes */
+@layer base {
+  :root {
+      /* Global font variables */
+      --font-heading: "Outfit", "Poppins", "Space Grotesk", "Fraunces", "Satoshi", Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-body: "Inter", "Manrope", "DM Sans", Lato, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      /* Light Theme Variables (Default) */
+      --background: 0 0% 100%;      /* White */
+
+      /*
+        REPLACED --foreground (was near-black) with a deep-indigo HSL value
+        so body text on light theme uses a colored (indigo) tone instead of plain black.
+        This is used via hsl(var(--foreground)) throughout the theme.
+      */
+      --foreground: 231 60% 32%;    /* deep indigo for primary text */
+
+      --card: 0 0% 100%;
+      --card-foreground: 231 60% 26%; /* slightly darker indigo for card text */
+      --popover: 0 0% 100%;
+      --popover-foreground: 231 60% 26%;
+      --primary: 210 40% 98%;
+      --primary-foreground: 210 40% 9.8%;
+
+      /* Light-mode secondary and muted text now use softer blue/purple hues (not gray/black) */
+      --secondary: 0 0% 96.1%;
+      --secondary-foreground: 224 56% 28%; /* nav / secondary text on light theme */
+
+      --muted: 0 0% 96.1%;
+      --muted-foreground: 231 35% 48%;    /* lighter indigo/purple for muted text */
+
+      --accent: 300 100% 50%;
+      --accent-foreground: 0 0% 98%;
+      --destructive: 0 84.2% 60.2%;
+      --destructive-foreground: 0 0% 98%;
+
+      /* Slightly brighter border for light mode (keeps contrast without pure black) */
+      --border: 215 10% 86%;
+
+      --input: 0 0% 94%;
+      --ring: 0 0% 3.9%;
+      --chart-1: 180 100% 50%;
+      --chart-2: 300 100% 50%;
+      --chart-3: 120 100% 50%;
+      --chart-4: 60 100% 50%;
+      --chart-5: 240 100% 50%;
+      --radius: 0.5rem;
+
+      /* Soft color fallbacks for light mode (kept and used) */
+      --cyan-soft-hex: #0891b2;
+      --pink-soft-hex: #f472b6;
+      --green-soft-hex: #16a34a;
+      --yellow-soft-hex: #f59e0b;
+      --blue-soft-hex: #1e3a8a;   /* indigo (preferred over pale skyblue) */
+      --purple-soft-hex: #8b5cf6;
+
+      /* Additional named variables for consistent light-mode text usage */
+      --text-primary-h: 231 60% 32%; /* same as --foreground (indigo) */
+      --text-heading-h: 224 68% 22%; /* darker indigo for headings */
+      --text-muted-h: 321 20% 45%;   /* a softer muted pink/purple */
+      --text-primary-hex: #1e3a8a;   /* indigo hex (for places easier to read as hex) */
+      --text-accent-pink-hex: #f472b6;
+      --text-accent-green-hex: #16a34a;
+      --text-accent-red-hex: #ef4444;
+  }
+
+  .dark {
+      /* Dark Theme Variables (UNCHANGED) */
+      --background: 0 0% 0%;        /* Black */
+      --foreground: 0 0% 100%;      /* White */
+      --card: 0 0% 0%;
+      --card-foreground: 0 0% 95%;
+      --popover: 0 0% 0%;
+      --popover-foreground: 0 0% 95%;
+      --primary: 180 100% 50%;
+      --primary-foreground: 0 0% 0%;
+      --secondary: 0 0% 5%;
+      --secondary-foreground: 0 0% 90%;
+      --muted: 0 0% 5%;
+      --muted-foreground: 0 0% 65%;
+      --accent: 300 100% 50%;
+      --accent-foreground: 0 0% 0%;
+      --destructive: 0 84.2% 60.2%;
+      --destructive-foreground: 0 0% 98%;
+      --border: 180 100% 50%;
+      --input: 0 0% 5%;
+      --ring: 180 100% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    }
+  html {
+    /* Ensure root element paints the page background (fixes right gutter) */
+    background-color: hsl(var(--background));
+    /* Basic smooth scrolling fallback (JavaScript solution is also implemented) */
+    scroll-behavior: smooth;
+  }
+  body {
+    /* ✨ MODIFIED: Uses CSS variables for background and text color */
+    @apply bg-background text-foreground;
+    }
+  /* Apply heading and body fonts globally */
+  h1, h2, h3, h4, h5, h6 { 
+    font-family: var(--font-heading);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  p, li, blockquote, input, textarea, button { 
+    font-family: var(--font-body);
+  }
+}
+
+/* Enhanced Black Theme with Shining Effects */
+@layer components {
+  /* Glassmorphic Navigation Button */
+  .glassmorphic-nav-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Reduced padding by ~15-20% for smaller size */
+    padding: 0.4rem 0.8rem; 
+    border-radius: 9999px;
+    backdrop-filter: blur(12px);
+    background: linear-gradient(to right, rgba(236, 72, 153, 0.3), rgba(34, 211, 238, 0.3));
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 6px -1px rgba(236, 72, 153, 0.1);
+    transition: all 0.3s ease;
+    color: hsl(var(--foreground));
+    font-weight: 500;
+    /* Reduced font size for better proportion with smaller buttons */
+    font-size: 0.9rem;
+  }
+  
+  .glassmorphic-nav-btn:hover {
+    background: linear-gradient(to right, rgba(236, 72, 153, 0.5), rgba(34, 211, 238, 0.5));
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 10px 15px -3px rgba(34, 211, 238, 0.2);
+  }
+  
+  .glassmorphic-nav-btn.active {
+    background: linear-gradient(to right, rgba(236, 72, 153, 0.7), rgba(34, 211, 238, 0.7));
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 10px 15px -3px rgba(34, 211, 238, 0.3);
+  }
+  
+  /* Dark theme adjustments for glassmorphic buttons */
+  .dark .glassmorphic-nav-btn {
+    background: linear-gradient(to right, rgba(236, 72, 153, 0.4), rgba(34, 211, 238, 0.4));
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: white;
+  }
+  
+  .dark .glassmorphic-nav-btn:hover {
+    background: linear-gradient(to right, rgba(236, 72, 153, 0.6), rgba(34, 211, 238, 0.6));
+    border: 1px solid rgba(255, 255, 255, 0.4);
+  }
+
+  .neon-theme {
+    background: #000000;
+    min-height: 100vh;
+  }
+
+  /* Enhanced Font Shining Effects */
+  .shine-text {
+    background: linear-gradient(90deg, #ffffff 0%, #22d3ee 25%, #ec4899 50%, #ffffff 75%, #10b981 100%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: textShine 3s ease-in-out infinite;
+  }
+
+  .shine-text-slow {
+    background: linear-gradient(90deg, #f8fafc 0%, #67e8f9 30%, #f9a8d4 60%, #f8fafc 100%);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: textShine 6s ease-in-out infinite;
+  }
+
+  .glow-text {
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(34, 211, 238, 0.3), 0 0 30px rgba(236, 72, 153, 0.2);
+    animation: textGlow 3s ease-in-out infinite alternate;
+  }
+
+  .glow-text-strong {
+    color: #ffffff;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 25px rgba(34, 211, 238, 0.6), 0 0 35px rgba(236, 72, 153, 0.4);
+    animation: strongGlow 2s ease-in-out infinite alternate;
+  }
+
+  .sparkle-text {
+    position: relative;
+    color: #ffffff;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+  }
+
+  .sparkle-text::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+    animation: sparkle 4s linear infinite;
+    pointer-events: none;
+  }
+
+  /* Entrance Animations */
+  .fade-in {
+    animation: fadeIn 1s ease-out forwards;
+    opacity: 0;
+  }
+
+  .fade-in-up {
+    animation: fadeInUp 1.2s ease-out forwards;
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  .fade-in-left {
+    animation: fadeInLeft 1.2s ease-out forwards;
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+
+  .fade-in-right {
+    animation: fadeInRight 1.2s ease-out forwards;
+    opacity: 0;
+    transform: translateX(40px);
+  }
+
+  .slide-in-bottom {
+    animation: slideInBottom 1.5s ease-out forwards;
+    opacity: 0;
+    transform: translateY(60px);
+  }
+
+  .scale-in {
+    animation: scaleIn 1s ease-out forwards;
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  .rotate-in {
+    animation: rotateIn 1.2s ease-out forwards;
+    opacity: 0;
+    transform: rotate(-10deg) scale(0.9);
+  }
+
+  /* Staggered animations with more variety */
+  .stagger-1 { animation-delay: 0.1s; }
+  .stagger-2 { animation-delay: 0.2s; }
+  .stagger-3 { animation-delay: 0.3s; }
+  .stagger-4 { animation-delay: 0.4s; }
+  .stagger-5 { animation-delay: 0.5s; }
+  .stagger-6 { animation-delay: 0.6s; }
+  .stagger-7 { animation-delay: 0.7s; }
+  .stagger-8 { animation-delay: 0.8s; }
+
+  /* Enhanced Text Animations */
+  .hero-title {
+    background: linear-gradient(135deg, #ffffff 0%, #67e8f9 25%, #f9a8d4 50%, #86efac 75%, #ffffff 100%);
+    background-size: 400% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+    animation: heroTitleShine 4s ease-in-out infinite;
+  }
+
+  .section-title {
+    background: linear-gradient(90deg, #ffffff 0%, #22d3ee 50%, #ffffff 100%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: sectionTitleShine 5s ease-in-out infinite;
+  }
+
+  .floating {
+    animation: floating 8s ease-in-out infinite;
+  }
+
+  .floating-reverse {
+    animation: floatingReverse 10s ease-in-out infinite;
+  }
+
+  .bounce-glow {
+    animation: bounceGlow 4s ease-in-out infinite;
+  }
+
+  .pulse-shine {
+    animation: pulseShine 3s ease-in-out infinite;
+  }
+
+  /* Enhanced Interactive Animations */
+  .hover-lift {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-12px) scale(1.02);
+    box-shadow: 0 25px 50px rgba(34, 211, 238, 0.3), 0 0 30px rgba(236, 72, 153, 0.2);
+  }
+
+  .hover-scale {
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .hover-scale:hover {
+    transform: scale(1.08);
+  }
+
+  .hover-glow {
+    transition: all 0.4s ease;
+  }
+
+  .hover-glow:hover {
+    box-shadow: 0 0 30px rgba(34, 211, 238, 0.6), 0 0 60px rgba(236, 72, 153, 0.4);
+    border-color: rgba(34, 211, 238, 0.8);
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+  }
+
+  .hover-rotate {
+    transition: transform 0.4s ease;
+  }
+
+  .hover-rotate:hover {
+    transform: rotate(8deg) scale(1.1);
+  }
+
+  .hover-shine {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .hover-shine::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.6s;
+  }
+
+  .hover-shine:hover::before {
+    left: 100%;
+  }
+
+  /* Enhanced Button Animations */
+  .neon-button {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(45deg, rgba(34, 211, 238, 0.1), rgba(236, 72, 153, 0.1));
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.4), 0 0 40px rgba(236, 72, 153, 0.3);
+    transition: all 0.4s ease;
+    animation: buttonPulse 4s ease-in-out infinite;
+  }
+
+  .neon-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s;
+  }
+
+  .neon-button:hover::before {
+    left: 100%;
+  }
+
+  .neon-button:hover {
+    box-shadow: 0 0 30px rgba(34, 211, 238, 0.8), 0 0 60px rgba(236, 72, 153, 0.6);
+    transform: translateY(-3px) scale(1.05);
+  }
+
+  /* Enhanced Card Animations */
+  .neon-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(34, 211, 238, 0.1), transparent);
+    transform: rotate(45deg);
+    transition: transform 0.8s ease;
+    opacity: 0;
+    /* ✨ FIX: Prevents the hover layer from capturing mouse clicks */
+    @apply pointer-events-none; 
+  }
+
+  .dark .neon-card:hover::before {
+    transform: rotate(45deg) translate(50%, 50%);
+    opacity: 1;
+  }
+
+  /* Progress Bar Animation */
+  .progress-fill {
+    transition: width 3s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: progressShine 3s ease-in-out infinite;
+  }
+
+  /* Enhanced Background Animations */
+  .bg-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(4px);
+    animation: orbFloat 25s ease-in-out infinite;
+  }
+
+  .bg-orb-1 {
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(34, 211, 238, 0.15) 0%, transparent 70%);
+    top: 10%;
+    left: 10%;
+    animation-delay: 0s;
+  }
+
+  .bg-orb-2 {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(236, 72, 153, 0.12) 0%, transparent 70%);
+    top: 60%;
+    right: 10%;
+    animation-delay: -8s;
+  }
+
+  .bg-orb-3 {
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(34, 197, 94, 0.1) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    animation-delay: -16s;
+  }
+
+  /* Navigation Animations */
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #22d3ee, #ec4899, #10b981);
+    transition: width 0.4s ease;
+    border-radius: 2px;
+  }
+
+  .dark .nav-link:hover::after {
+    width: 100%;
+  }
+
+  .dark .nav-link:hover {
+    color: #67e8f9;
+    text-shadow: 0 0 15px rgba(103, 232, 249, 0.8);
+    transform: translateY(-2px);
+  }
+
+  /* Light-mode nav tweaks earlier existed; we improve contrast slightly below. */
+  .light .nav-link {
+    position: relative;
+    transition: all 0.4s ease;
+    /* Use the heading color variable (no plain black) */
+    color: hsl(var(--text-heading-h));
+  }
+
+  .light .nav-link:hover {
+    /* stronger blue hover for visibility using the indigo hex variable */
+    color: var(--text-primary-hex);
+  }
+
+  /* Form Animations */
+  .form-input:focus {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2), 0 0 20px rgba(34, 211, 238, 0.3);
+    border-color: rgba(34, 211, 238, 0.8);
+    background: rgba(0, 0, 0, 0.9);
+  }
+
+  /* Enhanced Counter Animation */
+  .counter {
+    animation: counterShine 3s ease-out forwards;
+  }
+
+  /* Text Effects */
+  .text-gradient-animate {
+    background: linear-gradient(-45deg, #22d3ee, #ec4899, #10b981, #f59e0b, #8b5cf6);
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 6s ease infinite;
+  }
+
+  /* ✨ NEW: Theme-specific styles for components */
+  .neon-card, .form-input, header {
+      transition: background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+ 
+  .dark .neon-card {
+    backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+ 
+  .dark .neon-card:hover {
+    border-color: rgba(34, 211, 238, 0.5);
+    box-shadow: 0 15px 35px rgba(34, 211, 238, 0.2), 0 0 30px rgba(34, 211, 238, 0.1);
+    transform: translateY(-8px) scale(1.02);
+    background: rgba(0, 0, 0, 0.9);
+  }
+
+  /* IMPROVED LIGHT THEME CARD + INPUT DEFINITIONS (mildly stronger borders/colors for readability) */
+  .light .neon-card {
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(0, 0, 0, 0.12); /* slightly darker border for definition */
+    backdrop-filter: blur(6px);
+  }
+
+  .light .neon-card:hover {
+    border-color: rgba(0, 119, 255, 0.35);
+    box-shadow: 0 10px 25px rgba(0, 119, 255, 0.08);
+    transform: translateY(-8px) scale(1.02);
+    background: white;
+  }
+ 
+  .dark .form-input {
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+  }
+
+  /* slightly darker input border & clearer text color in light mode */
+  .light .form-input {
+    background: rgba(255, 255, 255, 0.98);
+    border: 1px solid rgba(0, 0, 0, 0.22);
+    /* Use the indigo (not plain black) for inputs text in light mode */
+    color: hsl(var(--text-primary-h));
+  }
+ 
+  .dark .nav-link {
+    position: relative;
+    transition: all 0.4s ease;
+    color: #ffffff;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+  }
+
+  .light .nav-link {
+    position: relative;
+    transition: all 0.4s ease;
+    /* replaced hard black with indigo heading color */
+    color: hsl(var(--text-heading-h));
+  }
+
+  .light .nav-link:hover {
+    color: var(--text-primary-hex); /* indigo hex hover */
+  }
+
+  /* Keyframe Animations */
+  @keyframes textShine {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  @keyframes textGlow {
+    from {
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(34, 211, 238, 0.3), 0 0 30px rgba(236, 72, 153, 0.2);
+    }
+    to {
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 30px rgba(34, 211, 238, 0.6), 0 0 40px rgba(236, 72, 153, 0.4);
+    }
+  }
+
+  @keyframes strongGlow {
+    from {
+      text-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 25px rgba(34, 211, 238, 0.6), 0 0 35px rgba(236, 72, 153, 0.4);
+    }
+    to {
+      text-shadow: 0 0 25px rgba(255, 255, 255, 1), 0 0 35px rgba(34, 211, 238, 0.8), 0 0 45px rgba(236, 72, 153, 0.6);
+    }
+  }
+
+  @keyframes sparkle {
+    0% { transform: translateX(-100%) rotate(45deg); }
+    100% { transform: translateX(300%) rotate(45deg); }
+  }
+
+  @keyframes heroTitleShine {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  @keyframes sectionTitleShine {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  @keyframes fadeIn {
+    to { opacity: 1; }
+  }
+
+  @keyframes fadeInUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeInLeft {
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes fadeInRight {
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slideInBottom {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes rotateIn {
+    to {
+      opacity: 1;
+      transform: rotate(0deg) scale(1);
+    }
+  }
+
+  @keyframes floating {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    33% { transform: translateY(-25px) rotate(2deg); }
+    66% { transform: translateY(10px) rotate(-1deg); }
+  }
+
+  @keyframes floatingReverse {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(20px) rotate(-2deg); }
+  }
+
+  @keyframes bounceGlow {
+    0%, 100% { 
+      transform: translateY(0) scale(1);
+      box-shadow: 0 0 20px rgba(34, 211, 238, 0.3);
+    }
+    50% { 
+      transform: translateY(-15px) scale(1.05);
+      box-shadow: 0 0 30px rgba(34, 211, 238, 0.6);
+    }
+  }
+
+  @keyframes pulseShine {
+    0%, 100% {
+      opacity: 1;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+    50% {
+      opacity: 0.8;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    }
+  }
+
+  @keyframes buttonPulse {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(34, 211, 238, 0.4), 0 0 40px rgba(236, 72, 153, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 25px rgba(34, 211, 238, 0.6), 0 0 50px rgba(236, 72, 153, 0.4);
+    }
+  }
+
+  @keyframes progressShine {
+    0%, 100% {
+      box-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(34, 211, 238, 0.8), 0 0 30px rgba(236, 72, 153, 0.4);
+    }
+  }
+
+  @keyframes orbFloat {
+    0%, 100% {
+      transform: translate(0, 0) rotate(0deg) scale(1);
+    }
+    25% {
+      transform: translate(40px, -40px) rotate(90deg) scale(1.1);
+    }
+    50% {
+      transform: translate(-30px, -60px) rotate(180deg) scale(0.9);
+    }
+    75% {
+      transform: translate(-40px, 20px) rotate(270deg) scale(1.05);
+    }
+  }
+
+  @keyframes counterShine {
+    from {
+      opacity: 0;
+      transform: scale(0.5);
+      text-shadow: 0 0 30px currentColor;
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+      text-shadow: 0 0 10px currentColor;
+    }
+  }
+
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Enhanced Colors */
+  .text-cyan-soft { color: #67e8f9; }
+  .text-pink-soft { color: #f9a8d4; }
+  .text-green-soft { color: #86efac; }
+  .text-yellow-soft { color: #fde047; }
+  .text-blue-soft { color: #93c5fd; }
+  /* ✨ MODIFIED: Changed color for better vibrancy */
+  .text-purple-soft { color: #c084fc; }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  /* Default track color kept neutral; dark theme overrides below */
+  ::-webkit-scrollbar-track { background: #f1f5f9; }
+
+  /* Ensure page/root scrollbar uses light palette when body has .light */
+  .light ::-webkit-scrollbar { width: 10px; background-color: #f8fafc; }
+  .light html::-webkit-scrollbar, .light body::-webkit-scrollbar { background-color: #f8fafc; }
+  .light ::-webkit-scrollbar-track { background: #f8fafc; }
+  .light body::-webkit-scrollbar-track { background: #f8fafc; }
+  /* Dark theme scrollbar - consistent fuchsia to cyan gradient */
+  .dark ::-webkit-scrollbar-track,
+  .dark *::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3); 
+    border-radius: 10px;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+  }
+
+  .dark ::-webkit-scrollbar-thumb,
+  .dark *::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #f472b6 0%, #38bdf8 100%);
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    animation: scrollbarGlowDark 3s ease-in-out infinite;
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover,
+  .dark *::-webkit-scrollbar-thumb:hover { 
+  background: linear-gradient(90deg, #f472b6 0%, #38bdf8 100%);
+    box-shadow: 0 0 8px rgba(217, 70, 239, 0.6);
+  }
+
+  /* Light theme scrollbar - warm gradient with pink/purple tones */
+  .light ::-webkit-scrollbar-track,
+  .light body::-webkit-scrollbar-track,
+  .light html::-webkit-scrollbar-track,
+  .light *::-webkit-scrollbar-track { 
+    background: #f8fafc; 
+    border-radius: 10px;
+    box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .light ::-webkit-scrollbar-corner,
+  .light *::-webkit-scrollbar-corner { 
+    background: #f8fafc; 
+  }
+
+  .light body::-webkit-scrollbar-thumb,
+  .light html::-webkit-scrollbar-thumb,
+  .light ::-webkit-scrollbar-thumb,
+  .light *::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #f472b6 0%, #38bdf8 100%);
+    border: 2px solid #f8fafc; /* ensure edge blends with track */
+    background-clip: padding-box;
+    border-radius: 8px;
+    animation: scrollbarGlowLight 3s ease-in-out infinite;
+  }
+
+  .light body::-webkit-scrollbar-thumb:hover,
+  .light html::-webkit-scrollbar-thumb:hover,
+  .light ::-webkit-scrollbar-thumb:hover,
+  .light *::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #f472b6 0%, #38bdf8 100%);
+    border-color: #f8fafc;
+    box-shadow: 0 0 8px rgba(249, 115, 22, 0.4);
+  }
+  
+  /* Theme-specific animations for scrollbar */
+  @keyframes scrollbarGlowDark {
+    0%, 100% { opacity: 0.8; box-shadow: 0 0 6px rgba(217, 70, 239, 0.4); }
+    50% { opacity: 1; box-shadow: 0 0 12px rgba(34, 211, 238, 0.6); }
+  }
+  
+  @keyframes scrollbarGlowLight {
+    0%, 100% { opacity: 0.8; box-shadow: 0 0 6px rgba(245, 158, 11, 0.3); }
+    50% { opacity: 1; box-shadow: 0 0 10px rgba(217, 70, 239, 0.4); }
+  }
+  
+  /* Firefox theme-specific scrollbar styling */
+  .dark {
+    scrollbar-width: thin;
+    scrollbar-color: #d946ef rgba(0, 0, 0, 0.3);
+  }
+  
+  .light {
+    scrollbar-width: thin;
+    scrollbar-color: #f59e0b #f8fafc;
+  }
+
+  /* Ensure any scrollable element in light mode has a light track */
+  .light *::-webkit-scrollbar-track { background: #f8fafc; }
+
+  /* Firefox light scrollbar colors */
+  .light body, .light html { scrollbar-color: #d946ef #f8fafc; }
+  /* Ensure light theme explicitly paints white on root to avoid dark gutter */
+  .light html, .light body { background-color: #ffffff; scrollbar-gutter: stable; }
+  
+  /* Enhanced Firefox scrollbar styling for both themes */
+  .dark {
+    scrollbar-width: thin;
+    scrollbar-color: #d946ef rgba(0, 0, 0, 0.3);
+  }
+  
+  .light {
+    scrollbar-width: thin;
+    scrollbar-color: #f59e0b #f8fafc;
+  }
+
+  /* ✨ NEW: Animation for Project Detail Link */
+  .detail-link-pulse {
+    animation: detail-link-pulse 2s infinite;
+  }
+
+  @keyframes detail-link-pulse {
+    0% {
+      transform: scale(1);
+      text-shadow: 0 0 5px rgba(103, 232, 249, 0.5);
+    }
+    50% {
+      transform: scale(1.03);
+      text-shadow: 0 0 15px rgba(103, 232, 249, 0.8);
+    }
+    100% {
+      transform: scale(1);
+      text-shadow: 0 0 5px rgba(103, 232, 249, 0.5);
+    }
+  }
+
+  /* =====================
+     LIGHT-THEME TARGETED OVERRIDES
+     (Keeps dark theme unchanged — only improves readability on light)
+     ===================== */
+
+  /* Reduce 'whitening glow' and improve contrast for light mode */
+  .light .glow-text,
+  .light .glow-text-strong {
+    /* Use the foreground variable for color and replace bright white glows with subtle dark micro-shadow */
+    color: hsl(var(--text-primary-h));
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 0 2px rgba(0, 0, 0, 0.03);
+    /* keep animations (do not disable), only reduce the visible glowing effect */
+  }
+
+  /* Make hero & section gradients more visible on light backgrounds (keeps animation)
+     NOTE: replaced pale cyan/skyblue with stronger indigo/teal to avoid washed-out look */
+  .light .hero-title {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 25%, #f472b6 50%, #16a34a 75%, #8b5cf6 100%);
+    background-size: 400% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+    animation: heroTitleShine 4s ease-in-out infinite;
+  }
+
+  .light .section-title {
+    background: linear-gradient(90deg, hsl(var(--text-heading-h)) 0%, #1e3a8a 50%, hsl(var(--text-heading-h)) 100%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: sectionTitleShine 5s ease-in-out infinite;
+  }
+
+  /* Slightly stronger nav colors for light mode so header links are readable */
+  .light .nav-link {
+    color: hsl(var(--text-heading-h)); /* replaced plain black with indigo heading color */
+  }
+
+  .light .nav-link:hover {
+    color: var(--text-primary-hex);
+    text-shadow: none;
+  }
+
+  /* Subtle reduction of sparkle overlay for light mode */
+  .light .sparkle-text::before {
+    background: linear-gradient(45deg, transparent 35%, rgba(0,0,0,0.04) 50%, transparent 65%);
+  }
+
+  /* Neon card border contrast improvements (light mode) */
+  .light .neon-card {
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    background: rgba(255,255,255,0.92);
+  }
+
+  .light .neon-card:hover {
+    border-color: rgba(0, 119, 255, 0.35);
+    box-shadow: 0 10px 25px rgba(0, 119, 255, 0.08);
+  }
+
+  /* Inputs clearer in light mode */
+  .light .form-input {
+    border: 1px solid rgba(0, 0, 0, 0.22);
+    /* Use indigo (not pure black) for input text */
+    color: hsl(var(--text-primary-h));
+    background: rgba(255,255,255,0.98);
+  }
+
+  /* Small icons / badges in light mode gain a touch more contrast */
+  .light .text-cyan-soft { color: var(--cyan-soft-hex); }
+  .light .text-pink-soft { color: var(--pink-soft-hex); }
+  .light .text-green-soft { color: var(--green-soft-hex); }
+  .light .text-yellow-soft { color: var(--yellow-soft-hex); }
+  .light .text-blue-soft { color: var(--blue-soft-hex); }
+  .light .text-purple-soft { color: var(--purple-soft-hex); }
+
+  /* Prevent hover-glow from producing bright white glows on light mode (reduce white text-shadow) */
+  .light .hover-glow:hover {
+    box-shadow: 0 0 12px rgba(34, 211, 238, 0.12), 0 0 18px rgba(236, 72, 153, 0.08);
+    border-color: rgba(34, 211, 238, 0.5);
+    text-shadow: 0 0 6px rgba(0,0,0,0.06);
+  }
+
+  /* Slightly stronger borders for form elements and cards to reduce 'washed out' look */
+  .light header, .light .card, .light .footer {
+    border-color: rgba(0,0,0,0.06);
+  }
+
+  /* Accessibility: ensure clickable small elements have visible focus */
+  .light .nav-link:focus, .light .form-input:focus, .light .button:focus {
+    outline: 2px solid rgba(2, 122, 255, 0.15);
+    outline-offset: 2px;
+  }
+
+  /* =====================
+     NEW: Brightened text/color utilities for light mode (apply these in components)
+     ===================== */
+
+  /* Project Details prominent text — replaces plain black with deep indigo + subtle entrance */
+  .light .project-detail-text {
+    color: var(--text-primary-hex); /* deep indigo — high contrast on white */
+    font-weight: 600;
+    line-height: 1.45;
+    animation: fadeInUp 0.9s ease both;
+  }
+
+  /* Sub-headings and body with pleasant warm/dense color instead of plain black */
+  .light .body-text {
+    /* Use the deep indigo as body text (not plain black) */
+    color: hsl(var(--text-primary-h));
+    font-weight: 400;
+    line-height: 1.6;
+  }
+
+  .light .muted-text {
+    color: hsl(var(--muted-foreground)); /* uses adjusted muted variable (now colorful) */
+  }
+
+  /* Color highlight utilities (use in ProjectDetail and other sections) */
+  .light .highlight-cyan { color: var(--cyan-soft-hex); font-weight: 600; }
+  .light .highlight-pink { color: var(--pink-soft-hex); font-weight: 600; }
+  .light .highlight-green { color: var(--green-soft-hex); font-weight: 600; }
+  .light .highlight-yellow { color: var(--yellow-soft-hex); font-weight: 600; }
+  .light .highlight-purple { color: var(--purple-soft-hex); font-weight: 600; }
+  .light .highlight-blue { color: var(--blue-soft-hex); font-weight: 600; }
+
+  /* Animated gradient text for titles/subtitles (keeps animation but uses stronger, not-sky colors) */
+  .light .animated-text {
+    background: linear-gradient(-45deg, var(--blue-soft-hex), var(--pink-soft-hex), var(--green-soft-hex), var(--yellow-soft-hex), var(--purple-soft-hex));
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 6s ease infinite;
+  }
+
+  /* For small icons/badges that were hard to read — give them slightly bolder color */
+  .light .icon-badge {
+    color: var(--blue-soft-hex);
+    font-weight: 600;
+  }
+
+  /* Replace any accidental white text in light mode (target common classes) */
+  .light .text-white, .light .glow-text-white {
+    /* White text on white backgrounds replaced with the foreground indigo */
+    color: hsl(var(--text-primary-h)) !important;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.04) !important;
+  }
+
+  /* Slight subtle shadow for main paragraphs for definition (keeps look subtle) */
+  .light p, .light li {
+    text-shadow: 0 0 0 rgba(0,0,0,0); /* keep no visible glow but allow fine tuning if needed */
+  }
+
+  /* Small helper: stronger link color on light backgrounds */
+  .light a {
+    /* links use indigo for clarity on white */
+    color: var(--text-primary-hex);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  .light a:hover {
+    color: #0b2a6f;
+  }
+
+  /* Ensure headings are slightly more prominent on light mode */
+  .light h1, .light h2, .light h3 {
+    /* headings use the heading HSL (darker indigo) */
+    color: hsl(var(--text-heading-h));
+    letter-spacing: -0.2px;
+  }
+
+  /* Gradient, glow, and blink for header name and nav (light theme only) */
+  /* Theme toggle: extra large, bright, glowing (both themes, no blinking in dark) */
+  .theme-toggle-blink-glow {
+    box-shadow: 0 0 16px 2px #f472b6, 0 0 24px 4px #10b981;
+    background: linear-gradient(135deg, #f472b6 40%, #10b981 100%);
+    border-radius: 50%;
+    filter: drop-shadow(0 0 4px #f472b6) drop-shadow(0 0 6px #10b981);
+    animation: toggleScale 2s infinite;
+  }
+  @keyframes toggleScale {
+    0%, 100% { transform: scale(1.08); }
+    50% { transform: scale(1.18); }
+  }
+
+  /* Fuchsia-to-Cyan gradient thumb for both themes, track as in images */
+  html::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #d946ef 0%, #06b6d4 100%);
+    border-radius: 8px;
+    border: 3px solid transparent;
+  }
+  html::-webkit-scrollbar {
+    background: #fff;
+  }
+  html.dark::-webkit-scrollbar {
+    background: #000;
+  }
+  html {
+    scrollbar-color: #d946ef #fff;
+  }
+  html.dark {
+    scrollbar-color: #d946ef #000;
+  }
+}
+
+/* =====================
+   LIGHT-MODE SECTION GRADIENT TYPOGRAPHY
+   (Distinct, soft gradients per section. Dark mode unaffected.)
+   The selectors are resilient: use any of the following in markup
+   - container id: #about, #projects, #skills, #experience, #certifications, #contact, #hero, #header, #footer, #project-detail
+   - container class: .about-section, .projects-section, .skills-section, .experience-section, .certifications-section, .contact-section, .hero-section, .header, .footer, .project-detail
+   - data attribute: [data-section="AboutSection"], etc.
+   Apply to headings and any element with .section-title or .gradient-text within the section.
+===================== */
+
+/* Helper mixin style: gradient text utility */
+.light .gradient-text, .light .section-title, .light .title-gradient {
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Hero */
+.light #hero .section-title,
+.light .hero-section .section-title,
+.light [data-section="HeroSection"] .section-title,
+.light #hero h1, .light .hero-section h1, .light [data-section="HeroSection"] h1,
+.light #hero .gradient-text, .light .hero-section .gradient-text {
+  background-image: linear-gradient(120deg, #1e3a8a 0%, #06b6d4 25%, #f472b6 55%, #22c55e 80%, #8b5cf6 100%);
+}
+
+/* Header */
+.light #header .section-title,
+.light .header .section-title,
+.light [data-section="Header"] .section-title,
+.light #header h1, .light .header h1, .light [data-section="Header"] h1,
+.light #header .gradient-text, .light .header .gradient-text {
+  background-image: linear-gradient(90deg, #0ea5e9 0%, #8b5cf6 50%, #f472b6 100%);
+}
+
+/* About */
+.light #about .section-title,
+.light .about-section .section-title,
+.light [data-section="AboutSection"] .section-title,
+.light #about h2, .light .about-section h2, .light [data-section="AboutSection"] h2,
+.light #about .gradient-text, .light .about-section .gradient-text {
+  background-image: linear-gradient(90deg, #16a34a 0%, #22d3ee 45%, #a78bfa 100%);
+}
+
+/* Experience */
+.light #experience .section-title,
+.light .experience-section .section-title,
+.light [data-section="ExperienceSection"] .section-title,
+.light #experience h2, .light .experience-section h2, .light [data-section="ExperienceSection"] h2,
+.light #experience .gradient-text, .light .experience-section .gradient-text {
+  background-image: linear-gradient(100deg, #0ea5e9 0%, #22c55e 40%, #f59e0b 90%);
+}
+
+/* Certifications */
+.light #certifications .section-title,
+.light .certifications-section .section-title,
+.light [data-section="CertificationsSection"] .section-title,
+.light #certifications h2, .light .certifications-section h2, .light [data-section="CertificationsSection"] h2,
+.light #certifications .gradient-text, .light .certifications-section .gradient-text {
+  background-image: linear-gradient(90deg, #06b6d4 0%, #f472b6 50%, #22c55e 100%);
+}
+
+/* Projects */
+.light #projects .section-title,
+.light .projects-section .section-title,
+.light [data-section="ProjectsSection"] .section-title,
+.light #projects h2, .light .projects-section h2, .light [data-section="ProjectsSection"] h2,
+.light #projects .gradient-text, .light .projects-section .gradient-text {
+  background-image: linear-gradient(110deg, #8b5cf6 0%, #06b6d4 40%, #f59e0b 85%);
+}
+
+/* Project Detail Page */
+.light #project-detail .section-title,
+.light .project-detail .section-title,
+.light [data-section="ProjectDetailPage"] .section-title,
+.light #project-detail h1, .light .project-detail h1, .light [data-section="ProjectDetailPage"] h1,
+.light #project-detail .gradient-text, .light .project-detail .gradient-text {
+  background-image: linear-gradient(100deg, #1e3a8a 0%, #22d3ee 35%, #f472b6 70%, #22c55e 100%);
+}
+
+/* Skills */
+.light #skills .section-title,
+.light .skills-section .section-title,
+.light [data-section="SkillsSection"] .section-title,
+.light #skills h2, .light .skills-section h2, .light [data-section="SkillsSection"] h2,
+.light #skills .gradient-text, .light .skills-section .gradient-text {
+  background-image: linear-gradient(95deg, #06b6d4 0%, #a78bfa 50%, #16a34a 100%);
+}
+
+/* Contact */
+.light #contact .section-title,
+.light .contact-section .section-title,
+.light [data-section="ContactSection"] .section-title,
+.light #contact h2, .light .contact-section h2, .light [data-section="ContactSection"] h2,
+.light #contact .gradient-text, .light .contact-section .gradient-text {
+  background-image: linear-gradient(90deg, #22c55e 0%, #06b6d4 50%, #f472b6 100%);
+}
+
+/* Footer owner name gradient only */
+/* Footer owner name gradient: pink spectrum (light theme only) */
+.light footer .owner-name,
+.light .footer .owner-name,
+.light [data-section="Footer"] .owner-name {
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  background-image: linear-gradient(90deg, #f43f5e 0%, #f472b6 50%, #fb7185 100%);
+}
+
+/* =====================
+   LIGHT-ONLY: Paragraph-specific gradient utilities (p1..p11)
+   Strong, readable gradients on white. Avoids blue/skyblue/white.
+   Usage: <p className="text-gradient-p1">...</p>
+   These do not affect dark mode.
+===================== */
+.light .text-gradient-p1,
+.light .text-gradient-p2,
+.light .text-gradient-p3,
+.light .text-gradient-p4,
+.light .text-gradient-p5,
+.light .text-gradient-p6,
+.light .text-gradient-p7,
+.light .text-gradient-p8,
+.light .text-gradient-p9,
+.light .text-gradient-p10,
+.light .text-gradient-p11 {
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* p1: orange -> pink */
+.light .text-gradient-p1 { background-image: linear-gradient(90deg, #f97316, #ec4899); }
+
+/* p2: emerald -> amber */
+.light .text-gradient-p2 { background-image: linear-gradient(90deg, #10b981, #f59e0b); }
+
+/* p3: rose -> fuchsia */
+.light .text-gradient-p3 { background-image: linear-gradient(90deg, #f43f5e, #d946ef); }
+
+/* p4: violet -> orange */
+.light .text-gradient-p4 { background-image: linear-gradient(90deg, #8b5cf6, #f97316); }
+
+/* p5: emerald -> rose */
+.light .text-gradient-p5 { background-image: linear-gradient(90deg, #10b981, #f43f5e); }
+
+/* p6: amber -> red */
+.light .text-gradient-p6 { background-image: linear-gradient(90deg, #f59e0b, #ef4444); }
+
+/* p7: purple -> emerald */
+.light .text-gradient-p7 { background-image: linear-gradient(90deg, #a855f7, #10b981); }
+
+/* p8: fuchsia -> orange */
+.light .text-gradient-p8 { background-image: linear-gradient(90deg, #d946ef, #f97316); }
+
+/* p9: red -> violet */
+.light .text-gradient-p9 { background-image: linear-gradient(90deg, #ef4444, #8b5cf6); }
+
+/* p10: lime -> emerald -> amber (three-stop) */
+.light .text-gradient-p10 { background-image: linear-gradient(100deg, #84cc16 0%, #10b981 55%, #f59e0b 100%); }
+
+/* p11: magenta -> purple (footer line or any paragraph) */
+.light .text-gradient-p11 { background-image: linear-gradient(90deg, #e11d48, #7c3aed); }
+
+/* Show scrollbar for light theme (default) */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #bdbdbd #f5f5f5;
+}
+html::-webkit-scrollbar {
+  width: 12px;
+  background: #f5f5f5;
+}
+html::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #f472b6 0%, #38bdf8 100%);
+  border-radius: 8px;
+  border: 3px solid #f5f5f5;
+}
+html.dark::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #f472b6 0%, #38bdf8 100%);
+  border: 3px solid #18181b;
+}
+html.dark::-webkit-scrollbar {
+  background: #18181b;
+}
+
+/* Increase theme toggle icon size in header */
+.theme-toggle-btn {
+  width: 2rem !important;
+  height: 2rem !important;
+  min-width: 2rem !important;
+  min-height: 2rem !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  position: relative;
+  /* Enhanced transitions for smooth animation */
+  transition: transform 0.4s ease-in-out, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.theme-toggle-btn:hover {
+  transform: rotate(90deg);
+  box-shadow: 0 0 0 2px #e0e7ff;
+}
+
+/* Add rotation to the theme toggle icon */
+.theme-toggle-btn svg {
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.theme-toggle-btn:active svg {
+  transform: rotate(360deg) scale(0.8);
+}
+
+/* Header animated glow and color effects */
+.header-animate {
+  color: #111;
+  text-shadow: 0 0 8px #e11d74, 0 0 16px #39ff14, 0 0 24px #3fefb3;
+  animation: headerGlowPulse 2.2s infinite alternate;
+}
+@keyframes headerGlowPulse {
+  0% { text-shadow: 0 0 8px #e11d74, 0 0 16px #39ff14, 0 0 24px #3fefb3; }
+  50% { text-shadow: 0 0 16px #39ff14, 0 0 32px #e11d74, 0 0 40px #3fefb3; }
+  100% { text-shadow: 0 0 8px #e11d74, 0 0 16px #39ff14, 0 0 24px #3fefb3; }
+}
+
+.nav-animate {
+  color: #111;
+  text-shadow: 0 0 6px #e11d74, 0 0 12px #39ff14;
+  animation: navGlowPulse 1.8s infinite alternate;
+}
+@keyframes navGlowPulse {
+  0% { text-shadow: 0 0 6px #e11d74, 0 0 12px #39ff14; }
+  50% { text-shadow: 0 0 12px #39ff14, 0 0 18px #e11d74; }
+  100% { text-shadow: 0 0 6px #e11d74, 0 0 12px #39ff14; }
+}
+
+.resume-animate-strong {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  padding: 0 0.85rem;
+  border-radius: 0.375rem;
+  
+  /* Glassmorphic effect matching other nav buttons */
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  
+  /* Interactive effects */
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.resume-animate-strong::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(135deg, rgba(230, 0, 115, 0.4), rgba(0, 212, 255, 0.4));
+  opacity: 0;
+  border-radius: 0.375rem;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.resume-animate-strong:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.resume-animate-strong:hover::after {
+  opacity: 1;
+}
+
+/* Dark theme resume button */
+.dark .resume-animate-strong {
+  background: linear-gradient(135deg, rgba(230, 0, 115, 0.2), rgba(0, 212, 255, 0.2));
+  color: #f8f9fa;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Light theme resume button */
+.light .resume-animate-strong {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(217, 70, 239, 0.1));
+  color: #333;
+  border-color: rgba(249, 115, 22, 0.2);
+}
+
+/* Blinking, gradient theme toggle button (matches Resume/Contact) */
+/* Blinking, gradient theme toggle button (matches Resume/Contact) */
+.theme-toggle-animate {
+  background: linear-gradient(90deg, #ff3fb4, #3dff8c);
+  box-shadow: 0 0 16px #ff3fb4, 0 0 24px #3dff8c;
+  border-radius: 50%;
+  filter: drop-shadow(0 0 8px #ff3fb4) drop-shadow(0 0 12px #3dff8c);
+  animation: toggleBlink 1.2s infinite;
+}
+/* Blinking, gradient nav button for header */
+.nav-blink-gradient {
+  background: linear-gradient(90deg, #ff3fb4, #3dff8c);
+  color: #111827;
+  animation: toggleBlink 1.2s infinite;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+@keyframes toggleGlowPulse {
+  0% { box-shadow: 0 0 16px #FF00AA, 0 0 24px #00D4FF; }
+  50% { box-shadow: 0 0 32px #00D4FF, 0 0 40px #FF00AA; }
+  100% { box-shadow: 0 0 16px #FF00AA, 0 0 24px #00D4FF; }
+}
+@keyframes toggleScale {
+  0%, 100% { transform: scale(1.08); }
+  50% { transform: scale(1.18); }
+}
+@keyframes toggleBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.75; }
+}
+
+/* Remove header/nav/button background glow for both themes */
+
+/* Glassmorphic gradient button for section blocks */
+.glassmorphic-btn {
+  background: linear-gradient(90deg, #ec4899 0%, #06b6d4 100%);
+  color: #fff;
+  border: none;
+  border-radius: 1rem;
+  box-shadow: 0 4px 32px 0 rgba(236, 72, 153, 0.15), 0 1.5px 8px 0 rgba(6, 182, 212, 0.10);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 0.75rem 2rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: box-shadow 0.2s, transform 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.glassmorphic-btn:hover {
+  box-shadow: 0 8px 40px 0 rgba(236, 72, 153, 0.25), 0 3px 16px 0 rgba(6, 182, 212, 0.18);
+  transform: translateY(-2px) scale(1.04);
+}
+
+/* Bigger, brighter, gradient theme toggle icon with glassmorphic effect */
+.theme-toggle-glassmorphic {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: linear-gradient(120deg, rgba(255, 0, 170, 0.15), rgba(0, 212, 255, 0.15));
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  box-shadow: 0 4px 8px -1px rgba(0, 0, 0, 0.1), 0 0 15px rgba(255, 0, 170, 0.4);
+  transform: scale(1);
+  transition: transform 0.4s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.theme-toggle-glassmorphic:hover {
+  background: linear-gradient(135deg, rgba(255, 0, 170, 0.4), rgba(0, 212, 255, 0.4));
+  box-shadow: 0 8px 25px rgba(255, 0, 170, 0.3), 0 4px 10px rgba(0, 212, 255, 0.3);
+  transform: scale(1.3) rotate(90deg);
+}
+
+.theme-toggle-animate {
+  animation: gentle-pulse 3s infinite alternate;
+}
+
+@keyframes gentle-pulse {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 1; }
+}
+
+/* Pink to Neon Green gradient for site name in dark theme */
+.dark .site-title-gradient {
+  color: #e94fc2 !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  -webkit-text-fill-color: unset !important;
+  text-fill-color: unset !important;
+  font-weight: 800;
+  text-shadow: 0 1px 4px #e94fc2, 0 0 1px #fff;
+  position: relative;
+  display: inline-block;
+}
+
+/* Pink to Neon Green gradient for site name in light theme */
+.name-text-light {
+  color: #38bdf8 !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  -webkit-text-fill-color: unset !important;
+  text-fill-color: unset !important;
+  font-weight: 800;
+  text-shadow: 0 1px 4px #e94fc2, 0 0 1px #fff;
+  display: inline-block;
+}
+

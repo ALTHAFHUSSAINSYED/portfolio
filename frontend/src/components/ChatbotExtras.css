@@ -1,0 +1,80 @@
+.chatbot-suggestions {
+  padding: 12px;
+  border-top: 1px solid rgba(229, 231, 235, 0.5);
+  background-color: rgba(248, 250, 252, 0.8);
+}
+
+.suggestion-title {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0 0 8px 0;
+}
+
+.suggestion-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.suggestion-button {
+  background-color: white;
+  border: 1px solid rgba(203, 213, 225, 0.8);
+  border-radius: 16px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--chat-primary-color);
+  transition: all 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.suggestion-button:hover {
+  background-color: #f8fafc;
+  border-color: var(--chat-primary-color);
+}
+
+.suggestion-button.selected {
+  background-color: var(--chat-primary-color);
+  color: white;
+  border-color: var(--chat-primary-color);
+}
+
+.chatbot-footer {
+  padding: 8px 12px;
+  border-top: 1px solid rgba(229, 231, 235, 0.5);
+  font-size: 11px;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.chatbot-footer a {
+  color: var(--chat-primary-color);
+  text-decoration: none;
+}
+
+.chatbot-footer a:hover {
+  text-decoration: underline;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 500px) {
+  .chatbot-window {
+    width: 300px;
+    height: 450px;
+    bottom: 70px;
+  }
+  
+  .chatbot-container {
+    bottom: 10px;
+    right: 10px;
+  }
+}
+
+/* Add a max-height to long messages */
+.message-content {
+  max-height: 200px;
+  overflow-y: auto;
+}
