@@ -4,6 +4,10 @@ from fastapi import FastAPI, APIRouter, UploadFile, File, Form, HTTPException, s
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
+from datetime import datetime, timedelta
+import aiohttp
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from sendgrid import SendGridAPIClient
@@ -14,16 +18,20 @@ import logging
 import threading
 from pathlib import Path
 from pydantic import BaseModel, Field, EmailStr
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Union
 import uuid
 from datetime import datetime
 import base64
 import shutil
 import json
-# ✨ --- NEW: IMPORT CLOUDINARY --- ✨
-import cloudinary
-import cloudinary.uploader
-import cloudinary.api
+import re
+import requests
+from bs4 import BeautifulSoup
+import chromadb
+import google.generativeai as genai
+from serper import Serper
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
 
 # Import the agent service conditionally to make deployment more robust
 try:
@@ -33,7 +41,185 @@ except (ImportError, ValueError):
     print("Warning: agent_service could not be imported. Chat and AI features will be disabled.")
     HAS_AGENT_SERVICE = False
 
-# Import feedparser and handle the cgi.escape dependency
+# Configure Gemini API
+genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
+
+# Initialize scheduler for automated tasks
+scheduler = AsyncIOScheduler()
+
+# Initialize ChromaDB Cloud Client
+chroma_client = chromadb.CloudClient(
+    api_key=os.getenv('CHROMA_API_KEY'),
+    tenant=os.getenv('CHROMA_TENANT_ID'),
+    database=os.getenv('CHROMA_DATABASE')
+)
+embedding_function = embedding_functions.OpenAIEmbeddingFunction(
+    api_key=os.getenv('OPENAI_API_KEY'),
+    model_name="text-embedding-3-small"
+)
+
+try:
+    collection = chroma_client.get_collection(
+        name="portfolio",
+        embedding_function=embedding_function
+    )
+except:
+    print("Warning: ChromaDB collection not found. Please run generate_vector_db.py first.")
+    collection = None
+
+def detect_category(query: str) -> str:
+    """Detect the category of the query to optimize ChromaDB search."""
+    query = query.lower()
+    
+    categories = {
+        "Frontend Development": ["frontend", "react", "web", "ui", "css", "html"],
+        "DevOps": ["devops", "ci/cd", "pipeline", "kubernetes", "docker"],
+        "Cloud Computing": ["cloud", "aws", "azure", "gcp"],
+        "IoT Development": ["iot", "sensors", "embedded"],
+        "Blockchain": ["blockchain", "smart contract", "web3"],
+        "AI and ML": ["ai", "ml", "machine learning", "neural"],
+        "Cybersecurity": ["security", "cyber", "encryption"],
+        "Edge Computing": ["edge computing", "edge devices"],
+        "Quantum Computing": ["quantum", "qubits"],
+        "Databases": ["database", "sql", "nosql", "sharding"]
+    }
+    
+    for category, keywords in categories.items():
+        if any(keyword in query for keyword in keywords):
+            return category
+    return ""  # No specific category detected
+
+async def check_internet():
+    """Check if internet connection is available."""
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://8.8.8.8", timeout=5) as response:
+                return response.status == 200
+    except:
+        return False
+
+async def generate_daily_blog():
+    """Generate and post a daily blog using AI."""
+    if not await check_internet():
+        logging.error("No internet connection. Skipping blog generation.")
+        return
+    
+    try:
+        # Get trending tech topics using Serper
+        serper_client = Serper(os.getenv('SERPER_API_KEY'))
+        trending_topics = serper_client.search(
+            q="latest technology trends programming development",
+            num=3
+        )
+        
+        # Generate blog content using Gemini
+        topic = trending_topics['organic'][0]['title']
+        blog_prompt = f"Write an insightful technical blog post about {topic}. " \
+                     f"Include code examples and practical applications. " \
+                     f"The content should be detailed and educational."
+                     
+        model = genai.GenerativeModel('gemini-pro')
+        response = model.generate_content(blog_prompt)
+        
+        blog_content = response.text
+        
+        # Create blog post
+        blog_post = {
+            "title": f"Tech Insights: {topic}",
+            "content": blog_content,
+            "date": datetime.now().isoformat(),
+            "category": "Technology",
+            "tags": ["AI", "Technology", "Programming"],
+            "isAutomated": True
+        }
+        
+        # Save to MongoDB
+        result = await db.blogs.insert_one(blog_post)
+        
+        # Add to ChromaDB for future context
+        collection.add(
+            documents=[blog_content],
+            metadatas=[{"type": "blog", "date": datetime.now().isoformat()}],
+            ids=[str(result.inserted_id)]
+        )
+        
+        logging.info(f"Successfully generated and posted blog about {topic}")
+    except Exception as e:
+        logging.error(f"Error in blog generation: {str(e)}")
+
+@app.on_event("startup")
+async def setup_scheduled_tasks():
+    """Setup scheduled tasks on application startup."""
+    # Schedule daily blog generation at 9 AM UTC
+    scheduler.add_job(
+        generate_daily_blog,
+        CronTrigger(hour=9, minute=0),  # 9 AM UTC daily
+        id="daily_blog",
+        replace_existing=True
+    )
+    scheduler.start()
+
+def is_tech_question(query: str) -> bool:
+    """Determine if a query is about technical topics."""
+    tech_keywords = [
+        r'\b(programming|coding|software|hardware|computer|tech|framework|library|api|server|database|cloud|devops|ci/cd|containerization|docker|kubernetes|git|infrastructure|deployment|development|web|app|mobile|backend|frontend|fullstack|stack|code|algorithm|data structure)\b',
+        r'\b(python|javascript|typescript|java|c\+\+|ruby|php|golang|rust|swift|kotlin|scala|html|css|sql|nosql|mongodb|postgresql|mysql|redis|elasticsearch)\b',
+        r'\b(react|angular|vue|node|express|django|flask|spring|hibernate|tensorflow|pytorch|pandas|numpy|scikit-learn|aws|azure|gcp|linux|unix|windows|macos)\b'
+    ]
+    
+    # Combine all patterns
+    combined_pattern = '|'.join(tech_keywords)
+    return bool(re.search(combined_pattern, query.lower()))
+
+def search_web(query: str) -> str:
+    """Search the web for technical information using Serper."""
+    try:
+        serper_client = Serper(os.getenv('SERPER_API_KEY'))
+        results = serper_client.search(query)
+        
+        # Extract organic search results
+        search_results = []
+        if 'organic' in results:
+            for result in results['organic'][:3]:  # Get top 3 results
+                title = result.get('title', '')
+                snippet = result.get('snippet', '')
+                search_results.append(f"{title}: {snippet}")
+        
+        return "\n\n".join(search_results)
+    except Exception as e:
+        print(f"Serper search error: {e}")
+        return ""
+
+def get_portfolio_context(query: str) -> str:
+    """Retrieve relevant context from the portfolio vector database."""
+    if not collection:
+        return ""
+    
+    try:
+        # First try to find category-specific content
+        results = collection.query(
+            query_texts=[query],
+            n_results=2,
+            where={"category": detect_category(query)}  # Add category filtering
+        )
+        
+        if not results['documents'][0]:  # If no category-specific results
+            # Fall back to general search
+            results = collection.query(
+                query_texts=[query],
+                n_results=2
+            )
+            query_texts=[query],
+            n_results=3
+        )
+        
+        if results and results['documents']:
+            return "\n\n".join(results['documents'][0])
+        return ""
+    except Exception as e:
+        print(f"ChromaDB query error: {e}")
+        return ""
+
 try:
     # First try to import html module for escaping
     import html
@@ -351,14 +537,16 @@ class BlogPost(BaseModel):
     category: Optional[str] = None  # Added category field for blog classification
 
 # --- AGENT API ENDPOINTS ---
+from models import ChatbotQuery
+
 @api_router.post("/ask-all-u-bot")
-async def ask_agent(query: AgentQuery):
-    """Endpoint for the chatbot to ask questions to the agent with internet access"""
+async def ask_agent(query: ChatbotQuery):
+    """Endpoint for the chatbot to ask questions with RAG system"""
     try:
         # Check for required environment variables
         required_vars = {
             "Gemini API": os.environ.get("GEMINI_API_KEY"),
-            "MongoDB URL": os.environ.get("MONGO_URL") or os.environ.get("MONGODB_URI")
+            "Serper API": os.environ.get("SERPER_API_KEY"),
         }
         
         missing_vars = [key for key, value in required_vars.items() if not value]
@@ -367,12 +555,65 @@ async def ask_agent(query: AgentQuery):
             missing_list = ", ".join(missing_vars)
             logging.warning(f"Missing required API keys: {missing_list}")
             return JSONResponse(
-                status_code=200,  # Return 200 to avoid frontend error handling
+                status_code=200,
                 content={
-                    "reply": f"I have limited functionality right now because some API configurations are missing ({missing_list}). I can still answer questions about Althaf's portfolio that don't require external information.",
+                    "reply": f"I have limited functionality right now because some API configurations are missing ({missing_list}). I can still try to help with basic questions.",
                     "source": None
                 }
             )
+
+        # Configure Gemini
+        genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
+        model = genai.GenerativeModel('gemini-pro')
+
+        # Step 1: Determine if this is a technical question
+        is_tech = is_tech_question(query.message)
+
+        # Step 2: Get relevant context from vector DB
+        portfolio_context = get_portfolio_context(query.message)
+
+        # Step 3: For tech questions, augment with web search
+        tech_context = ""
+        if is_tech:
+            tech_context = search_web(query.message)
+
+        # Step 4: Build the complete context
+        full_context = f"Portfolio Information:\n{portfolio_context}\n\n"
+        if tech_context:
+            full_context += f"Technical Information:\n{tech_context}\n\n"
+
+        # Step 5: Build the prompt for Gemini
+        system_prompt = """You are Allu Bot, Althaf's smart and professional portfolio assistant. You excel at technical discussions and explaining Althaf's work.
+
+Key Guidelines:
+- Focus on technical accuracy and professionalism
+- Use the provided context but integrate it naturally
+- For portfolio questions, stick to the facts about Althaf
+- For tech questions, provide expert-level explanations
+- Keep responses clear and well-structured
+- Be honest when information is limited
+- Add relevant examples when discussing technical concepts
+- Stay away from personal opinions on non-technical matters
+
+Always aim to showcase deep technical understanding while maintaining a helpful, professional tone."""
+
+        # Step 6: Get response from Gemini
+        prompt = f"{system_prompt}\n\nContext:\n{full_context}\n\nUser Question: {query.message}\n\nResponse:"
+        response = model.generate_content(prompt)
+
+        if response.text:
+            # Log successful interaction
+            logging.info(f"Successfully processed query: {query.message[:100]}...")
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "reply": response.text,
+                    "source": "Portfolio + Internet" if tech_context else "Portfolio"
+                }
+            )
+        else:
+            raise Exception("Empty response from Gemini")
+
             
         # Call the agent service to handle the query if available
         if HAS_AGENT_SERVICE:
