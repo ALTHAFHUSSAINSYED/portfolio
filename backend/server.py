@@ -207,11 +207,8 @@ def get_portfolio_context(query: str) -> str:
             # Fall back to general search
             results = collection.query(
                 query_texts=[query],
-                n_results=2
+                n_results=3
             )
-            query_texts=[query],
-            n_results=3
-        )
         
         if results and results['documents']:
             return "\n\n".join(results['documents'][0])
