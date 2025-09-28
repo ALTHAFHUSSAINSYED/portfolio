@@ -25,8 +25,13 @@ import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 
-# Import the agent service
-import agent_service
+# Import the agent service conditionally to make deployment more robust
+try:
+    import agent_service
+    HAS_AGENT_SERVICE = True
+except (ImportError, ValueError):
+    print("Warning: agent_service could not be imported. Chat and AI features will be disabled.")
+    HAS_AGENT_SERVICE = False
 
 # Import feedparser and handle the cgi.escape dependency
 try:
@@ -309,9 +314,15 @@ async def ask_agent(query: AgentQuery):
                 }
             )
             
-        # Call the agent service to handle the query
-        result = agent_service.handle_agent_query(query.message)
-        return result
+        # Call the agent service to handle the query if available
+        if HAS_AGENT_SERVICE:
+            result = agent_service.handle_agent_query(query.message)
+            return result
+        else:
+            return JSONResponse(
+                status_code=200,
+                content={"reply": "AI features are currently disabled. Please contact the administrator.", "source": None}
+            )
     except Exception as e:
         logging.error(f"Error in agent query: {e}")
         return JSONResponse(
@@ -336,12 +347,13 @@ async def generate_blog(request: BlogPostRequest, background_tasks: BackgroundTa
             logging.warning(f"Missing required API keys for blog generation: {missing_list}")
         
         # Generate the blog post (will use fallback if APIs are missing)
-        blog = agent_service.generate_blog_now(request.topic)
-        if blog:
-            # Convert MongoDB datetime to string for JSON serialization
-            if isinstance(blog.get("created_at"), datetime):
-                blog["created_at"] = blog["created_at"].isoformat()
-            return blog
+        if HAS_AGENT_SERVICE:
+            blog = agent_service.generate_blog_now(request.topic)
+            if blog:
+                # Convert MongoDB datetime to string for JSON serialization
+                if isinstance(blog.get("created_at"), datetime):
+                    blog["created_at"] = blog["created_at"].isoformat()
+                return blog
         else:
             return JSONResponse(
                 status_code=200,  # Return 200 to avoid frontend error handling
@@ -423,6 +435,12 @@ async def get_blog(blog_id: str):
 @api_router.post("/agent/start")
 async def start_agent():
     """Start the agent scheduler"""
+    if not HAS_AGENT_SERVICE:
+        return JSONResponse(
+            status_code=200,  # Using 200 to avoid frontend errors
+            content={"message": "Agent service is not available in this deployment"}
+        )
+        
     try:
         success = agent_service.initialize_agent()
         if success:
@@ -456,6 +474,10 @@ app.add_middleware(
 
 # --- Start the agent scheduler in a background thread ---
 def start_agent_thread():
+    if not HAS_AGENT_SERVICE:
+        logging.info("Agent service is not available in this deployment. Skipping agent initialization.")
+        return
+        
     try:
         agent_service.initialize_agent()
         logging.info("Agent scheduler started successfully in background thread")
@@ -469,7 +491,23 @@ agent_thread.start()
 
 # Start the server if this file is run directly
 if __name__ == "__main__":
+    # Configure logging
+    log_level = os.environ.get("LOG_LEVEL", "INFO").upper()
+    logging.basicConfig(
+        level=getattr(logging, log_level),
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    logging.info(f"Starting server with log level: {log_level}")
+    
+    # Log configuration status
+    if HAS_AGENT_SERVICE:
+        logging.info("Agent service is available and enabled")
+    else:
+        logging.warning("Agent service is not available. AI features will be disabled.")
+        
+    # Start the server
     import uvicorn
     port = int(os.environ.get("PORT", 5000))
     host = os.environ.get("HOST", "0.0.0.0")
+    logging.info(f"Starting server on {host}:{port}")
     uvicorn.run("server:app", host=host, port=port, reload=True)
