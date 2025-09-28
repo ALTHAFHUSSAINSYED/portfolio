@@ -69,7 +69,7 @@ load_dotenv(ROOT_DIR / '.env')
 
 # --- DATABASE CONNECTION ---
 mongo_url = os.environ.get('MONGO_URL')
-db_name = os.environ.get('DB_NAME', 'portfolio')  # Provide a default database name
+db_name = os.environ.get('DB_NAME', 'portfolioDB')  # Use portfolioDB as the default database name
 
 # Configure MongoDB client and database with proper error handling
 if not mongo_url:
