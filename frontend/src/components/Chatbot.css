@@ -52,8 +52,8 @@
   border: none;
   border-radius: 16px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-  width: 350px;
-  height: 500px;
+  width: 300px;
+  height: 420px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -80,11 +80,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px;
+  padding: 12px;
   border-bottom: 1px solid rgba(229, 231, 235, 0.5);
   background: linear-gradient(to right, var(--chat-primary-color), #4f46e5);
   color: white;
-  height: 60px; /* Increased to make the header more visible */
+  height: 55px; /* Reduced height for smaller window */
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
 }
