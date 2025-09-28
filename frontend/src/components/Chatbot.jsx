@@ -9,6 +9,22 @@ const Chatbot = () => {
   const [welcomeAnimation, setWelcomeAnimation] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
+  
+  // Conversation memory to track context - MOVED TO COMPONENT LEVEL
+  const conversationMemory = useRef({
+    lastTopic: null,
+    questionsAsked: 0,
+    topics: new Set()
+  });
+  
+  // API status reference - MOVED TO COMPONENT LEVEL
+  const apiStatus = useRef({
+    attemptCount: 0,
+    successCount: 0,
+    lastAttemptTime: null,
+    lastSuccessTime: null,
+    activeEndpoints: []
+  });
 
   // Initialize with welcome message
   useEffect(() => {
@@ -19,6 +35,23 @@ const Chatbot = () => {
       }]);
     }
   }, [isOpen, messages.length]);
+
+  // Load API status from localStorage
+  useEffect(() => {
+    try {
+      const storedStatus = localStorage.getItem('alluBotApiStatus');
+      if (storedStatus) {
+        const parsedStatus = JSON.parse(storedStatus);
+        // Only use stored data if it's recent (last 24 hours)
+        if (parsedStatus.lastAttemptTime && 
+            (new Date().getTime() - new Date(parsedStatus.lastAttemptTime).getTime() < 24 * 60 * 60 * 1000)) {
+          apiStatus.current = parsedStatus;
+        }
+      }
+    } catch (e) {
+      console.log("Error reading API status from localStorage:", e);
+    }
+  }, []);
 
   useEffect(() => {
     const theme = document.documentElement.getAttribute("data-theme");
@@ -56,13 +89,6 @@ const Chatbot = () => {
     setIsLoading(true);
 
     try {
-      // Conversation memory to track context
-      const conversationMemory = useRef({
-        lastTopic: null,
-        questionsAsked: 0,
-        topics: new Set()
-      });
-      
       // Set up enhanced local knowledge base
       const getFallbackResponse = (input) => {
         // Update conversation memory
@@ -266,32 +292,6 @@ const Chatbot = () => {
         const defaultReplies = responses.default.replies;
         return { reply: defaultReplies[Math.floor(Math.random() * defaultReplies.length)] };
       };
-      
-      // Create a reference for API status to optimize API calls
-      const apiStatus = useRef({
-        attemptCount: 0,
-        successCount: 0,
-        lastAttemptTime: null,
-        lastSuccessTime: null,
-        activeEndpoints: []
-      });
-      
-      // Load API status from localStorage if available
-      useEffect(() => {
-        try {
-          const storedStatus = localStorage.getItem('alluBotApiStatus');
-          if (storedStatus) {
-            const parsedStatus = JSON.parse(storedStatus);
-            // Only use stored data if it's recent (last 24 hours)
-            if (parsedStatus.lastAttemptTime && 
-                (new Date().getTime() - new Date(parsedStatus.lastAttemptTime).getTime() < 24 * 60 * 60 * 1000)) {
-              apiStatus.current = parsedStatus;
-            }
-          }
-        } catch (e) {
-          console.log("Error reading API status from localStorage:", e);
-        }
-      }, []);
       
       // Detect if the query is asking for internet information
       const requiresInternet = (query) => {
