@@ -1,0 +1,20 @@
+{
+  "personalInfo": {
+    "name": "Althaf Hussain Syed",
+    "title": "DevOps Engineer | Cloud & Infrastructure Specialist",
+    "email": "allualthaf42@gmail.com",
+    "phone": "8184812249",
+    "location": "Hyderabad, India",
+    "linkedin": "https://linkedin.com/in/althafhussainsyed",
+    "summary": "Certified DevOps Engineer with 3+ years of experience in cloud infrastructure, automation, and CI/CD pipeline engineering. Multi-cloud certified professional with expertise in AWS, GCP, Azure, and Oracle Cloud. Proven track record of reducing operational overhead by 40% and improving incident response time by 30%."
+  },
+  "skills": {
+    "cloudPlatforms": [
+      {
+        "name": "AWS",
+        "level": "Expert",
+        "certifications": 3
+      }
+    ]
+  }
+}
