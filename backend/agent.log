@@ -1,0 +1,31 @@
+2025-09-28 11:03:31,387 - AlluAgent - INFO - Connected to MongoDB successfully
+2025-09-28 11:03:31,389 - AlluAgent - WARNING - OPENAI_API_KEY not found in environment variables
+2025-09-28 11:03:31,389 - AlluAgent - WARNING - No search API keys found. Using DuckDuckGo fallback for web search.
+2025-09-28 11:03:31,389 - AlluAgent - WARNING - NEWS_API_KEY not found. Using RSS feeds for news content.
+2025-09-28 11:03:31,392 - AlluAgent - WARNING - No search API keys found. Using DuckDuckGo fallback for web search.
+2025-09-28 11:03:31,392 - AlluAgent - WARNING - NEWS_API_KEY not found. Using RSS feeds for news content.
+2025-09-28 11:03:31,445 - AlluAgent - WARNING - Failed to fetch news from RSS feeds: No module named 'cgi'
+2025-09-28 11:03:32,400 - AlluAgent - INFO - Searching with DuckDuckGo: Python programming trends
+2025-09-28 11:04:22,021 - AlluAgent - INFO - Connected to MongoDB successfully
+2025-09-28 11:04:22,033 - AlluAgent - WARNING - OPENAI_API_KEY not found in environment variables
+2025-09-28 11:04:22,042 - AlluAgent - WARNING - No search API keys found. Using DuckDuckGo fallback for web search.
+2025-09-28 11:04:22,050 - AlluAgent - WARNING - NEWS_API_KEY not found. Using RSS feeds for news content.
+2025-09-28 11:04:22,056 - AlluAgent - WARNING - No search API keys found. Using DuckDuckGo fallback for web search.
+2025-09-28 11:04:22,056 - AlluAgent - WARNING - NEWS_API_KEY not found. Using RSS feeds for news content.
+2025-09-28 11:04:22,125 - AlluAgent - WARNING - Failed to fetch news from RSS feeds: No module named 'cgi'
+2025-09-28 11:04:23,388 - AlluAgent - INFO - Searching with DuckDuckGo: Python programming trends
+2025-09-28 11:05:03,600 - AlluAgent - INFO - Connected to MongoDB successfully
+2025-09-28 11:05:03,601 - AlluAgent - WARNING - OPENAI_API_KEY not found in environment variables
+2025-09-28 11:05:03,601 - AlluAgent - WARNING - No search API keys found. Using DuckDuckGo fallback for web search.
+2025-09-28 11:05:03,601 - AlluAgent - WARNING - NEWS_API_KEY not found. Using RSS feeds for news content.
+2025-09-28 11:05:03,603 - AlluAgent - WARNING - No search API keys found. Using DuckDuckGo fallback for web search.
+2025-09-28 11:05:03,603 - AlluAgent - WARNING - NEWS_API_KEY not found. Using RSS feeds for news content.
+2025-09-28 11:05:08,064 - AlluAgent - INFO - Searching with DuckDuckGo: Python programming trends
+2025-09-28 11:06:06,107 - AlluAgent - INFO - Connected to MongoDB successfully
+2025-09-28 11:06:06,110 - AlluAgent - WARNING - OPENAI_API_KEY not found in environment variables
+2025-09-28 11:06:06,110 - AlluAgent - WARNING - No search API keys found. Using DuckDuckGo fallback for web search.
+2025-09-28 11:06:06,110 - AlluAgent - WARNING - NEWS_API_KEY not found. Using RSS feeds for news content.
+2025-09-28 11:06:06,269 - AlluAgent - INFO - Scheduled daily blog generation at 01:00
+2025-09-28 11:06:06,270 - AlluAgent - INFO - Starting agent scheduler
+2025-09-28 11:06:06,270 - AlluAgent - INFO - Agent scheduler started
+2025-09-28 11:06:06,270 - root - INFO - Agent scheduler started successfully in background thread
