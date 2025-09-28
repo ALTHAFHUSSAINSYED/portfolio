@@ -483,7 +483,7 @@ const Chatbot = () => {
           <div className="chatbot-header">
             <div className="chatbot-avatar">
               <img 
-                src="/chatbot-avatar.jpg" 
+                src="/profile-pic.jpg" 
                 alt="Althaf Hussain Syed" 
                 style={{
                   width: '100%',
@@ -497,6 +497,7 @@ const Chatbot = () => {
                   e.target.nextSibling.style.display = 'block';
                 }}
               />
+              <div className="author-name">Althaf Hussain</div>
               <svg 
                 viewBox="0 0 24 24" 
                 fill="none" 
@@ -524,7 +525,7 @@ const Chatbot = () => {
                 {msg.sender === "bot" && (
                   <div className="bot-avatar">
                     <img 
-                      src="/chatbot-avatar.jpg" 
+                      src="/profile-pic.jpg" 
                       alt="Allu Bot" 
                       style={{
                         width: '100%',
