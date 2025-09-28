@@ -69,9 +69,24 @@ load_dotenv(ROOT_DIR / '.env')
 
 # --- DATABASE CONNECTION ---
 mongo_url = os.environ.get('MONGO_URL')
-db_name = os.environ.get('DB_NAME')
-client = AsyncIOMotorClient(mongo_url)
-db = client[db_name]
+db_name = os.environ.get('DB_NAME', 'portfolio')  # Provide a default database name
+
+# Configure MongoDB client and database with proper error handling
+if not mongo_url:
+    print("Warning: MONGO_URL environment variable is not set. Database functionality will be limited.")
+    client = None
+    db = None
+else:
+    try:
+        client = AsyncIOMotorClient(mongo_url)
+        if not db_name:
+            print("Warning: DB_NAME environment variable is not set. Using default 'portfolio' database.")
+        db = client[db_name]
+        print(f"Successfully connected to MongoDB database: {db_name}")
+    except Exception as e:
+        print(f"Error connecting to MongoDB: {e}")
+        client = None
+        db = None
 
 # ✨ --- NEW: CONFIGURE CLOUDINARY --- ✨
 # This section reads your .env file and sets up Cloudinary
@@ -184,6 +199,10 @@ async def send_contact_email(form: ContactForm):
 # ✨ --- MODIFIED: The create_project endpoint --- ✨
 @api_router.post("/projects", response_model=Project, status_code=status.HTTP_201_CREATED)
 async def create_project(name: str = Form(...), summary: str = Form(...), details: str = Form(...), technologies: str = Form(...), key_outcomes: str = Form(...), file: UploadFile = File(...)):
+    # Check if database is available
+    if db is None:
+        raise HTTPException(status_code=503, detail="Database is not available. Check your MongoDB connection.")
+        
     # Sanitize all user inputs to prevent XSS attacks
     sanitized_name = bleach.clean(name)
     sanitized_summary = bleach.clean(summary)
@@ -211,34 +230,64 @@ async def create_project(name: str = Form(...), summary: str = Form(...), detail
         "key_outcomes": sanitized_key_outcomes
     }
     project = Project(**project_data)
-    await db.projects.insert_one(project.model_dump())
-    return project
+    
+    try:
+        await db.projects.insert_one(project.model_dump())
+        return project
+    except Exception as e:
+        logging.error(f"Database error when creating project: {e}")
+        raise HTTPException(status_code=500, detail="Failed to save project to database")
 
-# (No changes to your get_projects endpoint)
 @api_router.get("/projects", response_model=List[Project])
 async def get_projects():
-    projects_cursor = db.projects.find()
-    projects = await projects_cursor.to_list(length=100)
-    return projects
+    # Check if database is available
+    if db is None:
+        logging.warning("Database not available when fetching projects")
+        return []  # Return empty list when database is not available
+    
+    try:
+        projects_cursor = db.projects.find()
+        projects = await projects_cursor.to_list(length=100)
+        return projects
+    except Exception as e:
+        logging.error(f"Error fetching projects: {e}")
+        return []  # Return empty list on error
 
-# (No changes to your get_project_by_id endpoint)
 @api_router.get("/projects/{project_id}", response_model=Project)
 async def get_project_by_id(project_id: str):
-    project = await db.projects.find_one({"id": project_id})
-    if project: return project
-    raise HTTPException(status_code=404, detail="Project not found")
+    # Check if database is available
+    if db is None:
+        raise HTTPException(
+            status_code=503, 
+            detail="Database is not available. Check your MongoDB connection."
+        )
+    
+    try:
+        project = await db.projects.find_one({"id": project_id})
+        if project: 
+            return project
+        raise HTTPException(status_code=404, detail="Project not found")
+    except Exception as e:
+        logging.error(f"Error fetching project {project_id}: {e}")
+        raise HTTPException(status_code=500, detail="Error retrieving project from database")
 
-# ✨ --- MODIFIED: The update_project endpoint --- ✨
 @api_router.put("/projects/{project_id}", response_model=Project)
 async def update_project(project_id: str, name: Optional[str] = Form(None), summary: Optional[str] = Form(None), details: Optional[str] = Form(None), technologies: Optional[str] = Form(None), key_outcomes: Optional[str] = Form(None), file: Optional[UploadFile] = File(None)):
-    update_data = {}
-    if name is not None: update_data["name"] = name
-    if summary is not None: update_data["summary"] = summary
-    if details is not None: update_data["details"] = details
-    if technologies is not None: update_data["technologies"] = [t.strip() for t in technologies.split(',') if t.strip()]
-    if key_outcomes is not None: update_data["key_outcomes"] = key_outcomes
+    # Check if database is available
+    if db is None:
+        raise HTTPException(
+            status_code=503, 
+            detail="Database is not available. Check your MongoDB connection."
+        )
     
-    # NEW: If a new file is provided, upload it to Cloudinary
+    update_data = {}
+    if name is not None: update_data["name"] = bleach.clean(name)
+    if summary is not None: update_data["summary"] = bleach.clean(summary)
+    if details is not None: update_data["details"] = sanitize_html(details)
+    if technologies is not None: update_data["technologies"] = [bleach.clean(t.strip()) for t in technologies.split(',') if t.strip()]
+    if key_outcomes is not None: update_data["key_outcomes"] = bleach.clean(key_outcomes)
+    
+    # If a new file is provided, upload it to Cloudinary
     if file:
         try:
             upload_result = cloudinary.uploader.upload(file.file, folder="portfolio_projects")
@@ -246,29 +295,40 @@ async def update_project(project_id: str, name: Optional[str] = Form(None), summ
         except Exception as e:
             logging.error(f"Cloudinary upload failed on update: {e}")
             raise HTTPException(status_code=500, detail="Image could not be updated.")
-
-    # REMOVED: The old Base64 logic for file updates
     
     if not update_data:
         raise HTTPException(status_code=400, detail="No update data provided")
 
-    result = await db.projects.update_one({"id": project_id}, {"$set": update_data})
-    
-    # This logic remains the same
-    if result.modified_count >= 0:
-        updated_project = await db.projects.find_one({"id": project_id})
-        if updated_project:
-            return updated_project
-    
-    raise HTTPException(status_code=404, detail="Project not found")
+    try:
+        result = await db.projects.update_one({"id": project_id}, {"$set": update_data})
+        
+        if result.modified_count >= 0:
+            updated_project = await db.projects.find_one({"id": project_id})
+            if updated_project:
+                return updated_project
+        
+        raise HTTPException(status_code=404, detail="Project not found")
+    except Exception as e:
+        logging.error(f"Database error when updating project {project_id}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to update project in database")
 
-# (No changes to your delete_project endpoint)
 @api_router.delete("/projects/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_project(project_id: str):
-    result = await db.projects.delete_one({"id": project_id})
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Project not found")
-    return
+    # Check if database is available
+    if db is None:
+        raise HTTPException(
+            status_code=503, 
+            detail="Database is not available. Check your MongoDB connection."
+        )
+    
+    try:
+        result = await db.projects.delete_one({"id": project_id})
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Project not found")
+        return
+    except Exception as e:
+        logging.error(f"Database error when deleting project {project_id}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to delete project from database")
 
 # --- AGENT API MODELS ---
 class AgentQuery(BaseModel):
@@ -384,21 +444,23 @@ async def generate_blog(request: BlogPostRequest, background_tasks: BackgroundTa
 async def get_blogs():
     """Get all published blog posts"""
     try:
-        # First try to get blogs from MongoDB
-        try:
-            blogs_cursor = db.blogs.find({"published": True}).sort("created_at", -1)
-            blogs = await blogs_cursor.to_list(length=50)
-            for blog in blogs:
-                blog["id"] = str(blog.pop("_id"))
+        # First try to get blogs from MongoDB if available
+        if db is not None:
+            try:
+                blogs_cursor = db.blogs.find({"published": True}).sort("created_at", -1)
+                blogs = await blogs_cursor.to_list(length=50)
+                for blog in blogs:
+                    blog["id"] = str(blog.pop("_id"))
+                
+                # If we have blogs from MongoDB, return them
+                if blogs:
+                    return blogs
+            except Exception as e:
+                logging.warning(f"Could not fetch blogs from MongoDB: {e}")
+        else:
+            logging.warning("Database is not available. Falling back to local blogs.")
             
-            # If we have blogs from MongoDB, return them
-            if blogs:
-                return blogs
-        except Exception as e:
-            logging.warning(f"Could not fetch blogs from MongoDB: {e}")
-            blogs = []
-            
-        # If MongoDB fails or returns no blogs, try to get locally generated blogs
+        # If MongoDB fails, is unavailable, or returns no blogs, try to get locally generated blogs
         try:
             from read_local_blogs import get_local_blogs
             local_blogs = get_local_blogs()
@@ -407,6 +469,10 @@ async def get_blogs():
                 return local_blogs
         except Exception as e:
             logging.warning(f"Could not fetch locally generated blogs: {e}")
+            
+        # Return empty array as fallback if nothing works
+        logging.warning("No blogs available from any source, returning empty array")
+        return []
             
         # If we reach here and blogs is empty, we have no blogs to return
         if not blogs:
@@ -420,6 +486,13 @@ async def get_blogs():
 @api_router.get("/blogs/{blog_id}", response_model=BlogPost)
 async def get_blog(blog_id: str):
     """Get a specific blog post by ID"""
+    # Check if database is available
+    if db is None:
+        raise HTTPException(
+            status_code=503, 
+            detail="Database is not available. Check your MongoDB connection."
+        )
+    
     try:
         from bson.objectid import ObjectId
         blog = await db.blogs.find_one({"_id": ObjectId(blog_id)})
@@ -428,6 +501,10 @@ async def get_blog(blog_id: str):
             return blog
         else:
             raise HTTPException(status_code=404, detail="Blog not found")
+    except ValueError as e:
+        # Handle invalid ObjectId format
+        logging.error(f"Invalid blog ID format: {e}")
+        raise HTTPException(status_code=400, detail="Invalid blog ID format")
     except Exception as e:
         logging.error(f"Error fetching blog: {e}")
         raise HTTPException(status_code=500, detail="Could not fetch blog post")

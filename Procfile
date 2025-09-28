@@ -1,1 +1,1 @@
-web: cd backend && sh render_start.sh
+web: cd backend && bash render_start.sh
