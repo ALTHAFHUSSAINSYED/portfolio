@@ -62,14 +62,18 @@
 /* Mobile responsiveness */
 @media (max-width: 500px) {
   .chatbot-window {
-    width: 300px;
-    height: 450px;
+    width: 320px;
+    height: 480px;
     bottom: 70px;
   }
   
   .chatbot-container {
     bottom: 10px;
     right: 10px;
+  }
+  
+  .chatbot-header {
+    height: 60px;
   }
 }
 
