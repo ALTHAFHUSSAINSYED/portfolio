@@ -105,8 +105,17 @@ def check_gemini_api_key(api_key):
 if __name__ == "__main__":
     print("===== Gemini API Key Check =====")
     
-    # Use the provided API key
-    API_KEY = "AIzaSyAhhDf-WGTXRALXNfcCGhsoap7SfuyiDW8"
+    # Load API key from environment variables
+    import os
+    from dotenv import load_dotenv
+    
+    load_dotenv()
+    API_KEY = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+    
+    if not API_KEY:
+        print("❌ No API key found in environment variables")
+        print("Please set GEMINI_API_KEY or GOOGLE_API_KEY in your .env file")
+        exit(1)
     
     check_gemini_api_key(API_KEY)
     print("===============================")
