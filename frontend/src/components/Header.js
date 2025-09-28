@@ -5,12 +5,15 @@ import { useTheme } from '../context/ThemeContext'; // ✨ NEW: Import useTheme 
 // ✨ MODIFIED: Added icons for navigation items
 import { 
   Download, Mail, Phone, MapPin, Linkedin, Menu, X, Sun, Moon,
-  User, Sparkles, Briefcase, Award, BookOpen
+  User, Sparkles, Briefcase, Award, BookOpen, ChevronDown, Filter
 } from 'lucide-react'; 
+import { useNavigate } from 'react-router-dom';
 
 const Header = ({ personalInfo }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showBlogCategories, setShowBlogCategories] = useState(false);
   const { theme, toggleTheme } = useTheme(); // ✨ NEW: Get theme state and toggle function
+  const navigate = useNavigate();
 
   const downloadResume = () => {
     try {
@@ -95,13 +98,46 @@ const Header = ({ personalInfo }) => {
               <Award className="w-4 h-4 mr-2" />
               Certifications
             </button>
-            <button 
-              onClick={() => scrollToSection('blogs')}
-              className="glassmorphic-nav-btn font-medium nav-blink-gradient"
-            >
-              <BookOpen className="w-4 h-4 mr-2" />
-              Blogs
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => {
+                  scrollToSection('blogs');
+                  setShowBlogCategories(!showBlogCategories);
+                }}
+                className="glassmorphic-nav-btn font-medium nav-blink-gradient flex items-center"
+              >
+                <BookOpen className="w-4 h-4 mr-2" />
+                Blogs
+                <ChevronDown className={`w-4 h-4 ml-1 transition-transform ${showBlogCategories ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {/* Blog Categories Dropdown */}
+              {showBlogCategories && (
+                <div className="absolute mt-2 w-64 bg-background border border-border rounded-md shadow-lg py-2 z-50">
+                  <div className="px-4 py-2 border-b border-border">
+                    <p className="text-sm font-medium text-muted-foreground flex items-center">
+                      <Filter className="w-4 h-4 mr-1" /> Blog Categories
+                    </p>
+                  </div>
+                  <div className="max-h-64 overflow-y-auto py-2">
+                    {['Cloud Computing', 'AI and ML', 'DevOps', 'Software Development', 'Databases', 
+                      'Cybersecurity', 'Blockchain', 'Quantum Computing', 'Edge Computing', 
+                      'IoT Development', 'Low-Code/No-Code', 'Frontend Development'].map((category) => (
+                      <button
+                        key={category}
+                        onClick={() => {
+                          navigate(`/?category=${encodeURIComponent(category)}#blogs`);
+                          setShowBlogCategories(false);
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm hover:bg-secondary transition-colors"
+                      >
+                        {category}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </nav>
 
           <div className="hidden md:flex items-center space-x-3">
