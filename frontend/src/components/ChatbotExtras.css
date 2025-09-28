@@ -77,8 +77,4 @@
   }
 }
 
-/* Add a max-height to long messages */
-.message-content {
-  max-height: 200px;
-  overflow-y: auto;
-}
+/* Removed - causes double scrollbar issue */
