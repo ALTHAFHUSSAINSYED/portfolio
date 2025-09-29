@@ -130,13 +130,15 @@ async def scheduled_blog_generation():
         print("="*50 + "\n")
 
 
-# Start the scheduler only if running in main context
-import threading
-def start_scheduler():
-    if threading.current_thread() is threading.main_thread():
-        scheduler.start()
-        logger.info("Started scheduler - Blog generation scheduled for 09:40 AM UTC (production)")
-start_scheduler()
+
+# Start the scheduler and register jobs inside FastAPI's startup event
+@app.on_event("startup")
+async def start_scheduler():
+    # Register scheduled blog generation job
+    production_cron = CronTrigger(hour=9, minute=40, timezone=timezone.utc)
+    scheduler.add_job(scheduled_blog_generation, production_cron)
+    scheduler.start()
+    logger.info("Started AsyncIOScheduler - Blog generation scheduled for 09:40 AM UTC (production)")
 
 
 # Configure Gemini API
