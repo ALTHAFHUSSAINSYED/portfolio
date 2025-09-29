@@ -72,18 +72,11 @@ import test_blog_generation
 from notification_service import notification_service
 HAS_AGENT_SERVICE = True
 
-# Initialize scheduler for automated tasks
 from datetime import timedelta
 scheduler = AsyncIOScheduler()
 
-# Schedule blog generation in the next 2 minutes for immediate test
-test_run_time = datetime.utcnow() + timedelta(minutes=2)
-def scheduled_blog_generation_wrapper():
-    import asyncio
-    asyncio.run(scheduled_blog_generation())
-scheduler.add_job(scheduled_blog_generation_wrapper, 'date', run_date=test_run_time)
-
 production_cron = CronTrigger(hour=9, minute=40, timezone=timezone.utc)
+
 @scheduler.scheduled_job(production_cron)
 async def scheduled_blog_generation():
     try:
@@ -136,33 +129,15 @@ async def scheduled_blog_generation():
         print(f"Reason: {error_msg}")
         print("="*50 + "\n")
 
-# Start the scheduler
-scheduler.start()
-logger.info("Started scheduler - Blog generation scheduled for 10:43 AM UTC (test)")
 
-# Test email configuration and trigger initial blog generation
-@app.on_event("startup")
-async def trigger_initial_blog():
-    # Test email configuration
-    print("\n" + "="*50)
-    print("🔧 Environment Variables Check:")
-    print(f"SENDGRID_API_KEY: {'✅ Found' if os.getenv('SENDGRID_API_KEY') else '❌ Missing'}")
-    print(f"TO_EMAIL: {os.getenv('TO_EMAIL', 'Not set')}")
-    if not notification_service.sendgrid_api_key:
-        print("\n❌ ERROR: SendGrid API key not found!")
-        print("Please set the SENDGRID_API_KEY environment variable")
-        print("="*50 + "\n")
-        return
-    
-    print("\n" + "="*50)
-    print("📧 Email Configuration:")
-    print(f"To: {notification_service.to_email}")
-    print(f"SendGrid API Key: {'Configured ✅' if notification_service.sendgrid_api_key else 'Missing ❌'}")
-    print("="*50 + "\n")
-    
-    # Trigger blog generation
-    await scheduled_blog_generation()
-    logging.info("Triggered initial blog generation")
+# Start the scheduler only if running in main context
+import threading
+def start_scheduler():
+    if threading.current_thread() is threading.main_thread():
+        scheduler.start()
+        logger.info("Started scheduler - Blog generation scheduled for 09:40 AM UTC (production)")
+start_scheduler()
+
 
 # Configure Gemini API
 genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
