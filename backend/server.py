@@ -9,8 +9,7 @@ from contextlib import asynccontextmanager
 import os
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
-from datetime import datetime
-from datetime import timezone as UTC
+from datetime import datetime, timezone
 import logging
 import sys
 import json
@@ -84,8 +83,7 @@ def scheduled_blog_generation_wrapper():
     asyncio.run(scheduled_blog_generation())
 scheduler.add_job(scheduled_blog_generation_wrapper, 'date', run_date=test_run_time)
 
-# For production: schedule daily at 09:40 UTC
-production_cron = CronTrigger(hour=9, minute=40, timezone=UTC)
+production_cron = CronTrigger(hour=9, minute=40, timezone=timezone.utc)
 @scheduler.scheduled_job(production_cron)
 async def scheduled_blog_generation():
     try:
