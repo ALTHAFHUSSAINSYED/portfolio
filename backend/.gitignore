@@ -1,7 +1,14 @@
+
 # Environment variables
 .env
 .env.*
 !.env.example
+
+# Credentials and secrets
+credentials.txt
+*credentials*
+*secret*
+*key*
 
 # Python cache files
 __pycache__/

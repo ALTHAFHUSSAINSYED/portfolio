@@ -8,7 +8,6 @@ from datetime import datetime
 from dotenv import load_dotenv
 import threading
 from pymongo import MongoClient
-import openai
 import requests
 from bs4 import BeautifulSoup
 
@@ -31,9 +30,6 @@ mongo_url = os.getenv("MONGO_URL")
 db_name = os.getenv("DB_NAME")
 client = MongoClient(mongo_url)
 db = client[db_name]
-
-# OpenAI API setup
-openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # Auth token for blog posting
 auth_token = os.getenv("BLOG_AUTH_TOKEN")
@@ -104,73 +100,85 @@ def fetch_tech_news(limit=3):
     
     return all_news
 
-# Function to generate blog content using OpenAI API
+# Function to generate blog content using Gemini API
 def generate_blog_content(topic=None):
     if not topic:
         topic = random.choice(blog_topics)
     
-    # Get trending topics and tech news for context
-    trending_topics = fetch_trending_topics()
-    tech_news = fetch_tech_news()
-    
-    # Build context for the AI
-    context = f"Topic: {topic}\n\nTrending tech topics: {', '.join(trending_topics)}\n\nRecent tech news:\n"
-    for i, news in enumerate(tech_news):
-        context += f"{i+1}. {news['title']} ({news['source']})\n"
+    # For testing, use a simple context
+    context = f"Topic: {topic}\n\nWrite a technical blog post about this topic."
     
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[
-                {
-                    "role": "system", 
-                    "content": "You are an expert tech blogger who writes engaging, informative articles. " +
-                               "Generate a complete blog post with HTML formatting using the provided information. " +
-                               "Include a catchy title, introduction, main sections with headers, and a conclusion. " +
-                               "The blog post should be informative, engaging, and 600-800 words in length."
-                },
-                {"role": "user", "content": context}
-            ],
-            temperature=0.7,
-            max_tokens=1500
-        )
+        # Import Gemini service only when needed
+        from ai_service import gemini_service
+        blog = gemini_service.generate_blog_post(context)
         
-        blog_content = response["choices"][0]["message"]["content"]
-        
-        # Extract title from the generated content
-        lines = blog_content.split('\n')
-        title = ""
-        for line in lines[:5]:  # Check first few lines for title
-            if line.strip().startswith('#') or line.strip().startswith('<h1>'):
-                title = line.strip().replace('#', '').strip()
-                title = title.replace('<h1>', '').replace('</h1>', '').strip()
-                break
-        
-        if not title:
-            title = topic  # Fallback to topic if no title found
-        
-        return {"title": title, "content": blog_content}
+        if not blog:
+            logger.error("Failed to generate blog with Gemini")
+            return None
+            
+        return blog
         
     except Exception as e:
         logger.error(f"Error generating blog content: {e}")
         return None
 
-# Function to post a blog
-def post_blog(blog=None):
-    if not blog:
-        blog = generate_blog_content()
+# Function to post a blog with retry mechanism
+async def post_blog(blog=None, max_retries=3):
+    from notification_service import notification_service
     
-    if not blog:
-        logger.error("Failed to generate blog content")
-        return False
-    
-    # API endpoint for posting blog
-    api_url = os.getenv("BLOG_API_URL", "http://localhost:5000/api/post-blog")
-    
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {auth_token}"
-    }
+    for attempt in range(max_retries):
+        try:
+            if not blog:
+                blog = generate_blog_content()
+            
+            if not blog:
+                error_msg = "Failed to generate blog content"
+                logger.error(error_msg)
+                await notification_service.send_blog_notification(False, error_message=error_msg)
+                return False
+            
+            # API endpoint for posting blog
+            api_url = os.getenv("BLOG_API_URL", "http://localhost:5000/api/post-blog")
+            
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {auth_token}"
+            }
+            
+            response = requests.post(
+                api_url,
+                headers=headers,
+                json={
+                    "title": blog["title"],
+                    "content": blog["content"],
+                    "author": "Allu Bot"
+                },
+                timeout=30  # 30 second timeout
+            )
+            
+            response.raise_for_status()
+            
+            # Save to MongoDB
+            db.blogs.insert_one({
+                "title": blog["title"],
+                "content": blog["content"],
+                "created_at": datetime.utcnow(),
+                "status": "published"
+            })
+            
+            logger.info(f"Blog posted successfully: {blog['title']}")
+            await notification_service.send_blog_notification(True, blog_title=blog['title'])
+            return True
+            
+        except Exception as e:
+            logger.error(f"Attempt {attempt + 1} failed: {e}")
+            if attempt == max_retries - 1:
+                logger.error("All retries failed")
+                return False
+            time.sleep(5 * (attempt + 1))  # Exponential backoff
+            
+    return False
     
     try:
         response = requests.post(
