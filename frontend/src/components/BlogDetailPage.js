@@ -12,6 +12,7 @@ const BlogDetailPage = () => {
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showFullContent, setShowFullContent] = useState(true);
 
   useEffect(() => {
     fetchBlog();
@@ -114,17 +115,19 @@ const BlogDetailPage = () => {
   return (
     <section className="py-20 bg-background text-foreground">
       <div className="max-w-4xl mx-auto px-4">
-        <Link to="/" className="inline-flex items-center text-primary hover:text-primary/80 mb-6">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Home
+        <Link to="/blogs" className="inline-flex items-center text-primary hover:text-primary/80 mb-6">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back to all blogs
         </Link>
         
         <Card className="p-8 relative block-card shadow-lg">
+          {/* Header Section */}
           <div className="absolute top-4 right-4">
             <Newspaper className="w-6 h-6 text-cyan-400" />
           </div>
           
           <h1 className="text-4xl font-bold mb-6">{blog.title}</h1>
           
+          {/* Meta Information */}
           <div className="flex flex-wrap gap-2 mb-6">
             <div className="flex items-center text-sm text-muted-foreground">
               <Calendar className="mr-1 h-4 w-4" />
@@ -149,23 +152,84 @@ const BlogDetailPage = () => {
             </div>
           </div>
           
+          {/* Summary Section */}
           {blog.summary && (
-            <div className="bg-secondary/20 p-4 rounded-md mb-8 italic">
-              {blog.summary}
+            <div className="bg-secondary/20 p-4 rounded-md mb-8">
+              <h2 className="text-xl font-semibold mb-2">Overview</h2>
+              <p className="italic">{blog.summary}</p>
+            </div>
+          )}
+
+          {/* Table of Contents if blog has sections */}
+          {blog.sections && blog.sections.length > 0 && (
+            <div className="bg-secondary/10 p-4 rounded-md mb-8">
+              <h2 className="text-xl font-semibold mb-3">Table of Contents</h2>
+              <ul className="list-none space-y-2">
+                {blog.sections.map((section, idx) => (
+                  <li key={idx} className="flex items-center">
+                    <span className="mr-2 text-primary">{idx + 1}.</span>
+                    <a href={`#section-${idx}`} className="text-primary hover:underline">
+                      {section.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
           
-          <div 
-            className="mt-6 prose prose-lg dark:prose-invert max-w-none"
-            dangerouslySetInnerHTML={{ __html: renderMarkdown(blog.content) }}
-          />
+          {/* Main Content */}
+          <div className="mt-6 prose prose-lg dark:prose-invert max-w-none">
+            <div dangerouslySetInnerHTML={{ __html: renderMarkdown(blog.content) }} />
+          </div>
           
+          {/* Technologies Used Section */}
+          {blog.technologies && blog.technologies.length > 0 && (
+            <div className="mt-8 pt-6 border-t border-border">
+              <h3 className="text-lg font-semibold mb-3">Technologies & Tools Used</h3>
+              <div className="flex flex-wrap gap-2">
+                {blog.technologies.map((tech, idx) => (
+                  <Badge key={idx} variant="outline" className="bg-secondary/20">
+                    {tech}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Code Examples Section */}
+          {blog.codeExamples && blog.codeExamples.length > 0 && (
+            <div className="mt-8 pt-6 border-t border-border">
+              <h3 className="text-lg font-semibold mb-3">Code Examples</h3>
+              {blog.codeExamples.map((example, idx) => (
+                <div key={idx} className="mb-4">
+                  <h4 className="text-md font-medium mb-2">{example.title}</h4>
+                  <pre className="bg-secondary/20 p-4 rounded-md overflow-x-auto">
+                    <code>{example.code}</code>
+                  </pre>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Key Takeaways Section */}
+          {blog.keyTakeaways && blog.keyTakeaways.length > 0 && (
+            <div className="mt-8 pt-6 border-t border-border">
+              <h3 className="text-lg font-semibold mb-3">Key Takeaways</h3>
+              <ul className="list-disc list-inside space-y-2">
+                {blog.keyTakeaways.map((takeaway, idx) => (
+                  <li key={idx} className="text-muted-foreground">{takeaway}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* References and Sources */}
           {blog.sources && blog.sources.length > 0 && (
             <div className="mt-8 pt-6 border-t border-border">
-              <h3 className="text-lg font-medium mb-2">Sources</h3>
-              <ul className="list-disc list-inside">
+              <h3 className="text-lg font-semibold mb-3">References & Resources</h3>
+              <ul className="list-disc list-inside space-y-2">
                 {blog.sources.map((source, idx) => (
-                  <li key={idx} className="text-sm text-muted-foreground mb-1">
+                  <li key={idx} className="text-sm text-muted-foreground">
                     <a 
                       href={source} 
                       target="_blank" 
@@ -178,6 +242,21 @@ const BlogDetailPage = () => {
                   </li>
                 ))}
               </ul>
+            </div>
+          )}
+
+          {/* Author Info */}
+          {blog.author && (
+            <div className="mt-8 pt-6 border-t border-border flex items-center">
+              <img 
+                src={blog.author.avatar || "/profile-pic.jpg"} 
+                alt={blog.author.name}
+                className="w-12 h-12 rounded-full mr-4"
+              />
+              <div>
+                <h3 className="text-lg font-semibold">{blog.author.name}</h3>
+                <p className="text-sm text-muted-foreground">{blog.author.bio}</p>
+              </div>
             </div>
           )}
         </Card>

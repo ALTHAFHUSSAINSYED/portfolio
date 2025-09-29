@@ -39,6 +39,28 @@
   z-index: 1001; /* Ensure the toggle button stays on top */
   box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
   transition: all 0.2s ease;
+  overflow: hidden; /* Ensure the image stays within bounds */
+}
+
+.chat-icon-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-toggle-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.chat-toggle-fallback {
+  width: 30px;
+  height: 30px;
+  color: white;
 }
 
 .chatbot-toggle:hover {
@@ -52,8 +74,9 @@
   border: none;
   border-radius: 16px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-  width: 300px;
-  height: 450px; /* Increased height to prevent scrollbar on initial load */
+  width: 360px; /* Increased width for better readability at 100% scale */
+  max-width: 90vw;
+  height: 520px; /* Increased height for better content fit */
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -80,13 +103,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px;
+  padding: 8px 12px;
   border-bottom: 1px solid rgba(229, 231, 235, 0.5);
   background: linear-gradient(to right, var(--chat-primary-color), #4f46e5);
   color: white;
-  height: 55px; /* Reduced height for smaller window */
+  min-height: 48px;
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
+  overflow: hidden;
 }
 
 .chatbot-avatar {
@@ -153,22 +177,24 @@
 .chatbot-messages {
   flex-grow: 1;
   overflow-y: auto;
-  padding: 12px 16px; /* Reduced top/bottom padding */
+  padding: 12px 16px;
   display: flex;
   flex-direction: column;
-  gap: 10px; /* Reduced gap */
+  gap: 12px;
   scroll-behavior: smooth;
-  max-height: calc(450px - 55px - 68px); /* Updated for new window height */
-  min-height: 0; /* Ensure flex-grow works properly */
+  height: calc(100% - 110px); /* Account for header and input area */
+  min-height: 0;
+  overflow-x: hidden; /* Prevent horizontal scrollbar */
 }
 
 .chatbot-message {
   display: flex;
   align-items: flex-start;
   position: relative;
-  margin-bottom: 8px; /* Reduced margin */
+  margin-bottom: 0; /* Remove margin as we're using gap in parent */
   animation: messageAppear 0.3s forwards;
   overflow: visible; /* Prevent any internal scrolling */
+  width: 100%; /* Ensure message takes full width */
 }
 
 @keyframes messageAppear {
@@ -220,9 +246,10 @@
   font-size: 14px;
   word-wrap: break-word;
   position: relative;
-  overflow: visible; /* Ensure no internal scrolling */
-  white-space: pre-wrap; /* Handle line breaks properly */
-  max-height: none; /* Remove any height restrictions */
+  overflow: hidden;
+  white-space: pre-line;
+  hyphens: auto;
+  height: auto;
 }
 
 .bot .message-content {
@@ -273,9 +300,12 @@
 
 .chatbot-form {
   display: flex;
-  padding: 12px 16px; /* Reduced padding */
+  padding: 12px 16px;
   background-color: rgba(0, 0, 0, 0.02);
   border-top: 1px solid rgba(229, 231, 235, 0.5);
+  height: 64px;
+  box-sizing: border-box;
+  align-items: center;
 }
 
 .chatbot-input {
@@ -408,10 +438,10 @@
 
 .suggestion-buttons {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 6px;
-  max-height: 120px;
-  overflow-y: auto;
+  max-height: none;
+  overflow: visible;
 }
 
 .suggestion-button {
@@ -425,9 +455,11 @@
   text-align: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  flex: 0 1 auto;
+  max-width: 45%;
 }
 
 .suggestion-button:hover {

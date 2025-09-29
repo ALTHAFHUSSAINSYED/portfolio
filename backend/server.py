@@ -3,6 +3,38 @@
 from fastapi import FastAPI, APIRouter, UploadFile, File, Form, HTTPException, status, BackgroundTasks
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
+from contextlib import asynccontextmanager
+
+# Import scheduling libraries
+import os
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
+from datetime import datetime
+from datetime import timezone as UTC
+import logging
+import sys
+import json
+
+# Configure logging
+log_level = os.getenv('LOG_LEVEL', 'INFO').upper()
+logging.basicConfig(
+    level=getattr(logging, log_level),
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S UTC',
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+logger = logging.getLogger('BlogScheduler')
+
+# Create FastAPI app instance
+app = FastAPI(title="Portfolio Backend API", version="1.0.0")
+
+# Manual trigger endpoint for blog generation and notification
+@app.post("/trigger-blog-generation")
+async def trigger_blog_generation():
+    await scheduled_blog_generation()
+    return {"status": "Triggered blog generation and notification"}
 from dotenv import load_dotenv
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -29,17 +61,110 @@ import requests
 from bs4 import BeautifulSoup
 import chromadb
 import google.generativeai as genai
-from serper import Serper
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
+import cloudinary
+import cloudinary.uploader
 
-# Import the agent service conditionally to make deployment more robust
-try:
-    import agent_service
-    HAS_AGENT_SERVICE = True
-except (ImportError, ValueError):
-    print("Warning: agent_service could not be imported. Chat and AI features will be disabled.")
-    HAS_AGENT_SERVICE = False
+# Import required services
+import agent_service
+from ai_service import gemini_service
+import test_blog_generation
+from notification_service import notification_service
+HAS_AGENT_SERVICE = True
+
+# Initialize scheduler for automated tasks
+from datetime import timedelta
+scheduler = AsyncIOScheduler()
+
+# Schedule blog generation in the next 2 minutes for immediate test
+test_run_time = datetime.utcnow() + timedelta(minutes=2)
+def scheduled_blog_generation_wrapper():
+    import asyncio
+    asyncio.run(scheduled_blog_generation())
+scheduler.add_job(scheduled_blog_generation_wrapper, 'date', run_date=test_run_time)
+
+# For production: schedule daily at 09:40 UTC
+production_cron = CronTrigger(hour=9, minute=40, timezone=UTC)
+@scheduler.scheduled_job(production_cron)
+async def scheduled_blog_generation():
+    try:
+        print("\n" + "="*50)
+        print("🚀 Starting scheduled blog generation at", datetime.now(UTC))
+        print("="*50 + "\n")
+        logger.info("Starting scheduled blog generation at %s", datetime.now(UTC))
+        
+        # Generate blog content
+        topic = "Latest Trends in AI and Machine Learning"
+        content = gemini_service.generate_blog_post(topic)
+        
+        if content:
+            # Add metadata
+            blog_data = {
+                "title": content["title"],
+                "content": content["content"],
+                "author": "Allu Bot",
+                "createdAt": datetime.now(UTC),
+                "tags": content.get("tags", ["AI", "Machine Learning", "Technology"]),
+                "_id": "auto-" + datetime.now(UTC).strftime("%Y%m%d-%H%M%S")
+            }
+            
+            # Send success notification
+            await notification_service.send_blog_notification(True, blog_data)
+            logger.info("Blog generation and notification successful")
+            
+            # Display success message
+            print("\n" + "="*50)
+            print("✅ BLOG POSTED SUCCESSFULLY!")
+            print(f"📝 Title: {blog_data['title']}")
+            print(f"📧 Email sent to: {notification_service.to_email}")
+            print(f"🔗 Blog ID: {blog_data['_id']}")
+            print("="*50 + "\n")
+        else:
+            await notification_service.send_blog_notification(False, None, "Blog generation failed - no content generated")
+            logger.error("Blog generation failed - no content generated")
+            # Display error message
+            print("\n" + "="*50)
+            print("❌ BLOG GENERATION FAILED!")
+            print("Reason: No content was generated")
+            print("="*50 + "\n")
+    except Exception as e:
+        error_msg = f"Error in scheduled blog generation: {str(e)}"
+        logger.error(error_msg)
+        await notification_service.send_blog_notification(False, None, error_msg)
+        # Display error message
+        print("\n" + "="*50)
+        print("❌ BLOG GENERATION FAILED!")
+        print(f"Reason: {error_msg}")
+        print("="*50 + "\n")
+
+# Start the scheduler
+scheduler.start()
+logger.info("Started scheduler - Blog generation scheduled for 10:43 AM UTC (test)")
+
+# Test email configuration and trigger initial blog generation
+@app.on_event("startup")
+async def trigger_initial_blog():
+    # Test email configuration
+    print("\n" + "="*50)
+    print("🔧 Environment Variables Check:")
+    print(f"SENDGRID_API_KEY: {'✅ Found' if os.getenv('SENDGRID_API_KEY') else '❌ Missing'}")
+    print(f"TO_EMAIL: {os.getenv('TO_EMAIL', 'Not set')}")
+    if not notification_service.sendgrid_api_key:
+        print("\n❌ ERROR: SendGrid API key not found!")
+        print("Please set the SENDGRID_API_KEY environment variable")
+        print("="*50 + "\n")
+        return
+    
+    print("\n" + "="*50)
+    print("📧 Email Configuration:")
+    print(f"To: {notification_service.to_email}")
+    print(f"SendGrid API Key: {'Configured ✅' if notification_service.sendgrid_api_key else 'Missing ❌'}")
+    print("="*50 + "\n")
+    
+    # Trigger blog generation
+    await scheduled_blog_generation()
+    logging.info("Triggered initial blog generation")
 
 # Configure Gemini API
 genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
@@ -47,16 +172,25 @@ genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
 # Initialize scheduler for automated tasks
 scheduler = AsyncIOScheduler()
 
+# Schedule automated blog generation (test run at 12:01 UTC)
+
+
 # Initialize ChromaDB Cloud Client
-chroma_client = chromadb.CloudClient(
-    api_key=os.getenv('CHROMA_API_KEY'),
-    tenant=os.getenv('CHROMA_TENANT_ID'),
-    database=os.getenv('CHROMA_DATABASE')
-)
-embedding_function = embedding_functions.OpenAIEmbeddingFunction(
-    api_key=os.getenv('OPENAI_API_KEY'),
-    model_name="text-embedding-3-small"
-)
+try:
+    from chromadb.utils import embedding_functions
+    chroma_client = chromadb.CloudClient(
+        api_key=os.getenv('CHROMA_API_KEY'),
+        tenant=os.getenv('CHROMA_TENANT_ID'),
+        database=os.getenv('CHROMA_DATABASE')
+    )
+    embedding_function = embedding_functions.OpenAIEmbeddingFunction(
+        api_key=os.getenv('OPENAI_API_KEY'),
+        model_name="text-embedding-3-small"
+    )
+except Exception as e:
+    print(f"Warning: ChromaDB initialization failed: {e}")
+    chroma_client = None
+    embedding_function = None
 
 try:
     collection = chroma_client.get_collection(
@@ -105,12 +239,14 @@ async def generate_daily_blog():
         return
     
     try:
-        # Get trending tech topics using Serper
-        serper_client = Serper(os.getenv('SERPER_API_KEY'))
-        trending_topics = serper_client.search(
-            q="latest technology trends programming development",
-            num=3
+        # Get trending tech topics using agent service search
+        trending_topics = agent_service_instance.search_web(
+            "latest technology trends programming development",
+            max_results=3
         )
+        if not trending_topics:
+            logging.error("Failed to fetch trending topics")
+            return
         
         # Generate blog content using Gemini
         topic = trending_topics['organic'][0]['title']
@@ -150,11 +286,21 @@ async def generate_daily_blog():
 @app.on_event("startup")
 async def setup_scheduled_tasks():
     """Setup scheduled tasks on application startup."""
-    # Schedule daily blog generation at 9 AM UTC
+    # Schedule blog generation in 2 minutes for testing
     scheduler.add_job(
         generate_daily_blog,
-        CronTrigger(hour=9, minute=0),  # 9 AM UTC daily
-        id="daily_blog",
+        'date',  # Run once at specific time
+        run_date=datetime.utcnow() + timedelta(minutes=2),
+        id="test_blog",
+        replace_existing=True
+    )
+    
+    # Add health check job
+    scheduler.add_job(
+        health_check,
+        'interval',
+        minutes=30,  # Check every 30 minutes
+        id="health_check",
         replace_existing=True
     )
     scheduler.start()
@@ -806,26 +952,37 @@ def start_agent_thread():
 agent_thread = threading.Thread(target=start_agent_thread)
 agent_thread.daemon = True
 agent_thread.start()
+if hasattr(app, 'scheduler_started'):
+    delattr(app, 'scheduler_started')
+
+# Lifespan context manager for the FastAPI app
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Start scheduler
+    scheduler.start()
+    logging.info("Started main scheduler for blog generation")
+    yield
+    scheduler.shutdown()
+
+app.router.lifespan_context = lifespan
 
 # Start the server if this file is run directly
 if __name__ == "__main__":
-    # Configure logging
-    log_level = os.environ.get("LOG_LEVEL", "INFO").upper()
-    logging.basicConfig(
-        level=getattr(logging, log_level),
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
-    logging.info(f"Starting server with log level: {log_level}")
-    
-    # Log configuration status
-    if HAS_AGENT_SERVICE:
-        logging.info("Agent service is available and enabled")
-    else:
-        logging.warning("Agent service is not available. AI features will be disabled.")
-        
-    # Start the server
-    import uvicorn
-    port = int(os.environ.get("PORT", 5000))
-    host = os.environ.get("HOST", "0.0.0.0")
-    logging.info(f"Starting server on {host}:{port}")
-    uvicorn.run("server:app", host=host, port=port, reload=True)
+    import asyncio
+    import nest_asyncio
+    nest_asyncio.apply()
+    async def main():
+        print("Starting AsyncIOScheduler in standalone mode...")
+        scheduler.start()
+        while True:
+            await asyncio.sleep(1)
+
+    try:
+        import nest_asyncio
+        nest_asyncio.apply()
+        loop = asyncio.get_event_loop()
+        loop.create_task(main())
+        loop.run_forever()
+    except (KeyboardInterrupt, SystemExit):
+        print("Shutting down scheduler...")
+        scheduler.shutdown()

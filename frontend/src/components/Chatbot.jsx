@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./Chatbot.css";
 import "./ChatbotExtras.css";
+import "./ChatbotUnread.css";
 
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -8,6 +9,7 @@ const Chatbot = () => {
   const [input, setInput] = useState("");
   const [welcomeAnimation, setWelcomeAnimation] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasUnread, setHasUnread] = useState(true);
   const messagesEndRef = useRef(null);
   
   // Conversation memory to track context - MOVED TO COMPONENT LEVEL
@@ -69,7 +71,12 @@ const Chatbot = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const toggleChat = () => setIsOpen(!isOpen);
+  const toggleChat = () => {
+    if (!isOpen) {
+      setHasUnread(false); // Clear unread indicator when opening chat
+    }
+    setIsOpen(!isOpen);
+  };
 
   const handleInputChange = (e) => setInput(e.target.value);
 
@@ -475,36 +482,43 @@ const Chatbot = () => {
         onClick={toggleChat}
         aria-label={isOpen ? "Close chat" : "Open chat"}
       >
-        {isOpen ? "×" : "💬"}
+        {isOpen ? "×" : (
+          <div className="chat-icon-container">
+            {hasUnread && <div className="unread-indicator">1</div>}
+            <img 
+              src="/profile-pic.jpg" 
+              alt="Chat with Althaf" 
+              className="chat-toggle-avatar"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'block';
+              }}
+            />
+            <svg 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg" 
+              className="chat-toggle-fallback"
+              style={{display: 'none'}}
+            >
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" fill="currentColor"/>
+            </svg>
+          </div>
+        )}
       </button>
 
       {isOpen && (
         <div className="chatbot-window">
           <div className="chatbot-header">
             <div className="chatbot-avatar">
-              <img 
-                src="/profile-pic.jpg" 
-                alt="Althaf Hussain Syed" 
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  borderRadius: '50%',
-                  objectFit: 'cover'
-                }}
-                onError={(e) => {
-                  // Fallback to default avatar if image fails to load
-                  e.target.style.display = 'none';
-                  e.target.nextSibling.style.display = 'block';
-                }}
-              />
-              <div className="author-name">Althaf Hussain</div>
+              {hasUnread && <div className="unread-indicator">1</div>}
               <svg 
                 viewBox="0 0 24 24" 
                 fill="none" 
                 xmlns="http://www.w3.org/2000/svg" 
                 width="24" 
                 height="24"
-                style={{display: 'none'}}
+                style={{display: 'block'}}
               >
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" fill="currentColor"/>
               </svg>

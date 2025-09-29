@@ -16,7 +16,8 @@ const BlogsSection = () => {
   const [showTopicInput, setShowTopicInput] = useState(false);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [showCategoryFilter, setShowCategoryFilter] = useState(false);
+  const [showCategoryFilter, setShowCategoryFilter] = useState(true); // Set filter visible by default
+  const [showAllBlogs, setShowAllBlogs] = useState(false);
   const sectionRef = useRef(null);
   const location = useLocation();
 
@@ -29,8 +30,17 @@ const BlogsSection = () => {
     if (blogs && blogs.length > 0) {
       const uniqueCategories = [...new Set(blogs.map(blog => blog.category).filter(Boolean))];
       setCategories(uniqueCategories);
+      
+      // Get category from URL or select first category by default
+      const searchParams = new URLSearchParams(location.search);
+      const categoryParam = searchParams.get('category');
+      if (categoryParam && uniqueCategories.includes(categoryParam)) {
+        setSelectedCategory(categoryParam);
+      } else if (uniqueCategories.length > 0) {
+        setSelectedCategory(uniqueCategories[0]);
+      }
     }
-  }, [blogs]);
+  }, [blogs, location.search]);
   
   // Check URL for category parameter
   useEffect(() => {
@@ -151,16 +161,7 @@ const BlogsSection = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Delete this blog?')) return;
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/blogs/${id}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete blog');
-      fetchBlogs();
-    } catch (err) {
-      setError(err.message);
-    }
-  };
+  // Removed handleDelete function for security
 
   return (
     <section id="blogs" className="py-20 bg-background relative overflow-hidden" ref={sectionRef}>
@@ -182,22 +183,12 @@ const BlogsSection = () => {
             </Button>
             
             <Button 
-              onClick={() => handleGenerateBlog()}
-              className="flex items-center gap-2"
-              variant="default"
-              disabled={generating}
-            >
-              <Newspaper className="w-4 h-4" />
-              {generating ? 'Generating...' : 'Generate Random Blog'}
-            </Button>
-            
-            <Button 
               onClick={() => setShowCategoryFilter(!showCategoryFilter)}
               className="flex items-center gap-2"
-              variant={showCategoryFilter ? "secondary" : "outline"}
+              variant="secondary"
             >
               <Filter className="w-4 h-4" />
-              {showCategoryFilter ? 'Hide Categories' : 'Filter by Category'}
+              Categories
             </Button>
             
             {!showTopicInput ? (
@@ -311,7 +302,7 @@ const BlogsSection = () => {
             )}
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {blogs
+              {(showAllBlogs ? blogs : blogs.slice(0, 3))
                 .filter(blog => !selectedCategory || blog.category === selectedCategory)
                 .map((blog, idx) => (
                   <Card key={blog.id || blog._id || idx} className="p-8 relative block-card hover:shadow-lg transition-all duration-300">
@@ -339,11 +330,10 @@ const BlogsSection = () => {
                         day: 'numeric'
                       })}
                     </p>
-                    <div className="flex gap-2 mt-4">
-                      <Button size="sm" variant="destructive" onClick={() => handleDelete(blog.id || blog._id)}>Delete</Button>
+                    <div className="flex justify-end mt-4">
                       <Link 
                         to={`/blogs/${blog.id || blog._id}`} 
-                        className="ml-auto inline-flex items-center px-4 py-2 text-sm font-medium text-cyan-500 hover:text-cyan-600"
+                        className="inline-flex items-center px-4 py-2 text-sm font-medium text-cyan-500 hover:text-cyan-600"
                       >
                         Read More
                       </Link>
@@ -354,9 +344,13 @@ const BlogsSection = () => {
           </>
         )}
         
-        {blogs.length > 0 && (
+        {blogs.length > 3 && !showAllBlogs && (
           <div className="mt-12 text-center">
-            <Button variant="outline" className="glassmorphic-btn">
+            <Button 
+              variant="outline" 
+              className="glassmorphic-btn"
+              onClick={() => setShowAllBlogs(true)}
+            >
               See All Blogs
             </Button>
           </div>

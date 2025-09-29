@@ -50,11 +50,14 @@ class GeminiService:
         Generate text using the Gemini model with a simple prompt.
         
         Args:
-            prompt (str): The text prompt to send to the model
-            temperature (float): Controls randomness in outputs (0.0-1.0)
+            prompt: The text prompt to generate from
+            temperature: Controls randomness (0.0 = deterministic, 1.0 = creative)
             
         Returns:
-            str: The generated text response
+            Generated text string
+            
+        Raises:
+            Exception if generation fails
         """
         try:
             logger.info(f"Generating content with Gemini prompt length: {len(prompt)}")
@@ -64,10 +67,15 @@ class GeminiService:
                 self.text_model.generation_config.temperature = temperature
             
             response = self.text_model.generate_content(prompt)
-            return response.text
+            
+            if not response or not response.text:
+                raise Exception("Empty response from Gemini API")
+                
+            return response.text.strip()
+            
         except Exception as e:
-            logger.error(f"Error generating content with Gemini: {e}")
-            return f"Error generating content: {str(e)}"
+            logger.error(f"Error generating content with Gemini: {str(e)}")
+            raise
     
     def start_chat(self) -> None:
         """
@@ -156,11 +164,7 @@ class GeminiService:
             
             user_prompt = f"""Topic: {topic}
             
-            Research Information:
-            {research_context}
-            
-            Latest News:
-            {news_context}
+            Write a comprehensive technical blog post focusing on this topic.
             
             Write a comprehensive blog post (800-1200 words) that provides value to readers.
             Format your response as a JSON object with the following structure:
