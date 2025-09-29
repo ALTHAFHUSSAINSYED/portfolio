@@ -174,7 +174,6 @@ scheduler = AsyncIOScheduler()
 
 # Schedule automated blog generation (test run at 12:01 UTC)
 
-
 # Initialize ChromaDB Cloud Client
 try:
     from chromadb.utils import embedding_functions
@@ -187,18 +186,14 @@ try:
         api_key=os.getenv('OPENAI_API_KEY'),
         model_name="text-embedding-3-small"
     )
-except Exception as e:
-    print(f"Warning: ChromaDB initialization failed: {e}")
-    chroma_client = None
-    embedding_function = None
-
-try:
     collection = chroma_client.get_collection(
         name="portfolio",
         embedding_function=embedding_function
     )
-except:
-    print("Warning: ChromaDB collection not found. Please run generate_vector_db.py first.")
+except Exception as e:
+    print(f"Warning: ChromaDB initialization failed: {e}")
+    chroma_client = None
+    embedding_function = None
     collection = None
 
 def detect_category(query: str) -> str:
@@ -237,29 +232,15 @@ async def generate_daily_blog():
     if not await check_internet():
         logging.error("No internet connection. Skipping blog generation.")
         return
-    
     try:
-        # Get trending tech topics using agent service search
-        trending_topics = agent_service_instance.search_web(
-            "latest technology trends programming development",
-            max_results=3
-        )
-        if not trending_topics:
-            logging.error("Failed to fetch trending topics")
-            return
-        
         # Generate blog content using Gemini
-        topic = trending_topics['organic'][0]['title']
+        topic = "Latest Trends in AI and Machine Learning"
         blog_prompt = f"Write an insightful technical blog post about {topic}. " \
                      f"Include code examples and practical applications. " \
                      f"The content should be detailed and educational."
-                     
         model = genai.GenerativeModel('gemini-pro')
         response = model.generate_content(blog_prompt)
-        
         blog_content = response.text
-        
-        # Create blog post
         blog_post = {
             "title": f"Tech Insights: {topic}",
             "content": blog_content,
@@ -268,17 +249,15 @@ async def generate_daily_blog():
             "tags": ["AI", "Technology", "Programming"],
             "isAutomated": True
         }
-        
         # Save to MongoDB
         result = await db.blogs.insert_one(blog_post)
-        
         # Add to ChromaDB for future context
-        collection.add(
-            documents=[blog_content],
-            metadatas=[{"type": "blog", "date": datetime.now().isoformat()}],
-            ids=[str(result.inserted_id)]
-        )
-        
+        if collection:
+            collection.add(
+                documents=[blog_content],
+                metadatas=[{"type": "blog", "date": datetime.now().isoformat()}],
+                ids=[str(result.inserted_id)]
+            )
         logging.info(f"Successfully generated and posted blog about {topic}")
     except Exception as e:
         logging.error(f"Error in blog generation: {str(e)}")
@@ -292,15 +271,6 @@ async def setup_scheduled_tasks():
         'date',  # Run once at specific time
         run_date=datetime.utcnow() + timedelta(minutes=2),
         id="test_blog",
-        replace_existing=True
-    )
-    
-    # Add health check job
-    scheduler.add_job(
-        health_check,
-        'interval',
-        minutes=30,  # Check every 30 minutes
-        id="health_check",
         replace_existing=True
     )
     scheduler.start()
@@ -320,18 +290,32 @@ def is_tech_question(query: str) -> bool:
 def search_web(query: str) -> str:
     """Search the web for technical information using Serper."""
     try:
-        serper_client = Serper(os.getenv('SERPER_API_KEY'))
-        results = serper_client.search(query)
-        
-        # Extract organic search results
-        search_results = []
-        if 'organic' in results:
-            for result in results['organic'][:3]:  # Get top 3 results
-                title = result.get('title', '')
-                snippet = result.get('snippet', '')
-                search_results.append(f"{title}: {snippet}")
-        
-        return "\n\n".join(search_results)
+        api_key = os.getenv('SERPER_API_KEY')
+        if not api_key:
+            print("Serper API key not found.")
+            return ""
+        url = "https://google.serper.dev/search"
+        headers = {
+            'X-API-KEY': api_key,
+            'Content-Type': 'application/json'
+        }
+        payload = {
+            'q': query,
+            'num': 3
+        }
+        response = requests.post(url, headers=headers, json=payload, timeout=10)
+        if response.status_code == 200:
+            results = response.json()
+            search_results = []
+            if 'organic' in results:
+                for result in results['organic'][:3]:
+                    title = result.get('title', '')
+                    snippet = result.get('snippet', '')
+                    search_results.append(f"{title}: {snippet}")
+            return "\n\n".join(search_results)
+        else:
+            print(f"Serper API error: HTTP {response.status_code}")
+            return ""
     except Exception as e:
         print(f"Serper search error: {e}")
         return ""
@@ -364,26 +348,11 @@ def get_portfolio_context(query: str) -> str:
         return ""
 
 try:
-    # First try to import html module for escaping
+    # Use html.escape for escaping
     import html
-    
-    # Create a function to replace cgi.escape
     def escape(s):
         """Replacement for deprecated cgi.escape"""
         return html.escape(s, quote=False)
-    
-    # Try to import cgi module or create a mock
-    try:
-        import cgi
-    except ImportError:
-        # Create a mock cgi module with the escape function
-        import types
-        cgi = types.ModuleType('cgi')
-        cgi.escape = escape
-        import sys
-        sys.modules['cgi'] = cgi
-    
-    # Now try to import feedparser
     import feedparser
 except ImportError:
     import subprocess
