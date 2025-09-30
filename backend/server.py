@@ -75,7 +75,7 @@ HAS_AGENT_SERVICE = True
 from datetime import timedelta
 scheduler = AsyncIOScheduler()
 
-production_cron = CronTrigger(hour=9, minute=40, timezone=timezone.utc)
+production_cron = CronTrigger(hour=1, minute=0, timezone=timezone.utc)
 
 @scheduler.scheduled_job(production_cron)
 async def scheduled_blog_generation():
@@ -151,16 +151,15 @@ scheduler = AsyncIOScheduler()
 
 # Initialize ChromaDB Cloud Client
 try:
-    from chromadb.utils import embedding_functions
+    from sentence_transformers import SentenceTransformer
     chroma_client = chromadb.CloudClient(
         api_key=os.getenv('CHROMA_API_KEY'),
         tenant=os.getenv('CHROMA_TENANT_ID'),
         database=os.getenv('CHROMA_DATABASE')
     )
-    embedding_function = embedding_functions.OpenAIEmbeddingFunction(
-        api_key=os.getenv('OPENAI_API_KEY'),
-        model_name="text-embedding-3-small"
-    )
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+    def embedding_function(texts):
+        return model.encode(texts).tolist()
     collection = chroma_client.get_collection(
         name="portfolio",
         embedding_function=embedding_function

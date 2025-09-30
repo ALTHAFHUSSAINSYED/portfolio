@@ -33,7 +33,7 @@ const Chatbot = () => {
     if (isOpen && messages.length === 0) {
       setMessages([{
         sender: "bot",
-        text: "👋 Hi there! I'm Allu Bot. How can I assist you with tech questions or portfolio information today?"
+  text: "👋 Hi there! I'm Allu Bot. How can I assist you with tech questions or TechAssistant information today?"
       }]);
     }
   }, [isOpen, messages.length]);
@@ -104,7 +104,7 @@ const Chatbot = () => {
         // Convert input to lowercase for easier matching
         const inputLower = input.toLowerCase();
         
-        // Comprehensive knowledge base about Althaf and portfolio
+  // Comprehensive knowledge base about Althaf and TechAssistant
         const knowledgeBase = {
           profile: {
             name: "Althaf Hussain Syed",
@@ -124,9 +124,9 @@ const Chatbot = () => {
           
           projects: [
             {
-              name: "Personal Portfolio Website",
+              name: "TechAssistant Website",
               tech: "React, Tailwind CSS, Node.js, MongoDB",
-              description: "Interactive portfolio with chatbot integration showcasing projects and skills"
+              description: "Interactive TechAssistant with chatbot integration showcasing projects and skills"
             },
             {
               name: "Cloud-based CI/CD Pipeline",
@@ -143,7 +143,7 @@ const Chatbot = () => {
           contactInfo: {
             email: "Available through the contact form on the website",
             github: "ALTHAFHUSSAINSYED",
-            linkedin: "Available on the portfolio site"
+            linkedin: "Available on the TechAssistant site"
           }
         };
         
@@ -152,14 +152,14 @@ const Chatbot = () => {
           greetings: {
             match: /^(hi|hello|hey|greetings|howdy|hola|good morning|good afternoon|good evening|hi there|hello there)/i,
             replies: [
-              "Hello there! I'm Allu Bot, your friendly portfolio assistant. How can I help you today?",
-              "Hi! Welcome to Althaf's portfolio. What would you like to know about his skills or projects?",
+              "Hello there! I'm Allu Bot, your friendly TechAssistant. How can I help you today?",
+              "Hi! Welcome to Althaf's TechAssistant. What would you like to know about his skills or projects?",
               "Hey! Great to meet you. Feel free to ask about Althaf's work, technologies, or experience!"
             ]
           },
           
           about: {
-            match: /^(who|what|tell me about|about|describe|introduce|background|info about).*(althaf|you|himself|portfolio owner|developer|creator)/i,
+            match: /^(who|what|tell me about|about|describe|introduce|background|info about).*(althaf|you|himself|techassistant owner|developer|creator)/i,
             replies: [
               `${knowledgeBase.profile.name} is a ${knowledgeBase.profile.role} with ${knowledgeBase.profile.experience}. ${knowledgeBase.profile.summary}.`,
               `Althaf Hussain Syed is a developer specializing in full-stack development and DevOps. He has experience with ${knowledgeBase.skills.frontend.slice(0,3).join(", ")} on the frontend and ${knowledgeBase.skills.backend.slice(0,3).join(", ")} on the backend.`
@@ -207,10 +207,10 @@ const Chatbot = () => {
           },
           
           projects: {
-            match: /^(projects|portfolio|work|showcase|applications|apps)/i,
+            match: /^(projects|techassistant|work|showcase|applications|apps)/i,
             replies: [
               `Althaf's notable projects include: 1) ${knowledgeBase.projects[0].name} using ${knowledgeBase.projects[0].tech} - ${knowledgeBase.projects[0].description}, 2) ${knowledgeBase.projects[1].name} using ${knowledgeBase.projects[1].tech} - ${knowledgeBase.projects[1].description}, and 3) ${knowledgeBase.projects[2].name} using ${knowledgeBase.projects[2].tech} - ${knowledgeBase.projects[2].description}.`,
-              `The portfolio showcases several projects including ${knowledgeBase.projects[0].name}, ${knowledgeBase.projects[1].name}, and ${knowledgeBase.projects[2].name}, demonstrating various technical skills from frontend to DevOps.`
+              `The TechAssistant showcases several projects including ${knowledgeBase.projects[0].name}, ${knowledgeBase.projects[1].name}, and ${knowledgeBase.projects[2].name}, demonstrating various technical skills from frontend to DevOps.`
             ]
           },
           
@@ -233,8 +233,8 @@ const Chatbot = () => {
           chatbot: {
             match: /(chatbot|chat bot|bot|ai|yourself|talking to|speaking with|assistant)/i,
             replies: [
-              "I'm Allu Bot, a specialized AI assistant built for Althaf's portfolio website. While I have limited internet access, I can answer questions about Althaf's skills, projects, and experience.",
-              "I'm a custom AI assistant for this portfolio. I can tell you about Althaf's work, skills, and projects, though my knowledge is primarily focused on information contained in this portfolio."
+              "I'm Allu Bot, a specialized AI assistant built for Althaf's TechAssistant website. While I have limited internet access, I can answer questions about Althaf's skills, projects, and experience.",
+              "I'm a custom AI assistant for this TechAssistant. I can tell you about Althaf's work, skills, and projects, though my knowledge is primarily focused on information contained in this TechAssistant."
             ]
           },
           
@@ -242,14 +242,14 @@ const Chatbot = () => {
             match: /^(thanks|thank you|appreciate|helpful|great)/i,
             replies: [
               "You're welcome! I'm glad I could help. Feel free to ask if you have any other questions about Althaf's work or skills.",
-              "Happy to help! If you need any more information about Althaf's portfolio or experience, just let me know.",
+              "Happy to help! If you need any more information about Althaf's TechAssistant or experience, just let me know.",
               "My pleasure! Is there anything else you'd like to know about Althaf's projects or technical background?"
             ]
           },
           
           default: {
             replies: [
-              "I'm designed to answer questions about Althaf's portfolio and skills. Could you try asking something more specific about his work, projects, or technical expertise?",
+              "I'm designed to answer questions about Althaf's TechAssistant and skills. Could you try asking something more specific about his work, projects, or technical expertise?",
               "I can tell you about Althaf's projects, skills, and experience. What specific aspect of his professional background would you like to know about?",
               "I'd be happy to help with information about Althaf's work and skills. For best results, try asking about specific technologies, projects, or areas of expertise."
             ]
@@ -280,7 +280,7 @@ const Chatbot = () => {
 
         // Check for technology mentions
         const techKeywords = {
-          react: "React is one of Althaf's core frontend skills. He uses it for building interactive user interfaces, including this portfolio website.",
+          react: "React is one of Althaf's core frontend skills. He uses it for building interactive user interfaces, including this TechAssistant website.",
           node: "Node.js is part of Althaf's backend stack, used for building scalable server-side applications and APIs.",
           python: "Python is among Althaf's backend technologies, particularly with frameworks like Flask and FastAPI for web services.",
           aws: "Althaf has experience with AWS for cloud deployment, including services like EC2, S3, Lambda, and more.",
@@ -425,7 +425,7 @@ const Chatbot = () => {
       let messageText = data.reply || "Sorry, I couldn't process your request.";
       
       // If we have a source from the internet, add attribution
-      if (foundSource && foundSource !== "Portfolio" && foundSource !== "None" && foundSource.startsWith("http")) {
+  if (foundSource && foundSource !== "TechAssistant" && foundSource !== "None" && foundSource.startsWith("http")) {
         try {
           messageText += `\n\n[Source: ${new URL(foundSource).hostname}]`;
         } catch (e) {
@@ -505,7 +505,44 @@ const Chatbot = () => {
             </svg>
           </div>
         )}
-      </button>
+
+      {/* Chatbot Icon with Unread Badge */}
+      <div style={{position: 'relative', display: 'inline-block'}}>
+        <button
+          className={`chat-toggle-button${isOpen ? ' open' : ''}`}
+          onClick={toggleChat}
+          aria-label={isOpen ? 'Close chat' : 'Open chat'}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+          >
+            <circle cx="12" cy="12" r="10" fill="#3b82f6" />
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#fff" />
+          </svg>
+          {/* Red unread badge */}
+          {!isOpen && hasUnread && (
+            <span style={{
+              position: 'absolute',
+              top: '-6px',
+              right: '-6px',
+              background: 'red',
+              color: 'white',
+              borderRadius: '50%',
+              padding: '2px 6px',
+              fontSize: '14px',
+              fontWeight: 'bold',
+              boxShadow: '0 0 4px rgba(0,0,0,0.2)',
+              zIndex: 2
+            }}>
+              1
+            </span>
+          )}
+        </button>
+      </div>
 
       {isOpen && (
         <div className="chatbot-window">
@@ -525,7 +562,7 @@ const Chatbot = () => {
             </div>
             <div className="chatbot-title-container">
               <div className="chatbot-title">Allu Bot</div>
-              <div className="chatbot-subtitle">Portfolio Assistant</div>
+              <div className="chatbot-subtitle">Portfolio & Tech Assistant</div>
             </div>
             <button className="close-button" onClick={toggleChat} aria-label="Close chat">×</button>
           </div>

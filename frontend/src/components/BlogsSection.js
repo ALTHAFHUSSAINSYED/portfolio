@@ -100,7 +100,13 @@ const BlogsSection = () => {
       }
       
       if (succeeded && data) {
-        setBlogs(data);
+        // Sort blogs by created_at descending (newest first)
+        const sortedBlogs = [...data].sort((a, b) => {
+          const dateA = new Date(a.created_at || a.date || 0);
+          const dateB = new Date(b.created_at || b.date || 0);
+          return dateB - dateA;
+        });
+        setBlogs(sortedBlogs);
         setError(null);
       } else {
         throw new Error('Failed to fetch blogs from all endpoints');
@@ -181,7 +187,6 @@ const BlogsSection = () => {
               <RefreshCw className="w-4 h-4" />
               Refresh
             </Button>
-            
             <Button 
               onClick={() => setShowCategoryFilter(!showCategoryFilter)}
               className="flex items-center gap-2"
@@ -190,43 +195,16 @@ const BlogsSection = () => {
               <Filter className="w-4 h-4" />
               Categories
             </Button>
-            
-            {!showTopicInput ? (
-              <Button 
-                onClick={() => setShowTopicInput(true)}
-                className="flex items-center gap-2"
-                variant="secondary"
-              >
-                <Bookmark className="w-4 h-4" />
-                Generate Custom Blog
-              </Button>
-            ) : (
-              <div className="flex w-full max-w-md mt-4 gap-2">
-                <input
-                  type="text"
-                  value={customTopic}
-                  onChange={(e) => setCustomTopic(e.target.value)}
-                  placeholder="Enter blog topic..."
-                  className="flex-grow px-4 py-2 border rounded-md dark:bg-gray-800 dark:border-gray-700"
-                />
-                <Button 
-                  onClick={() => handleGenerateBlog(customTopic)}
-                  disabled={!customTopic.trim() || generating}
-                  variant="default"
-                >
-                  {generating ? 'Generating...' : 'Generate'}
-                </Button>
-                <Button 
-                  onClick={() => {
-                    setShowTopicInput(false);
-                    setCustomTopic('');
-                  }}
-                  variant="outline"
-                >
-                  Cancel
-                </Button>
-              </div>
-            )}
+            {/* Search utility for existing blogs */}
+            <input
+              type="text"
+              placeholder="Search blogs..."
+              className="flex-grow px-4 py-2 border rounded-md dark:bg-gray-800 dark:border-gray-700"
+              onChange={e => {
+                const search = e.target.value.toLowerCase();
+                setBlogs(prev => prev.filter(blog => blog.title.toLowerCase().includes(search) || blog.summary.toLowerCase().includes(search)));
+              }}
+            />
           </div>
           
           {/* Category Filter */}
@@ -280,15 +258,7 @@ const BlogsSection = () => {
           </div>
         ) : blogs.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-muted-foreground mb-4">No blogs available yet. Generate your first blog!</p>
-            <Button 
-              onClick={() => handleGenerateBlog()}
-              className="flex items-center gap-2 mx-auto"
-              disabled={generating}
-            >
-              <Newspaper className="w-4 h-4" />
-              {generating ? 'Generating...' : 'Generate First Blog'}
-            </Button>
+            <p className="text-muted-foreground mb-4">No blogs available yet.</p>
           </div>
         ) : (
           <>

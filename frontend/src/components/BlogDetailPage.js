@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Newspaper, ArrowLeft, Calendar, Tag, ExternalLink } from 'lucide-react';
@@ -9,6 +9,7 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://althaf-portfolio.
 
 const BlogDetailPage = () => {
   const { blogId } = useParams();
+  const navigate = useNavigate();
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,35 +23,44 @@ const BlogDetailPage = () => {
   const fetchBlog = async () => {
     setLoading(true);
     try {
-      // Try different API endpoints if the main one fails
-      const baseUrls = [
-        '', // Same domain (relative URL)
-        'https://althaf-portfolio.onrender.com',
-        'https://althaf-portfolio.vercel.app',
-        'http://localhost:5000'
-      ];
-      
+      // Try ChromaDB API first
       let data = null;
       let succeeded = false;
-      
-      for (const baseUrl of baseUrls) {
-        try {
-          const response = await fetch(`${baseUrl}/api/blogs/${blogId}`);
-          if (response.ok) {
-            data = await response.json();
-            succeeded = true;
-            break;
+      try {
+        const chromaRes = await fetch(`/api/chromadb/blogs/${blogId}`);
+        if (chromaRes.ok) {
+          data = await chromaRes.json();
+          succeeded = true;
+        }
+      } catch (err) {
+        console.log(`Error fetching from ChromaDB: ${err.message}`);
+      }
+      // Fallback to MongoDB if ChromaDB fails
+      if (!succeeded) {
+        const baseUrls = [
+          '',
+          'https://althaf-portfolio.onrender.com',
+          'https://althaf-portfolio.vercel.app',
+          'http://localhost:5000'
+        ];
+        for (const baseUrl of baseUrls) {
+          try {
+            const response = await fetch(`${baseUrl}/api/blogs/${blogId}`);
+            if (response.ok) {
+              data = await response.json();
+              succeeded = true;
+              break;
+            }
+          } catch (err) {
+            console.log(`Error fetching from ${baseUrl}: ${err.message}`);
           }
-        } catch (err) {
-          console.log(`Error fetching from ${baseUrl}: ${err.message}`);
         }
       }
-      
       if (succeeded && data) {
         setBlog(data);
         setError(null);
       } else {
-        throw new Error('Failed to fetch blog from all endpoints');
+        throw new Error('Failed to fetch blog from ChromaDB and MongoDB');
       }
     } catch (err) {
       setError(err.message);
@@ -115,9 +125,21 @@ const BlogDetailPage = () => {
   return (
     <section className="py-20 bg-background text-foreground">
       <div className="max-w-4xl mx-auto px-4">
-        <Link to="/blogs" className="inline-flex items-center text-primary hover:text-primary/80 mb-6">
+        <button
+          className="inline-flex items-center text-primary hover:text-primary/80 mb-6 font-semibold border border-primary rounded px-4 py-2 bg-background"
+          onClick={() => {
+            // Smooth scroll to blogs section
+            navigate('/');
+            setTimeout(() => {
+              const blogsSection = document.getElementById('blogs');
+              if (blogsSection) {
+                blogsSection.scrollIntoView({ behavior: 'smooth' });
+              }
+            }, 100);
+          }}
+        >
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to all blogs
-        </Link>
+        </button>
         
         <Card className="p-8 relative block-card shadow-lg">
           {/* Header Section */}
@@ -179,7 +201,11 @@ const BlogDetailPage = () => {
           
           {/* Main Content */}
           <div className="mt-6 prose prose-lg dark:prose-invert max-w-none">
-            <div dangerouslySetInnerHTML={{ __html: renderMarkdown(blog.content) }} />
+            {blog.content ? (
+              <div dangerouslySetInnerHTML={{ __html: renderMarkdown(blog.content) }} />
+            ) : (
+              <div className="text-red-500 font-semibold">Full blog content is not available for this entry.</div>
+            )}
           </div>
           
           {/* Technologies Used Section */}

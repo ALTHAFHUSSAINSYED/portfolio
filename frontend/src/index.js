@@ -19,8 +19,8 @@ const router = createBrowserRouter([
     element: <App />, // The App component is now the main layout
     children: [
       {
-        index: true, // The Portfolio component renders at the "/" path
-        element: <Portfolio />,
+  index: true, // The Portfolio component renders at the "/" path
+  element: <Portfolio />,
       },
       {
         path: "/projects/:projectId", // The detail page renders at its specific path

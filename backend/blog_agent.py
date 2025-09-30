@@ -34,8 +34,8 @@ db = client[db_name]
 # Auth token for blog posting
 auth_token = os.getenv("BLOG_AUTH_TOKEN")
 
-# Blog topics
-# List of blog topics
+
+# Blog topics (sequential round-robin selection)
 blog_topics = [
     "Latest AI Innovations",
     "Web Development Trends",
@@ -48,6 +48,24 @@ blog_topics = [
     "Blockchain Applications",
     "Augmented and Virtual Reality"
 ]
+
+# Track the current topic index in a file for persistence
+TOPIC_INDEX_FILE = "current_topic_index.txt"
+
+def get_next_topic():
+    try:
+        if os.path.exists(TOPIC_INDEX_FILE):
+            with open(TOPIC_INDEX_FILE, "r") as f:
+                idx = int(f.read().strip())
+        else:
+            idx = 0
+    except Exception:
+        idx = 0
+    topic = blog_topics[idx % len(blog_topics)]
+    # Update index for next run
+    with open(TOPIC_INDEX_FILE, "w") as f:
+        f.write(str((idx + 1) % len(blog_topics)))
+    return topic
 
 # Function to fetch trending topics
 def fetch_trending_topics():
@@ -103,7 +121,7 @@ def fetch_tech_news(limit=3):
 # Function to generate blog content using Gemini API
 def generate_blog_content(topic=None):
     if not topic:
-        topic = random.choice(blog_topics)
+        topic = get_next_topic()
     
     # For testing, use a simple context
     context = f"Topic: {topic}\n\nWrite a technical blog post about this topic."
@@ -135,46 +153,61 @@ async def post_blog(blog=None, max_retries=3):
             if not blog:
                 error_msg = "Failed to generate blog content"
                 logger.error(error_msg)
+                print(f"[ERROR] {error_msg}")
                 await notification_service.send_blog_notification(False, error_message=error_msg)
                 return False
             
-            # API endpoint for posting blog
-            api_url = os.getenv("BLOG_API_URL", "http://localhost:5000/api/post-blog")
-            
-            headers = {
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {auth_token}"
-            }
-            
-            response = requests.post(
-                api_url,
-                headers=headers,
-                json={
+
+            # Save to ChromaDB first
+            try:
+                import chromadb
+                chroma_client = chromadb.CloudClient(
+                    api_key=os.getenv('CHROMA_API_KEY'),
+                    tenant=os.getenv('CHROMA_TENANT_ID'),
+                    database=os.getenv('CHROMA_DATABASE')
+                )
+                collection = chroma_client.get_or_create_collection(name='Blogs_data')
+                # Use blog title as ID, or generate a unique one
+                blog_id = blog.get('id') or blog.get('title') or str(datetime.utcnow().timestamp())
+                print(f"[INFO] Storing blog in ChromaDB: {blog['title']} (ID: {blog_id})")
+                collection.add(
+                    ids=[str(blog_id)],
+                    documents=[blog['content']],
+                    metadatas=[{
+                        'title': blog['title'],
+                        'author': blog.get('author', 'Allu Bot'),
+                        'created_at': str(datetime.utcnow()),
+                        'category': blog.get('category', 'General'),
+                        'summary': blog.get('summary', ''),
+                        'tags': blog.get('tags', []),
+                        'status': 'published'
+                    }]
+                )
+                logger.info(f"Blog stored in ChromaDB: {blog['title']}")
+                print(f"[SUCCESS] Blog stored in ChromaDB: {blog['title']}")
+            except Exception as chroma_exc:
+                logger.error(f"Failed to store blog in ChromaDB: {chroma_exc}")
+                print(f"[ERROR] Failed to store blog in ChromaDB: {chroma_exc}")
+                # Fallback to MongoDB
+                db.blogs.insert_one({
                     "title": blog["title"],
                     "content": blog["content"],
-                    "author": "Allu Bot"
-                },
-                timeout=30  # 30 second timeout
-            )
-            
-            response.raise_for_status()
-            
-            # Save to MongoDB
-            db.blogs.insert_one({
-                "title": blog["title"],
-                "content": blog["content"],
-                "created_at": datetime.utcnow(),
-                "status": "published"
-            })
-            
-            logger.info(f"Blog posted successfully: {blog['title']}")
+                    "created_at": datetime.utcnow(),
+                    "status": "published"
+                })
+                logger.info(f"Blog stored in MongoDB: {blog['title']}")
+                print(f"[SUCCESS] Blog stored in MongoDB: {blog['title']}")
+
             await notification_service.send_blog_notification(True, blog_title=blog['title'])
+            print(f"[INFO] Notification sent for blog: {blog['title']}")
             return True
             
         except Exception as e:
             logger.error(f"Attempt {attempt + 1} failed: {e}")
+            print(f"[ERROR] Attempt {attempt + 1} failed: {e}")
             if attempt == max_retries - 1:
                 logger.error("All retries failed")
+                print("[ERROR] All retries failed")
                 return False
             time.sleep(5 * (attempt + 1))  # Exponential backoff
             
@@ -210,16 +243,15 @@ async def post_blog(blog=None, max_retries=3):
 
 # Function to run the blog agent as a scheduled task
 def run_blog_agent():
-    # Schedule a daily post at a random time between 9 AM and 5 PM
-    hour = random.randint(9, 17)
-    minute = random.randint(0, 59)
-    
-    logger.info(f"Scheduling daily blog post at {hour:02d}:{minute:02d}")
-    
+    # Schedule a daily post at 11:00 AM UTC
+    from datetime import timezone
+    hour = 11
+    minute = 0
+    logger.info("Scheduling daily blog post at 11:00 UTC")
     while True:
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         if now.hour == hour and now.minute == minute:
-            logger.info("Executing scheduled blog post")
+            logger.info("Executing scheduled blog post at 11:00 UTC")
             post_blog()
             time.sleep(60)  # Sleep for a minute to avoid duplicate posts
         time.sleep(30)  # Check every 30 seconds
