@@ -11,9 +11,9 @@ model = SentenceTransformer('all-MiniLM-L6-v2')
 
 # Connect to ChromaDB Cloud
 chroma_client = chromadb.CloudClient(
-    api_key=os.getenv('CHROMA_API_KEY'),
-    tenant=os.getenv('CHROMA_TENANT_ID'),
-    database=os.getenv('CHROMA_DATABASE')
+    api_key=os.getenv('api_key'),
+    tenant=os.getenv('tenant'),
+    database=os.getenv('database')
 )
 
 TRACKING_FILE = 'query_tracking_log.json'

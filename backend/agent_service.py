@@ -13,10 +13,10 @@ import html  # For HTML entity escaping/unescaping
 from dotenv import load_dotenv
 
 # Import Gemini service
-from ai_service import gemini_service
+from backend.ai_service import gemini_service
 
 # Import search utilities for API optimization
-from search_utils import search_cache, rate_limiter, query_optimizer
+from backend.search_utils import search_cache, rate_limiter, query_optimizer
 
 # Monkey patch for old cgi.escape functionality
 def escape(s):

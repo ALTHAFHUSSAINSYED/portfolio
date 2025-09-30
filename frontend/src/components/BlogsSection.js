@@ -16,7 +16,7 @@ const BlogsSection = () => {
   const [showTopicInput, setShowTopicInput] = useState(false);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [showCategoryFilter, setShowCategoryFilter] = useState(true); // Set filter visible by default
+  const [showCategoryFilter, setShowCategoryFilter] = useState(false); // Hide filter by default
   const [showAllBlogs, setShowAllBlogs] = useState(false);
   const sectionRef = useRef(null);
   const location = useLocation();
@@ -199,7 +199,7 @@ const BlogsSection = () => {
             <input
               type="text"
               placeholder="Search blogs..."
-              className="flex-grow px-4 py-2 border rounded-md dark:bg-gray-800 dark:border-gray-700"
+              className="w-56 max-w-xs px-4 py-2 border rounded-md dark:bg-gray-800 dark:border-gray-700"
               onChange={e => {
                 const search = e.target.value.toLowerCase();
                 setBlogs(prev => prev.filter(blog => blog.title.toLowerCase().includes(search) || blog.summary.toLowerCase().includes(search)));
@@ -217,6 +217,7 @@ const BlogsSection = () => {
                     onClick={() => setSelectedCategory(null)}
                     variant="outline" 
                     className="flex items-center gap-2 border-red-500 text-red-500 hover:bg-red-500/10"
+                    style={{ display: selectedCategory ? 'flex' : 'none' }}
                   >
                     <X className="w-4 h-4" />
                     Clear Filter
@@ -321,7 +322,7 @@ const BlogsSection = () => {
               className="glassmorphic-btn"
               onClick={() => setShowAllBlogs(true)}
             >
-              See All Blogs
+              See More Blogs
             </Button>
           </div>
         )}

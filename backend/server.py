@@ -66,10 +66,10 @@ import cloudinary
 import cloudinary.uploader
 
 # Import required services
-import agent_service
-from ai_service import gemini_service
-import test_blog_generation
-from notification_service import notification_service
+from backend import agent_service
+from backend.ai_service import gemini_service
+from backend import test_blog_generation
+from backend.notification_service import notification_service
 HAS_AGENT_SERVICE = True
 
 from datetime import timedelta
@@ -77,33 +77,88 @@ scheduler = AsyncIOScheduler()
 
 production_cron = CronTrigger(hour=1, minute=0, timezone=timezone.utc)
 
-@scheduler.scheduled_job(production_cron)
+
+
+
+
+# Start the scheduler and register jobs inside FastAPI's startup event
+@app.on_event("startup")
+async def start_scheduler():
+    # Register scheduled blog generation job
+    production_cron = CronTrigger(hour=9, minute=40, timezone=timezone.utc)
+    scheduler.add_job(scheduled_blog_generation, production_cron)
 async def scheduled_blog_generation():
+    print("Scheduled blog generation triggered.")
+    # Schedule ChromaDB monitor to run daily at 2:00 AM UTC
+    chromadb_monitor_cron = CronTrigger(hour=2, minute=0, timezone=timezone.utc)
+    def run_chromadb_monitor():
+        try:
+            print("\n" + "="*50)
+            print("🚀 Starting scheduled blog generation at", datetime.now(timezone.utc))
+            print("="*50 + "\n")
+            logger.info("Starting scheduled blog generation at %s", datetime.now(timezone.utc))
+            # Generate blog content
+            topic = "Latest Trends in AI and Machine Learning"
+            content = gemini_service.generate_blog_post(topic)
+            if content:
+                # Add metadata
+                blog_data = {
+                    "title": content["title"],
+                    "content": content["content"],
+                    "author": "Allu Bot",
+                    "createdAt": datetime.now(timezone.utc),
+                    "tags": content.get("tags", ["AI", "Machine Learning", "Technology"]),
+                    "_id": "auto-" + datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+                }
+                # Send success notification
+                await notification_service.send_blog_notification(True, blog_data)
+                logger.info("Blog generation and notification successful")
+                # Display success message
+                print("\n" + "="*50)
+                print("✅ BLOG POSTED SUCCESSFULLY!")
+                print(f"📝 Title: {blog_data['title']}")
+                print(f"📧 Email sent to: {notification_service.to_email}")
+                print(f"🔗 Blog ID: {blog_data['_id']}")
+                print("="*50 + "\n")
+            else:
+                await notification_service.send_blog_notification(False, None, "Blog generation failed - no content generated")
+                logger.error("Blog generation failed - no content generated")
+                # Display error message
+                print("\n" + "="*50)
+                print("❌ BLOG GENERATION FAILED!")
+                print("Reason: No content was generated")
+                print("="*50 + "\n")
+        except Exception as e:
+            error_msg = f"Error in scheduled blog generation: {str(e)}"
+            logger.error(error_msg)
+            await notification_service.send_blog_notification(False, None, error_msg)
+            # Display error message
+            print("\n" + "="*50)
+            print("❌ BLOG GENERATION FAILED!")
+            print(f"Reason: {error_msg}")
+            print("="*50 + "\n")
+    embedding_function = None
     try:
         print("\n" + "="*50)
-        print("🚀 Starting scheduled blog generation at", datetime.now(UTC))
+        print("🚀 Starting scheduled blog generation at", datetime.now(timezone.utc))
         print("="*50 + "\n")
-        logger.info("Starting scheduled blog generation at %s", datetime.now(UTC))
-        
+        logger.info("Starting scheduled blog generation at %s", datetime.now(timezone.utc))
         # Generate blog content
         topic = "Latest Trends in AI and Machine Learning"
         content = gemini_service.generate_blog_post(topic)
-        
         if content:
             # Add metadata
             blog_data = {
                 "title": content["title"],
                 "content": content["content"],
                 "author": "Allu Bot",
-                "createdAt": datetime.now(UTC),
+                "createdAt": datetime.now(timezone.utc),
                 "tags": content.get("tags", ["AI", "Machine Learning", "Technology"]),
-                "_id": "auto-" + datetime.now(UTC).strftime("%Y%m%d-%H%M%S")
+                "_id": "auto-" + datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
             }
-            
             # Send success notification
             await notification_service.send_blog_notification(True, blog_data)
             logger.info("Blog generation and notification successful")
-            
             # Display success message
             print("\n" + "="*50)
             print("✅ BLOG POSTED SUCCESSFULLY!")
@@ -129,126 +184,6 @@ async def scheduled_blog_generation():
         print(f"Reason: {error_msg}")
         print("="*50 + "\n")
 
-
-
-# Start the scheduler and register jobs inside FastAPI's startup event
-@app.on_event("startup")
-async def start_scheduler():
-    # Register scheduled blog generation job
-    production_cron = CronTrigger(hour=9, minute=40, timezone=timezone.utc)
-    scheduler.add_job(scheduled_blog_generation, production_cron)
-    # Schedule ChromaDB monitor to run daily at 2:00 AM UTC
-    chromadb_monitor_cron = CronTrigger(hour=2, minute=0, timezone=timezone.utc)
-    def run_chromadb_monitor():
-        import subprocess
-        try:
-            result = subprocess.run([sys.executable, "chromadb_monitor.py"], cwd=os.path.join(os.path.dirname(__file__)), capture_output=True, text=True)
-            logger.info(f"ChromaDB monitor output: {result.stdout}")
-            if result.stderr:
-                logger.error(f"ChromaDB monitor error: {result.stderr}")
-        except Exception as e:
-            logger.error(f"Failed to run chromadb_monitor.py: {e}")
-    scheduler.add_job(run_chromadb_monitor, chromadb_monitor_cron)
-    scheduler.start()
-    logger.info("Started AsyncIOScheduler - Blog generation scheduled for 09:40 AM UTC (production)")
-    logger.info("ChromaDB monitor scheduled for 02:00 AM UTC (production)")
-
-
-# Configure Gemini API
-genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
-
-# Initialize scheduler for automated tasks
-scheduler = AsyncIOScheduler()
-
-# Schedule automated blog generation (test run at 12:01 UTC)
-
-# Initialize ChromaDB Cloud Client
-try:
-    from sentence_transformers import SentenceTransformer
-    chroma_client = chromadb.CloudClient(
-        api_key=os.getenv('CHROMA_API_KEY'),
-        tenant=os.getenv('CHROMA_TENANT_ID'),
-        database=os.getenv('CHROMA_DATABASE')
-    )
-    model = SentenceTransformer('all-MiniLM-L6-v2')
-    def embedding_function(texts):
-        return model.encode(texts).tolist()
-    collection = chroma_client.get_collection(
-        name="portfolio",
-        embedding_function=embedding_function
-    )
-except Exception as e:
-    print(f"Warning: ChromaDB initialization failed: {e}")
-    chroma_client = None
-    embedding_function = None
-    collection = None
-
-def detect_category(query: str) -> str:
-    """Detect the category of the query to optimize ChromaDB search."""
-    query = query.lower()
-    
-    categories = {
-        "Frontend Development": ["frontend", "react", "web", "ui", "css", "html"],
-        "DevOps": ["devops", "ci/cd", "pipeline", "kubernetes", "docker"],
-        "Cloud Computing": ["cloud", "aws", "azure", "gcp"],
-        "IoT Development": ["iot", "sensors", "embedded"],
-        "Blockchain": ["blockchain", "smart contract", "web3"],
-        "AI and ML": ["ai", "ml", "machine learning", "neural"],
-        "Cybersecurity": ["security", "cyber", "encryption"],
-        "Edge Computing": ["edge computing", "edge devices"],
-        "Quantum Computing": ["quantum", "qubits"],
-        "Databases": ["database", "sql", "nosql", "sharding"]
-    }
-    
-    for category, keywords in categories.items():
-        if any(keyword in query for keyword in keywords):
-            return category
-    return ""  # No specific category detected
-
-async def check_internet():
-    """Check if internet connection is available."""
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get("https://8.8.8.8", timeout=5) as response:
-                return response.status == 200
-    except:
-        return False
-
-async def generate_daily_blog():
-    """Generate and post a daily blog using AI."""
-    if not await check_internet():
-        logging.error("No internet connection. Skipping blog generation.")
-        return
-    try:
-        # Generate blog content using Gemini
-        topic = "Latest Trends in AI and Machine Learning"
-        blog_prompt = f"Write an insightful technical blog post about {topic}. " \
-                     f"Include code examples and practical applications. " \
-                     f"The content should be detailed and educational."
-        model = genai.GenerativeModel('gemini-pro')
-        response = model.generate_content(blog_prompt)
-        blog_content = response.text
-        blog_post = {
-            "title": f"Tech Insights: {topic}",
-            "content": blog_content,
-            "date": datetime.now().isoformat(),
-            "category": "Technology",
-            "tags": ["AI", "Technology", "Programming"],
-            "isAutomated": True
-        }
-        # Save to MongoDB
-        result = await db.blogs.insert_one(blog_post)
-        # Add to ChromaDB for future context
-        if collection:
-            collection.add(
-                documents=[blog_content],
-                metadatas=[{"type": "blog", "date": datetime.now().isoformat()}],
-                ids=[str(result.inserted_id)]
-            )
-        logging.info(f"Successfully generated and posted blog about {topic}")
-    except Exception as e:
-        logging.error(f"Error in blog generation: {str(e)}")
-
 @app.on_event("startup")
 async def setup_scheduled_tasks():
     """Setup scheduled tasks on application startup."""
@@ -260,52 +195,51 @@ async def setup_scheduled_tasks():
         id="test_blog",
         replace_existing=True
     )
-    scheduler.start()
-
-def is_tech_question(query: str) -> bool:
-    """Determine if a query is about technical topics."""
-    tech_keywords = [
-        r'\b(programming|coding|software|hardware|computer|tech|framework|library|api|server|database|cloud|devops|ci/cd|containerization|docker|kubernetes|git|infrastructure|deployment|development|web|app|mobile|backend|frontend|fullstack|stack|code|algorithm|data structure)\b',
-        r'\b(python|javascript|typescript|java|c\+\+|ruby|php|golang|rust|swift|kotlin|scala|html|css|sql|nosql|mongodb|postgresql|mysql|redis|elasticsearch)\b',
-        r'\b(react|angular|vue|node|express|django|flask|spring|hibernate|tensorflow|pytorch|pandas|numpy|scikit-learn|aws|azure|gcp|linux|unix|windows|macos)\b'
-    ]
-    
-    # Combine all patterns
-    combined_pattern = '|'.join(tech_keywords)
-    return bool(re.search(combined_pattern, query.lower()))
-
-def search_web(query: str) -> str:
-    """Search the web for technical information using Serper."""
     try:
-        api_key = os.getenv('SERPER_API_KEY')
-        if not api_key:
-            print("Serper API key not found.")
-            return ""
-        url = "https://google.serper.dev/search"
-        headers = {
-            'X-API-KEY': api_key,
-            'Content-Type': 'application/json'
-        }
-        payload = {
-            'q': query,
-            'num': 3
-        }
-        response = requests.post(url, headers=headers, json=payload, timeout=10)
-        if response.status_code == 200:
-            results = response.json()
-            search_results = []
-            if 'organic' in results:
-                for result in results['organic'][:3]:
-                    title = result.get('title', '')
-                    snippet = result.get('snippet', '')
-                    search_results.append(f"{title}: {snippet}")
-            return "\n\n".join(search_results)
+        print("\n" + "="*50)
+        print("🚀 Starting scheduled blog generation at", datetime.now(timezone.utc))
+        print("="*50 + "\n")
+        logger.info("Starting scheduled blog generation at %s", datetime.now(timezone.utc))
+        # Generate blog content
+        topic = "Latest Trends in AI and Machine Learning"
+        content = gemini_service.generate_blog_post(topic)
+        if content:
+            # Add metadata
+            blog_data = {
+                "title": content["title"],
+                "content": content["content"],
+                "author": "Allu Bot",
+                "createdAt": datetime.now(timezone.utc),
+                "tags": content.get("tags", ["AI", "Machine Learning", "Technology"]),
+                "_id": "auto-" + datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+            }
+            # Send success notification
+            await notification_service.send_blog_notification(True, blog_data)
+            logger.info("Blog generation and notification successful")
+            # Display success message
+            print("\n" + "="*50)
+            print("✅ BLOG POSTED SUCCESSFULLY!")
+            print(f"📝 Title: {blog_data['title']}")
+            print(f"📧 Email sent to: {notification_service.to_email}")
+            print(f"🔗 Blog ID: {blog_data['_id']}")
+            print("="*50 + "\n")
         else:
-            print(f"Serper API error: HTTP {response.status_code}")
-            return ""
+            await notification_service.send_blog_notification(False, None, "Blog generation failed - no content generated")
+            logger.error("Blog generation failed - no content generated")
+            # Display error message
+            print("\n" + "="*50)
+            print("❌ BLOG GENERATION FAILED!")
+            print("Reason: No content was generated")
+            print("="*50 + "\n")
     except Exception as e:
-        print(f"Serper search error: {e}")
-        return ""
+        error_msg = f"Error in scheduled blog generation: {str(e)}"
+        logger.error(error_msg)
+        await notification_service.send_blog_notification(False, None, error_msg)
+        # Display error message
+        print("\n" + "="*50)
+        print("❌ BLOG GENERATION FAILED!")
+        print(f"Reason: {error_msg}")
+        print("="*50 + "\n")
 
 def get_portfolio_context(query: str) -> str:
     """Retrieve relevant context from the portfolio vector database."""
@@ -383,7 +317,7 @@ cloudinary.config(
 )
 
 # Import security utilities
-from security_utils import sanitize_html, sanitize_input_dict, HTTPSRedirectMiddleware, SecurityHeadersMiddleware
+from backend.security_utils import sanitize_html, sanitize_input_dict, HTTPSRedirectMiddleware, SecurityHeadersMiddleware
 
 # --- FASTAPI APP INSTANCE ---
 app = FastAPI(title="Portfolio API")
@@ -636,7 +570,7 @@ class BlogPost(BaseModel):
     category: Optional[str] = None  # Added category field for blog classification
 
 # --- AGENT API ENDPOINTS ---
-from models import ChatbotQuery
+from backend.models import ChatbotQuery
 
 @api_router.post("/ask-all-u-bot")
 async def ask_agent(query: ChatbotQuery):
@@ -805,7 +739,7 @@ async def get_blogs():
             
         # If MongoDB fails, is unavailable, or returns no blogs, try to get locally generated blogs
         try:
-            from read_local_blogs import get_local_blogs
+            from backend.read_local_blogs import get_local_blogs
             local_blogs = get_local_blogs()
             if local_blogs:
                 logging.info(f"Serving {len(local_blogs)} locally generated blog posts")

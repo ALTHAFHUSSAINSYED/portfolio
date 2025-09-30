@@ -11,17 +11,17 @@ DB_NAME = os.getenv("DB_NAME", "portfolioDB")
 COLLECTION_NAME = "projects"
 
 # ChromaDB cloud credentials from .env
-CHROMA_API_KEY = os.getenv("CHROMA_API_KEY")
-CHROMA_TENANT_ID = os.getenv("CHROMA_TENANT_ID")
-CHROMA_DATABASE = os.getenv("CHROMA_DATABASE")
+api_key = os.getenv("api_key")
+tenant = os.getenv("tenant")
+database = os.getenv("database")
 
 # Connect to ChromaDB Cloud and get/create Projects_data collection
 
 # Connect to ChromaDB Cloud
 chroma_client = chromadb.CloudClient(
-    api_key=CHROMA_API_KEY,
-    tenant=CHROMA_TENANT_ID,
-    database=CHROMA_DATABASE
+    api_key=api_key,
+    tenant=tenant,
+    database=database
 )
 projects_collection = chroma_client.get_collection(name='Projects_data')
 

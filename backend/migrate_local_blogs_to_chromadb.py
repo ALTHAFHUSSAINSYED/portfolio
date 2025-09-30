@@ -9,9 +9,9 @@ BLOGS_DIR = os.path.join(os.path.dirname(__file__), 'generated_blogs')
 
 # Connect to ChromaDB and get/create Blogs_data collection
 chroma_client = chromadb.CloudClient(
-    api_key=os.getenv('CHROMA_API_KEY'),
-    tenant=os.getenv('CHROMA_TENANT_ID'),
-    database=os.getenv('CHROMA_DATABASE')
+    api_key=os.getenv('api_key'),
+    tenant=os.getenv('tenant'),
+    database=os.getenv('database')
 )
 blogs_collection = chroma_client.get_collection(
     name='Blogs_data'

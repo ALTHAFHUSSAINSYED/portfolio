@@ -2,8 +2,8 @@ import os
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 import logging
-from notification_service import notification_service
-from ai_service import gemini_service
+from backend.notification_service import notification_service
+from backend.ai_service import gemini_service
 import asyncio
 import time
 

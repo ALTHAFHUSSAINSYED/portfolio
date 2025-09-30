@@ -528,15 +528,7 @@ const Chatbot = () => {
       {isOpen && (
         <div className="chatbot-window">
           <div className="chatbot-header">
-            <div className="chatbot-avatar">
-              <img
-                src="/profile-pic.jpg"
-                alt="Allu Bot"
-                className="chatbot-header-avatar"
-                style={{width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', background: '#fff'}}
-                onError={e => { e.target.style.display = 'none'; }}
-              />
-            </div>
+            {/* Avatar removed for cleaner header as per user request */}
             <div className="chatbot-title-container">
               <div className="chatbot-title">Allu Bot</div>
               <div className="chatbot-subtitle">Portfolio & Tech Assistant</div>
