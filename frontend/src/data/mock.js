@@ -1,4 +1,4 @@
-// Mock data for Althaf Hussain Syed's portfolio
+// Mock data for Althaf Hussain Syed's TechAssistant
 export const portfolioData = {
   personalInfo: {
     name: "Althaf Hussain Syed",

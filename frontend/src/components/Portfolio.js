@@ -1,4 +1,4 @@
-// src/components/Portfolio.js
+// src/components/TechAssistant.js
 
 import React from 'react';
 import { portfolioData } from '../data/mock';
@@ -14,7 +14,7 @@ import ContactSection from './ContactSection';
 // NOTE: Header, Footer, and Toaster are intentionally NOT included here.
 // The global layout (Header/Footer/Toaster) is provided by App.js to avoid duplicates.
 
-const Portfolio = () => {
+const TechAssistant = () => {
   return (
     // ✨ MODIFIED: Added "relative" to create a stable anchor for the page layout.
     <div className="min-h-screen bg-background relative">
@@ -30,4 +30,4 @@ const Portfolio = () => {
   );
 };
 
-export default Portfolio;
+export default TechAssistant;
