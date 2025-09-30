@@ -81,63 +81,59 @@ production_cron = CronTrigger(hour=1, minute=0, timezone=timezone.utc)
 
 
 
-# Start the scheduler and register jobs inside FastAPI's startup event
 @app.on_event("startup")
 async def start_scheduler():
     # Register scheduled blog generation job
     production_cron = CronTrigger(hour=9, minute=40, timezone=timezone.utc)
     scheduler.add_job(scheduled_blog_generation, production_cron)
+    scheduler.start()
+
 async def scheduled_blog_generation():
-    print("Scheduled blog generation triggered.")
-    # Schedule ChromaDB monitor to run daily at 2:00 AM UTC
-    chromadb_monitor_cron = CronTrigger(hour=2, minute=0, timezone=timezone.utc)
-    def run_chromadb_monitor():
-        try:
+    try:
+        print("\n" + "="*50)
+        print("🚀 Starting scheduled blog generation at", datetime.now(timezone.utc))
+        print("="*50 + "\n")
+        logger.info("Starting scheduled blog generation at %s", datetime.now(timezone.utc))
+        # Generate blog content
+        topic = "Latest Trends in AI and Machine Learning"
+        content = gemini_service.generate_blog_post(topic)
+        if content:
+            # Add metadata
+            blog_data = {
+                "title": content["title"],
+                "content": content["content"],
+                "author": "Allu Bot",
+                "createdAt": datetime.now(timezone.utc),
+                "tags": content.get("tags", ["AI", "Machine Learning", "Technology"]),
+                "_id": "auto-" + datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+            }
+            # Send success notification
+            await notification_service.send_blog_notification(True, blog_data)
+            logger.info("Blog generation and notification successful")
+            # Display success message
             print("\n" + "="*50)
-            print("🚀 Starting scheduled blog generation at", datetime.now(timezone.utc))
+            print("✅ BLOG POSTED SUCCESSFULLY!")
+            print(f"📝 Title: {blog_data['title']}")
+            print(f"📧 Email sent to: {notification_service.to_email}")
+            print(f"🔗 Blog ID: {blog_data['_id']}")
             print("="*50 + "\n")
-            logger.info("Starting scheduled blog generation at %s", datetime.now(timezone.utc))
-            # Generate blog content
-            topic = "Latest Trends in AI and Machine Learning"
-            content = gemini_service.generate_blog_post(topic)
-            if content:
-                # Add metadata
-                blog_data = {
-                    "title": content["title"],
-                    "content": content["content"],
-                    "author": "Allu Bot",
-                    "createdAt": datetime.now(timezone.utc),
-                    "tags": content.get("tags", ["AI", "Machine Learning", "Technology"]),
-                    "_id": "auto-" + datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
-                }
-                # Send success notification
-                await notification_service.send_blog_notification(True, blog_data)
-                logger.info("Blog generation and notification successful")
-                # Display success message
-                print("\n" + "="*50)
-                print("✅ BLOG POSTED SUCCESSFULLY!")
-                print(f"📝 Title: {blog_data['title']}")
-                print(f"📧 Email sent to: {notification_service.to_email}")
-                print(f"🔗 Blog ID: {blog_data['_id']}")
-                print("="*50 + "\n")
-            else:
-                await notification_service.send_blog_notification(False, None, "Blog generation failed - no content generated")
-                logger.error("Blog generation failed - no content generated")
-                # Display error message
-                print("\n" + "="*50)
-                print("❌ BLOG GENERATION FAILED!")
-                print("Reason: No content was generated")
-                print("="*50 + "\n")
-        except Exception as e:
-            error_msg = f"Error in scheduled blog generation: {str(e)}"
-            logger.error(error_msg)
-            await notification_service.send_blog_notification(False, None, error_msg)
+        else:
+            await notification_service.send_blog_notification(False, None, "Blog generation failed - no content generated")
+            logger.error("Blog generation failed - no content generated")
             # Display error message
             print("\n" + "="*50)
             print("❌ BLOG GENERATION FAILED!")
-            print(f"Reason: {error_msg}")
+            print("Reason: No content was generated")
             print("="*50 + "\n")
-    embedding_function = None
+    except Exception as e:
+        error_msg = f"Error in scheduled blog generation: {str(e)}"
+        logger.error(error_msg)
+        await notification_service.send_blog_notification(False, None, error_msg)
+        # Display error message
+        print("\n" + "="*50)
+        print("❌ BLOG GENERATION FAILED!")
+        print(f"Reason: {error_msg}")
+        print("="*50 + "\n")
     try:
         print("\n" + "="*50)
         print("🚀 Starting scheduled blog generation at", datetime.now(timezone.utc))
@@ -188,13 +184,8 @@ async def scheduled_blog_generation():
 async def setup_scheduled_tasks():
     """Setup scheduled tasks on application startup."""
     # Schedule blog generation in 2 minutes for testing
-    scheduler.add_job(
-        generate_daily_blog,
-        'date',  # Run once at specific time
-        run_date=datetime.utcnow() + timedelta(minutes=2),
-        id="test_blog",
-        replace_existing=True
-    )
+    # Removed undefined generate_daily_blog job to prevent runtime error
+    pass
     try:
         print("\n" + "="*50)
         print("🚀 Starting scheduled blog generation at", datetime.now(timezone.utc))
@@ -243,30 +234,33 @@ async def setup_scheduled_tasks():
 
 def get_portfolio_context(query: str) -> str:
     """Retrieve relevant context from the portfolio vector database."""
-    if not collection:
-        return ""
-    
+    # Try ChromaDB vector search first
     try:
-        # First try to find category-specific content
-        results = collection.query(
-            query_texts=[query],
-            n_results=2,
-            where={"category": detect_category(query)}  # Add category filtering
-        )
-        
-        if not results['documents'][0]:  # If no category-specific results
-            # Fall back to general search
-            results = collection.query(
-                query_texts=[query],
-                n_results=3
-            )
-        
-        if results and results['documents']:
-            return "\n\n".join(results['documents'][0])
-        return ""
+        chroma_api_key = os.getenv('api_key')
+        chroma_tenant = os.getenv('tenant')
+        chroma_database = os.getenv('database')
+        if chroma_api_key and chroma_tenant and chroma_database:
+            chroma_client = chromadb.CloudClient(api_key=chroma_api_key, tenant=chroma_tenant, database=chroma_database)
+            collection = chroma_client.get_collection(name='Portfolio_data')
+            # Use sentence-transformers for embedding
+            from sentence_transformers import SentenceTransformer
+            model = SentenceTransformer('all-MiniLM-L6-v2')
+            embedding = model.encode([query]).tolist()
+            results = collection.query(query_embeddings=embedding, n_results=3)
+            docs = results.get('documents', [[]])[0]
+            if docs:
+                return '\n\n'.join(docs)
     except Exception as e:
-        print(f"ChromaDB query error: {e}")
-        return ""
+        print(f"ChromaDB error: {e}")
+    # Fallback: try MongoDB for context
+    try:
+        if db is not None:
+            doc = await db.context.find_one({'$text': {'$search': query}})
+            if doc and 'content' in doc:
+                return doc['content']
+    except Exception as e:
+        print(f"MongoDB context error: {e}")
+    return ""
 
 try:
     # Use html.escape for escaping
@@ -459,18 +453,18 @@ async def create_project(name: str = Form(...), summary: str = Form(...), detail
 
 @api_router.get("/projects", response_model=List[Project])
 async def get_projects():
-    # Check if database is available
-    if db is None:
-        logging.warning("Database not available when fetching projects")
-        return []  # Return empty list when database is not available
-    
+    # Always fallback to empty list if db is unavailable
     try:
-        projects_cursor = db.projects.find()
-        projects = await projects_cursor.to_list(length=100)
-        return projects
+        if db is not None:
+            projects_cursor = db.projects.find()
+            projects = await projects_cursor.to_list(length=100)
+            return projects
+        else:
+            logging.warning("Database not available when fetching projects, returning empty list")
+            return []
     except Exception as e:
         logging.error(f"Error fetching projects: {e}")
-        return []  # Return empty list on error
+        return []
 
 @api_router.get("/projects/{project_id}", response_model=Project)
 async def get_project_by_id(project_id: str):
@@ -581,9 +575,7 @@ async def ask_agent(query: ChatbotQuery):
             "Gemini API": os.environ.get("GEMINI_API_KEY"),
             "Serper API": os.environ.get("SERPER_API_KEY"),
         }
-        
         missing_vars = [key for key, value in required_vars.items() if not value]
-        
         if missing_vars:
             missing_list = ", ".join(missing_vars)
             logging.warning(f"Missing required API keys: {missing_list}")
@@ -599,16 +591,33 @@ async def ask_agent(query: ChatbotQuery):
         genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
         model = genai.GenerativeModel('gemini-pro')
 
-        # Step 1: Determine if this is a technical question
+        # Step 1: Detect if this is a technical/web question
+        def is_tech_question(q):
+            tech_keywords = ["how", "what", "why", "explain", "tutorial", "guide", "fix", "error", "python", "react", "docker", "kubernetes", "cloud", "aws", "azure", "devops", "ml", "ai", "database", "sql", "api", "web", "linux", "windows", "bug", "issue", "deploy", "build", "test", "debug"]
+            return any(word in q.lower() for word in tech_keywords)
         is_tech = is_tech_question(query.message)
 
-        # Step 2: Get relevant context from vector DB
-        portfolio_context = get_portfolio_context(query.message)
+        # Step 2: Get portfolio context (ChromaDB/Mongo fallback)
+        portfolio_context = await get_portfolio_context(query.message)
 
-        # Step 3: For tech questions, augment with web search
+        # Step 3: For tech questions, use Serper API for web search
         tech_context = ""
         if is_tech:
-            tech_context = search_web(query.message)
+            try:
+                import requests
+                serper_api_key = os.getenv('SERPER_API_KEY')
+                if serper_api_key:
+                    resp = requests.post(
+                        'https://google.serper.dev/search',
+                        headers={'X-API-KEY': serper_api_key, 'Content-Type': 'application/json'},
+                        json={"q": query.message, "num": 3}
+                    )
+                    if resp.ok:
+                        data = resp.json()
+                        if 'organic' in data:
+                            tech_context = '\n'.join([f"{item['title']}: {item['snippet']}" for item in data['organic']])
+            except Exception as e:
+                print(f"Serper API error: {e}")
 
         # Step 4: Build the complete context
         full_context = f"Portfolio Information:\n{portfolio_context}\n\n"
@@ -646,20 +655,6 @@ Always aim to showcase deep technical understanding while maintaining a helpful,
             )
         else:
             raise Exception("Empty response from Gemini")
-
-            
-        # Call the agent service to handle the query if available
-        if HAS_AGENT_SERVICE:
-            result = agent_service.handle_agent_query(query.message)
-            return JSONResponse(
-                status_code=200,
-                content=result
-            )
-        else:
-            return JSONResponse(
-                status_code=200,
-                content={"reply": "AI features are currently disabled. Please contact the administrator.", "source": None}
-            )
     except Exception as e:
         logging.error(f"Error in agent query: {e}")
         return JSONResponse(
@@ -720,45 +715,19 @@ async def generate_blog(request: BlogPostRequest, background_tasks: BackgroundTa
 @api_router.get("/blogs", response_model=List[BlogPost])
 async def get_blogs():
     """Get all published blog posts"""
+    # Always fallback to local blogs for reliability
     try:
-        # First try to get blogs from MongoDB if available
-        if db is not None:
-            try:
-                blogs_cursor = db.blogs.find({"published": True}).sort("created_at", -1)
-                blogs = await blogs_cursor.to_list(length=50)
-                for blog in blogs:
-                    blog["id"] = str(blog.pop("_id"))
-                
-                # If we have blogs from MongoDB, return them
-                if blogs:
-                    return blogs
-            except Exception as e:
-                logging.warning(f"Could not fetch blogs from MongoDB: {e}")
+        from backend.read_local_blogs import get_local_blogs
+        local_blogs = get_local_blogs()
+        if local_blogs:
+            logging.info(f"Serving {len(local_blogs)} locally generated blog posts")
+            return local_blogs
         else:
-            logging.warning("Database is not available. Falling back to local blogs.")
-            
-        # If MongoDB fails, is unavailable, or returns no blogs, try to get locally generated blogs
-        try:
-            from backend.read_local_blogs import get_local_blogs
-            local_blogs = get_local_blogs()
-            if local_blogs:
-                logging.info(f"Serving {len(local_blogs)} locally generated blog posts")
-                return local_blogs
-        except Exception as e:
-            logging.warning(f"Could not fetch locally generated blogs: {e}")
-            
-        # Return empty array as fallback if nothing works
-        logging.warning("No blogs available from any source, returning empty array")
-        return []
-            
-        # If we reach here and blogs is empty, we have no blogs to return
-        if not blogs:
-            logging.warning("No blogs found in MongoDB or local files")
-            
-        return blogs
+            logging.warning("No local blogs found, returning empty array")
+            return []
     except Exception as e:
-        logging.error(f"Error fetching blogs: {e}")
-        raise HTTPException(status_code=500, detail="Could not fetch blog posts")
+        logging.error(f"Error fetching local blogs: {e}")
+        return []
 
 @api_router.get("/blogs/{blog_id}", response_model=BlogPost)
 async def get_blog(blog_id: str):
