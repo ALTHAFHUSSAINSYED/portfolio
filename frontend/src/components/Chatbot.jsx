@@ -478,19 +478,28 @@ const Chatbot = () => {
   return (
     <div className={`chatbot-container ${welcomeAnimation ? "welcome-animation" : ""}`}>
 
-      {/* Chatbot Icon with Unread Badge */}
+      {/* Chatbot Icon with Unread Badge and Avatar */}
       <div style={{position: 'relative', display: 'inline-block'}}>
         <button
           className={`chat-toggle-button${isOpen ? ' open' : ''}`}
           onClick={toggleChat}
           aria-label={isOpen ? 'Close chat' : 'Open chat'}
         >
+          <img
+            src="/profile-pic.jpg"
+            alt="Allu Bot"
+            className="chat-toggle-avatar"
+            style={{width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', background: '#fff'}}
+            onError={e => { e.target.style.display = 'none'; }}
+          />
+          {/* Fallback SVG if image fails */}
           <svg
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             width="32"
             height="32"
+            style={{position: 'absolute', top: 4, left: 4, display: 'none'}}
           >
             <circle cx="12" cy="12" r="10" fill="#3b82f6" />
             <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#fff" />
@@ -520,17 +529,13 @@ const Chatbot = () => {
         <div className="chatbot-window">
           <div className="chatbot-header">
             <div className="chatbot-avatar">
-              {hasUnread && <div className="unread-indicator">1</div>}
-              <svg 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                xmlns="http://www.w3.org/2000/svg" 
-                width="24" 
-                height="24"
-                style={{display: 'block'}}
-              >
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" fill="currentColor"/>
-              </svg>
+              <img
+                src="/profile-pic.jpg"
+                alt="Allu Bot"
+                className="chatbot-header-avatar"
+                style={{width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', background: '#fff'}}
+                onError={e => { e.target.style.display = 'none'; }}
+              />
             </div>
             <div className="chatbot-title-container">
               <div className="chatbot-title">Allu Bot</div>
