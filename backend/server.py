@@ -137,8 +137,21 @@ async def start_scheduler():
     # Register scheduled blog generation job
     production_cron = CronTrigger(hour=9, minute=40, timezone=timezone.utc)
     scheduler.add_job(scheduled_blog_generation, production_cron)
+    # Schedule ChromaDB monitor to run daily at 2:00 AM UTC
+    chromadb_monitor_cron = CronTrigger(hour=2, minute=0, timezone=timezone.utc)
+    def run_chromadb_monitor():
+        import subprocess
+        try:
+            result = subprocess.run([sys.executable, "chromadb_monitor.py"], cwd=os.path.join(os.path.dirname(__file__)), capture_output=True, text=True)
+            logger.info(f"ChromaDB monitor output: {result.stdout}")
+            if result.stderr:
+                logger.error(f"ChromaDB monitor error: {result.stderr}")
+        except Exception as e:
+            logger.error(f"Failed to run chromadb_monitor.py: {e}")
+    scheduler.add_job(run_chromadb_monitor, chromadb_monitor_cron)
     scheduler.start()
     logger.info("Started AsyncIOScheduler - Blog generation scheduled for 09:40 AM UTC (production)")
+    logger.info("ChromaDB monitor scheduled for 02:00 AM UTC (production)")
 
 
 # Configure Gemini API
