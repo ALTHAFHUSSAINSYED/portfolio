@@ -30,8 +30,13 @@ class GeminiService:
         Initialize the Gemini service.
         """
         self.api_key = os.environ.get('GOOGLE_API_KEY') or os.environ.get('GEMINI_API_KEY')
-        if not self.api_key:
-            raise ValueError("No Gemini API key found. Set GOOGLE_API_KEY or GEMINI_API_KEY environment variable.")
+        self.is_available = bool(self.api_key and self.api_key != 'placeholder')
+        
+        if not self.is_available:
+            logging.warning("Gemini API key not configured. Blog generation and AI features will be limited.")
+            self.text_model = None
+            self.vision_model = None
+            return
         
         # Configure Gemini
         genai.configure(api_key=self.api_key)
@@ -323,5 +328,11 @@ class GeminiService:
             logger.error(f"Error generating with LangChain: {e}")
             return f"Error: {str(e)}"
 
-# Create a singleton instance
-gemini_service = GeminiService()
+# Create a singleton instance with error handling
+try:
+    gemini_service = GeminiService()
+    if not gemini_service.is_available:
+        logging.warning("Gemini service initialized but API key not available")
+except Exception as e:
+    logging.error(f"Failed to initialize Gemini service: {e}")
+    gemini_service = None
