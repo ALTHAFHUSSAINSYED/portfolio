@@ -286,13 +286,13 @@ async def get_portfolio_context(query: str) -> str:
                     # Log actual distance for debugging
                     logging.info(f"{collection_name} result {i+1}: distance={dist:.4f}, doc_preview={doc[:80]}...")
                     
-                    # Keep results with low distance (good match)
-                    # Distance < 0.5 is usually good, < 0.3 is excellent
-                    if dist < 1.0:  # Accept results with distance < 1.0
+                    # Keep results with reasonably low distance
+                    # Based on logs: 1.08-1.25 are very relevant results
+                    if dist < 1.3:  # Accept results with distance < 1.3
                         filtered_docs.append(doc)
                         logging.info(f"  ✅ ACCEPTED (distance={dist:.4f})")
                     else:
-                        logging.info(f"  ❌ REJECTED (distance={dist:.4f} >= 1.0)")
+                        logging.info(f"  ❌ REJECTED (distance={dist:.4f} >= 1.3)")
                 
                 if filtered_docs:
                     all_context.extend(filtered_docs)
