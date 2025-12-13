@@ -43,7 +43,7 @@ class GeminiService:
         
         # Initialize models
         self.text_model = genai.GenerativeModel(
-            model_name="models/gemini-pro",  # Stable model for general text generation
+            model_name="models/gemini-2.5-flash",  # Fast modern model for general text generation
             generation_config=genai.GenerationConfig(temperature=0.7)
         )
         
