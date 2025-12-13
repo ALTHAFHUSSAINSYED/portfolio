@@ -57,6 +57,14 @@ import shutil
 import json
 import re
 import requests
+from sentence_transformers import SentenceTransformer
+
+# Initialize embedding model globally to avoid reloading on every request
+try:
+    embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+except Exception as e:
+    print(f"Warning: Could not load SentenceTransformer: {e}")
+    embedding_model = None
 from bs4 import BeautifulSoup
 import chromadb
 import google.generativeai as genai
@@ -232,29 +240,42 @@ async def setup_scheduled_tasks():
         print(f"Reason: {error_msg}")
         print("="*50 + "\n")
 
-def get_portfolio_context(query: str) -> str:
+async def get_portfolio_context(query: str) -> str:
     """Retrieve relevant context from the portfolio vector database."""
     # Try ChromaDB vector search first
     try:
-        chroma_api_key = os.getenv('api_key')
-        chroma_tenant = os.getenv('tenant')
-        chroma_database = os.getenv('database')
+        # Support both standard and legacy environment variable names
+        chroma_api_key = os.getenv('CHROMA_API_KEY') or os.getenv('api_key')
+        chroma_tenant = os.getenv('CHROMA_TENANT_ID') or os.getenv('tenant')
+        chroma_database = os.getenv('CHROMA_DATABASE') or os.getenv('database')
+        
         if chroma_api_key and chroma_tenant and chroma_database:
             chroma_client = chromadb.CloudClient(api_key=chroma_api_key, tenant=chroma_tenant, database=chroma_database)
-            collection = chroma_client.get_collection(name='Portfolio_data')
-            # Use sentence-transformers for embedding
-            from sentence_transformers import SentenceTransformer
-            model = SentenceTransformer('all-MiniLM-L6-v2')
-            embedding = model.encode([query]).tolist()
-            results = collection.query(query_embeddings=embedding, n_results=3)
+            
+            # Try 'portfolio' collection first (standard)
+            try:
+                collection = chroma_client.get_collection(name='portfolio')
+            except:
+                # Fallback to 'Portfolio_data' (legacy)
+                collection = chroma_client.get_collection(name='Portfolio_data')
+            
+            if embedding_model:
+                embedding = embedding_model.encode([query]).tolist()
+                results = collection.query(query_embeddings=embedding, n_results=3)
+            else:
+                # Fallback if model not loaded
+                results = collection.query(query_texts=[query], n_results=3)
+                
             docs = results.get('documents', [[]])[0]
             if docs:
                 return '\n\n'.join(docs)
     except Exception as e:
         print(f"ChromaDB error: {e}")
+
     # Fallback: try MongoDB for context
     try:
         if db is not None:
+            # Use await since this is an async function
             doc = await db.context.find_one({'$text': {'$search': query}})
             if doc and 'content' in doc:
                 return doc['content']
