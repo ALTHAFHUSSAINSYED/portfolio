@@ -149,12 +149,19 @@ def process_portfolio_data(data):
 
 def main():
     try:
-        # Get or create collection
-        collection = client.get_or_create_collection(
+        # Delete existing collection to ensure clean repopulation
+        try:
+            client.delete_collection(name="portfolio")
+            print("✅ Deleted old portfolio collection")
+        except Exception as e:
+            print(f"ℹ️  No existing collection to delete: {e}")
+        
+        # Create fresh collection
+        collection = client.create_collection(
             name="portfolio",
             metadata={"description": "Portfolio content embeddings"}
         )
-        print("Connected to ChromaDB cloud collection!")
+        print("✅ Created fresh ChromaDB collection!")
 
         # Load portfolio data
         portfolio_data = load_portfolio_data()
