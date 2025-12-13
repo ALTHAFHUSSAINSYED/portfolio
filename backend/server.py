@@ -612,19 +612,69 @@ class BlogPost(BaseModel):
 # --- AGENT API ENDPOINTS ---
 from backend.models import ChatbotQuery
 
+def classify_intent(user_message: str) -> dict:
+    """Intent Router - The 'Receptionist' that handles instant replies"""
+    msg = user_message.lower().strip()
+    
+    # 1. VULGARITY FILTER - Block immediately
+    bad_words = ['stupid', 'idiot', 'shut up', 'damn', 'worst', 'suck', 'hate', 'dumb', 'crap']
+    if any(word in msg for word in bad_words):
+        return {
+            "type": "instant",
+            "reply": "⚠️ Let's keep the conversation professional. I'm here to discuss Althaf's portfolio.",
+            "source": "System"
+        }
+    
+    # 2. GREETINGS - Instant friendly response
+    greetings = ['hi', 'hello', 'hey', 'good morning', 'good evening', 'good afternoon', 'greetings']
+    if any(msg.startswith(g) for g in greetings) or msg in greetings:
+        return {
+            "type": "instant",
+            "reply": "👋 Hi there! I'm Allu Bot, Althaf's portfolio assistant. I can answer questions about his skills, experience, certifications, and projects. What would you like to know?",
+            "source": "System"
+        }
+    
+    # 3. GRATITUDE / CLOSING - Shorthand & formal
+    gratitude_words = ['thx', 'ty', 'tysm', 'thank', 'thanks', 'cool', 'nice', 'great', 'awesome', 'gr8']
+    closings = ['bye', 'goodbye', 'see you', 'later', 'take care']
+    if any(word in msg for word in gratitude_words + closings):
+        if any(short in msg for short in ['thx', 'ty', 'tysm', 'gr8']):
+            return {"type": "instant", "reply": "No problem! 😎 Happy to help.", "source": "System"}
+        else:
+            return {"type": "instant", "reply": "You're welcome! Let me know if you need any other information about Althaf's portfolio.", "source": "System"}
+    
+    # 4. CONTACT REQUEST - Hardcoded accurate info
+    contact_words = ['contact', 'email', 'phone', 'hire', 'reach', 'linkedin', 'connect']
+    if any(word in msg for word in contact_words):
+        return {
+            "type": "instant",
+            "reply": "📧 You can reach Althaf at **allualthaf42@gmail.com** or connect on LinkedIn at https://linkedin.com/in/althafhussainsyed. He's currently open to DevOps opportunities!",
+            "source": "System"
+        }
+    
+    # 5. DEFAULT - Send to RAG pipeline
+    return {"type": "rag"}
+
 @api_router.post("/ask-all-u-bot")
 async def ask_agent(query: ChatbotQuery):
-    """Endpoint for the chatbot - Pure ChromaDB retrieval (NO LLM, NO Internet)"""
+    """Corporate RAG Chatbot: Intent Routing + Strict RAG with Gemma 3"""
     try:
-        # Query ChromaDB for relevant portfolio data
+        # LAYER 1: THE RECEPTIONIST (Intent Router)
+        intent = classify_intent(query.message)
+        
+        if intent["type"] == "instant":
+            # Return pre-written polished response instantly (no DB, no LLM)
+            logging.info(f"Instant reply for: {query.message[:50]}")
+            return JSONResponse(status_code=200, content={"reply": intent["reply"], "source": intent["source"]})
+        
+        # LAYER 2: THE EXPERT (Strict RAG Pipeline)
+        # Step 1: Retrieve ONLY relevant data from ChromaDB
         portfolio_context = await get_portfolio_context(query.message)
         
-        # Log what we retrieved for debugging
         logging.info(f"ChromaDB retrieval for '{query.message[:50]}...': {len(portfolio_context) if portfolio_context else 0} chars")
 
-        # Check if we have relevant context
+        # Step 2: Check if we have relevant context
         if not portfolio_context or len(portfolio_context.strip()) < 20:
-            # No relevant data found - refuse to answer
             return JSONResponse(
                 status_code=200,
                 content={
@@ -633,26 +683,58 @@ async def ask_agent(query: ChatbotQuery):
                 }
             )
 
-        # Return pure ChromaDB data with simple formatting
-        # Clean up the context for better readability
-        formatted_response = portfolio_context.strip()
+        # Step 3: Configure Gemma 3 (14,400 requests/day!)
+        genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
         
-        # Add context-based prefix if it's a direct question
-        question_lower = query.message.lower()
-        if any(word in question_lower for word in ["what", "list", "tell", "describe", "explain"]):
-            formatted_response = f"Based on Althaf's portfolio:\n\n{formatted_response}"
-
-        # Log successful interaction
-        logging.info(f"Successfully retrieved context for: {query.message[:100]}...")
-        return JSONResponse(
-            status_code=200,
-            content={
-                "reply": formatted_response,
-                "source": "Portfolio"
-            }
+        generation_config = genai.GenerationConfig(
+            temperature=0.0,  # Zero creativity = no hallucinations
+            top_p=0.95,
+            top_k=20,
+            max_output_tokens=1024,
         )
+        
+        model = genai.GenerativeModel(
+            'models/gemma-3-27b-it',  # Instruction-tuned Gemma 3: 14,400 RPD (vs 20 for Gemini)
+            generation_config=generation_config
+        )
+
+        # Step 4: Build STRICT system prompt - LLM as "Translator" only
+        system_instruction = f"""You are Allu Bot, the professional portfolio assistant for Althaf Hussain Syed.
+
+CRITICAL RULES (ZERO EXCEPTIONS):
+1. You are a TRANSLATOR, not a knowledge source
+2. Your ONLY job: Convert the raw Context below into polished, professional sentences
+3. DO NOT add facts, assumptions, or external knowledge
+4. If the Context doesn't answer the question, say: "I don't have that specific information in my knowledge base"
+5. Write in a friendly, professional tone (like a corporate recruiter or LinkedIn profile)
+6. Use bullet points for lists (certifications, skills)
+7. DO NOT say "Based on the context" - speak as if you ARE the portfolio
+
+RAW CONTEXT (Your ONLY source of truth):
+{portfolio_context}
+
+Remember: Rewrite this data into nice sentences. Do NOT invent new facts."""
+
+        # Step 5: Generate human-like response (temperature=0 prevents creativity)
+        user_prompt = f"User Question: {query.message}\n\nRewrite the Context into a polished, professional answer:"
+        full_prompt = f"{system_instruction}\n\n{user_prompt}"
+        
+        response = model.generate_content(full_prompt)
+
+        if response.text:
+            logging.info(f"Successfully processed RAG query: {query.message[:100]}")
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "reply": response.text,
+                    "source": "Portfolio"
+                }
+            )
+        else:
+            raise Exception("Empty response from Gemma")
+            
     except Exception as e:
-        logging.error(f"Error in agent query: {e}")
+        logging.error(f"Error in chatbot: {e}")
         return JSONResponse(
             status_code=500,
             content={"reply": f"Error processing your request: {str(e)}", "source": None}
