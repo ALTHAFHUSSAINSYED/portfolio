@@ -19,6 +19,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Create environment file
+        run: |
+          cd /home/ec2-user/portfolio/backend
+          cat > .env << EOF
+          MONGO_URL=${{ secrets.MONGO_URL }}
+          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+          SERPER_API_KEY=${{ secrets.SERPER_API_KEY }}
+          CORS_ORIGINS=${{ secrets.CORS_ORIGINS }}
+          CHROMA_API_KEY=${{ secrets.CHROMA_API_KEY }}
+          CHROMA_TENANT_ID=${{ secrets.CHROMA_TENANT_ID }}
+          CHROMA_DATABASE=${{ secrets.CHROMA_DATABASE }}
+          CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
+          DB_NAME=portfolioDB
+          ENVIRONMENT=production
+          EOF
+          chmod 600 .env
+
       - name: Deploy and restart backend
         run: |
           cd /home/ec2-user/portfolio
@@ -26,4 +45,27 @@ jobs:
           git reset --hard origin/main
           sudo docker rm -f portfolio-backend || true
           sudo docker build -t portfolio-backend -f backend/Dockerfile .
-          sudo docker run --env-file backend/.env -p 8000:8000 --name portfolio-backend -d portfolio-backend
+          sudo docker run --env-file /home/ec2-user/portfolio/backend/.env -p 8000:8000 --name portfolio-backend --restart unless-stopped -d portfolio-backend
+      
+      - name: Wait for container to start
+        run: |
+          echo "Waiting for container to start..."
+          sleep 10
+          sudo docker logs portfolio-backend --tail 50
+      
+      - name: Health check
+        run: |
+          echo "Running health check..."
+          max_attempts=10
+          attempt=0
+          while [ $attempt -lt $max_attempts ]; do
+            if curl -f http://localhost:8000/ > /dev/null 2>&1; then
+              echo "✅ Backend is healthy!"
+              exit 0
+            fi
+            echo "Attempt $((attempt+1))/$max_attempts failed, retrying..."
+            sleep 5
+            attempt=$((attempt+1))
+          done
+          echo "❌ Backend health check failed!"
+          exit 1
