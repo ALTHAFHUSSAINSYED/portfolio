@@ -241,8 +241,9 @@ async def setup_scheduled_tasks():
         print("="*50 + "\n")
 
 async def get_portfolio_context(query: str) -> str:
-    """Retrieve relevant context from ALL portfolio ChromaDB collections."""
+    """Retrieve relevant context from ALL portfolio ChromaDB collections with similarity threshold."""
     all_context = []
+    SIMILARITY_THRESHOLD = 0.7  # Only keep results with similarity > 70%
     
     try:
         # Get ChromaDB credentials
@@ -251,7 +252,7 @@ async def get_portfolio_context(query: str) -> str:
         chroma_database = os.getenv('CHROMA_DATABASE')
         
         if not (chroma_api_key and chroma_tenant and chroma_database):
-            print("ChromaDB credentials missing")
+            logging.error("ChromaDB credentials missing")
             return ""
             
         chroma_client = chromadb.CloudClient(
@@ -270,24 +271,44 @@ async def get_portfolio_context(query: str) -> str:
                 # Use embedding model if available, otherwise text search
                 if embedding_model:
                     embedding = embedding_model.encode([query]).tolist()
-                    results = collection.query(query_embeddings=embedding, n_results=3)
+                    results = collection.query(query_embeddings=embedding, n_results=5)
                 else:
-                    results = collection.query(query_texts=[query], n_results=3)
+                    results = collection.query(query_texts=[query], n_results=5)
                 
+                # Apply similarity threshold
                 docs = results.get('documents', [[]])[0]
-                if docs:
-                    all_context.extend(docs)
-                    print(f"Found {len(docs)} results in {collection_name}")
+                distances = results.get('distances', [[]])[0]
+                
+                # Filter by similarity (lower distance = higher similarity)
+                # Convert distance to similarity score
+                filtered_docs = []
+                for i, (doc, dist) in enumerate(zip(docs, distances)):
+                    similarity = 1 - dist  # Convert distance to similarity
+                    if similarity >= SIMILARITY_THRESHOLD:
+                        filtered_docs.append(doc)
+                        logging.info(f"{collection_name} result {i+1}: similarity={similarity:.2f}")
+                    else:
+                        logging.debug(f"{collection_name} result {i+1}: REJECTED (similarity={similarity:.2f} < {SIMILARITY_THRESHOLD})")
+                
+                if filtered_docs:
+                    all_context.extend(filtered_docs)
+                    logging.info(f"Found {len(filtered_docs)} relevant results in {collection_name}")
+                else:
+                    logging.info(f"No relevant results in {collection_name} (all below threshold)")
                     
             except Exception as e:
-                print(f"Error accessing {collection_name}: {e}")
+                logging.error(f"Error accessing {collection_name}: {e}")
                 continue
         
         if all_context:
-            return '\n\n'.join(all_context)
+            context_str = '\n\n---\n\n'.join(all_context)
+            logging.info(f"Total context retrieved: {len(context_str)} chars from {len(all_context)} documents")
+            return context_str
+        else:
+            logging.warning(f"No relevant context found for query: {query}")
             
     except Exception as e:
-        print(f"ChromaDB connection error: {e}")
+        logging.error(f"ChromaDB connection error: {e}")
     
     return ""
 
@@ -607,63 +628,63 @@ async def ask_agent(query: ChatbotQuery):
                 }
             )
 
-        # Configure Gemini
+        # Configure Gemini with STRICT settings (Corporate RAG)
         genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
-        model = genai.GenerativeModel('models/gemini-2.5-flash')
-
-        # Step 1: Get portfolio context from ChromaDB (ALL 3 collections)
-        portfolio_context = await get_portfolio_context(query.message)
-
-        # Step 2: Only use internet if ChromaDB has NO relevant data
-        web_context = ""
-        data_source = "Portfolio"
         
-        if not portfolio_context or len(portfolio_context.strip()) < 50:
-            # ChromaDB has no data, try web search as fallback
-            try:
-                import requests
-                serper_api_key = os.getenv('SERPER_API_KEY')
-                if serper_api_key:
-                    resp = requests.post(
-                        'https://google.serper.dev/search',
-                        headers={'X-API-KEY': serper_api_key, 'Content-Type': 'application/json'},
-                        json={"q": query.message, "num": 3}
-                    )
-                    if resp.ok:
-                        data = resp.json()
-                        if 'organic' in data:
-                            web_context = '\n'.join([f"{item['title']}: {item['snippet']}" for item in data['organic']])
-                            data_source = "Internet"
-            except Exception as e:
-                print(f"Serper API error: {e}")
+        # temperature=0 eliminates creativity/hallucinations
+        generation_config = genai.GenerationConfig(
+            temperature=0.0,
+            top_p=0.95,
+            top_k=20,
+            max_output_tokens=1024,
+        )
+        model = genai.GenerativeModel(
+            'models/gemini-2.5-flash',
+            generation_config=generation_config
+        )
 
-        # Step 3: Build the context - prioritize portfolio data
-        if portfolio_context:
-            full_context = f"Althaf's Portfolio Data:\n{portfolio_context}"
-            if web_context:
-                full_context += f"\n\nAdditional Information:\n{web_context}"
-                data_source = "Portfolio + Internet"
-        elif web_context:
-            full_context = f"Information:\n{web_context}"
-        else:
-            full_context = "No specific information found."
+        # Step 1: ALWAYS query ChromaDB (no exceptions)
+        portfolio_context = await get_portfolio_context(query.message)
+        
+        # Log what we retrieved for debugging
+        logging.info(f"ChromaDB retrieval for '{query.message[:50]}...': {len(portfolio_context) if portfolio_context else 0} chars")
 
-        # Step 4: Build the prompt for Gemini - strict instructions
-        system_prompt = """You are Allu Bot, Althaf Hussain Syed's portfolio assistant.
+        # Step 2: Check if we have RELEVANT context (strict threshold)
+        if not portfolio_context or len(portfolio_context.strip()) < 20:
+            # No relevant data found - refuse to answer
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "reply": "I don't have information about that in Althaf's portfolio. I can only answer questions about Althaf Hussain Syed's professional experience, skills, projects, and certifications based on his portfolio data.",
+                    "source": None
+                }
+            )
 
-CRITICAL RULES:
-1. ONLY use information from "Althaf's Portfolio Data" section
-2. If portfolio data exists, answer ONLY from that data - DO NOT mix with other sources
-3. Do NOT make assumptions or add information not in the provided context
-4. If asked about Althaf and no portfolio data exists, say "I don't have that information in the portfolio"
-5. Be precise and factual - quote from the portfolio data directly
-6. Format responses clearly with bullet points when listing multiple items
+        # Step 3: Build STRICT system instruction (Corporate RAG)
+        system_instruction = f"""You are 'Allu Bot', the official AI assistant for Althaf Hussain Syed's professional portfolio.
 
-Your goal: Provide accurate information about Althaf Hussain Syed based ONLY on his portfolio data."""
+STRICT RULES (NO EXCEPTIONS):
+1. You are FORBIDDEN from using your internal knowledge, training data, or the internet
+2. You MUST answer SOLELY based on the 'Context' provided below
+3. If the Context does not contain the answer, you MUST reply: "I don't have that information in my knowledge base"
+4. Do NOT make assumptions, inferences, or add any information not explicitly in the Context
+5. Do NOT say "Based on the context" - just answer directly as if you know this information
+6. Keep answers professional, concise, and well-formatted
 
-        # Step 5: Get response from Gemini
-        prompt = f"{system_prompt}\n\nContext:\n{full_context}\n\nUser Question: {query.message}\n\nAnswer based ONLY on the context provided:"
-        response = model.generate_content(prompt)
+CONTEXT (Your ONLY source of truth):
+{portfolio_context}
+
+Remember: If it's not in the Context above, you don't know it. Period."""
+
+        # Step 4: Build user prompt
+        user_prompt = f"User Question: {query.message}\n\nAnswer using ONLY the Context provided in your system instruction:"
+
+        # Step 5: Generate response (temperature=0 prevents creativity)
+        response = model.generate_content(user_prompt, generation_config=generation_config)
+        
+        # Override system instruction by prepending it to prompt
+        full_prompt = f"{system_instruction}\n\n{user_prompt}"
+        response = model.generate_content(full_prompt)
 
         if response.text:
             # Log successful interaction
