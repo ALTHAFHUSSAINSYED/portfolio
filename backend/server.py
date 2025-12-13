@@ -269,11 +269,12 @@ async def get_portfolio_context(query: str) -> str:
                 collection = chroma_client.get_collection(name=collection_name)
                 
                 # Use embedding model if available, otherwise text search
+                # Fetch more results to ensure complete data coverage (all certs, skills, projects)
                 if embedding_model:
                     embedding = embedding_model.encode([query]).tolist()
-                    results = collection.query(query_embeddings=embedding, n_results=5)
+                    results = collection.query(query_embeddings=embedding, n_results=15)
                 else:
-                    results = collection.query(query_texts=[query], n_results=5)
+                    results = collection.query(query_texts=[query], n_results=15)
                 
                 # Apply similarity threshold
                 docs = results.get('documents', [[]])[0]
