@@ -601,7 +601,7 @@ async def ask_agent(query: ChatbotQuery):
 
         # Configure Gemini
         genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('models/gemini-pro')
 
         # Step 1: Detect if this is a technical/web question
         def is_tech_question(q):
