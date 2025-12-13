@@ -340,21 +340,12 @@ api_router = APIRouter(prefix="/api")
 
 # --- Add Security Middleware ---
 # Enable HTTPS redirect in production, disable in development
+# Note: Disabled because nginx handles HTTPS termination
 is_production = os.environ.get("ENVIRONMENT", "development").lower() == "production"
-app.add_middleware(HTTPSRedirectMiddleware, enabled=is_production)
+app.add_middleware(HTTPSRedirectMiddleware, enabled=False)  # Disabled - nginx handles HTTPS
 app.add_middleware(SecurityHeadersMiddleware)
 
-# Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",  # Development frontend
-        "https://yourdomain.com",  # Production frontend - replace with your actual domain
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Note: CORS middleware is added later with environment-based configuration
 
 # --- PYDANTIC MODELS ---
 # (No changes here)
