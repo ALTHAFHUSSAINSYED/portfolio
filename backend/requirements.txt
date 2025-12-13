@@ -20,7 +20,7 @@ flake8>=7.0.0
 mypy>=1.8.0
 python-jose>=3.3.0
 google-generativeai>=0.8.5
-chromadb==0.4.24
+chromadb>=0.5.5
 beautifulsoup4==4.12.3
 requests>=2.31.0
 aiohttp>=3.9.5
