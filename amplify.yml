@@ -3,14 +3,14 @@ frontend:
   phases:
     preBuild:
       commands:
-        - cd frontend && yarn install --ignore-engines
+        - yarn install --ignore-engines
     build:
       commands:
-        - cd frontend && yarn run build
+        - yarn run build
   artifacts:
-    baseDirectory: frontend/build
+    baseDirectory: build
     files:
       - '**/*'
   cache:
     paths:
-      - frontend/node_modules/**/*
+      - node_modules/**/*
