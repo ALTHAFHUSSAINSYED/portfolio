@@ -241,46 +241,54 @@ async def setup_scheduled_tasks():
         print("="*50 + "\n")
 
 async def get_portfolio_context(query: str) -> str:
-    """Retrieve relevant context from the portfolio vector database."""
-    # Try ChromaDB vector search first
+    """Retrieve relevant context from ALL portfolio ChromaDB collections."""
+    all_context = []
+    
     try:
-        # Support both standard and legacy environment variable names
-        chroma_api_key = os.getenv('CHROMA_API_KEY') or os.getenv('api_key')
-        chroma_tenant = os.getenv('CHROMA_TENANT_ID') or os.getenv('tenant')
-        chroma_database = os.getenv('CHROMA_DATABASE') or os.getenv('database')
+        # Get ChromaDB credentials
+        chroma_api_key = os.getenv('CHROMA_API_KEY')
+        chroma_tenant = os.getenv('CHROMA_TENANT') or os.getenv('CHROMA_TENANT_ID')
+        chroma_database = os.getenv('CHROMA_DATABASE')
         
-        if chroma_api_key and chroma_tenant and chroma_database:
-            chroma_client = chromadb.CloudClient(api_key=chroma_api_key, tenant=chroma_tenant, database=chroma_database)
+        if not (chroma_api_key and chroma_tenant and chroma_database):
+            print("ChromaDB credentials missing")
+            return ""
             
-            # Try 'portfolio' collection first (standard)
+        chroma_client = chromadb.CloudClient(
+            api_key=chroma_api_key,
+            tenant=chroma_tenant,
+            database=chroma_database
+        )
+        
+        # Search ALL 3 collections
+        collection_names = ['portfolio', 'Blogs_data', 'Projects_data']
+        
+        for collection_name in collection_names:
             try:
-                collection = chroma_client.get_collection(name='portfolio')
-            except:
-                # Fallback to 'Portfolio_data' (legacy)
-                collection = chroma_client.get_collection(name='Portfolio_data')
-            
-            if embedding_model:
-                embedding = embedding_model.encode([query]).tolist()
-                results = collection.query(query_embeddings=embedding, n_results=3)
-            else:
-                # Fallback if model not loaded
-                results = collection.query(query_texts=[query], n_results=3)
+                collection = chroma_client.get_collection(name=collection_name)
                 
-            docs = results.get('documents', [[]])[0]
-            if docs:
-                return '\n\n'.join(docs)
+                # Use embedding model if available, otherwise text search
+                if embedding_model:
+                    embedding = embedding_model.encode([query]).tolist()
+                    results = collection.query(query_embeddings=embedding, n_results=3)
+                else:
+                    results = collection.query(query_texts=[query], n_results=3)
+                
+                docs = results.get('documents', [[]])[0]
+                if docs:
+                    all_context.extend(docs)
+                    print(f"Found {len(docs)} results in {collection_name}")
+                    
+            except Exception as e:
+                print(f"Error accessing {collection_name}: {e}")
+                continue
+        
+        if all_context:
+            return '\n\n'.join(all_context)
+            
     except Exception as e:
-        print(f"ChromaDB error: {e}")
-
-    # Fallback: try MongoDB for context
-    try:
-        if db is not None:
-            # Use await since this is an async function
-            doc = await db.context.find_one({'$text': {'$search': query}})
-            if doc and 'content' in doc:
-                return doc['content']
-    except Exception as e:
-        print(f"MongoDB context error: {e}")
+        print(f"ChromaDB connection error: {e}")
+    
     return ""
 
 try:
@@ -603,18 +611,15 @@ async def ask_agent(query: ChatbotQuery):
         genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
         model = genai.GenerativeModel('models/gemini-2.5-flash')
 
-        # Step 1: Detect if this is a technical/web question
-        def is_tech_question(q):
-            tech_keywords = ["how", "what", "why", "explain", "tutorial", "guide", "fix", "error", "python", "react", "docker", "kubernetes", "cloud", "aws", "azure", "devops", "ml", "ai", "database", "sql", "api", "web", "linux", "windows", "bug", "issue", "deploy", "build", "test", "debug"]
-            return any(word in q.lower() for word in tech_keywords)
-        is_tech = is_tech_question(query.message)
-
-        # Step 2: Get portfolio context (ChromaDB/Mongo fallback)
+        # Step 1: Get portfolio context from ChromaDB (ALL 3 collections)
         portfolio_context = await get_portfolio_context(query.message)
 
-        # Step 3: For tech questions, use Serper API for web search
-        tech_context = ""
-        if is_tech:
+        # Step 2: Only use internet if ChromaDB has NO relevant data
+        web_context = ""
+        data_source = "Portfolio"
+        
+        if not portfolio_context or len(portfolio_context.strip()) < 50:
+            # ChromaDB has no data, try web search as fallback
             try:
                 import requests
                 serper_api_key = os.getenv('SERPER_API_KEY')
@@ -627,32 +632,37 @@ async def ask_agent(query: ChatbotQuery):
                     if resp.ok:
                         data = resp.json()
                         if 'organic' in data:
-                            tech_context = '\n'.join([f"{item['title']}: {item['snippet']}" for item in data['organic']])
+                            web_context = '\n'.join([f"{item['title']}: {item['snippet']}" for item in data['organic']])
+                            data_source = "Internet"
             except Exception as e:
                 print(f"Serper API error: {e}")
 
-        # Step 4: Build the complete context
-        full_context = f"Portfolio Information:\n{portfolio_context}\n\n"
-        if tech_context:
-            full_context += f"Technical Information:\n{tech_context}\n\n"
+        # Step 3: Build the context - prioritize portfolio data
+        if portfolio_context:
+            full_context = f"Althaf's Portfolio Data:\n{portfolio_context}"
+            if web_context:
+                full_context += f"\n\nAdditional Information:\n{web_context}"
+                data_source = "Portfolio + Internet"
+        elif web_context:
+            full_context = f"Information:\n{web_context}"
+        else:
+            full_context = "No specific information found."
 
-        # Step 5: Build the prompt for Gemini
-        system_prompt = """You are Allu Bot, Althaf's smart and professional portfolio assistant. You excel at technical discussions and explaining Althaf's work.
+        # Step 4: Build the prompt for Gemini - strict instructions
+        system_prompt = """You are Allu Bot, Althaf Hussain Syed's portfolio assistant.
 
-Key Guidelines:
-- Focus on technical accuracy and professionalism
-- Use the provided context but integrate it naturally
-- For portfolio questions, stick to the facts about Althaf
-- For tech questions, provide expert-level explanations
-- Keep responses clear and well-structured
-- Be honest when information is limited
-- Add relevant examples when discussing technical concepts
-- Stay away from personal opinions on non-technical matters
+CRITICAL RULES:
+1. ONLY use information from "Althaf's Portfolio Data" section
+2. If portfolio data exists, answer ONLY from that data - DO NOT mix with other sources
+3. Do NOT make assumptions or add information not in the provided context
+4. If asked about Althaf and no portfolio data exists, say "I don't have that information in the portfolio"
+5. Be precise and factual - quote from the portfolio data directly
+6. Format responses clearly with bullet points when listing multiple items
 
-Always aim to showcase deep technical understanding while maintaining a helpful, professional tone."""
+Your goal: Provide accurate information about Althaf Hussain Syed based ONLY on his portfolio data."""
 
-        # Step 6: Get response from Gemini
-        prompt = f"{system_prompt}\n\nContext:\n{full_context}\n\nUser Question: {query.message}\n\nResponse:"
+        # Step 5: Get response from Gemini
+        prompt = f"{system_prompt}\n\nContext:\n{full_context}\n\nUser Question: {query.message}\n\nAnswer based ONLY on the context provided:"
         response = model.generate_content(prompt)
 
         if response.text:
@@ -662,7 +672,7 @@ Always aim to showcase deep technical understanding while maintaining a helpful,
                 status_code=200,
                 content={
                     "reply": response.text,
-                    "source": "Portfolio + Internet" if tech_context else "Portfolio"
+                    "source": data_source
                 }
             )
         else:
@@ -670,8 +680,8 @@ Always aim to showcase deep technical understanding while maintaining a helpful,
     except Exception as e:
         logging.error(f"Error in agent query: {e}")
         return JSONResponse(
-            status_code=200,  # Return 200 to avoid frontend error handling
-            content={"reply": "I'm having trouble accessing external information right now. I can still answer questions about Althaf's portfolio directly.", "source": None}
+            status_code=500,
+            content={"reply": f"Error processing your request: {str(e)}", "source": None}
         )
 
 @api_router.post("/generate-blog", response_model=BlogPost)
