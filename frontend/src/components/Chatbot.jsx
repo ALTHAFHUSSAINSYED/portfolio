@@ -324,12 +324,8 @@ const Chatbot = () => {
       
       // Prepare the list of API endpoints to try
       const possibleBaseUrls = [
-        '', // Same domain (relative URL)
-        ...(apiStatus.current.activeEndpoints || []),
-        'https://althaf-portfolio.onrender.com',
-        'https://althaf-portfolio.vercel.app',
-        'http://localhost:5000'
-      ].filter((url, index, self) => self.indexOf(url) === index); // Remove duplicates
+        process.env.REACT_APP_BACKEND_URL || '', // Use environment variable or fallback to relative
+      ].filter(Boolean); // Remove empty values
       
       // Update the API attempt counter
       apiStatus.current.attemptCount++;
