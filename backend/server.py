@@ -614,95 +614,43 @@ from backend.models import ChatbotQuery
 
 @api_router.post("/ask-all-u-bot")
 async def ask_agent(query: ChatbotQuery):
-    """Endpoint for the chatbot to ask questions with RAG system"""
+    """Endpoint for the chatbot - Pure ChromaDB retrieval (NO LLM, NO Internet)"""
     try:
-        # Check for required environment variables
-        required_vars = {
-            "Gemini API": os.environ.get("GEMINI_API_KEY"),
-            "Serper API": os.environ.get("SERPER_API_KEY"),
-        }
-        missing_vars = [key for key, value in required_vars.items() if not value]
-        if missing_vars:
-            missing_list = ", ".join(missing_vars)
-            logging.warning(f"Missing required API keys: {missing_list}")
-            return JSONResponse(
-                status_code=200,
-                content={
-                    "reply": f"I have limited functionality right now because some API configurations are missing ({missing_list}). I can still try to help with basic questions.",
-                    "source": None
-                }
-            )
-
-        # Configure Gemini with STRICT settings (Corporate RAG)
-        genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
-        
-        # temperature=0 eliminates creativity/hallucinations
-        generation_config = genai.GenerationConfig(
-            temperature=0.0,
-            top_p=0.95,
-            top_k=20,
-            max_output_tokens=1024,
-        )
-        model = genai.GenerativeModel(
-            'models/gemini-2.5-flash-lite',  # Using lite version - fresh quota (0/20 RPD)
-            generation_config=generation_config
-        )
-
-        # Step 1: ALWAYS query ChromaDB (no exceptions)
+        # Query ChromaDB for relevant portfolio data
         portfolio_context = await get_portfolio_context(query.message)
         
         # Log what we retrieved for debugging
         logging.info(f"ChromaDB retrieval for '{query.message[:50]}...': {len(portfolio_context) if portfolio_context else 0} chars")
 
-        # Step 2: Check if we have RELEVANT context (strict threshold)
+        # Check if we have relevant context
         if not portfolio_context or len(portfolio_context.strip()) < 20:
             # No relevant data found - refuse to answer
             return JSONResponse(
                 status_code=200,
                 content={
-                    "reply": "I don't have information about that in Althaf's portfolio. I can only answer questions about Althaf Hussain Syed's professional experience, skills, projects, and certifications based on his portfolio data.",
+                    "reply": "I don't have information about that in Althaf's portfolio. I can only answer questions about Althaf Hussain Syed's professional experience, skills, projects, and certifications.",
                     "source": None
                 }
             )
 
-        # Step 3: Build STRICT system instruction (Corporate RAG)
-        system_instruction = f"""You are 'Allu Bot', the official AI assistant for Althaf Hussain Syed's professional portfolio.
-
-STRICT RULES (NO EXCEPTIONS):
-1. You are FORBIDDEN from using your internal knowledge, training data, or the internet
-2. You MUST answer SOLELY based on the 'Context' provided below
-3. If the Context does not contain the answer, you MUST reply: "I don't have that information in my knowledge base"
-4. Do NOT make assumptions, inferences, or add any information not explicitly in the Context
-5. Do NOT say "Based on the context" - just answer directly as if you know this information
-6. Keep answers professional, concise, and well-formatted
-
-CONTEXT (Your ONLY source of truth):
-{portfolio_context}
-
-Remember: If it's not in the Context above, you don't know it. Period."""
-
-        # Step 4: Build user prompt
-        user_prompt = f"User Question: {query.message}\n\nAnswer using ONLY the Context provided in your system instruction:"
-
-        # Step 5: Generate response (temperature=0 prevents creativity)
-        response = model.generate_content(user_prompt, generation_config=generation_config)
+        # Return pure ChromaDB data with simple formatting
+        # Clean up the context for better readability
+        formatted_response = portfolio_context.strip()
         
-        # Override system instruction by prepending it to prompt
-        full_prompt = f"{system_instruction}\n\n{user_prompt}"
-        response = model.generate_content(full_prompt)
+        # Add context-based prefix if it's a direct question
+        question_lower = query.message.lower()
+        if any(word in question_lower for word in ["what", "list", "tell", "describe", "explain"]):
+            formatted_response = f"Based on Althaf's portfolio:\n\n{formatted_response}"
 
-        if response.text:
-            # Log successful interaction
-            logging.info(f"Successfully processed query: {query.message[:100]}...")
-            return JSONResponse(
-                status_code=200,
-                content={
-                    "reply": response.text,
-                    "source": "Portfolio"
-                }
-            )
-        else:
-            raise Exception("Empty response from Gemini")
+        # Log successful interaction
+        logging.info(f"Successfully retrieved context for: {query.message[:100]}...")
+        return JSONResponse(
+            status_code=200,
+            content={
+                "reply": formatted_response,
+                "source": "Portfolio"
+            }
+        )
     except Exception as e:
         logging.error(f"Error in agent query: {e}")
         return JSONResponse(
