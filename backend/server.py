@@ -644,7 +644,7 @@ async def ask_agent(query: ChatbotQuery):
             max_output_tokens=1024,
         )
         model = genai.GenerativeModel(
-            'models/gemini-2.5-flash',
+            'models/gemini-2.5-flash-lite',  # Using lite version - fresh quota (0/20 RPD)
             generation_config=generation_config
         )
 
