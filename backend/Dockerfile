@@ -2,21 +2,20 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    curl \
+RUN apt-get update \
+    && apt-get install -y build-essential curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY backend/requirements.txt /app/backend/requirements.txt
+RUN pip install --no-cache-dir -r /app/backend/requirements.txt \
+    && apt-get remove -y build-essential curl \
+    && apt-get autoremove -y \
+    && rm -rf /root/.cache/pip
 
-# Copy application code
-COPY . .
+COPY backend /app/backend
 
-# Expose port
+WORKDIR /app
+
 EXPOSE 8000
 
-# Command to run the application
-CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "backend.server:app", "--host", "0.0.0.0", "--port", "8000"]

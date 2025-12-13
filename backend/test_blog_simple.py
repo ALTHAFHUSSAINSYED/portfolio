@@ -1,4 +1,4 @@
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 import logging
 from ai_service import gemini_service
 import asyncio
