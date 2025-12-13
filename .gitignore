@@ -110,4 +110,6 @@ agenthub/agents/youtube/db
 .cache/
 
 # Mobile development
-android-sdk/ 
+android-sdk/ *.env.deploy
+cloudinary-credentials.txt
+mongodb_commands.txt
