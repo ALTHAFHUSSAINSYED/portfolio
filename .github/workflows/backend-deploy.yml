@@ -22,7 +22,8 @@ jobs:
       - name: Deploy and restart backend
         run: |
           cd /home/ec2-user/portfolio
-          git pull origin main
+          git fetch origin main
+          git reset --hard origin/main
           sudo docker rm -f portfolio-backend || true
           sudo docker build -t portfolio-backend -f backend/Dockerfile .
           sudo docker run --env-file backend/.env -p 8000:8000 --name portfolio-backend -d portfolio-backend
