@@ -697,7 +697,7 @@ Remember: If it's not in the Context above, you don't know it. Period."""
                 status_code=200,
                 content={
                     "reply": response.text,
-                    "source": data_source
+                    "source": "Portfolio"
                 }
             )
         else:
