@@ -1,0 +1,30 @@
+name: Repopulate ChromaDB
+
+on:
+  workflow_dispatch:  # Manual trigger only
+
+jobs:
+  repopulate:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v4
+
+      - name: Repopulate ChromaDB from cleaned data
+        run: |
+          cd /home/ec2-user/portfolio/backend
+          
+          # Create .env file with credentials
+          cat > .env << EOF
+          CHROMA_API_KEY=${{ secrets.CHROMA_API_KEY }}
+          CHROMA_TENANT=${{ secrets.CHROMA_TENANT }}
+          CHROMA_DATABASE=Development
+          EOF
+          
+          echo "📋 Running ChromaDB repopulation script..."
+          python3 populate_vector_db.py
+          
+          echo "✅ ChromaDB repopulated successfully!"
+          
+          # Clean up .env
+          rm -f .env
