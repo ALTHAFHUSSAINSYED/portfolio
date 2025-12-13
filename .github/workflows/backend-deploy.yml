@@ -39,6 +39,17 @@ jobs:
           EOF
           chmod 600 .env
 
+      - name: Repopulate ChromaDB (if data files changed)
+        run: |
+          cd /home/ec2-user/portfolio/backend
+          if git diff HEAD~1 HEAD --name-only | grep -E "(portfolio_data\.json|formatted_data\.json|fixed_data\.json)"; then
+            echo "📋 Data files changed - repopulating ChromaDB..."
+            python3 populate_vector_db.py
+            echo "✅ ChromaDB repopulated successfully!"
+          else
+            echo "ℹ️ No data file changes detected - skipping ChromaDB repopulation"
+          fi
+
       - name: Deploy and restart backend
         run: |
           cd /home/ec2-user/portfolio
