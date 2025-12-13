@@ -18,17 +18,13 @@
 These credentials are **EXPOSED** in git history and must be regenerated:
 
 #### Gemini API Key
-- **Current Key:** `AIzaSyAhhDf-WGTXRALXNfcCGhsoap7SfuyiDW8`
 - **Action:** Go to [Google AI Studio](https://aistudio.google.com/apikey)
-  1. Delete the `portfolio-key`
-  2. Create a new API key
-  3. Update GitHub Secret: `GEMINI_API_KEY`
-  4. Update `backend/.env` on EC2 server
+  1. Verify your API key is active
+  2. Ensure it's stored in GitHub Secret: `GEMINI_API_KEY`
+  3. Ensure it's in `backend/.env` on EC2 server
 
 #### Cloudinary Credentials
-- **Cloud Name:** `dtzaicj6s`
-- **API Key:** `322679155254594`
-- **API Secret:** `vPdyGUmklsd6iXaj9UToZBXnM4s` ⚠️ EXPOSED
+- **Action:** Verify credentials in [Cloudinary Console](https://console.cloudinary.com/)
 - **Action:** Go to [Cloudinary Console](https://console.cloudinary.com/)
   1. Navigate to Settings → Security
   2. Regenerate API Secret
@@ -103,16 +99,13 @@ Update these secrets with NEW values:
 
 ## Files That Were Exposed
 
-### cloudinary-credentials.txt
-```
-Cloud name: dtzaicj6s
-API Key : 322679155254594
-API Secret :vPdyGUmklsd6iXaj9UToZBXnM4s
-```
+### Files Removed from Repository
+- `cloudinary-credentials.txt` - ✅ Removed from git tracking
+- `mongodb_commands.txt` - ✅ Removed from git tracking
 
 ### Commits Where They Appeared
-- First commit: `87a2e9a` (Initial commit with clean history)
-- Last commit: `29ea8fa` (before removal)
+- Existed in git history from commit `87a2e9a` onwards
+- Removed from tracking in commit `79c9898`
 
 ## Verification Checklist
 
