@@ -2,12 +2,16 @@ import chromadb
 import os
 import json
 import re
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Initialize ChromaDB cloud client
 client = chromadb.CloudClient(
-    api_key='ck-EWpGxabEbpBzHDHjj9YrSFoyRyiAtgwooUbtmJXxziXH',
-    tenant='7c2da124-ba75-4ae6-85b5-ff22589f0d08',
-    database='Development'
+    api_key=os.getenv('CHROMA_API_KEY'),
+    tenant=os.getenv('CHROMA_TENANT'),
+    database=os.getenv('CHROMA_DATABASE', 'Development')
 )
 
 def clean_text(text):
