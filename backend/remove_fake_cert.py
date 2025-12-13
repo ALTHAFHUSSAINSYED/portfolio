@@ -39,3 +39,4 @@ print(f"\n📊 Summary: Deleted {deleted_count} document(s) containing fake cert
 # Verify deletion
 results_after = collection.get()
 print(f"Documents remaining: {len(results_after['ids'])}")
+# ChromaDB repopulated on Sun, Dec 14, 2025  1:38:25 AM
