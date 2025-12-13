@@ -1,7 +1,7 @@
 import os
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 from dotenv import load_dotenv
 
 # Load environment variables
