@@ -243,7 +243,7 @@ async def setup_scheduled_tasks():
 async def get_portfolio_context(query: str) -> str:
     """Retrieve relevant context from ALL portfolio ChromaDB collections with similarity threshold."""
     all_context = []
-    SIMILARITY_THRESHOLD = 0.7  # Only keep results with similarity > 70%
+    SIMILARITY_THRESHOLD = 0.3  # Lower threshold - ChromaDB uses different distance metrics
     
     try:
         # Get ChromaDB credentials
@@ -280,15 +280,19 @@ async def get_portfolio_context(query: str) -> str:
                 distances = results.get('distances', [[]])[0]
                 
                 # Filter by similarity (lower distance = higher similarity)
-                # Convert distance to similarity score
+                # ChromaDB returns squared euclidean distance, not cosine
                 filtered_docs = []
                 for i, (doc, dist) in enumerate(zip(docs, distances)):
-                    similarity = 1 - dist  # Convert distance to similarity
-                    if similarity >= SIMILARITY_THRESHOLD:
+                    # Log actual distance for debugging
+                    logging.info(f"{collection_name} result {i+1}: distance={dist:.4f}, doc_preview={doc[:80]}...")
+                    
+                    # Keep results with low distance (good match)
+                    # Distance < 0.5 is usually good, < 0.3 is excellent
+                    if dist < 1.0:  # Accept results with distance < 1.0
                         filtered_docs.append(doc)
-                        logging.info(f"{collection_name} result {i+1}: similarity={similarity:.2f}")
+                        logging.info(f"  ✅ ACCEPTED (distance={dist:.4f})")
                     else:
-                        logging.debug(f"{collection_name} result {i+1}: REJECTED (similarity={similarity:.2f} < {SIMILARITY_THRESHOLD})")
+                        logging.info(f"  ❌ REJECTED (distance={dist:.4f} >= 1.0)")
                 
                 if filtered_docs:
                     all_context.extend(filtered_docs)
