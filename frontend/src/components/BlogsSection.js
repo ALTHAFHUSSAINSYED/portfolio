@@ -17,41 +17,60 @@ const BlogsSection = () => {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [showCategoryFilter, setShowCategoryFilter] = useState(false); // Hide filter by default
-  const [showAllBlogs, setShowAllBlogs] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(3); // Progressive loading: start with 3
   const sectionRef = useRef(null);
   const location = useLocation();
+  
+  // Categories to exclude
+  const excludedCategories = [
+    'Frontend Development',
+    'IoT Development',
+    'Blockchain',
+    'Databases',
+    'Edge Computing',
+    'Quantum Computing'
+  ];
 
   useEffect(() => {
     fetchBlogs();
   }, []);
   
-  // Extract unique categories from blogs
+  // Extract unique categories from blogs (excluding unwanted ones)
   useEffect(() => {
     if (blogs && blogs.length > 0) {
-      const uniqueCategories = [...new Set(blogs.map(blog => blog.category).filter(Boolean))];
+      const uniqueCategories = [...new Set(
+        blogs
+          .map(blog => blog.category)
+          .filter(cat => cat && !excludedCategories.includes(cat))
+      )];
       setCategories(uniqueCategories);
       
-      // Get category from URL or select first category by default
+      // Get category from URL
       const searchParams = new URLSearchParams(location.search);
       const categoryParam = searchParams.get('category');
       if (categoryParam && uniqueCategories.includes(categoryParam)) {
         setSelectedCategory(categoryParam);
+        setVisibleCount(3); // Reset to 3 when category selected
       }
-      // Removed auto-selection: selectedCategory stays null by default
     }
   }, [blogs, location.search]);
   
   // Check URL for category parameter
   useEffect(() => {
-    // Get category from URL if present
     const searchParams = new URLSearchParams(location.search);
     const categoryParam = searchParams.get('category');
     
     if (categoryParam) {
       setSelectedCategory(categoryParam);
       setShowCategoryFilter(true);
+      setVisibleCount(3); // Reset to 3 when URL category changes
     }
   }, [location.search]);
+  
+  // Reset visible count when category filter changes
+  useEffect(() => {
+    setVisibleCount(3); // Always start with 3 blogs
+  }, [selectedCategory]);
 
   const fetchBlogs = async () => {
     setLoading(true);
@@ -272,8 +291,10 @@ const BlogsSection = () => {
             )}
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {(showAllBlogs ? blogs : blogs.slice(0, 3))
-                .filter(blog => !selectedCategory || blog.category === selectedCategory)
+              {blogs
+                .filter(blog => !excludedCategories.includes(blog.category)) // Filter out excluded categories
+                .filter(blog => !selectedCategory || blog.category === selectedCategory) // Apply selected category filter
+                .slice(0, visibleCount) // Progressive loading
                 .map((blog, idx) => (
                   <Card key={blog.id || blog._id || idx} className="p-8 relative block-card hover:shadow-lg transition-all duration-300">
                     <div className="absolute top-4 right-4">
@@ -314,17 +335,50 @@ const BlogsSection = () => {
           </>
         )}
         
-        {blogs.length > 3 && !showAllBlogs && (
-          <div className="mt-12 text-center">
-            <Button 
-              variant="outline" 
-              className="glassmorphic-btn"
-              onClick={() => setShowAllBlogs(true)}
-            >
-              See More Blogs
-            </Button>
-          </div>
-        )}
+        {/* Dynamic "See More" / "See Less" Button */}
+        {(() => {
+          const filteredBlogs = blogs
+            .filter(blog => !excludedCategories.includes(blog.category))
+            .filter(blog => !selectedCategory || blog.category === selectedCategory);
+          
+          const totalFiltered = filteredBlogs.length;
+          const allVisible = visibleCount >= totalFiltered;
+          
+          // Only show button if there are more than 3 blogs
+          if (totalFiltered <= 3) return null;
+          
+          if (allVisible) {
+            // Show "See Less Blogs" button
+            return (
+              <div className="mt-12 text-center">
+                <Button 
+                  variant="outline" 
+                  className="glassmorphic-btn"
+                  onClick={() => {
+                    setVisibleCount(3);
+                    setSelectedCategory(null); // Clear filter
+                    setShowCategoryFilter(false); // Hide category filter
+                  }}
+                >
+                  See Less Blogs
+                </Button>
+              </div>
+            );
+          } else {
+            // Show "See More Blogs" button
+            return (
+              <div className="mt-12 text-center">
+                <Button 
+                  variant="outline" 
+                  className="glassmorphic-btn"
+                  onClick={() => setVisibleCount(prev => prev + 3)}
+                >
+                  See More Blogs
+                </Button>
+              </div>
+            );
+          }
+        })()}
       </div>
     </section>
   );
