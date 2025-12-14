@@ -87,8 +87,8 @@ jobs:
           echo "🏷️ Tagging image for registry..."
           # Get commit SHA for unique tag
           COMMIT_SHA=$(git rev-parse --short HEAD)
-          IMAGE_TAG="althafhussainsyed/portfolio-backend:${COMMIT_SHA}"
-          LATEST_TAG="althafhussainsyed/portfolio-backend:latest"
+          IMAGE_TAG="kubealthaf/portfolio-backend:${COMMIT_SHA}"
+          LATEST_TAG="kubealthaf/portfolio-backend:latest"
           echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
           echo "LATEST_TAG=${LATEST_TAG}" >> $GITHUB_ENV
           sudo docker tag portfolio-backend $IMAGE_TAG
