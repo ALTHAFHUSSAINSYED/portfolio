@@ -96,253 +96,9 @@ const Chatbot = () => {
     setIsLoading(true);
 
     try {
-      // Set up enhanced local knowledge base
-      const getFallbackResponse = (input) => {
-        // Update conversation memory
-        conversationMemory.current.questionsAsked++;
-        
-        // Convert input to lowercase for easier matching
-        const inputLower = input.toLowerCase();
-        
-  // Comprehensive knowledge base about Althaf and TechAssistant
-        const knowledgeBase = {
-          profile: {
-            name: "Althaf Hussain Syed",
-            role: "Full Stack Developer & DevOps Engineer",
-            summary: "Passionate about building scalable web applications and implementing efficient CI/CD pipelines",
-            experience: "Over 5 years of experience in software development, cloud architecture, and DevOps practices",
-            education: "Bachelor's degree in Computer Science with specialization in Software Engineering"
-          },
-          
-          skills: {
-            frontend: ["React", "Next.js", "JavaScript", "TypeScript", "HTML/CSS", "Tailwind CSS", "Material UI"],
-            backend: ["Node.js", "Express", "Python", "Flask", "FastAPI", "RESTful API design"],
-            database: ["MongoDB", "PostgreSQL", "MySQL", "Redis", "Database design & optimization"],
-            devops: ["AWS", "Azure", "Docker", "Kubernetes", "CI/CD", "GitHub Actions", "Terraform"],
-            other: ["Git", "Agile methodologies", "Testing", "System design", "Problem-solving"]
-          },
-          
-          projects: [
-            {
-              name: "TechAssistant Website",
-              tech: "React, Tailwind CSS, Node.js, MongoDB",
-              description: "Interactive TechAssistant with chatbot integration showcasing projects and skills"
-            },
-            {
-              name: "Cloud-based CI/CD Pipeline",
-              tech: "AWS, Docker, Kubernetes, GitHub Actions",
-              description: "Automated deployment workflow for microservice applications"
-            },
-            {
-              name: "E-commerce Platform",
-              tech: "Next.js, MongoDB, Stripe, Auth0",
-              description: "Full-featured online store with secure payment processing"
-            }
-          ],
-
-          blogs: [
-            "Cloud architecture walkthroughs for the TechAssistant platform",
-            "DevOps automation practices with GitHub Actions and Docker",
-            "Full stack implementation notes from recent client projects"
-          ],
-          
-          contactInfo: {
-            email: "Available through the contact form on the website",
-            github: "ALTHAFHUSSAINSYED",
-            linkedin: "Available on the TechAssistant site"
-          }
-        };
-        
-        // Define response categories with advanced pattern matching
-        const responses = {
-          greetings: {
-            match: /^(hi|hello|hey|greetings|howdy|hola|good morning|good afternoon|good evening|hi there|hello there)/i,
-            replies: [
-              "Hello there! I'm Allu Bot, your friendly TechAssistant. How can I help you today?",
-              "Hi! Welcome to Althaf's TechAssistant. What would you like to know about his skills or projects?",
-              "Hey! Great to meet you. Feel free to ask about Althaf's work, technologies, or experience!"
-            ]
-          },
-
-          skillsOverview: {
-            match: /(skill|skills|skillset|tech stack|expertise|strengths)/i,
-            replies: [
-              `Althaf's core skills span frontend (${knowledgeBase.skills.frontend.slice(0,4).join(", ")}), backend (${knowledgeBase.skills.backend.slice(0,4).join(", ")}), and DevOps (${knowledgeBase.skills.devops.slice(0,4).join(", ")}).`,
-              `He combines frontend tools like ${knowledgeBase.skills.frontend.slice(0,3).join(", ")} with backend frameworks such as ${knowledgeBase.skills.backend.slice(0,3).join(", ")} and DevOps automation using ${knowledgeBase.skills.devops.slice(0,3).join(", ")}.`
-            ]
-          },
-
-          frontend: {
-            match: /\b(frontend|front-end|front end|ui|user interface|react|javascript|web design)\b/i,
-            replies: [
-              `For frontend development, Althaf works with ${knowledgeBase.skills.frontend.join(", ")}. His projects like ${knowledgeBase.projects[0].name} showcase his frontend skills.`,
-              `Althaf's frontend stack includes ${knowledgeBase.skills.frontend.join(", ")}, with a focus on building responsive and user-friendly interfaces.`
-            ]
-          },
-
-          backend: {
-            match: /\b(backend|back-end|back end|server|api|database|node|python|express)\b/i,
-            replies: [
-              `Althaf's backend expertise includes ${knowledgeBase.skills.backend.join(", ")} and database technologies like ${knowledgeBase.skills.database.slice(0,3).join(", ")}.`,
-              `For backend development, Althaf uses ${knowledgeBase.skills.backend.slice(0,3).join(", ")}, designing scalable APIs and efficient database structures with ${knowledgeBase.skills.database.slice(0,3).join(", ")}.`
-            ]
-          },
-
-          devops: {
-            match: /(devops|ci\/cd|deployment|cloud|aws|azure|docker|kubernetes|pipeline|infrastructure)/i,
-            replies: [
-              `Althaf has strong DevOps skills with ${knowledgeBase.skills.devops.join(", ")}. His ${knowledgeBase.projects[1].name} project demonstrates his DevOps capabilities.`,
-              `In the DevOps realm, Althaf works with ${knowledgeBase.skills.devops.join(", ")}, implementing automated pipelines and cloud infrastructure.`
-            ]
-          },
-
-          projects: {
-            match: /(project|projects|techassistant|showcase|applications|apps|portfolio work)/i,
-            replies: [
-              `Althaf's notable projects include: 1) ${knowledgeBase.projects[0].name} using ${knowledgeBase.projects[0].tech} - ${knowledgeBase.projects[0].description}, 2) ${knowledgeBase.projects[1].name} using ${knowledgeBase.projects[1].tech} - ${knowledgeBase.projects[1].description}, and 3) ${knowledgeBase.projects[2].name} using ${knowledgeBase.projects[2].tech} - ${knowledgeBase.projects[2].description}.`,
-              `The TechAssistant showcases several projects including ${knowledgeBase.projects[0].name}, ${knowledgeBase.projects[1].name}, and ${knowledgeBase.projects[2].name}, demonstrating various technical skills from frontend to DevOps.`
-            ]
-          },
-
-          blogs: {
-            match: /(blog|blogs|articles?|recent blogs|latest blog|write)/i,
-            replies: [
-              `Althaf regularly shares blogs on topics like ${knowledgeBase.blogs.join(", ")}. You can read them in the Blogs section of this portfolio.`,
-              "You'll find his latest blog posts in the Blogs section, covering cloud architecture, DevOps automation, and end-to-end project case studies."
-            ]
-          },
-
-          contact: {
-            match: /(contact|reach|email|github|linkedin|social|get in touch|contact information)/i,
-            replies: [
-              `You can contact Althaf through the contact form on this website. His GitHub username is ${knowledgeBase.contactInfo.github}, and LinkedIn is available in the contact section.`,
-              `For professional inquiries, please use the contact form on this website. Althaf can also be found on GitHub as ${knowledgeBase.contactInfo.github}.`
-            ]
-          },
-
-          experience: {
-            match: /(experience|work history|background|career|job|professional)/i,
-            replies: [
-              `Althaf has ${knowledgeBase.profile.experience}, focusing on web development and cloud infrastructure. He's worked on various projects including ${knowledgeBase.projects[0].name} and ${knowledgeBase.projects[1].name}.`,
-              `With ${knowledgeBase.profile.experience}, Althaf has developed expertise in both frontend and backend technologies, as well as cloud deployment and DevOps practices.`
-            ]
-          },
-
-          education: {
-            match: /(education|degree|study|college|university|academic)/i,
-            replies: [
-              `Althaf has ${knowledgeBase.profile.education}, which provided a strong foundation for his software development career.`,
-              `His educational background includes ${knowledgeBase.profile.education}, complemented by continuous learning and staying updated with industry trends.`
-            ]
-          },
-
-          about: {
-            match: /^(who|tell me about|about|describe|introduce|background|info about).*(althaf|you|himself|techassistant owner|developer|creator)/i,
-            replies: [
-              `${knowledgeBase.profile.name} is a ${knowledgeBase.profile.role} with ${knowledgeBase.profile.experience}. ${knowledgeBase.profile.summary}.`,
-              `Althaf Hussain Syed is a developer specializing in full-stack development and DevOps. He has experience with ${knowledgeBase.skills.frontend.slice(0,3).join(", ")} on the frontend and ${knowledgeBase.skills.backend.slice(0,3).join(", ")} on the backend.`
-            ]
-          },
-          
-          specificProject: {
-            match: /(e-commerce|store|shop|payment)/i,
-            replies: [
-              `The ${knowledgeBase.projects[2].name} is built with ${knowledgeBase.projects[2].tech}. ${knowledgeBase.projects[2].description}.`,
-              `Althaf developed an e-commerce platform using ${knowledgeBase.projects[2].tech}, featuring secure payments, user authentication, and product management.`
-            ]
-          },
-          
-          chatbot: {
-            match: /(chatbot|chat bot|bot|ai|yourself|talking to|speaking with|assistant)/i,
-            replies: [
-              "I'm Allu Bot, a specialized AI assistant built for Althaf's TechAssistant website. While I have limited internet access, I can answer questions about Althaf's skills, projects, and experience.",
-              "I'm a custom AI assistant for this TechAssistant. I can tell you about Althaf's work, skills, and projects, though my knowledge is primarily focused on information contained in this TechAssistant."
-            ]
-          },
-          
-          thanks: {
-            match: /^(thanks|thank you|appreciate|helpful|great)/i,
-            replies: [
-              "You're welcome! I'm glad I could help. Feel free to ask if you have any other questions about Althaf's work or skills.",
-              "Happy to help! If you need any more information about Althaf's TechAssistant or experience, just let me know.",
-              "My pleasure! Is there anything else you'd like to know about Althaf's projects or technical background?"
-            ]
-          },
-          
-          default: {
-            replies: [
-              "I'm designed to answer questions about Althaf's TechAssistant and skills. Could you try asking something more specific about his work, projects, or technical expertise?",
-              "I can tell you about Althaf's projects, skills, and experience. What specific aspect of his professional background would you like to know about?",
-              "I'd be happy to help with information about Althaf's work and skills. For best results, try asking about specific technologies, projects, or areas of expertise."
-            ]
-          }
-        };
-
-        // Check for context-aware responses based on conversation history
-        if (conversationMemory.current.questionsAsked > 1) {
-          // If user has asked multiple short questions, try to be more helpful
-          if (input.length < 10) {
-            if (conversationMemory.current.lastTopic === "projects") {
-              return { reply: `Regarding Althaf's projects, he has worked on ${knowledgeBase.projects.map(p => p.name).join(", ")}. Which one would you like to know more about?` };
-            }
-            if (conversationMemory.current.lastTopic === "skills") {
-              return { reply: `About Althaf's skills, he specializes in frontend (${knowledgeBase.skills.frontend.slice(0,3).join(", ")}), backend (${knowledgeBase.skills.backend.slice(0,3).join(", ")}), and DevOps (${knowledgeBase.skills.devops.slice(0,3).join(", ")}). Would you like more details on any of these areas?` };
-            }
-          }
-        }
-
-        // Try to match input to a category
-        for (const [category, data] of Object.entries(responses)) {
-          if (category !== 'default' && data.match.test(inputLower)) {
-            conversationMemory.current.lastTopic = category;
-            conversationMemory.current.topics.add(category);
-            return { reply: data.replies[Math.floor(Math.random() * data.replies.length)] };
-          }
-        }
-
-        // Check for technology mentions
-        const techKeywords = {
-          react: "React is one of Althaf's core frontend skills. He uses it for building interactive user interfaces, including this TechAssistant website.",
-          node: "Node.js is part of Althaf's backend stack, used for building scalable server-side applications and APIs.",
-          python: "Python is among Althaf's backend technologies, particularly with frameworks like Flask and FastAPI for web services.",
-          aws: "Althaf has experience with AWS for cloud deployment, including services like EC2, S3, Lambda, and more.",
-          azure: "Azure is part of Althaf's cloud expertise, used for deploying applications and implementing DevOps practices.",
-          docker: "Althaf uses Docker for containerization, ensuring consistent environments across development and production.",
-          kubernetes: "Kubernetes is part of Althaf's DevOps toolkit, used for container orchestration in his cloud projects."
-        };
-
-        for (const [tech, response] of Object.entries(techKeywords)) {
-          if (inputLower.includes(tech)) {
-            return { reply: response };
-          }
-        }
-
-        // Default response if no matches
-        const defaultReplies = responses.default.replies;
-        return { reply: defaultReplies[Math.floor(Math.random() * defaultReplies.length)] };
-      };
-      
-      // Detect if the query is asking for internet information
-      const requiresInternet = (query) => {
-        const internetQueries = [
-          /current|latest|news|today|update|recent/i,
-          /weather|forecast/i,
-          /stock|market|price/i,
-          /search|find|look up|google/i,
-          /what is|who is|tell me about/i,
-          /how to|how do/i
-        ];
-        
-        return internetQueries.some(pattern => pattern.test(query));
-      };
-      
       let data = null;
       let apiCallSucceeded = false;
       let foundSource = null;
-      
-      // Determine if we should try to get an internet-based response
-      const needsInternetResponse = requiresInternet(userInput);
-      console.log(`Query "${userInput}" - Needs internet access: ${needsInternetResponse}`);
       
       // Prepare the list of API endpoints to try
       const possibleBaseUrls = [
@@ -358,14 +114,13 @@ const Chatbot = () => {
         try {
           console.log(`Attempting API call to: ${baseUrl}/api/ask-all-u-bot`);
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5-second timeout
+          const timeoutId = setTimeout(() => controller.abort(), 15000); // Increased timeout to 15s
           
           const response = await fetch(`${baseUrl}/api/ask-all-u-bot`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ 
-              message: userInput,
-              context: needsInternetResponse ? "internet_required" : "portfolio_info" 
+              message: userInput
             }),
             credentials: 'omit',
             signal: controller.signal
@@ -425,33 +180,26 @@ const Chatbot = () => {
         console.log("Error saving API status to localStorage:", e);
       }
       
-      // If API calls failed, use local fallback system
+      // If API calls failed, show error
       if (!apiCallSucceeded || !data) {
-        // If internet information was requested but unavailable, inform the user
-        if (needsInternetResponse) {
-          data = {
-            reply: "I'd like to answer that question, but I need internet access which is currently unavailable. I can tell you about Althaf's skills, projects, or experience instead."
-          };
-        } else {
-          // Otherwise use standard local fallback
-          data = getFallbackResponse(userInput);
-        }
-        console.log("Using local fallback system for response");
+        data = {
+          reply: "I'm sorry, I'm having trouble connecting to my brain right now. Please try again in a moment."
+        };
+        console.log("API failed, showing error message");
       }
 
       // Create the bot message, including source attribution if available
       let messageText = data.reply || "Sorry, I couldn't process your request.";
       
       // If we have a source from the internet, add attribution
-  if (foundSource && foundSource !== "TechAssistant" && foundSource !== "None" && foundSource.startsWith("http")) {
+      if (foundSource && foundSource !== "Portfolio" && foundSource !== "None" && foundSource.startsWith("http")) {
         try {
           messageText += `\n\n[Source: ${new URL(foundSource).hostname}]`;
         } catch (e) {
           // If URL construction fails, just add the raw source
-          messageText += `\n\n[Source: ${foundSource}]`;
         }
       }
-      
+
       const botMessage = { 
         sender: "bot", 
         text: messageText,
