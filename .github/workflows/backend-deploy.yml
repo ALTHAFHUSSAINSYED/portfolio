@@ -81,3 +81,32 @@ jobs:
           done
           echo "❌ Backend health check failed!"
           exit 1
+
+      - name: Tag Docker image for registry
+        run: |
+          echo "🏷️ Tagging image for registry..."
+          # Get commit SHA for unique tag
+          COMMIT_SHA=$(git rev-parse --short HEAD)
+          IMAGE_TAG="althafhussainsyed/portfolio-backend:${COMMIT_SHA}"
+          LATEST_TAG="althafhussainsyed/portfolio-backend:latest"
+          echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
+          echo "LATEST_TAG=${LATEST_TAG}" >> $GITHUB_ENV
+          sudo docker tag portfolio-backend $IMAGE_TAG
+          sudo docker tag portfolio-backend $LATEST_TAG
+          echo "✅ Images tagged as: $IMAGE_TAG and $LATEST_TAG"
+
+      - name: Login to Docker registry
+        run: |
+          echo "🔐 Logging into Docker registry..."
+          echo "${{ secrets.DOCKER_PASSWORD }}" | sudo docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          echo "✅ Successfully logged into Docker registry"
+
+      - name: Push image to registry
+        run: |
+          echo "📤 Pushing images to registry..."
+          sudo docker push $IMAGE_TAG
+          sudo docker push $LATEST_TAG
+          echo "✅ Images successfully pushed to registry!"
+          echo "🖼️ Images available at:"
+          echo "  - $IMAGE_TAG"
+          echo "  - $LATEST_TAG"
