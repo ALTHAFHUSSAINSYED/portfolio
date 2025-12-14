@@ -524,10 +524,33 @@ const Chatbot = () => {
       {isOpen && (
         <div className="chatbot-window">
           <div className="chatbot-header">
-            {/* Avatar removed for cleaner header as per user request */}
+            <div className="chatbot-avatar" aria-hidden="true">
+              <img
+                src="/profile-pic.jpg"
+                alt="Allu Bot"
+                onError={(e) => {
+                  e.target.style.display = "none";
+                  if (e.target.nextSibling) {
+                    e.target.nextSibling.style.display = "block";
+                  }
+                }}
+              />
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                style={{ display: "none" }}
+              >
+                <circle cx="12" cy="12" r="10" fill="#3b82f6" />
+                <path
+                  d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                  fill="#fff"
+                />
+              </svg>
+            </div>
             <div className="chatbot-title-container">
-              <div className="chatbot-title">Allu Bot</div>
-              <div className="chatbot-subtitle">Portfolio & Tech Assistant</div>
+              <p className="chatbot-title">Allu Bot</p>
+              <p className="chatbot-subtitle">Portfolio & Tech Assistant</p>
             </div>
             <button className="close-button" onClick={toggleChat} aria-label="Close chat">×</button>
           </div>
