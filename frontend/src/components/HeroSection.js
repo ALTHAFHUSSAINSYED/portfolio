@@ -133,7 +133,7 @@ const HeroSection = ({ personalInfo }) => {
           
           {/* Conditionally render SVG only on large screens */}
           {isLargeScreen && (
-            <svg className="absolute top-0 left-0 w-full h-full z-10" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet">
+            <svg className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet">
               {/* --- SVG PATHS UPDATED for top-center connection --- */}
               {/* Added conditional class for animation */}
               <path d="M 800 128 C 300 300, 200 400, 250 510" stroke="url(#left-grad)" strokeWidth="4" fill="none" className={profilePicLoaded ? "snake-path-animated" : ""} />
@@ -153,11 +153,11 @@ const HeroSection = ({ personalInfo }) => {
 
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-4 items-start w-full mt-8">
             
-            <div className="z-20 order-2 lg:order-1 lg:col-span-1 flex justify-center lg:justify-start pt-4">
-              <div className="relative group">
+            <div className="relative z-30 order-2 lg:order-1 lg:col-span-1 flex justify-center lg:justify-start pt-4">
+              <div className="relative group bg-background rounded-xl">
                 <video 
                   ref={leftVideoRef} 
-                  src="/videos/intro_left.mp4" 
+                  src="https://res.cloudinary.com/dtzaicj6s/video/upload/v1765735442/intro_left_yxzbkk.mp4" 
                   autoPlay 
                   playsInline 
                   loop 
@@ -171,7 +171,7 @@ const HeroSection = ({ personalInfo }) => {
               </div>
             </div>
 
-            <div className="relative text-center z-20 order-1 lg:order-2 lg:col-span-3">
+            <div className="relative text-center z-30 order-1 lg:order-2 lg:col-span-3">
               <Badge variant="outline" className="mb-6"><span className="animate-pulse mr-2 text-green-soft">•</span>Available for New Opportunities</Badge>
               <h1 className="text-5xl md:text-7xl font-bold mb-6">{personalInfo.name}</h1>
               <div className="text-2xl md:text-3xl font-semibold mb-8">
@@ -186,11 +186,11 @@ const HeroSection = ({ personalInfo }) => {
               </div>
             </div>
 
-            <div className="z-20 order-3 lg:order-3 lg:col-span-1 flex justify-center lg:justify-end pt-4">
-              <div className="relative group">
+            <div className="relative z-30 order-3 lg:order-3 lg:col-span-1 flex justify-center lg:justify-end pt-4">
+              <div className="relative group bg-background rounded-xl">
                 <video 
                   ref={rightVideoRef} 
-                  src="/videos/intro_right.mp4" 
+                  src="https://res.cloudinary.com/dtzaicj6s/video/upload/v1765735441/intro_right_yslwma.mp4" 
                   autoPlay 
                   playsInline 
                   loop 
