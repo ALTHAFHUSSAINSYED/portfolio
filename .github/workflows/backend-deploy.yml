@@ -1,47 +1,34 @@
-# GitHub Actions Workflow File
+# GitHub Actions Workflow File - Complete Learning Guide with Inline Comments
 # This file defines an automated CI/CD pipeline that runs on GitHub's servers
 # When you push code, it automatically builds, tests, and deploys your backend
 
-# Display name shown in GitHub Actions UI
-name: Deploy Backend to EC2
+name: Deploy Backend to EC2  # Display name shown in GitHub Actions UI
 
-# WHEN does this workflow run?
-on:
+on:  # WHEN does this workflow run? (triggers section)
   push:  # Trigger on git push events
-    # Only run when these files/folders change
-    paths:
+    paths:  # Only run when these files/folders change (path filters)
       - 'backend/**'  # Any file in backend/ folder
       - '.github/workflows/backend-deploy.yml'  # This workflow file itself
       - 'backend/Dockerfile'  # Docker build instructions
       - 'backend/requirements.txt'  # Python dependencies
       - 'backend/.env*'  # Environment variable files
       - '!frontend/**'  # EXCLUDE frontend changes (don't run for frontend)
-    # Only run on pushes to these branches
-    branches:
+    branches:  # Only run on pushes to these branches
       - main  # Production branch
 
-# WHAT jobs to run (can have multiple jobs, but we have one)
-jobs:
-  deploy:  # Job name
-    # Run on YOUR EC2 server (not GitHub's servers)
-    runs-on: self-hosted
+jobs:  # WHAT jobs to run (can have multiple jobs, but we have one)
+  deploy:  # Job name (unique identifier for this job)
+    runs-on: self-hosted  # Run on YOUR EC2 server (not GitHub's servers)
 
-    # STEPS to execute (run in order)
-    steps:
+    steps:  # STEPS to execute (run in order - like a recipe)
 
-      # Step 1: Get the code from GitHub
-      - name: Checkout code  # Human-readable step name
-        # Use GitHub's pre-built "checkout" action
-        uses: actions/checkout@v4
+      - name: Checkout code  # Step 1: Get the code from GitHub (human-readable step name)
+        uses: actions/checkout@v4  # Use GitHub's pre-built "checkout" action (version 4)
 
-      # Step 2: Create environment variables file
-      - name: Create environment file
-        # Multi-line shell script
-        run: |
-          # Go to backend folder on EC2
-          cd /home/ec2-user/portfolio/backend
-          # Create .env file with all secrets
-          cat > .env << EOF
+      - name: Create environment file  # Step 2: Create environment variables file
+        run: |  # Multi-line shell script (pipe | means multi-line)
+          cd /home/ec2-user/portfolio/backend  # Go to backend folder on EC2
+          cat > .env << EOF  # Create .env file with all secrets (heredoc syntax)
           MONGO_URL=${{ secrets.MONGO_URL }}  # Database connection (from GitHub Secrets)
           GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}  # AI API key
           SERPER_API_KEY=${{ secrets.SERPER_API_KEY }}  # Search API key
@@ -55,107 +42,76 @@ jobs:
           CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}  # Image hosting secret
           DB_NAME=portfolioDB  # MongoDB database name
           ENVIRONMENT=production  # Tells app it's running in production
-          EOF
-          # Set file permissions (owner read/write only)
-          chmod 600 .env
+          EOF  # End of heredoc
+          chmod 600 .env  # Set file permissions (owner read/write only)
 
-      # Step 3: Update vector database if portfolio data changed
-      - name: Repopulate ChromaDB (if data files changed)
-        run: |
-          cd /home/ec2-user/portfolio/backend
-          if git diff HEAD~1 HEAD --name-only | grep -E "(portfolio_data\.json|formatted_data\.json|fixed_data\.json)"; then
-            # If portfolio data files changed, rebuild the vector database
-            echo "📋 Data files changed - repopulating ChromaDB..."
+      - name: Repopulate ChromaDB (if data files changed)  # Step 3: Update vector database if portfolio data changed
+        run: |  # Multi-line shell script
+          cd /home/ec2-user/portfolio/backend  # Go to backend folder on EC2
+          if git diff HEAD~1 HEAD --name-only | grep -E "(portfolio_data\.json|formatted_data\.json|fixed_data\.json)"; then  # Check if data files changed in last commit
+            echo "📋 Data files changed - repopulating ChromaDB..."  # If files changed, show message
             python3 populate_vector_db.py  # Run the database population script
-            echo "✅ ChromaDB repopulated successfully!"
-          else
-            # If no data files changed, skip this step
-            echo "ℹ️ No data file changes detected - skipping ChromaDB repopulation"
-          fi
+            echo "✅ ChromaDB repopulated successfully!"  # Success message
+          else  # If no data files changed
+            echo "ℹ️ No data file changes detected - skipping ChromaDB repopulation"  # Skip message
+          fi  # End of if statement
 
-      # Step 4: Build and deploy the Docker container
-      - name: Deploy and restart backend
-        run: |
-          # Go to project root on EC2
-          cd /home/ec2-user/portfolio
-          # Get latest changes from GitHub
-          git fetch origin main
-          # Force update to latest commit
-          git reset --hard origin/main
-          # Stop/remove old container (ignore errors)
-          sudo docker rm -f portfolio-backend || true
-          # Build new image
-          sudo docker build -t portfolio-backend -f backend/Dockerfile .
-          # Run container: load env vars, map port 8000, name it, auto-restart, detached mode
-          sudo docker run --env-file /home/ec2-user/portfolio/backend/.env -p 8000:8000 --name portfolio-backend --restart unless-stopped -d portfolio-backend
+      - name: Deploy and restart backend  # Step 4: Build and deploy the Docker container
+        run: |  # Multi-line shell script
+          cd /home/ec2-user/portfolio  # Go to project root on EC2
+          git fetch origin main  # Get latest changes from GitHub
+          git reset --hard origin/main  # Force update to latest commit (destructive!)
+          sudo docker rm -f portfolio-backend || true  # Stop/remove old container (ignore errors)
+          sudo docker build -t portfolio-backend -f backend/Dockerfile .  # Build new image
+          sudo docker run --env-file /home/ec2-user/portfolio/backend/.env -p 8000:8000 --name portfolio-backend --restart unless-stopped -d portfolio-backend  # Run container with all options
 
-      # Step 5: Wait for container to start up
-      - name: Wait for container to start
-        run: |
-          echo "Waiting for container to start..."
-          # Wait 10 seconds for container to initialize
-          sleep 10
-          # Show last 50 lines of container logs
-          sudo docker logs portfolio-backend --tail 50
+      - name: Wait for container to start  # Step 5: Wait for container to start up
+        run: |  # Multi-line shell script
+          echo "Waiting for container to start..."  # Status message
+          sleep 10  # Wait 10 seconds for container to initialize
+          sudo docker logs portfolio-backend --tail 50  # Show last 50 lines of container logs
 
-      # Step 6: Test that the backend is working
-      - name: Health check
-        run: |
-          echo "Running health check..."
-          # Try up to 10 times
-          max_attempts=10
-          attempt=0
-          while [ $attempt -lt $max_attempts ]; do
-            if curl -f http://localhost:8000/ > /dev/null 2>&1; then
-              # If curl succeeds (HTTP 200), backend is healthy
-              echo "✅ Backend is healthy!"
-              # Success - exit the script
-              exit 0
-            fi
-            echo "Attempt $((attempt+1))/$max_attempts failed, retrying..."
-            # Wait 5 seconds before retrying
-            sleep 5
-            attempt=$((attempt+1))
-          done
-          echo "❌ Backend health check failed!"
-          # Failure - stop the workflow
-          exit 1
+      - name: Health check  # Step 6: Test that the backend is working
+        run: |  # Multi-line shell script
+          echo "Running health check..."  # Status message
+          max_attempts=10  # Try up to 10 times
+          attempt=0  # Start attempt counter at 0
+          while [ $attempt -lt $max_attempts ]; do  # Loop while attempts < max
+            if curl -f http://localhost:8000/ > /dev/null 2>&1; then  # Try to curl the health endpoint
+              echo "✅ Backend is healthy!"  # If curl succeeds (HTTP 200)
+              exit 0  # Success - exit the script
+            fi  # End of if
+            echo "Attempt $((attempt+1))/$max_attempts failed, retrying..."  # Failure message with attempt count
+            sleep 5  # Wait 5 seconds before retrying
+            attempt=$((attempt+1))  # Increment attempt counter
+          done  # End of while loop
+          echo "❌ Backend health check failed!"  # If all attempts failed
+          exit 1  # Failure - stop the workflow
 
-      # Step 7: Tag the Docker image for registry (only runs if health check passed)
-      - name: Tag Docker image for registry
-        run: |
-          echo "🏷️ Tagging image for registry..."
-          # Get short commit hash for unique versioning
-          COMMIT_SHA=$(git rev-parse --short HEAD)
-          # Unique tag with commit
-          IMAGE_TAG="kubealthaf/portfolio-backend:${COMMIT_SHA}"
-          # Latest tag for easy pulling
-          LATEST_TAG="kubealthaf/portfolio-backend:latest"
-          # Save for next steps
-          echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
-          echo "LATEST_TAG=${LATEST_TAG}" >> $GITHUB_ENV
-          # Tag the local image
-          sudo docker tag portfolio-backend $IMAGE_TAG
-          sudo docker tag portfolio-backend $LATEST_TAG
-          echo "✅ Images tagged as: $IMAGE_TAG and $LATEST_TAG"
+      - name: Tag Docker image for registry  # Step 7: Tag the Docker image for registry (only runs if health check passed)
+        run: |  # Multi-line shell script
+          echo "🏷️ Tagging image for registry..."  # Status message
+          COMMIT_SHA=$(git rev-parse --short HEAD)  # Get short commit hash for unique versioning
+          IMAGE_TAG="kubealthaf/portfolio-backend:${COMMIT_SHA}"  # Unique tag with commit
+          LATEST_TAG="kubealthaf/portfolio-backend:latest"  # Latest tag for easy pulling
+          echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV  # Save for next steps (GitHub environment variable)
+          echo "LATEST_TAG=${LATEST_TAG}" >> $GITHUB_ENV  # Save for next steps
+          sudo docker tag portfolio-backend $IMAGE_TAG  # Tag the local image
+          sudo docker tag portfolio-backend $LATEST_TAG  # Tag the local image
+          echo "✅ Images tagged as: $IMAGE_TAG and $LATEST_TAG"  # Success message
 
-      # Step 8: Login to Docker Hub (only runs if health check passed)
-      - name: Login to Docker registry
-        run: |
-          echo "🔐 Logging into Docker registry..."
-          # Use secrets for authentication (never expose passwords in code!)
-          echo "${{ secrets.DOCKER_PASSWORD }}" | sudo docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-          echo "✅ Successfully logged into Docker registry"
+      - name: Login to Docker registry  # Step 8: Login to Docker Hub (only runs if health check passed)
+        run: |  # Multi-line shell script
+          echo "🔐 Logging into Docker registry..."  # Status message
+          echo "${{ secrets.DOCKER_PASSWORD }}" | sudo docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin  # Use secrets for authentication
+          echo "✅ Successfully logged into Docker registry"  # Success message
 
-      # Step 9: Push images to Docker Hub (only runs if health check passed)
-      - name: Push image to registry
-        run: |
-          echo "📤 Pushing images to registry..."
-          # Push versioned image
-          sudo docker push $IMAGE_TAG
-          # Push latest image
-          sudo docker push $LATEST_TAG
-          echo "✅ Images successfully pushed to registry!"
-          echo "🖼️ Images available at:"
+      - name: Push image to registry  # Step 9: Push images to Docker Hub (only runs if health check passed)
+        run: |  # Multi-line shell script
+          echo "📤 Pushing images to registry..."  # Status message
+          sudo docker push $IMAGE_TAG  # Push versioned image
+          sudo docker push $LATEST_TAG  # Push latest image
+          echo "✅ Images successfully pushed to registry!"  # Success message
+          echo "🖼️ Images available at:"  # Show URLs
           echo "  - $IMAGE_TAG"  # Shows the tagged image URL
           echo "  - $LATEST_TAG"  # Shows the latest image URL
