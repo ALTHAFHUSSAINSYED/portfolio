@@ -76,7 +76,7 @@
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
   width: 360px; /* Increased width for better readability at 100% scale */
   max-width: 90vw;
-  height: 520px; /* Increased height for better content fit */
+  height: 500px; /* Reduced height as requested */
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -498,4 +498,35 @@
 
 [data-theme="dark"] .suggestion-button:hover {
   background-color: rgba(99, 102, 241, 0.2);
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
