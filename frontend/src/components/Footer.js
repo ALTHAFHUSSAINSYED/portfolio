@@ -30,8 +30,8 @@ const Footer = ({ personalInfo }) => {
   const downloadResume = () => {
     try {
       const link = document.createElement('a');
-      link.href = `${process.env.PUBLIC_URL || ''}/ALTHAF_HUSSAIN_SYED_DevOps_Resume.pdf`;
-      link.download = 'Althaf_Hussain_Syed_DevOps_Resume.pdf';
+      link.href = `${process.env.PUBLIC_URL || ''}/ALTHAF HUSSAIN SYED - Resume (3).pdf`;
+      link.download = 'Althaf_Hussain_Syed_Resume.pdf';
       link.style.display = 'none';
       
       document.body.appendChild(link);
@@ -41,7 +41,7 @@ const Footer = ({ personalInfo }) => {
       console.log('Resume download initiated from footer');
     } catch (error) {
       console.error('Download error:', error);
-      window.open(`${process.env.PUBLIC_URL || ''}/ALTHAF_HUSSAIN_SYED_DevOps_Resume.pdf`, '_blank');
+      window.open(`${process.env.PUBLIC_URL || ''}/ALTHAF HUSSAIN SYED - Resume (3).pdf`, '_blank');
     }
   };
 
