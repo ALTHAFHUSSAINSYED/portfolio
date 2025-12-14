@@ -325,7 +325,7 @@ const Chatbot = () => {
             <button className="close-button" onClick={toggleChat} aria-label="Close chat">×</button>
           </div>
           
-          <div className="chatbot-messages">
+          <div className="chatbot-messages custom-scrollbar">
             {messages.map((msg, index) => (
               <div
                 key={index}
@@ -382,27 +382,23 @@ const Chatbot = () => {
                 </div>
               </div>
             )}
+            
+            {/* Suggested questions - inside messages area */}
+            {messages.length < 3 && (
+              <div style={{display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px'}}>
+                {suggestedQuestions.map((question, index) => (
+                  <button 
+                    key={index}
+                    onClick={() => handleSuggestionClick(question)}
+                    className="suggestion-button"
+                  >
+                    {question}
+                  </button>
+                ))}
+              </div>
+            )}
             <div ref={messagesEndRef} />
           </div>
-          
-          {/* Suggested questions */}
-          {messages.length < 3 && (
-            <div className="chatbot-suggestions">
-              <div className="suggestion-buttons">
-                <div className="max-h-20 overflow-y-auto pr-1 custom-scrollbar" style={{display: 'flex', flexWrap: 'wrap', gap: '6px'}}>
-                  {suggestedQuestions.map((question, index) => (
-                    <button 
-                      key={index}
-                      onClick={() => handleSuggestionClick(question)}
-                      className={`suggestion-button ${selectedSuggestion === question ? 'selected' : ''}`}
-                    >
-                      {question}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
           
           <form className="chatbot-form" onSubmit={handleSubmit}>
             <input
