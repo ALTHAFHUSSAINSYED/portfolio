@@ -474,10 +474,10 @@ const Chatbot = () => {
 
   // Common questions suggestions
   const suggestedQuestions = [
+    "Show me his recent blogs",
     "What are Althaf's skills?",
     "Tell me about his projects",
     "What DevOps tools does he use?",
-    "Show me his recent blogs",
     "Contact information"
   ];
   
@@ -642,15 +642,17 @@ const Chatbot = () => {
             <div className="chatbot-suggestions">
               <p className="suggestion-title">Try asking:</p>
               <div className="suggestion-buttons">
-                {suggestedQuestions.map((question, index) => (
-                  <button 
-                    key={index}
-                    onClick={() => handleSuggestionClick(question)}
-                    className={`suggestion-button ${selectedSuggestion === question ? 'selected' : ''}`}
-                  >
-                    {question}
-                  </button>
-                ))}
+                <div className="max-h-24 overflow-y-auto custom-scrollbar" style={{display: 'flex', flexWrap: 'wrap', gap: '6px'}}>
+                  {suggestedQuestions.map((question, index) => (
+                    <button 
+                      key={index}
+                      onClick={() => handleSuggestionClick(question)}
+                      className={`suggestion-button ${selectedSuggestion === question ? 'selected' : ''}`}
+                    >
+                      {question}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           )}
