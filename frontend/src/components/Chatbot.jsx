@@ -388,9 +388,8 @@ const Chatbot = () => {
           {/* Suggested questions */}
           {messages.length < 3 && (
             <div className="chatbot-suggestions">
-              <p className="suggestion-title">Try asking:</p>
               <div className="suggestion-buttons">
-                <div className="max-h-24 overflow-y-auto custom-scrollbar" style={{display: 'flex', flexWrap: 'wrap', gap: '6px'}}>
+                <div className="max-h-20 overflow-y-auto pr-1 custom-scrollbar" style={{display: 'flex', flexWrap: 'wrap', gap: '6px'}}>
                   {suggestedQuestions.map((question, index) => (
                     <button 
                       key={index}

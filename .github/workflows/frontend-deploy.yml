@@ -1,0 +1,23 @@
+name: Deploy Frontend to Amplify
+
+on:
+  push:
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-deploy.yml'
+      - 'amplify.yml'
+    branches:
+      - main
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Frontend changes detected
+        run: |
+          echo "✅ Frontend changes detected!"
+          echo "📦 AWS Amplify will automatically deploy from connected repository"
+          echo "🔗 Check deployment status at: https://console.aws.amazon.com/amplify"
