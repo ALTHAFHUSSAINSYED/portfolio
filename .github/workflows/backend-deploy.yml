@@ -42,7 +42,7 @@ jobs:  # WHAT jobs to run (can have multiple jobs, but we have one)
           CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}  # Image hosting secret
           DB_NAME=portfolioDB  # MongoDB database name
           ENVIRONMENT=production  # Tells app it's running in production
-          EOF  # End of heredoc
+          EOF
           chmod 600 .env  # Set file permissions (owner read/write only)
 
       - name: Repopulate ChromaDB (if data files changed)  # Step 3: Update vector database if portfolio data changed
