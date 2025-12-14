@@ -181,8 +181,20 @@ const HeroSection = ({ personalInfo }) => {
               {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
               <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-3xl mx-auto">{personalInfo.summary}</p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Button onClick={downloadResume} size="lg"><Download className="w-5 h-5 mr-3" />Download Resume</Button>
-                <Button onClick={scrollToContact} variant="outline" size="lg"><Mail className="w-5 h-5 mr-3" />Get in Touch</Button>
+                <Button 
+                  onClick={downloadResume} 
+                  size="lg"
+                  className="bg-gradient-to-r from-pink-500 to-green-500 text-white hover:from-pink-600 hover:to-pink-600 dark:from-cyan-500 dark:to-purple-500 dark:hover:from-cyan-600 dark:hover:to-purple-600 border-0"
+                >
+                  <Download className="w-5 h-5 mr-3" />Download Resume
+                </Button>
+                <Button 
+                  onClick={scrollToContact} 
+                  size="lg"
+                  className="bg-gradient-to-r from-pink-500 to-green-500 text-white hover:from-pink-600 hover:to-pink-600 dark:from-cyan-500 dark:to-purple-500 dark:hover:from-cyan-600 dark:hover:to-purple-600 border-0"
+                >
+                  <Mail className="w-5 h-5 mr-3" />Get in Touch
+                </Button>
               </div>
             </div>
 
