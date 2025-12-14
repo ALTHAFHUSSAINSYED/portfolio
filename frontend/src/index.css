@@ -1440,31 +1440,35 @@ html.dark::-webkit-scrollbar {
   50% { opacity: 1; }
 }
 
-/* Pink to Neon Green gradient for site name in dark theme */
+/* ================================================================= */
+/* ADAPTIVE NAME COLORS (Pro Gradients)                             */
+/* ================================================================= */
+
+/* 1. DARK THEME NAME: "Neon Horizon" (Cyan -> Purple) */
+/* This replaces the solid pink with a modern tech gradient */
 .dark .site-title-gradient {
-  color: #e94fc2 !important;
-  background: none !important;
-  -webkit-background-clip: unset !important;
-  background-clip: unset !important;
-  -webkit-text-fill-color: unset !important;
-  text-fill-color: unset !important;
+  background: linear-gradient(to right, #22d3ee 0%, #d946ef 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important; /* Fallback */
   font-weight: 800;
-  text-shadow: 0 1px 4px #e94fc2, 0 0 1px #fff;
-  position: relative;
-  display: inline-block;
+  /* Adds a subtle glow to make it readable on black */
+  filter: drop-shadow(0 0 2px rgba(34, 211, 238, 0.3)); 
 }
 
-/* Pink to Neon Green gradient for site name in light theme */
+/* 2. LIGHT THEME NAME: "Deep Ocean" (Royal Blue -> Indigo) */
+/* This replaces the "Blue/Pink" combo with a clean, strong corporate look */
 .name-text-light {
-  color: #38bdf8 !important;
-  background: none !important;
-  -webkit-background-clip: unset !important;
-  background-clip: unset !important;
-  -webkit-text-fill-color: unset !important;
-  text-fill-color: unset !important;
+  background: linear-gradient(to right, #2563eb 0%, #4f46e5 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important; /* Fallback */
   font-weight: 800;
-  text-shadow: 0 1px 4px #e94fc2, 0 0 1px #fff;
-  display: inline-block;
+  /* Removes any weird pink text shadows */
+  text-shadow: none !important;
+  filter: none !important;
 }
 
 /* Frontend rebuild trigger - Sun, Dec 14, 2025  4:12:59 PM */
