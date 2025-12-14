@@ -295,11 +295,21 @@ async def get_portfolio_context(query: str) -> str:
                     else:
                         logging.info(f"  ❌ REJECTED (distance={dist:.4f} >= 1.3)")
                 
+                if not filtered_docs and docs:
+                    # Fallback: if nothing met the threshold, still include top results
+                    fallback_docs = docs[: min(3, len(docs))]
+                    filtered_docs.extend(fallback_docs)
+                    logging.info(
+                        "No items under threshold for %s; including top %d result(s) as fallback",
+                        collection_name,
+                        len(fallback_docs)
+                    )
+
                 if filtered_docs:
                     all_context.extend(filtered_docs)
                     logging.info(f"Found {len(filtered_docs)} relevant results in {collection_name}")
                 else:
-                    logging.info(f"No relevant results in {collection_name} (all below threshold)")
+                    logging.info(f"No relevant results in {collection_name} (collection empty)")
                     
             except Exception as e:
                 logging.error(f"Error accessing {collection_name}: {e}")

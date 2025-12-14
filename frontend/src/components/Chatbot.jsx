@@ -139,6 +139,12 @@ const Chatbot = () => {
               description: "Full-featured online store with secure payment processing"
             }
           ],
+
+          blogs: [
+            "Cloud architecture walkthroughs for the TechAssistant platform",
+            "DevOps automation practices with GitHub Actions and Docker",
+            "Full stack implementation notes from recent client projects"
+          ],
           
           contactInfo: {
             email: "Available through the contact form on the website",
@@ -157,68 +163,84 @@ const Chatbot = () => {
               "Hey! Great to meet you. Feel free to ask about Althaf's work, technologies, or experience!"
             ]
           },
-          
-          about: {
-            match: /^(who|what|tell me about|about|describe|introduce|background|info about).*(althaf|you|himself|techassistant owner|developer|creator)/i,
+
+          skillsOverview: {
+            match: /(skill|skills|skillset|tech stack|expertise|strengths)/i,
             replies: [
-              `${knowledgeBase.profile.name} is a ${knowledgeBase.profile.role} with ${knowledgeBase.profile.experience}. ${knowledgeBase.profile.summary}.`,
-              `Althaf Hussain Syed is a developer specializing in full-stack development and DevOps. He has experience with ${knowledgeBase.skills.frontend.slice(0,3).join(", ")} on the frontend and ${knowledgeBase.skills.backend.slice(0,3).join(", ")} on the backend.`
+              `Althaf's core skills span frontend (${knowledgeBase.skills.frontend.slice(0,4).join(", ")}), backend (${knowledgeBase.skills.backend.slice(0,4).join(", ")}), and DevOps (${knowledgeBase.skills.devops.slice(0,4).join(", ")}).`,
+              `He combines frontend tools like ${knowledgeBase.skills.frontend.slice(0,3).join(", ")} with backend frameworks such as ${knowledgeBase.skills.backend.slice(0,3).join(", ")} and DevOps automation using ${knowledgeBase.skills.devops.slice(0,3).join(", ")}.`
             ]
           },
-          
-          experience: {
-            match: /^(experience|work history|background|career|job|professional)/i,
-            replies: [
-              `Althaf has ${knowledgeBase.profile.experience}, focusing on web development and cloud infrastructure. He's worked on various projects including ${knowledgeBase.projects[0].name} and ${knowledgeBase.projects[1].name}.`,
-              `With ${knowledgeBase.profile.experience}, Althaf has developed expertise in both frontend and backend technologies, as well as cloud deployment and DevOps practices.`
-            ]
-          },
-          
-          education: {
-            match: /^(education|degree|study|college|university|academic)/i,
-            replies: [
-              `Althaf has ${knowledgeBase.profile.education}, which provided a strong foundation for his software development career.`,
-              `His educational background includes ${knowledgeBase.profile.education}, complemented by continuous learning and staying updated with industry trends.`
-            ]
-          },
-          
+
           frontend: {
-            match: /^(frontend|front-end|front end|ui|user interface|react|javascript|web design)/i,
+            match: /\b(frontend|front-end|front end|ui|user interface|react|javascript|web design)\b/i,
             replies: [
               `For frontend development, Althaf works with ${knowledgeBase.skills.frontend.join(", ")}. His projects like ${knowledgeBase.projects[0].name} showcase his frontend skills.`,
               `Althaf's frontend stack includes ${knowledgeBase.skills.frontend.join(", ")}, with a focus on building responsive and user-friendly interfaces.`
             ]
           },
-          
+
           backend: {
-            match: /^(backend|back-end|back end|server|api|database|node|python|express)/i,
+            match: /\b(backend|back-end|back end|server|api|database|node|python|express)\b/i,
             replies: [
               `Althaf's backend expertise includes ${knowledgeBase.skills.backend.join(", ")} and database technologies like ${knowledgeBase.skills.database.slice(0,3).join(", ")}.`,
               `For backend development, Althaf uses ${knowledgeBase.skills.backend.slice(0,3).join(", ")}, designing scalable APIs and efficient database structures with ${knowledgeBase.skills.database.slice(0,3).join(", ")}.`
             ]
           },
-          
+
           devops: {
-            match: /^(devops|deployment|cloud|aws|azure|docker|kubernetes|ci\/cd|pipeline|infrastructure)/i,
+            match: /(devops|ci\/cd|deployment|cloud|aws|azure|docker|kubernetes|pipeline|infrastructure)/i,
             replies: [
               `Althaf has strong DevOps skills with ${knowledgeBase.skills.devops.join(", ")}. His ${knowledgeBase.projects[1].name} project demonstrates his DevOps capabilities.`,
               `In the DevOps realm, Althaf works with ${knowledgeBase.skills.devops.join(", ")}, implementing automated pipelines and cloud infrastructure.`
             ]
           },
-          
+
           projects: {
-            match: /^(projects|techassistant|work|showcase|applications|apps)/i,
+            match: /(project|projects|techassistant|showcase|applications|apps|portfolio work)/i,
             replies: [
               `Althaf's notable projects include: 1) ${knowledgeBase.projects[0].name} using ${knowledgeBase.projects[0].tech} - ${knowledgeBase.projects[0].description}, 2) ${knowledgeBase.projects[1].name} using ${knowledgeBase.projects[1].tech} - ${knowledgeBase.projects[1].description}, and 3) ${knowledgeBase.projects[2].name} using ${knowledgeBase.projects[2].tech} - ${knowledgeBase.projects[2].description}.`,
               `The TechAssistant showcases several projects including ${knowledgeBase.projects[0].name}, ${knowledgeBase.projects[1].name}, and ${knowledgeBase.projects[2].name}, demonstrating various technical skills from frontend to DevOps.`
             ]
           },
-          
+
+          blogs: {
+            match: /(blog|blogs|articles?|recent blogs|latest blog|write)/i,
+            replies: [
+              `Althaf regularly shares blogs on topics like ${knowledgeBase.blogs.join(", ")}. You can read them in the Blogs section of this portfolio.`,
+              "You'll find his latest blog posts in the Blogs section, covering cloud architecture, DevOps automation, and end-to-end project case studies."
+            ]
+          },
+
           contact: {
-            match: /^(contact|reach|email|github|linkedin|social|get in touch)/i,
+            match: /(contact|reach|email|github|linkedin|social|get in touch|contact information)/i,
             replies: [
               `You can contact Althaf through the contact form on this website. His GitHub username is ${knowledgeBase.contactInfo.github}, and LinkedIn is available in the contact section.`,
               `For professional inquiries, please use the contact form on this website. Althaf can also be found on GitHub as ${knowledgeBase.contactInfo.github}.`
+            ]
+          },
+
+          experience: {
+            match: /(experience|work history|background|career|job|professional)/i,
+            replies: [
+              `Althaf has ${knowledgeBase.profile.experience}, focusing on web development and cloud infrastructure. He's worked on various projects including ${knowledgeBase.projects[0].name} and ${knowledgeBase.projects[1].name}.`,
+              `With ${knowledgeBase.profile.experience}, Althaf has developed expertise in both frontend and backend technologies, as well as cloud deployment and DevOps practices.`
+            ]
+          },
+
+          education: {
+            match: /(education|degree|study|college|university|academic)/i,
+            replies: [
+              `Althaf has ${knowledgeBase.profile.education}, which provided a strong foundation for his software development career.`,
+              `His educational background includes ${knowledgeBase.profile.education}, complemented by continuous learning and staying updated with industry trends.`
+            ]
+          },
+
+          about: {
+            match: /^(who|tell me about|about|describe|introduce|background|info about).*(althaf|you|himself|techassistant owner|developer|creator)/i,
+            replies: [
+              `${knowledgeBase.profile.name} is a ${knowledgeBase.profile.role} with ${knowledgeBase.profile.experience}. ${knowledgeBase.profile.summary}.`,
+              `Althaf Hussain Syed is a developer specializing in full-stack development and DevOps. He has experience with ${knowledgeBase.skills.frontend.slice(0,3).join(", ")} on the frontend and ${knowledgeBase.skills.backend.slice(0,3).join(", ")} on the backend.`
             ]
           },
           
