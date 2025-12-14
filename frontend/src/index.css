@@ -1457,10 +1457,10 @@ html.dark::-webkit-scrollbar {
   filter: drop-shadow(0 0 2px rgba(34, 211, 238, 0.3)); 
 }
 
-/* 2. LIGHT THEME NAME: "Deep Ocean" (Royal Blue -> Indigo) */
-/* This replaces the "Blue/Pink" combo with a clean, strong corporate look */
+/* 2. LIGHT THEME NAME: "Pink Horizon" (Pink/Magenta -> Green/Teal) */
+/* Matches the About/Skills button gradient color scheme */
 .name-text-light {
-  background: linear-gradient(to right, #2563eb 0%, #4f46e5 100%) !important;
+  background: linear-gradient(to right, #ec4899 0%, #10b981 100%) !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
