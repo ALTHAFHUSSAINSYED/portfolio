@@ -36,9 +36,8 @@ const BlogsSection = () => {
       const categoryParam = searchParams.get('category');
       if (categoryParam && uniqueCategories.includes(categoryParam)) {
         setSelectedCategory(categoryParam);
-      } else if (uniqueCategories.length > 0) {
-        setSelectedCategory(uniqueCategories[0]);
       }
+      // Removed auto-selection: selectedCategory stays null by default
     }
   }, [blogs, location.search]);
   
