@@ -154,7 +154,7 @@ const Header = ({ personalInfo }) => {
             <Button
               onClick={downloadResume}
               size="sm"
-              className="neon-button bg-gradient-to-r from-pink-500/80 to-cyan-400/80 hover:from-pink-500 hover:to-cyan-400 text-black font-semibold transition-all duration-300"
+              className="neon-button bg-gradient-to-r from-pink-500 to-green-500 hover:from-pink-600 hover:to-green-600 text-white font-semibold transition-all duration-300"
             >
               <Download className="w-4 h-4 mr-2" />
               Resume
@@ -163,7 +163,7 @@ const Header = ({ personalInfo }) => {
               onClick={() => scrollToSection('contact')}
               size="sm"
               id="contact-nav-button"
-              className="neon-button bg-gradient-to-r from-pink-500/80 to-cyan-400/80 hover:from-pink-500 hover:to-cyan-400 text-black font-semibold transition-all duration-300"
+              className="neon-button bg-gradient-to-r from-pink-500 to-green-500 hover:from-pink-600 hover:to-green-600 text-white font-semibold transition-all duration-300"
             >
               <Mail className="w-4 h-4 mr-2" />
               Contact
@@ -219,7 +219,7 @@ const Header = ({ personalInfo }) => {
                 <Button
                   onClick={downloadResume}
                   size="sm"
-                  className="neon-button bg-gradient-to-r from-pink-500/80 to-cyan-400/80 hover:from-pink-500 hover:to-cyan-400 text-black font-semibold transition-all duration-300 fade-in-right stagger-6"
+                  className="neon-button bg-gradient-to-r from-pink-500 to-green-500 hover:from-pink-600 hover:to-green-600 text-white font-semibold transition-all duration-300 fade-in-right stagger-6"
                 >
                   <Download className="w-4 h-4 mr-2" />
                   Download Resume
@@ -228,7 +228,7 @@ const Header = ({ personalInfo }) => {
                   onClick={() => scrollToSection('contact')}
                   size="sm"
                   id="contact-nav-button-mobile"
-                  className="neon-button bg-gradient-to-r from-pink-500/80 to-cyan-400/80 hover:from-pink-500 hover:to-cyan-400 text-black font-semibold transition-all duration-300 fade-in-right stagger-7"
+                  className="neon-button bg-gradient-to-r from-pink-500 to-green-500 hover:from-pink-600 hover:to-green-600 text-white font-semibold transition-all duration-300 fade-in-right stagger-7"
                 >
                   <Mail className="w-4 h-4 mr-2" />
                   Contact
