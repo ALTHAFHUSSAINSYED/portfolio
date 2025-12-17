@@ -31,7 +31,7 @@ const Footer = ({ personalInfo }) => {
     try {
       const link = document.createElement('a');
       link.href = `${process.env.PUBLIC_URL || ''}/AlthafResume.pdf`;
-      link.download = 'Althaf_Hussain_Syed_Resume.pdf';
+      link.download = 'AlthafResume.pdf';
       link.style.display = 'none';
       
       document.body.appendChild(link);
