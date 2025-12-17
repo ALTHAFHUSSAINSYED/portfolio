@@ -56,14 +56,15 @@ import shutil
 import json
 import re
 import requests
-from sentence_transformers import SentenceTransformer
 
-# Initialize embedding model globally to avoid reloading on every request
-try:
-    embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
-except Exception as e:
-    print(f"Warning: Could not load SentenceTransformer: {e}")
-    embedding_model = None
+# Temporarily disabled AI features (missing torch/transformers dependencies)
+# from sentence_transformers import SentenceTransformer
+# try:
+#     embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+# except Exception as e:
+#     print(f"Warning: Could not load SentenceTransformer: {e}")
+#     embedding_model = None
+embedding_model = None  # AI features disabled
 from bs4 import BeautifulSoup
 import chromadb
 import google.generativeai as genai
