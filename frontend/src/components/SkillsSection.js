@@ -236,13 +236,13 @@ const SkillsSection = ({ skills }) => {
             </div>
              {/* ✨ MODIFIED: Removed bg-black/50, changed text-gray-300 */}
             <div className="rounded-lg p-6 border border-purple-400/20 hover:border-purple-400/40 transition-all duration-300 neon-card hover-lift">
-              <div className="text-2xl font-bold text-purple-soft mb-2 counter">3</div>
-              <div className="text-muted-foreground font-medium text-sm">Languages</div>
+              <div className="text-2xl font-bold text-purple-soft mb-2 counter">4+</div>
+              <div className="text-muted-foreground font-medium text-sm">CI/CD Tools</div>
             </div>
              {/* ✨ MODIFIED: Removed bg-black/50, changed text-gray-300 */}
             <div className="rounded-lg p-6 border border-orange-400/20 hover:border-orange-400/40 transition-all duration-300 neon-card hover-lift">
               <div className="text-2xl font-bold text-yellow-soft mb-2 counter">4+</div>
-              <div className="text-muted-foreground font-medium text-sm">Storage Systems</div>
+              <div className="text-muted-foreground font-medium text-sm">Monitoring Tools</div>
             </div>
           </div>
         </div>

@@ -86,8 +86,7 @@ const AboutSection = ({ personalInfo, achievements }) => {
                   <Badge 
                     key={skill.name}
                     variant="outline" 
-                    // ✨ MODIFIED: Changed bg-black/50 to bg-background/50
-                    className={`border-${skill.color}-400/30 text-${skill.color}-soft bg-background/50 px-3 py-2 justify-start hover:bg-${skill.color}-400/5 transition-all duration-300 backdrop-blur-sm hover-scale ${
+                    className={`border-${skill.color}-400/30 text-${skill.color}-soft bg-background/50 px-3 py-2 justify-start hover:bg-${skill.color}-400/10 hover:border-${skill.color}-400/50 transition-all duration-300 backdrop-blur-sm hover-scale ${
                       isVisible ? `fade-in-up stagger-${index + 3}` : ''
                     }`}
                   >
