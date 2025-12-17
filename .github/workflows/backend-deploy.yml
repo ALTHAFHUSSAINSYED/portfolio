@@ -42,6 +42,9 @@ jobs:  # WHAT jobs to run (can have multiple jobs, but we have one)
           CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}  # Image hosting secret
           DB_NAME=portfolioDB  # MongoDB database name
           ENVIRONMENT=production  # Tells app it's running in production
+          RESEND_KEY=${{ secrets.RESEND_KEY }}  # Email API key for Resend
+          RESEND_API_KEY=${{ secrets.RESEND_KEY }}  # Email API key (alt name)
+          TO_EMAIL=${{ secrets.TO_EMAIL }}  # Contact form destination email
           EOF
           chmod 600 .env  # Set file permissions (owner read/write only)
 
