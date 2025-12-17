@@ -8,17 +8,17 @@ const AboutSection = ({ personalInfo, achievements }) => {
   const sectionRef = useRef(null);
 
   const iconMap = {
-    'Infrastructure Automation Champion': TrendingUp,
-    'Multi-Cloud Expert': Shield,
-    'Incident Response Optimization': Zap,
-    'High Availability Specialist': Award
+    'DXC CHAMPS Award – FY24 Q1': Award,
+    'DXC CHAMPS Award – FY26 H1': Award,
+    'Multi-Cloud Certified Professional': Shield,
+    'CI/CD Automation Excellence': TrendingUp
   };
 
   const iconColors = {
-    'Infrastructure Automation Champion': 'text-cyan-soft',
-    'Multi-Cloud Expert': 'text-pink-soft',
-    'Incident Response Optimization': 'text-green-soft',
-    'High Availability Specialist': 'text-yellow-soft'
+    'DXC CHAMPS Award – FY24 Q1': 'text-yellow-soft',
+    'DXC CHAMPS Award – FY26 H1': 'text-yellow-soft',
+    'Multi-Cloud Certified Professional': 'text-pink-soft',
+    'CI/CD Automation Excellence': 'text-cyan-soft'
   };
 
   useEffect(() => {

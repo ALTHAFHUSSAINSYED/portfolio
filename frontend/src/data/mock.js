@@ -4,55 +4,60 @@ export const portfolioData = {
     name: "Althaf Hussain Syed",
     title: "DevOps Engineer | Cloud & Infrastructure Specialist",
     email: "allualthaf42@gmail.com",
-    phone: "8184812249",
+    phone: "+91 8184812249",
     location: "Hyderabad, India",
-    linkedin: "https://linkedin.com/in/althafhussainsyed",
-    summary: "Certified DevOps Engineer with 3+ years of experience in cloud infrastructure, automation, and CI/CD pipeline engineering. Multi-cloud certified professional with expertise in AWS, GCP, Azure, and Oracle Cloud. Proven track record of reducing operational overhead by 40% and improving incident response time by 30%."
+    linkedin: "https://www.linkedin.com/in/althafhussainsyed/",
+    summary: "Motivated DevOps Engineer with 3.5 years of experience supporting AWS cloud environments, CI/CD pipelines, and container-based deployments. Skilled in building automation, deployment support, and environment monitoring using Terraform, Jenkins, Docker, and Kubernetes. Works effectively with cross-functional teams and follows ITIL and SDLC practices to maintain stable and compliant operations. Focused on reliability, task ownership, and continuous improvement within enterprise infrastructure."
   },
 
   skills: {
     cloudPlatforms: [
-      { name: "AWS", level: "Expert", certifications: 3 },
+      { name: "AWS", level: "Advanced", certifications: 3 },
       { name: "Google Cloud Platform", level: "Advanced", certifications: 1 },
-      { name: "Microsoft Azure", level: "Advanced", certifications: 2 },
-      { name: "Oracle Cloud", level: "Intermediate", certifications: 7 }
+      { name: "Microsoft Azure", level: "Advanced", certifications: 2 }
     ],
     devopsTools: [
-      { name: "Jenkins", level: "Expert" },
-      { name: "Docker", level: "Advanced" },
-      { name: "Kubernetes", level: "Advanced" },
-      { name: "Terraform", level: "Advanced" },
-      { name: "Ansible", level: "Advanced" },
-      { name: "GitHub Actions", level: "Intermediate" }
+      { name: "Jenkins", level: "Intermediate" },
+      { name: "Docker", level: "Intermediate" },
+      { name: "Kubernetes", level: "Intermediate" },
+      { name: "Terraform", level: "Intermediate" },
+      { name: "Ansible", level: "Intermediate" },
+      { name: "GitHub Actions", level: "Intermediate" },
+      { name: "GitLab CI", level: "Intermediate" },
+      { name: "AWS CodePipeline", level: "Intermediate" },
+      { name: "Maven", level: "Intermediate" },
+      { name: "SonarQube", level: "Intermediate" },
+      { name: "Nexus", level: "Intermediate" },
+      { name: "Prometheus", level: "Intermediate" },
+      { name: "Grafana", level: "Intermediate" },
+      { name: "Dynatrace", level: "Intermediate" }
     ],
     programming: [
-      { name: "Python", level: "Advanced" },
-      { name: "Bash Scripting", level: "Advanced" },
-      { name: "Java", level: "Intermediate" }
-    ],
-    storage: [
-      { name: "Brocade SAN", level: "Expert" },
-      { name: "HPE 3PAR", level: "Expert" },
-      { name: "HPE Primera", level: "Advanced" },
-      { name: "Dell EMC", level: "Advanced" }
+      { name: "Python", level: "Intermediate" },
+      { name: "Bash Scripting", level: "Intermediate" }
     ]
   },
 
   experience: [
     {
       company: "DXC Technology",
-      position: "Analyst III Infrastructure Services / DevOps Engineer",
+      position: "Analyst III Infrastructure Services | DevOps Engineer",
       duration: "Aug 2022 – Present",
       location: "Hyderabad, India",
+      project: "Cloud Platform Automation & Delivery | AWS Managed Services",
       achievements: [
-        "Automated infrastructure provisioning using Terraform and Ansible, reducing manual effort by 40%",
-        "Designed and deployed CI/CD pipelines using Jenkins and AWS CodePipeline for multi-tier applications",
-        "Containerized applications with Docker and orchestrated them using Kubernetes (EKS, GKE, AKS)",
-        "Implemented comprehensive monitoring solutions with AWS CloudWatch and GCP Cloud Monitoring, improving incident response time by 30%",
-        "Managed enterprise storage solutions (Brocade SAN, HPE 3PAR, Primera) ensuring 99.9% uptime",
-        "Collaborated with cross-functional teams to streamline infrastructure reliability and migrations"
+        "Supporting automation, deployment, and environment operations in AWS Managed Services setup with CI/CD execution and environment monitoring",
+        "Maintained Jenkins pipelines and GitHub Actions for build, test, and deployment with Maven, SonarQube quality gates, and Docker image builds",
+        "Implemented end-to-end CI/CD automation, reducing manual effort by ~70% and improving delivery efficiency",
+        "Containerized applications using Docker and supported deployments in Kubernetes environments",
+        "Monitored system health and logs using CloudWatch, Grafana, Prometheus and Dynatrace",
+        "Managed incidents and change requests via ServiceNow, participating in daily stand-ups and CAB calls",
+        "Created and maintained Standard Operating Procedures (SOPs) and runbooks for CI/CD and monitoring tasks",
+        "Developed custom ServiceNow dashboard for incident tracking and SLA breach reporting",
+        "Received DXC CHAMPS Award (FY24 Q1) for consistent delivery and reliable execution of infrastructure operations",
+        "Received DXC CHAMPS Award (FY26 H1) for sustained performance and operational excellence"
       ],
-      technologies: ["AWS", "GCP", "Azure", "Jenkins", "Docker", "Kubernetes", "Terraform", "Ansible", "Python", "Bash"]
+      technologies: ["AWS", "Terraform", "Jenkins", "GitHub Actions", "Docker", "Kubernetes", "Maven", "SonarQube", "ECR", "CloudWatch", "Prometheus", "Grafana", "Dynatrace", "ServiceNow"]
     }
   ],
 
@@ -130,22 +135,29 @@ export const portfolioData = {
 
   achievements: [
     {
-      title: "Infrastructure Automation Champion",
-      description: "Reduced manual infrastructure provisioning time by 40% through comprehensive automation"
+      title: "DXC CHAMPS Award – FY24 Q1",
+      description: "Recognised for consistent delivery, ownership of priority tasks, and reliable execution of infrastructure operations and production deployments"
     },
     {
-      title: "Multi-Cloud Expert",
-      description: "Achieved 14+ professional certifications across AWS, GCP, Azure, and Oracle Cloud platforms"
+      title: "DXC CHAMPS Award – FY26 H1",
+      description: "Awarded for sustained performance, end-to-end accountability, and operational excellence in supporting critical infrastructure services"
     },
     {
-      title: "Incident Response Optimization",
-      description: "Improved incident response time by 30% through proactive monitoring and alerting systems"
+      title: "Multi-Cloud Certified Professional",
+      description: "Achieved 8+ professional certifications across three major cloud platforms: AWS, GCP, and Azure"
     },
     {
-      title: "High Availability Specialist",
-      description: "Maintained 99.9% uptime for critical enterprise storage infrastructure"
+      title: "CI/CD Automation Excellence",
+      description: "Implemented end-to-end CI/CD automation, reducing manual effort by 70% and improving delivery efficiency"
     }
   ],
+
+  professionalInterests: [
+    "Willing to upskill in MLOps (Machine Learning Operations) and AIOps (Artificial Intelligence for IT Operations) to support modern automation and operational efficiency",
+    "Interested in exploring MLOps and AIOps concepts as part of long-term career development"
+  ],
+
+  languages: ["English", "Hindi", "Telugu"],
 
   projects: [
     {
