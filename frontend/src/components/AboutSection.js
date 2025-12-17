@@ -83,15 +83,14 @@ const AboutSection = ({ personalInfo, achievements }) => {
                   { name: 'Container Orchestration', color: 'blue' },
                   { name: 'SDLC/ITIL/DevOps Operations', color: 'purple' }
                 ].map((skill, index) => (
-                  <Badge 
+                  <div
                     key={skill.name}
-                    variant="outline" 
-                    className={`border-${skill.color}-400/30 text-${skill.color}-soft bg-background/50 px-3 py-2 justify-start hover:bg-${skill.color}-400/10 hover:border-${skill.color}-400/50 transition-all duration-300 backdrop-blur-sm hover-scale ${
+                    className={`border border-${skill.color}-400/30 text-${skill.color}-soft bg-background/50 px-3 py-2 rounded-md text-sm font-medium hover:bg-${skill.color}-400/10 hover:border-${skill.color}-400/50 transition-all duration-300 backdrop-blur-sm hover:scale-105 cursor-default ${
                       isVisible ? `fade-in-up stagger-${index + 3}` : ''
                     }`}
                   >
                     {skill.name}
-                  </Badge>
+                  </div>
                 ))}
               </div>
             </div>

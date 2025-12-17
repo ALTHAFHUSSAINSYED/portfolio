@@ -179,7 +179,7 @@ const HeroSection = ({ personalInfo }) => {
                 {personalInfo.title.includes('|') && (<span className="text-pink-soft"> | {personalInfo.title.split('|')[1]}</span>)}
               </div>
               {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
-              <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-3xl mx-auto">{personalInfo.summary}</p>
+              <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-3xl mx-auto">{personalInfo.heroSummary}</p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <Button 
                   onClick={downloadResume} 
