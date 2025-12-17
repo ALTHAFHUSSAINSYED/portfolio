@@ -4,7 +4,7 @@ import { Badge } from './ui/badge';
 import { Folder, CheckCircle, ArrowRight, Zap, Code, Server, Loader2, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://althaf-portfolio.onrender.com';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://api.althafportfolio.site';
 
 const ProjectsSection = () => {
   const [projects, setProjects] = useState([]);

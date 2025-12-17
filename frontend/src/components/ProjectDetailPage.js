@@ -4,7 +4,7 @@ import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { ArrowLeft, Loader2, AlertTriangle, Zap, Code, CheckCircle } from 'lucide-react';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://althaf-portfolio.onrender.com';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://api.althafportfolio.site';
 
 // Helper function to check if a line is a code example
 const isCodeLine = (line) => {

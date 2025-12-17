@@ -78,6 +78,37 @@ class NotificationService:
         except Exception as e:
             logger.error(f"Error sending email notification: {e}")
             print(f"❌ Error sending email notification: {e}")
+    
+    async def send_contact_email(self, form_data):
+        """Send contact form email via Resend"""
+        if not self.resend_api_key:
+            raise Exception("Server is not configured for sending emails.")
+            
+        try:
+            params = {
+                "from": "Portfolio Contact <onboarding@resend.dev>",
+                "to": [self.to_email],
+                "subject": f"New Message from {form_data.name}: {form_data.subject if form_data.subject else 'No Subject'}",
+                "html": f"""
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                        <h3 style="color: #333;">New Contact Request</h3>
+                        <div style="margin: 20px 0; padding: 15px; background-color: #f5f5f5; border-left: 4px solid #007bff;">
+                            <p><strong>Name:</strong> {form_data.name}</p>
+                            <p><strong>Email:</strong> {form_data.email}</p>
+                            <p><strong>Subject:</strong> {form_data.subject if form_data.subject else 'No Subject Provided'}</p>
+                            <p><strong>Message:</strong><br>{form_data.message}</p>
+                        </div>
+                    </div>
+                """,
+                "reply_to": form_data.email
+            }
+            
+            response = resend.Emails.send(params)
+            logger.info(f"Contact form email sent successfully")
+            return {"message": "Email sent successfully"}
+        except Exception as e:
+            logger.error(f"Resend Error: {e}")
+            raise Exception(f"Failed to send email via Resend provider: {e}")
 
 # Initialize global notification service
 notification_service = NotificationService()
