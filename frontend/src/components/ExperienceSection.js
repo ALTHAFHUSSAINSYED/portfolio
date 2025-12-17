@@ -146,21 +146,26 @@ const ExperienceSection = ({ experience }) => {
             <h3 className="text-2xl font-bold mb-4 shine-text">
               Career Highlights
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
               <div className="text-center hover-glow transition-all duration-300 p-4 rounded-lg">
-                <div className="text-3xl font-bold text-cyan-soft mb-2 counter glow-text-strong">40%</div>
+                <div className="text-3xl font-bold text-cyan-soft mb-2 counter glow-text-strong">70%</div>
                 {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
-                <div className="text-muted-foreground font-medium glow-text">Reduction in Manual Effort</div>
+                <div className="text-muted-foreground font-medium glow-text">Manual Effort Reduction</div>
               </div>
               <div className="text-center hover-glow transition-all duration-300 p-4 rounded-lg">
-                <div className="text-3xl font-bold text-green-soft mb-2 counter glow-text-strong">30%</div>
+                <div className="text-3xl font-bold text-green-soft mb-2 counter glow-text-strong">2x</div>
                 {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
-                <div className="text-muted-foreground font-medium glow-text">Faster Incident Response</div>
+                <div className="text-muted-foreground font-medium glow-text">DXC CHAMPS Awards</div>
               </div>
               <div className="text-center hover-glow transition-all duration-300 p-4 rounded-lg">
-                <div className="text-3xl font-bold text-pink-soft mb-2 counter glow-text-strong">99.9%</div>
+                <div className="text-3xl font-bold text-pink-soft mb-2 counter glow-text-strong">8+</div>
                 {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
-                <div className="text-muted-foreground font-medium glow-text">Infrastructure Uptime</div>
+                <div className="text-muted-foreground font-medium glow-text">Cloud Certifications</div>
+              </div>
+              <div className="text-center hover-glow transition-all duration-300 p-4 rounded-lg">
+                <div className="text-3xl font-bold text-yellow-soft mb-2 counter glow-text-strong">3.5+</div>
+                {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
+                <div className="text-muted-foreground font-medium glow-text">Years Experience</div>
               </div>
             </div>
             {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}

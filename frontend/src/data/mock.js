@@ -16,21 +16,32 @@ export const portfolioData = {
       { name: "Google Cloud Platform", level: "Advanced", certifications: 1 },
       { name: "Microsoft Azure", level: "Advanced", certifications: 2 }
     ],
-    devopsTools: [
+    cicd: [
       { name: "Jenkins", level: "Intermediate" },
-      { name: "Docker", level: "Intermediate" },
-      { name: "Kubernetes", level: "Intermediate" },
-      { name: "Terraform", level: "Intermediate" },
-      { name: "Ansible", level: "Intermediate" },
       { name: "GitHub Actions", level: "Intermediate" },
       { name: "GitLab CI", level: "Intermediate" },
-      { name: "AWS CodePipeline", level: "Intermediate" },
-      { name: "Maven", level: "Intermediate" },
-      { name: "SonarQube", level: "Intermediate" },
-      { name: "Nexus", level: "Intermediate" },
+      { name: "AWS CodePipeline", level: "Intermediate" }
+    ],
+    containerization: [
+      { name: "Docker", level: "Intermediate" },
+      { name: "Kubernetes", level: "Intermediate" },
+      { name: "Amazon ECS", level: "Intermediate" }
+    ],
+    iac: [
+      { name: "Terraform", level: "Intermediate" },
+      { name: "Ansible", level: "Intermediate" }
+    ],
+    monitoring: [
+      { name: "CloudWatch", level: "Intermediate" },
       { name: "Prometheus", level: "Intermediate" },
       { name: "Grafana", level: "Intermediate" },
       { name: "Dynatrace", level: "Intermediate" }
+    ],
+    buildQuality: [
+      { name: "Maven", level: "Intermediate" },
+      { name: "SonarQube", level: "Intermediate" },
+      { name: "Nexus", level: "Intermediate" },
+      { name: "Trivy", level: "Intermediate" }
     ],
     programming: [
       { name: "Python", level: "Intermediate" },
@@ -84,24 +95,6 @@ export const portfolioData = {
       category: "aws"
     },
     {
-      name: "Google Cloud Professional Cloud Architect",
-      issuer: "Google Cloud",
-      year: "2024",
-      category: "gcp"
-    },
-    {
-      name: "Microsoft Azure Administrator Associate (AZ-104)",
-      issuer: "Microsoft",
-      year: "2024",
-      category: "azure"
-    },
-    {
-      name: "Oracle Cloud Infrastructure Architect Associate",
-      issuer: "Oracle",
-      year: "2024",
-      category: "oracle"
-    },
-    {
       name: "AWS Certified AI Practitioner",
       issuer: "Amazon Web Services",
       year: "2024",
@@ -112,6 +105,18 @@ export const portfolioData = {
       issuer: "Amazon Web Services",
       year: "2023",
       category: "aws"
+    },
+    {
+      name: "Google Cloud Professional Cloud Architect",
+      issuer: "Google Cloud",
+      year: "2024",
+      category: "gcp"
+    },
+    {
+      name: "Microsoft Azure Administrator Associate (AZ-104)",
+      issuer: "Microsoft",
+      year: "2024",
+      category: "azure"
     },
     {
       name: "Azure Fundamentals (AZ-900)",
@@ -126,7 +131,7 @@ export const portfolioData = {
       category: "devops"
     },
     {
-      name: "Generative AI Certified Professional",
+      name: "Generative AI Certified",
       issuer: "Oracle",
       year: "2024",
       category: "ai"
@@ -161,22 +166,22 @@ export const portfolioData = {
 
   projects: [
     {
-      title: "Multi-Cloud CI/CD Pipeline",
-      description: "Designed and implemented end-to-end CI/CD pipelines across AWS, GCP, and Azure environments",
-      technologies: ["Jenkins", "AWS CodePipeline", "GCP Cloud Build", "Docker", "Kubernetes"],
-      achievements: ["Reduced deployment time by 60%", "Improved code quality through automated testing"]
+      title: "Cloud Platform Automation & Delivery",
+      description: "AWS Managed Services project supporting automation, deployment, and environment operations with CI/CD execution and ITIL-aligned change coordination",
+      technologies: ["AWS", "Terraform", "Jenkins", "GitHub Actions", "Docker", "Kubernetes", "ServiceNow"],
+      achievements: ["Implemented end-to-end CI/CD automation reducing manual effort by 70%", "Developed custom ServiceNow dashboard for incident tracking"]
     },
     {
-      title: "Infrastructure as Code Implementation",
-      description: "Automated infrastructure provisioning using Terraform and Ansible across multiple cloud platforms",
-      technologies: ["Terraform", "Ansible", "AWS", "GCP", "Azure"],
-      achievements: ["40% reduction in manual provisioning", "Standardized infrastructure deployment"]
+      title: "CI/CD Pipeline Excellence",
+      description: "Maintained Jenkins pipelines and GitHub Actions for build, test, and deployment with integrated quality gates and Docker image management",
+      technologies: ["Jenkins", "GitHub Actions", "Maven", "SonarQube", "Docker", "Amazon ECR", "Slack"],
+      achievements: ["Integrated SonarQube quality gates", "Configured Slack notifications for build updates", "Improved delivery efficiency"]
     },
     {
-      title: "Enterprise Storage Optimization",
-      description: "Managed and optimized enterprise storage solutions for high-performance computing environments",
-      technologies: ["Brocade SAN", "HPE 3PAR", "HPE Primera", "Dell EMC"],
-      achievements: ["99.9% uptime achievement", "30% improvement in storage efficiency"]
+      title: "Monitoring & Observability Platform",
+      description: "Implemented comprehensive monitoring solutions using CloudWatch, Grafana, Prometheus, and Dynatrace for system health and log management",
+      technologies: ["AWS CloudWatch", "Prometheus", "Grafana", "Dynatrace"],
+      achievements: ["Created SOPs and runbooks for monitoring tasks", "Improved operational transparency"]
     }
   ]
 };

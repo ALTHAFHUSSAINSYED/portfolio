@@ -18,18 +18,46 @@ const SkillsSection = ({ skills }) => {
       gradient: 'from-cyan-400 to-blue-500'
     },
     {
-      title: 'DevOps Tools',
+      title: 'CI/CD & Automation',
       icon: Settings,
-      items: skills.devopsTools,
+      items: skills.cicd,
       color: 'bg-green-50 border-green-200 text-green-700',
       gradient: 'from-green-400 to-emerald-500'
+    },
+    {
+      title: 'Containerization & Orchestration',
+      icon: Database,
+      items: skills.containerization,
+      color: 'bg-cyan-50 border-cyan-200 text-cyan-700',
+      gradient: 'from-cyan-400 to-teal-500'
+    },
+    {
+      title: 'Infrastructure as Code',
+      icon: Code,
+      items: skills.iac,
+      color: 'bg-orange-50 border-orange-200 text-orange-700',
+      gradient: 'from-orange-400 to-yellow-500'
+    },
+    {
+      title: 'Monitoring & Observability',
+      icon: Award,
+      items: skills.monitoring,
+      color: 'bg-purple-50 border-purple-200 text-purple-700',
+      gradient: 'from-purple-400 to-pink-500'
+    },
+    {
+      title: 'Build & Quality Management',
+      icon: Settings,
+      items: skills.buildQuality,
+      color: 'bg-pink-50 border-pink-200 text-pink-700',
+      gradient: 'from-pink-400 to-rose-500'
     },
     {
       title: 'Programming & Scripting',
       icon: Code,
       items: skills.programming,
-      color: 'bg-purple-50 border-purple-200 text-purple-700',
-      gradient: 'from-purple-400 to-pink-500'
+      color: 'bg-indigo-50 border-indigo-200 text-indigo-700',
+      gradient: 'from-indigo-400 to-purple-500'
     }
   ];
 
