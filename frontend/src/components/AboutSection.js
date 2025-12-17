@@ -81,7 +81,7 @@ const AboutSection = ({ personalInfo, achievements }) => {
                   { name: 'CI/CD Pipelines', color: 'green' },
                   { name: 'Infrastructure as Code', color: 'yellow' },
                   { name: 'Container Orchestration', color: 'blue' },
-                  { name: 'Storage Solutions', color: 'purple' }
+                  { name: 'SDLC/ITIL/DevOps Operations', color: 'purple' }
                 ].map((skill, index) => (
                   <Badge 
                     key={skill.name}

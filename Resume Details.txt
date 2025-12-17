@@ -1,0 +1,71 @@
+Resume Details
+
+
+ALTHAF HUSSAIN SYED
+Analyst III Infrastructure Services | DevOps Engineer | 3.5 years of experience
+Email: allualthaf42@gmail.com
+Mobile No: +91 8184812249
+LinkedIn: https://www.linkedin.com/in/althafhussainsyed/
+Portfolio Website: https://www.althafportfolio.site/
+SUMMARY
+Motivated DevOps Engineer with 3.5 years of experience supporting AWS cloud environments, CI/CD pipelines, and container-based deployments. Skilled in building automation, deployment support, and environment monitoring using Terraform, Jenkins, Docker, and Kubernetes. Works effectively with cross-functional teams and follows ITIL and SDLC practices to maintain stable and compliant operations. Focused on reliability, task ownership, and continuous improvement within enterprise infrastructure.
+EDUCATION
+Acharya Nagarjuna University
+Master of Science (M.Sc.) in Computer Science Dec 2022 - June 2024
+Bachelor of Science (B.Sc.) in Computer Science June 2019 - June 2022
+SKILLS
+• Cloud Platforms: AWS, GCP, Azure
+• Infrastructure as Code & Automation: Terraform, Ansible, Bash scripting, Python
+• CI/CD: Jenkins, GitHub Actions, GitLab CI, AWS CodePipeline.
+• Build & Quality Management: Maven, SDLC collaboration, Checkstyle, SonarQube, Qualitygates, Trivy
+• Artifact Repositories: Nexus, AWS CodeArtifact, ECR, Docker Hub
+• Source Control Management: GitHub, GitLab, Bitbucket
+• Containerisation & Orchestration: Docker, Kubernetes, ECS
+• Monitoring & Logging: CloudWatch, Prometheus, Grafana, Dynatrace
+• Networking & Security: VPC, subnets, security groups, IAM.
+• Linux Administration: Package management, user management, service monitoring, troubleshooting
+• Collaboration & Processes: Agile/DevOps, SDLC, ITIL, cross-functional team coordination
+• AI/ML & AWS AI Services: Gen AI/ML basics, AWS AI services, Prompt Engineering basics
+• Soft Skills: Leadership, Communication, Teamwork, Problem Solving, Time Management, Documentation
+EXPERIENCE
+DXC Technology
+Analyst III Infrastructure Services | DevOps Engineer Aug 2022 - Present
+Project Title: Cloud Platform Automation & Delivery | AWS Managed Services
+Supporting automation, deployment, and environment operations in an AWS Managed Services setup. Involved in CI/CD execution, environment monitoring, and change coordination aligned with ITIL and SDLC frameworks to ensure smooth delivery.
+Roles & Responsibilities:
+•
+Automation & Environment Support: Supporting automation, deployment, and environment operations in an AWS Managed Services setup.Involved in CI/CD execution, environment monitoring, and change coordination aligned with ITIL and SDLC frameworks to ensure smooth delivery.
+•
+Daily Stand-Ups & Coordination: Attended daily stand-up meetings to share progress, discuss incident status, and coordinate upcoming deployment or change activities with cross-functional teams.
+•
+AWS Provisioning & Change Management: Worked on provisioning and managing AWS services based on approved change requests.
+•
+Infrastructure as Code (IaC): Used Terraform templates to standardise configurations and maintain production consistency.
+•
+CI/CD Pipeline Management: Maintained Jenkins pipelines and GitHub Actions for build, test, and deployment. – Integrated Maven, SonarQube quality gates, and Docker image builds pushed to Amazon ECR for artifact management. – Configured Slack notifications for build and deployment updates. – Implemented end-to-end CI/CD automation, improving delivery efficiency and reducing manual effort by ~70%.
+•
+Containerisation & Orchestration: Containerised applications using Docker and supported deployments in Kubernetes environments.
+•
+Monitoring & Observability: Monitored system health and logs using CloudWatch, Grafana, Prometheus and Dynatrace.
+•
+Incident & Change Operations (ITIL): Managed incidents and change requests via ServiceNow. Participated in daily stand-ups and CAB calls to track progress and maintain operational continuity.
+•
+Documentation & SOP Management: Created and maintained Standard Operating Procedures (SOPs) and runbooks for CI/CD and monitoring tasks.
+ACHIEVEMENTS
+• Implemented end-to-end CI/CD automation, reducing manual effort by 70% and improving delivery efficiency. • Developed a custom ServiceNow dashboard for incident tracking and SLA breach reporting, improving operational transparency. • Integrated SonarQube quality gates, ECR management, and Slack notifications for improved collaboration and feedback. • DXC CHAMPS Award – FY24 Q1: Recognised for consistent delivery, ownership of priority tasks, and reliable execution of infrastructure operations and production deployments. • DXC CHAMPS Award – FY26 H1: Awarded for sustained performance, end-to-end accountability, and operational excellence in supporting critical infrastructure services.
+CERTIFICATES
+• AWS Certified Solutions Architect – Associate
+• AWS Certified AI Practitioner
+• AWS Cloud Practitioner
+• Google Cloud Professional Cloud Architect
+• Microsoft Azure Administrator Associate (AZ-104)
+• Azure Fundamentals (AZ-900)
+• GitHub Foundations
+• Generative AI Certified (Oracle)
+LANGUAGES
+• English
+• Hindi
+• Telugu
+PROFESSIONAL INTERESTS
+• Willing to upskill in MLOps (Machine Learning Operations) and AIOps (Artificial Intelligence for IT Operations) to support modern automation and operational efficiency.
+• Interested in exploring concepts like MLOps and AIOps as part of long-term career development, not current expertise.
