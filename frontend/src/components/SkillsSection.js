@@ -58,6 +58,13 @@ const SkillsSection = ({ skills }) => {
       items: skills.programming,
       color: 'bg-indigo-50 border-indigo-200 text-indigo-700',
       gradient: 'from-indigo-400 to-purple-500'
+    },
+    {
+      title: 'Source Resource Management',
+      icon: Settings,
+      items: skills.srm,
+      color: 'bg-teal-50 border-teal-200 text-teal-700',
+      gradient: 'from-teal-400 to-cyan-500'
     }
   ];
 

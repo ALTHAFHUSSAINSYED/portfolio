@@ -37,7 +37,8 @@ const CertificationsSection = ({ certifications }) => {
     azure: { name: 'Microsoft Azure', color: 'text-blue-500', bg: 'bg-blue-600/20' },
     oracle: { name: 'Oracle', color: 'text-red-400', bg: 'bg-red-500/20' },
     devops: { name: 'DevOps', color: 'text-green-400', bg: 'bg-green-500/20' },
-    ai: { name: 'AI/ML', color: 'text-purple-400', bg: 'bg-purple-500/20' }
+    ai: { name: 'AI/ML', color: 'text-purple-400', bg: 'bg-purple-500/20' },
+    github: { name: 'GitHub', color: 'text-gray-300', bg: 'bg-gray-500/20' }
   };
 
   const filteredCertifications = selectedCategory === 'all' 
@@ -193,12 +194,12 @@ const CertificationsSection = ({ certifications }) => {
               {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
               <div className="text-muted-foreground font-medium text-sm glow-text">Azure Certs</div>
             </div>
-            <div className="text-center p-4 bg-red-500/10 rounded-lg border border-red-400/20 hover:border-red-400/40 transition-all duration-300 hover-glow">
-              <div className="text-2xl font-bold text-red-400 mb-2 counter glow-text-strong">
-                {certifications.filter(c => c.category === 'oracle').length}
+            <div className="text-center p-4 bg-gray-500/10 rounded-lg border border-gray-400/20 hover:border-gray-400/40 transition-all duration-300 hover-glow">
+              <div className="text-2xl font-bold text-gray-300 mb-2 counter glow-text-strong">
+                {certifications.filter(c => c.category === 'github').length}
               </div>
               {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
-              <div className="text-muted-foreground font-medium text-sm glow-text">Oracle Certs</div>
+              <div className="text-muted-foreground font-medium text-sm glow-text">GitHub Certs</div>
             </div>
           </div>
         </div>

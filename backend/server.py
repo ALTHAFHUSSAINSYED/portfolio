@@ -41,8 +41,7 @@ from datetime import datetime, timedelta
 import aiohttp
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail, From, To, Subject, Content, ReplyTo
+import requests
 import bleach
 import os
 import logging
@@ -423,9 +422,9 @@ class UpdateProjectModel(BaseModel):
 @api_router.post("/contact")
 async def send_contact_email(form: ContactForm):
     to_email = os.environ.get('TO_EMAIL')
-    sendgrid_api_key = os.environ.get('SENDGRID_API_KEY')
+    resend_api_key = os.environ.get('RESEND_KEY')
 
-    if not to_email or not sendgrid_api_key:
+    if not to_email or not resend_api_key:
         raise HTTPException(status_code=500, detail="Server is not configured for sending emails.")
     
     # Sanitize inputs to prevent XSS
@@ -444,24 +443,35 @@ async def send_contact_email(form: ContactForm):
     <p>{sanitized_message}</p>
     """
     
-    message = Mail(
-        from_email=From(to_email, form.name),
-        to_emails=To(to_email),
-        subject=Subject(final_subject),
-        html_content=Content("text/html", html_content)
-    )
-    message.reply_to = ReplyTo(form.email, form.name)
+    # Resend API payload
+    payload = {
+        "from": "onboarding@resend.dev",
+        "to": [to_email],
+        "subject": final_subject,
+        "html": html_content,
+        "reply_to": form.email
+    }
+    
+    headers = {
+        "Authorization": f"Bearer {resend_api_key}",
+        "Content-Type": "application/json"
+    }
 
     try:
-        sg = SendGridAPIClient(sendgrid_api_key)
-        response = sg.send(message)
-        if 200 <= response.status_code < 300:
+        response = requests.post(
+            "https://api.resend.com/emails",
+            json=payload,
+            headers=headers,
+            timeout=10
+        )
+        
+        if response.status_code == 200:
             return {"message": "Email sent successfully!"}
         else:
-            logging.error(f"SendGrid error: {response.status_code} {response.body}")
+            logging.error(f"Resend API error: {response.status_code} {response.text}")
             raise HTTPException(status_code=500, detail="Failed to send email.")
-    except Exception as e:
-        logging.error(f"Error sending email: {e}")
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Error sending email via Resend: {e}")
         raise HTTPException(status_code=500, detail="An error occurred while sending the email.")
 
 
