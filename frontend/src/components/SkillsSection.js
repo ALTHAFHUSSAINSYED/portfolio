@@ -25,18 +25,11 @@ const SkillsSection = ({ skills }) => {
       gradient: 'from-green-400 to-emerald-500'
     },
     {
-      title: 'Programming',
+      title: 'Programming & Scripting',
       icon: Code,
       items: skills.programming,
       color: 'bg-purple-50 border-purple-200 text-purple-700',
       gradient: 'from-purple-400 to-pink-500'
-    },
-    {
-      title: 'Storage & Infrastructure',
-      icon: Database,
-      items: skills.storage,
-      color: 'bg-orange-50 border-orange-200 text-orange-700',
-      gradient: 'from-orange-400 to-red-500'
     }
   ];
 
