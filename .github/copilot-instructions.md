@@ -24,7 +24,7 @@ This is an AI-powered portfolio and blogging platform. It features an automated 
 ## Critical Workflows
 
 ### Running the Backend
-- **Production:** Uses `backend/render_start.sh` which runs `uvicorn server:app`.
+- **Production (EC2):** SSH into the server and run the FastAPI application.
 - **Development:**
   ```bash
   cd backend
@@ -47,9 +47,8 @@ This is an AI-powered portfolio and blogging platform. It features an automated 
 ## Conventions & Patterns
 
 ### Environment Configuration
-- All secrets must be in `.env`.
-- Key variables: `GEMINI_API_KEY`, `SERPER_API_KEY`, `MONGO_URL`, `CLOUDINARY_*`.
-- See `backend/render_start.sh` for default values and fallback logic.
+- All secrets must be in `.env` on the EC2 instance.
+- Key variables: `GEMINI_API_KEY`, `SERPER_API_KEY`, `MONGO_URL`, `CLOUDINARY_*`, `SENDGRID_API_KEY`, `TO_EMAIL`.
 
 ### Logging
 - Application logs are written to `agent.log` and stdout.
@@ -66,4 +65,4 @@ This is an AI-powered portfolio and blogging platform. It features an automated 
 ## Integration Points
 - **Cloudinary:** Used for image hosting (configured in `server.py`).
 - **SendGrid:** Used for email notifications (`backend/notification_service.py`).
-- **Render:** Deployment platform; respects `Procfile` and `render_start.sh`.
+- **AWS EC2:** Backend deployment platform (IP: 13.233.54.210, access via PORTFOLIO.pem key).

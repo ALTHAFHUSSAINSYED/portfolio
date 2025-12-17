@@ -163,9 +163,9 @@ const ExperienceSection = ({ experience }) => {
                 <div className="text-muted-foreground font-medium glow-text">Cloud Certifications</div>
               </div>
               <div className="text-center hover-glow transition-all duration-300 p-4 rounded-lg">
-                <div className="text-3xl font-bold text-yellow-soft mb-2 counter glow-text-strong">3.5+</div>
+                <div className="text-3xl font-bold text-yellow-soft mb-2 counter glow-text-strong">100%</div>
                 {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
-                <div className="text-muted-foreground font-medium glow-text">Years Experience</div>
+                <div className="text-muted-foreground font-medium glow-text">On-Time Delivery</div>
               </div>
             </div>
             {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}

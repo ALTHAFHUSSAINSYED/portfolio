@@ -46,6 +46,11 @@ export const portfolioData = {
     programming: [
       { name: "Python", level: "Intermediate" },
       { name: "Bash Scripting", level: "Intermediate" }
+    ],
+    srm: [
+      { name: "GitHub", level: "Intermediate" },
+      { name: "GitLab", level: "Intermediate" },
+      { name: "Bitbucket", level: "Intermediate" }
     ]
   },
 
@@ -128,7 +133,7 @@ export const portfolioData = {
       name: "GitHub Foundations",
       issuer: "GitHub",
       year: "2024",
-      category: "devops"
+      category: "github"
     },
     {
       name: "Generative AI Certified",
@@ -154,6 +159,10 @@ export const portfolioData = {
     {
       title: "CI/CD Automation Excellence",
       description: "Implemented end-to-end CI/CD automation, reducing manual effort by 70% and improving delivery efficiency"
+    },
+    {
+      title: "100% On-Time Project Delivery",
+      description: "Consistently delivered all assigned infrastructure projects and change requests within committed timelines, maintaining zero SLA breaches"
     }
   ],
 
