@@ -1,5 +1,4 @@
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail, From, To, Subject, Content
+import resend
 import os
 import logging
 from datetime import datetime, timezone
@@ -12,17 +11,18 @@ logger = logging.getLogger(__name__)
 
 class NotificationService:
     def __init__(self):
-        self.sendgrid_api_key = os.environ.get('SENDGRID_API_KEY')
+        self.resend_api_key = os.environ.get('RESEND_KEY')
         # Set default email if environment variable is not set
         self.to_email = os.environ.get('TO_EMAIL', 'allualthaf42@gmail.com')
-        self.sg = SendGridAPIClient(self.sendgrid_api_key) if self.sendgrid_api_key else None
+        if self.resend_api_key:
+            resend.api_key = self.resend_api_key
         logger.info(f"Notification service initialized. Emails will be sent to: {self.to_email}")
     
     async def send_blog_notification(self, success: bool, blog_data: dict = None, error_message: str = None):
         """Send notification about blog generation status"""
-        if not self.sg or not self.to_email:
-            logger.error("SendGrid not configured. Skipping email notification.")
-            print("❌ SendGrid not configured. Skipping email notification.")
+        if not self.resend_api_key or not self.to_email:
+            logger.error("Resend not configured. Skipping email notification.")
+            print("❌ Resend not configured. Skipping email notification.")
             return
             
         try:
@@ -59,25 +59,21 @@ class NotificationService:
                 <p>The system will retry automatically during the next health check.</p>
                 """
             
-            message = Mail(
-                from_email=From(self.to_email, "Allu Bot"),
-                to_emails=To(self.to_email),
-                subject=Subject(subject),
-                html_content=Content("text/html", content)
-            )
-            
             try:
-                response = self.sg.send(message)
-                print(f"SendGrid response status: {response.status_code}")
-                if response.status_code not in [200, 201, 202]:
-                    logger.error(f"Failed to send email notification. Status code: {response.status_code}")
-                    print(f"❌ Failed to send email notification. Status code: {response.status_code}")
-                else:
-                    logger.info(f"Email notification sent successfully: {subject}")
-                    print(f"✅ Email notification sent successfully: {subject}")
+                params = {
+                    "from": "Portfolio <onboarding@resend.dev>",
+                    "to": [self.to_email],
+                    "subject": subject,
+                    "html": content
+                }
+                
+                response = resend.Emails.send(params)
+                logger.info(f"Email notification sent successfully: {subject}")
+                print(f"✅ Email notification sent successfully: {subject}")
+                print(f"Resend response: {response}")
             except Exception as send_error:
-                logger.error(f"SendGrid send error: {send_error}")
-                print(f"❌ SendGrid send error: {send_error}")
+                logger.error(f"Resend send error: {send_error}")
+                print(f"❌ Resend send error: {send_error}")
                 
         except Exception as e:
             logger.error(f"Error sending email notification: {e}")

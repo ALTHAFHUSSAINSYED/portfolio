@@ -79,7 +79,7 @@ const HeroSection = ({ personalInfo }) => {
 
   const downloadResume = () => {
     const link = document.createElement('a');
-    link.href = '/Althaf_Hussain_Syed_Resume.pdf';
+    link.href = '/AlthafResume.pdf';
     link.download = 'Althaf_Hussain_Syed_Resume.pdf';
     document.body.appendChild(link);
     link.click();
