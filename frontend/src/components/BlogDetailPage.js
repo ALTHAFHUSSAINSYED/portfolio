@@ -5,7 +5,7 @@ import { Badge } from './ui/badge';
 import { Newspaper, ArrowLeft, Calendar, Tag, ExternalLink } from 'lucide-react';
 import { Button } from './ui/button';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://althaf-portfolio.onrender.com';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://api.althafportfolio.site';
 
 const BlogDetailPage = () => {
   const { blogId } = useParams();

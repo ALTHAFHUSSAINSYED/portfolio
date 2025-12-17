@@ -5,7 +5,7 @@ import { Button } from './ui/button';
 import { Mail, Bookmark, Newspaper, RefreshCw, Filter, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://althaf-portfolio.onrender.com';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://api.althafportfolio.site';
 
 const BlogsSection = () => {
   const [blogs, setBlogs] = useState([]);

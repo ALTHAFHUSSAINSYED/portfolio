@@ -419,61 +419,21 @@ class UpdateProjectModel(BaseModel):
 
 # --- API ENDPOINTS ---
 
-# (No changes to your contact form)
+# Contact form endpoint using notification service
 @api_router.post("/contact")
 async def send_contact_email(form: ContactForm):
-    to_email = os.environ.get('TO_EMAIL')
-    resend_api_key = os.environ.get('RESEND_KEY')
-
-    if not to_email or not resend_api_key:
-        raise HTTPException(status_code=500, detail="Server is not configured for sending emails.")
-    
-    # Sanitize inputs to prevent XSS
-    sanitized_name = bleach.clean(form.name)
-    sanitized_subject = bleach.clean(form.subject) if form.subject else None
-    sanitized_message = bleach.clean(form.message)
-    
-    # Use sanitized inputs
-    final_subject = sanitized_subject if sanitized_subject else f"New portfolio message from {sanitized_name}"
-    html_content = f"""
-    <h3>New Contact Form Submission</h3>
-    <p><strong>Name:</strong> {sanitized_name}</p>
-    <p><strong>Email:</strong> {form.email}</p>
-    <p><strong>Subject:</strong> {sanitized_subject or 'No Subject Provided'}</p>
-    <p><strong>Message:</strong></p>
-    <p>{sanitized_message}</p>
-    """
-    
-    # Resend API payload
-    payload = {
-        "from": "onboarding@resend.dev",
-        "to": [to_email],
-        "subject": final_subject,
-        "html": html_content,
-        "reply_to": form.email
-    }
-    
-    headers = {
-        "Authorization": f"Bearer {resend_api_key}",
-        "Content-Type": "application/json"
-    }
-
     try:
-        response = requests.post(
-            "https://api.resend.com/emails",
-            json=payload,
-            headers=headers,
-            timeout=10
-        )
+        # Sanitize inputs to prevent XSS
+        form.name = bleach.clean(form.name)
+        form.subject = bleach.clean(form.subject) if form.subject else "No Subject"
+        form.message = bleach.clean(form.message)
         
-        if response.status_code == 200:
-            return {"message": "Email sent successfully!"}
-        else:
-            logging.error(f"Resend API error: {response.status_code} {response.text}")
-            raise HTTPException(status_code=500, detail="Failed to send email.")
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Error sending email via Resend: {e}")
-        raise HTTPException(status_code=500, detail="An error occurred while sending the email.")
+        # Use notification service to send email
+        result = await notification_service.send_contact_email(form)
+        return result
+    except Exception as e:
+        logging.error(f"Error in contact endpoint: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ✨ --- MODIFIED: The create_project endpoint --- ✨
@@ -828,7 +788,7 @@ def welcome():
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_origins=[origin.strip() for origin in os.environ.get('CORS_ORIGINS', '*').split(',')],
     allow_methods=["*"],
     allow_headers=["*"],
 )
