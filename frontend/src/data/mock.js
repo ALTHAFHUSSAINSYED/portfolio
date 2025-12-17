@@ -7,7 +7,7 @@ export const portfolioData = {
     phone: "+91 8184812249",
     location: "Hyderabad, India",
     linkedin: "https://www.linkedin.com/in/althafhussainsyed/",
-    summary: "Motivated DevOps Engineer with 3.5 years of experience supporting AWS cloud environments, CI/CD pipelines, and container-based deployments. Skilled in building automation, deployment support, and environment monitoring using Terraform, Jenkins, Docker, and Kubernetes. Works effectively with cross-functional teams and follows ITIL and SDLC practices to maintain stable and compliant operations. Focused on reliability, task ownership, and continuous improvement within enterprise infrastructure."
+    summary: "DevOps Engineer specializing in AWS cloud infrastructure, CI/CD automation, and container orchestration. Proven track record in building scalable pipelines and reducing manual effort by 70%. Certified across AWS, Azure, and Google Cloud platforms. Committed to operational excellence and continuous improvement."
   },
 
   skills: {
@@ -139,7 +139,7 @@ export const portfolioData = {
       name: "Generative AI Certified",
       issuer: "Oracle",
       year: "2024",
-      category: "ai"
+      category: "oracle"
     }
   ],
 
