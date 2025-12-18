@@ -120,9 +120,7 @@ const Header = ({ personalInfo }) => {
                     </p>
                   </div>
                   <div className="max-h-64 overflow-y-auto py-2">
-                    {['Cloud Computing', 'AI and ML', 'DevOps', 'Software Development', 'Databases', 
-                      'Cybersecurity', 'Blockchain', 'Quantum Computing', 'Edge Computing', 
-                      'IoT Development', 'Low-Code/No-Code', 'Frontend Development'].map((category) => (
+                    {['Cloud Computing', 'DevOps', 'AI and ML', 'Cybersecurity', 'Software Development'].map((category) => (
                       <button
                         key={category}
                         onClick={() => {

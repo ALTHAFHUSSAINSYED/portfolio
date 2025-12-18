@@ -43,18 +43,26 @@ const CertificationsSection = ({ certifications }) => {
 
   const filteredCertifications = selectedCategory === 'all' 
     ? certifications 
-    : certifications.filter(cert => cert.category === selectedCategory);
+    : certifications.filter(cert => 
+        Array.isArray(cert.category) 
+          ? cert.category.includes(selectedCategory)
+          : cert.category === selectedCategory
+      );
+
+  const getMainCategory = (category) => {
+    return Array.isArray(category) ? category[0] : category;
+  };
 
   const getCertificationIcon = (category) => {
     return <Award className="w-6 h-6" />;
   };
 
   const getCertificationColor = (category) => {
-    return categories[category]?.color || 'text-gray-400';
+    return categories[getMainCategory(category)]?.color || 'text-gray-400';
   };
 
   const getCertificationBg = (category) => {
-    return categories[category]?.bg || 'bg-gray-500/20';
+    return categories[getMainCategory(category)]?.bg || 'bg-gray-500/20';
   };
 
   return (
@@ -157,7 +165,9 @@ const CertificationsSection = ({ certifications }) => {
                   variant="outline" 
                   className={`${getCertificationBg(cert.category)} ${getCertificationColor(cert.category)} border-current text-xs px-3 py-1 hover-scale transition-all duration-300 sparkle-text`}
                 >
-                  {categories[cert.category]?.name || cert.category}
+                  {selectedCategory !== 'all' && Array.isArray(cert.category) && cert.category.includes(selectedCategory)
+                    ? categories[selectedCategory]?.name
+                    : categories[getMainCategory(cert.category)]?.name || cert.category}
                 </Badge>
               </div>
             </Card>
@@ -175,28 +185,28 @@ const CertificationsSection = ({ certifications }) => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center p-4 bg-orange-500/10 rounded-lg border border-orange-400/20 hover:border-orange-400/40 transition-all duration-300 hover-glow">
               <div className="text-2xl font-bold text-orange-400 mb-2 counter glow-text-strong">
-                {certifications.filter(c => c.category === 'aws').length}
+                {certifications.filter(c => Array.isArray(c.category) ? c.category.includes('aws') : c.category === 'aws').length}
               </div>
               {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
               <div className="text-muted-foreground font-medium text-sm glow-text">AWS Certs</div>
             </div>
             <div className="text-center p-4 bg-blue-500/10 rounded-lg border border-blue-400/20 hover:border-blue-400/40 transition-all duration-300 hover-glow">
               <div className="text-2xl font-bold text-blue-400 mb-2 counter glow-text-strong">
-                {certifications.filter(c => c.category === 'gcp').length}
+                {certifications.filter(c => Array.isArray(c.category) ? c.category.includes('gcp') : c.category === 'gcp').length}
               </div>
               {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
               <div className="text-muted-foreground font-medium text-sm glow-text">GCP Certs</div>
             </div>
             <div className="text-center p-4 bg-blue-600/10 rounded-lg border border-blue-500/20 hover:border-blue-500/40 transition-all duration-300 hover-glow">
               <div className="text-2xl font-bold text-blue-500 mb-2 counter glow-text-strong">
-                {certifications.filter(c => c.category === 'azure').length}
+                {certifications.filter(c => Array.isArray(c.category) ? c.category.includes('azure') : c.category === 'azure').length}
               </div>
               {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
               <div className="text-muted-foreground font-medium text-sm glow-text">Azure Certs</div>
             </div>
             <div className="text-center p-4 bg-gray-500/10 rounded-lg border border-gray-400/20 hover:border-gray-400/40 transition-all duration-300 hover-glow">
               <div className="text-2xl font-bold text-gray-300 mb-2 counter glow-text-strong">
-                {certifications.filter(c => c.category === 'github').length}
+                {certifications.filter(c => Array.isArray(c.category) ? c.category.includes('github') : c.category === 'github').length}
               </div>
               {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
               <div className="text-muted-foreground font-medium text-sm glow-text">GitHub Certs</div>

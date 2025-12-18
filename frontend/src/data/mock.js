@@ -104,7 +104,7 @@ export const portfolioData = {
       name: "AWS Certified AI Practitioner",
       issuer: "Amazon Web Services",
       year: "2024",
-      category: "aws"
+      category: ["aws", "ai"]
     },
     {
       name: "AWS Cloud Practitioner",
@@ -140,7 +140,7 @@ export const portfolioData = {
       name: "Generative AI Certified",
       issuer: "Oracle",
       year: "2024",
-      category: "oracle"
+      category: ["oracle", "ai"]
     }
   ],
 
