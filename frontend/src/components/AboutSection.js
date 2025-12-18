@@ -5,6 +5,7 @@ import { Award, TrendingUp, Shield, Zap } from 'lucide-react';
 
 const AboutSection = ({ personalInfo, achievements }) => {
   const [isVisible, setIsVisible] = useState(false);
+  const [hoveredSkill, setHoveredSkill] = useState(null);
   const sectionRef = useRef(null);
 
   const iconMap = {
@@ -85,9 +86,13 @@ const AboutSection = ({ personalInfo, achievements }) => {
                 ].map((skill, index) => (
                   <div
                     key={skill.name}
-                    className={`border border-${skill.color}-400/30 text-${skill.color}-soft bg-background/50 px-3 py-2 rounded-md text-sm font-medium hover:bg-${skill.color}-400/10 hover:border-${skill.color}-400/50 transition-all duration-300 backdrop-blur-sm hover:scale-105 cursor-default ${
-                      isVisible ? `fade-in-up stagger-${index + 3}` : ''
-                    }`}
+                    onMouseEnter={() => setHoveredSkill(skill.name)}
+                    onMouseLeave={() => setHoveredSkill(null)}
+                    className={`border px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 backdrop-blur-sm cursor-default ${
+                      hoveredSkill === skill.name 
+                        ? `border-${skill.color}-400/50 text-${skill.color}-soft bg-${skill.color}-400/10 scale-105`
+                        : 'border-border/30 text-muted-foreground bg-background/50'
+                    } ${isVisible ? `fade-in-up stagger-${index + 3}` : ''}`}
                   >
                     {skill.name}
                   </div>
