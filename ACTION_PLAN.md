@@ -1,7 +1,7 @@
 # Portfolio Blog Implementation - Action Plan & Timeline
 
 **Status:** Phase 1 Complete (SEO Infrastructure + First Elite Blog)  
-**Next Phase:** Post-Deployment Actions + Remaining 10 Blogs  
+**Next Phase:** Post-Deployment Actions + Remaining 5 Blogs  
 **Last Updated:** December 19, 2025
 
 ---
@@ -229,7 +229,7 @@ Expected: Should print lines containing "CCIM"
 
 ---
 
-## 🚀 NEXT PHASE: Regenerate Remaining 10 Blogs
+## 🚀 NEXT PHASE: Regenerate Remaining 5 Blogs
 
 ### Blog 2: Cybersecurity (SFAM Framework)
 **Framework:** Security-First Accountability Model  
@@ -278,13 +278,6 @@ Expected: Should print lines containing "CCIM"
 
 ---
 
-### Blogs 7-11: Mobile, Web, Data Science, Blockchain, IoT
-**Frameworks:** To be created (MFUM, CFPM, DMVM, SFIM, EFIM)  
-**Estimated Time:** 4-5 hours each (need to create frameworks)  
-**Status:** NOT STARTED
-
----
-
 ## 📅 COMPLETE TIMELINE ESTIMATE
 
 ### Phase 1: Infrastructure + First Blog ✅ DONE
@@ -301,15 +294,14 @@ Expected: Should print lines containing "CCIM"
 
 **Status:** PENDING YOUR ACTION
 
-### Phase 3: Remaining 10 Blogs
-**Time:** 35-45 hours (3.5-4.5 hours per blog × 10 blogs)
-- Blogs 2-6 (frameworks exist): 3-4 hours each = 15-20 hours
-- Blogs 7-11 (create frameworks): 4-5 hours each = 20-25 hours
+### Phase 3: Remaining 5 Blogs
+**Time:** 15-20 hours (3-4 hours per blog × 5 blogs)
+- All 5 blogs have frameworks already defined in ELITE_TIER_VALIDATION.md
 
 **Options:**
-- **Fast Track:** 2-3 weeks (working 2-3 hours daily)
-- **Steady Pace:** 4-6 weeks (working 1-2 hours daily)
-- **Weekend Batches:** 8-10 weekends (3-4 blogs per weekend sprint)
+- **Fast Track:** 1-2 weeks (working 2 hours daily)
+- **Steady Pace:** 2-3 weeks (working 1 hour daily)
+- **Weekend Batches:** 3-4 weekends (1-2 blogs per weekend sprint)
 
 ---
 
@@ -326,7 +318,7 @@ Expected: Should print lines containing "CCIM"
 - Actions 10-11 (monitoring, alerts)
 
 ### Can't Start Until Google Indexing Works
-- Remaining 10 blogs (no point if first blog isn't crawlable)
+- Remaining 5 blogs (no point if first blog isn't crawlable)
 
 ---
 
@@ -353,6 +345,8 @@ NEXT 7-14 DAYS (ongoing):
 □ Monitor indexing: site:althafportfolio.site/blogs
 □ Check Google Search Console coverage report
 □ If indexed successfully → Start Blog 2 (Cybersecurity)
+
+NOTE: Focusing on 6 core blogs only (Low-Code, Cybersecurity, AI/ML, Software Dev, DevOps, Cloud)
 ```
 
 ---
@@ -444,7 +438,7 @@ Allow: /
 ## 📈 SUCCESS METRICS (30-Day Goals)
 
 ### Week 1-2
-- [ ] All 1 blog indexed by Google
+- [ ] First blog indexed by Google
 - [ ] AI bots can read blog content
 - [ ] Rich results showing in Google testing tool
 - [ ] 10-50 organic impressions (Google Search Console)
@@ -455,7 +449,7 @@ Allow: /
 - [ ] 1-5 clicks from search
 - [ ] LinkedIn profile views increase 20-30%
 
-### Month 2-3 (After All 11 Blogs Published)
+### Month 2-3 (After All 6 Blogs Published)
 - [ ] 500+ organic impressions/month
 - [ ] 20-50 clicks/month from search
 - [ ] Ranking #10-20 for target keywords
@@ -500,8 +494,10 @@ Allow: /
 **Total Time to Full Launch:**
 - Verification: 30 min
 - SEO setup: 1 hour
-- 10 more blogs: 35-45 hours
-- **Total: 6-8 weeks to all 11 elite blogs live**
+- 5 more blogs: 15-20 hours
+- **Total: 3-4 weeks to all 6 elite blogs live**
+
+**Note:** Mobile, Web, Data Science, Blockchain, and IoT topics removed per user request (not relevant to core expertise)
 
 ---
 
