@@ -305,6 +305,8 @@ const BlogsSection = () => {
                   className="glassmorphic-btn"
                   onClick={() => {
                     setVisibleCount(3);
+                    // Scroll to blogs section smoothly
+                    document.getElementById('blogs')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                   }}
                 >
                   See Less Blogs
