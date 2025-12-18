@@ -9,6 +9,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Portfolio from "./components/Portfolio";
 import ProjectDetailPage from "./components/ProjectDetailPage";
+import BlogDetailPage from "./components/BlogDetailPage";
 // Import the smooth scroll functionality
 import "./smooth-scroll";
 
@@ -25,6 +26,10 @@ const router = createBrowserRouter([
       {
         path: "/projects/:projectId", // The detail page renders at its specific path
         element: <ProjectDetailPage />,
+      },
+      {
+        path: "/blogs/:blogId", // Blog detail page route
+        element: <BlogDetailPage />,
       },
     ],
   },

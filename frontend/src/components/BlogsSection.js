@@ -249,37 +249,39 @@ const BlogsSection = () => {
               {displayBlogs
                 .slice(0, visibleCount)
                 .map((blog, idx) => (
-                  <Card key={blog.id || blog._id || idx} className="p-8 relative block-card hover:shadow-lg transition-all duration-300">
-                    <div className="absolute top-4 right-4">
-                      <Newspaper className="w-6 h-6 text-cyan-400" />
-                    </div>
-                    <h3 className="text-xl font-bold mb-2">{blog.title}</h3>
-                    <p className="text-muted-foreground mb-4">{blog.summary}</p>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {blog.category && (
-                        <Badge variant="default" className="bg-primary text-primary-foreground mr-2 mb-2">
+                  <Card key={blog.id || blog._id || idx} className="flex flex-col overflow-hidden transition-all duration-300 backdrop-blur-sm hover:shadow-lg hover:shadow-cyan-500/20 group border-border/40 h-auto">
+                    {/* Compact Header with Badge and Date */}
+                    <div className="p-4 pb-2">
+                      <div className="flex justify-between items-start mb-2">
+                        <Badge className="bg-cyan-500/10 text-cyan-300 border-cyan-500/30 text-xs px-2 py-0.5">
                           {blog.category}
                         </Badge>
-                      )}
-                      {blog.tags && blog.tags.map((tag, tagIdx) => (
-                        <Badge key={tagIdx} variant="secondary" className="mr-2">
-                          {tag}
-                        </Badge>
-                      ))}
+                        <span className="text-[10px] text-muted-foreground flex items-center">
+                          <Calendar className="w-3 h-3 mr-1" /> 
+                          {blog.created_at && new Date(blog.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </span>
+                      </div>
+
+                      {/* Title - Bold and Eye-catching */}
+                      <h3 className="text-lg font-bold text-foreground leading-snug group-hover:text-cyan-soft transition-colors line-clamp-2 mb-2">
+                        {blog.title}
+                      </h3>
                     </div>
-                    <p className="text-xs text-muted-foreground mb-4">
-                      {blog.created_at && new Date(blog.created_at).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                    </p>
-                    <div className="flex justify-end mt-4">
+
+                    {/* Multi-line Attractive Teaser (2-3 lines) */}
+                    <div className="px-4 pb-3 flex-grow">
+                      <p className="text-muted-foreground text-sm line-clamp-3 leading-relaxed">
+                        {blog.summary}
+                      </p>
+                    </div>
+
+                    {/* Compact Footer with Read More */}
+                    <div className="px-4 py-2 bg-secondary/10 border-t border-white/5 mt-auto">
                       <Link
                         to={`/blogs/${blog.id || blog._id}`}
-                        className="inline-flex items-center px-4 py-2 text-sm font-medium text-cyan-500 hover:text-cyan-600"
+                        className="text-xs font-bold text-cyan-400 hover:text-cyan-300 transition-colors flex items-center uppercase tracking-wider"
                       >
-                        Read More
+                        Read More <Bookmark className="w-3 h-3 ml-2" />
                       </Link>
                     </div>
                   </Card>
