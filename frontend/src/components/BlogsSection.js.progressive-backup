@@ -2,130 +2,190 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import { Bookmark, Newspaper, RefreshCw, Filter, X } from 'lucide-react';
+import { Mail, Bookmark, Newspaper, RefreshCw, Filter, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://api.althafportfolio.site';
 
 const BlogsSection = () => {
   const [blogs, setBlogs] = useState([]);
-  const [allBlogs, setAllBlogs] = useState([]); // Keep original blogs for reset
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [generating, setGenerating] = useState(false);
+  const [customTopic, setCustomTopic] = useState('');
+  const [showTopicInput, setShowTopicInput] = useState(false);
+  const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [showCategoryFilter, setShowCategoryFilter] = useState(true); // VISIBLE BY DEFAULT
-  const [visibleCount, setVisibleCount] = useState(3);
+  const [showCategoryFilter, setShowCategoryFilter] = useState(false); // Hide filter by default
+  const [visibleCount, setVisibleCount] = useState(3); // Progressive loading: start with 3
   const sectionRef = useRef(null);
   const location = useLocation();
   
-  // ONLY THESE 6 CATEGORIES ALLOWED - ALL OTHERS PERMANENTLY REMOVED
-  const allowedCategories = [
-    'Low-Code/No-Code',
-    'Cybersecurity',
-    'Software Development',
-    'DevOps',
-    'AI and ML',
-    'Cloud Computing'
+  // Categories to exclude
+  const excludedCategories = [
+    'Frontend Development',
+    'IoT Development',
+    'Blockchain',
+    'Databases',
+    'Edge Computing',
+    'Quantum Computing'
   ];
 
   useEffect(() => {
     fetchBlogs();
   }, []);
   
+  // Extract unique categories from blogs (excluding unwanted ones)
+  useEffect(() => {
+    if (blogs && blogs.length > 0) {
+      const uniqueCategories = [...new Set(
+        blogs
+          .map(blog => blog.category)
+          .filter(cat => cat && !excludedCategories.includes(cat))
+      )];
+      setCategories(uniqueCategories);
+      
+      // Get category from URL
+      const searchParams = new URLSearchParams(location.search);
+      const categoryParam = searchParams.get('category');
+      if (categoryParam && uniqueCategories.includes(categoryParam)) {
+        setSelectedCategory(categoryParam);
+        setVisibleCount(3); // Reset to 3 when category selected
+      }
+    }
+  }, [blogs, location.search]);
+  
   // Check URL for category parameter
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const categoryParam = searchParams.get('category');
     
-    if (categoryParam && allowedCategories.includes(categoryParam)) {
+    if (categoryParam) {
       setSelectedCategory(categoryParam);
-      setVisibleCount(3);
+      setShowCategoryFilter(true);
+      setVisibleCount(3); // Reset to 3 when URL category changes
     }
   }, [location.search]);
   
-  // Reset visible count when filters change
+  // Reset visible count when category filter changes
   useEffect(() => {
-    setVisibleCount(3);
-  }, [selectedCategory, searchQuery]);
+    setVisibleCount(3); // Always start with 3 blogs
+  }, [selectedCategory]);
 
   const fetchBlogs = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/blogs`);
-      if (response.ok) {
-        const data = await response.json();
-        // Filter to ONLY show allowed categories
-        const filteredData = data.filter(blog => 
-          blog.category && allowedCategories.includes(blog.category)
-        );
-        // Sort by date (newest first)
-        const sortedBlogs = [...filteredData].sort((a, b) => {
+      // Try different API endpoints if the main one fails
+      const baseUrls = [
+        '', // Same domain (relative URL)
+        'https://althaf-portfolio.onrender.com',
+        'https://althaf-portfolio.vercel.app',
+        'http://localhost:5000',
+        'http://localhost:5001'
+      ];
+      
+      let data = null;
+      let succeeded = false;
+      
+      // Try API endpoints first
+      for (const baseUrl of baseUrls) {
+        try {
+          const response = await fetch(`${baseUrl}/api/blogs`);
+          if (response.ok) {
+            data = await response.json();
+            succeeded = true;
+            console.log(`Successfully fetched blogs from ${baseUrl}/api/blogs`);
+            break;
+          }
+        } catch (err) {
+          console.log(`Error fetching from ${baseUrl}: ${err.message}`);
+        }
+      }
+      
+      // If API endpoints fail, try local JSON file as fallback
+      if (!succeeded) {
+        try {
+          const response = await fetch('/data/blogs.json');
+          if (response.ok) {
+            const jsonData = await response.json();
+            data = jsonData.blogs;
+            succeeded = true;
+            console.log('Successfully fetched blogs from local JSON file');
+          }
+        } catch (err) {
+          console.log(`Error fetching from local JSON file: ${err.message}`);
+        }
+      }
+      
+      if (succeeded && data) {
+        // Sort blogs by created_at descending (newest first)
+        const sortedBlogs = [...data].sort((a, b) => {
           const dateA = new Date(a.created_at || a.date || 0);
           const dateB = new Date(b.created_at || b.date || 0);
           return dateB - dateA;
         });
         setBlogs(sortedBlogs);
-        setAllBlogs(sortedBlogs);
         setError(null);
       } else {
-        throw new Error('Failed to fetch blogs');
+        throw new Error('Failed to fetch blogs from all endpoints');
       }
     } catch (err) {
-      console.error('Error fetching blogs:', err);
       setError(err.message);
-      // Try local fallback
-      try {
-        const localData = await import('../../public/data/blogs.json');
-        const filteredData = (localData.default || []).filter(blog => 
-          blog.category && allowedCategories.includes(blog.category)
-        );
-        setBlogs(filteredData);
-        setAllBlogs(filteredData);
-      } catch (e) {
-        setBlogs([]);
-        setAllBlogs([]);
-      }
     } finally {
       setLoading(false);
     }
   };
 
-  // CASE-INSENSITIVE SEARCH: title, summary, tags, category
-  const handleSearch = (query) => {
-    setSearchQuery(query);
-    const lowerQuery = query.toLowerCase().trim();
-    
-    if (!lowerQuery) {
-      setBlogs(allBlogs);
-      return;
-    }
-    
-    const filtered = allBlogs.filter(blog => {
-      const titleMatch = blog.title?.toLowerCase().includes(lowerQuery);
-      const summaryMatch = blog.summary?.toLowerCase().includes(lowerQuery);
-      const categoryMatch = blog.category?.toLowerCase().includes(lowerQuery);
-      const tagsMatch = blog.tags?.some(tag => tag.toLowerCase().includes(lowerQuery));
+  const handleGenerateBlog = async (topic = null) => {
+    setGenerating(true);
+    try {
+      const requestBody = topic ? { topic } : {};
       
-      return titleMatch || summaryMatch || categoryMatch || tagsMatch;
-    });
-    
-    setBlogs(filtered);
+      // Try different API endpoints if the main one fails
+      const baseUrls = [
+        '', // Same domain (relative URL)
+        'https://althaf-portfolio.onrender.com',
+        'https://althaf-portfolio.vercel.app',
+        'http://localhost:5000'
+      ];
+      
+      let newBlog = null;
+      let succeeded = false;
+      
+      for (const baseUrl of baseUrls) {
+        try {
+          const response = await fetch(`${baseUrl}/api/generate-blog`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+          });
+          
+          if (response.ok) {
+            newBlog = await response.json();
+            succeeded = true;
+            break;
+          }
+        } catch (err) {
+          console.log(`Error generating blog from ${baseUrl}: ${err.message}`);
+        }
+      }
+      
+      if (succeeded && newBlog) {
+        // Add the new blog to the list and refresh
+        setBlogs(prevBlogs => [newBlog, ...prevBlogs]);
+        setCustomTopic('');
+        setShowTopicInput(false);
+      } else {
+        throw new Error('Failed to generate blog from all endpoints');
+      }
+    } catch (err) {
+      setError(`Failed to generate blog: ${err.message}`);
+    } finally {
+      setGenerating(false);
+    }
   };
 
-  // Clear all filters
-  const clearAllFilters = () => {
-    setSearchQuery('');
-    setSelectedCategory(null);
-    setBlogs(allBlogs);
-    setVisibleCount(3);
-    window.history.pushState({}, '', window.location.pathname);
-  };
-
-  // Get filtered blogs for display
-  const displayBlogs = selectedCategory 
-    ? blogs.filter(blog => blog.category === selectedCategory)
-    : blogs;
+  // Removed handleDelete function for security
 
   return (
     <section id="blogs" className="py-20 bg-background relative overflow-hidden" ref={sectionRef}>
@@ -153,42 +213,38 @@ const BlogsSection = () => {
               <Filter className="w-4 h-4" />
               Categories
             </Button>
-            {/* Search Bar */}
+            {/* Search utility for existing blogs */}
             <input
               type="text"
               placeholder="Search blogs..."
-              value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
               className="w-56 max-w-xs px-4 py-2 border rounded-md dark:bg-gray-800 dark:border-gray-700"
+              onChange={e => {
+                const search = e.target.value.toLowerCase();
+                setBlogs(prev => prev.filter(blog => blog.title.toLowerCase().includes(search) || blog.summary.toLowerCase().includes(search)));
+              }}
             />
-            {/* Clear All Filters - LEFT SIDE */}
-            {(searchQuery || selectedCategory) && (
-              <Button 
-                onClick={clearAllFilters}
-                variant="outline" 
-                className="flex items-center gap-2 border-red-500 text-red-500 hover:bg-red-500/10"
-              >
-                <X className="w-4 h-4" />
-                Clear All Filters
-              </Button>
-            )}
           </div>
           
-          {/* Category Filter - VISIBLE BY DEFAULT */}
-          {showCategoryFilter && (
+          {/* Category Filter */}
+          {showCategoryFilter && categories.length > 0 && (
             <div className="mt-6">
               <h3 className="text-lg font-semibold mb-3">Filter by Category:</h3>
               <div className="flex flex-wrap gap-3 justify-center">
-                {allowedCategories.map((category) => (
+                {selectedCategory && (
+                  <Button 
+                    onClick={() => setSelectedCategory(null)}
+                    variant="outline" 
+                    className="flex items-center gap-2 border-red-500 text-red-500 hover:bg-red-500/10"
+                    style={{ display: selectedCategory ? 'flex' : 'none' }}
+                  >
+                    <X className="w-4 h-4" />
+                    Clear Filter
+                  </Button>
+                )}
+                {categories.map((category) => (
                   <Badge 
                     key={category}
-                    onClick={() => {
-                      if (selectedCategory === category) {
-                        setSelectedCategory(null);
-                      } else {
-                        setSelectedCategory(category);
-                      }
-                    }}
+                    onClick={() => setSelectedCategory(category === selectedCategory ? null : category)}
                     className={`text-sm px-3 py-1 cursor-pointer hover:opacity-90 ${
                       category === selectedCategory 
                         ? 'bg-primary text-primary-foreground' 
@@ -219,13 +275,9 @@ const BlogsSection = () => {
               Try Again
             </Button>
           </div>
-        ) : displayBlogs.length === 0 ? (
+        ) : blogs.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-muted-foreground mb-4">
-              {searchQuery || selectedCategory 
-                ? 'No blogs found matching your filters.' 
-                : 'No blogs available yet.'}
-            </p>
+            <p className="text-muted-foreground mb-4">No blogs available yet.</p>
           </div>
         ) : (
           <>
@@ -237,17 +289,12 @@ const BlogsSection = () => {
                 </p>
               </div>
             )}
-            {searchQuery && (
-              <div className="mb-6 text-center">
-                <p className="text-primary font-medium">
-                  Search results for: <span className="font-bold">"{searchQuery}"</span>
-                </p>
-              </div>
-            )}
-
+            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {displayBlogs
-                .slice(0, visibleCount)
+              {blogs
+                .filter(blog => !excludedCategories.includes(blog.category)) // Filter out excluded categories
+                .filter(blog => !selectedCategory || blog.category === selectedCategory) // Apply selected category filter
+                .slice(0, visibleCount) // Progressive loading
                 .map((blog, idx) => (
                   <Card key={blog.id || blog._id || idx} className="p-8 relative block-card hover:shadow-lg transition-all duration-300">
                     <div className="absolute top-4 right-4">
@@ -275,8 +322,8 @@ const BlogsSection = () => {
                       })}
                     </p>
                     <div className="flex justify-end mt-4">
-                      <Link
-                        to={`/blogs/${blog.id || blog._id}`}
+                      <Link 
+                        to={`/blogs/${blog.id || blog._id}`} 
                         className="inline-flex items-center px-4 py-2 text-sm font-medium text-cyan-500 hover:text-cyan-600"
                       >
                         Read More
@@ -287,24 +334,30 @@ const BlogsSection = () => {
             </div>
           </>
         )}
-
+        
         {/* Dynamic "See More" / "See Less" Button */}
         {(() => {
-          const totalFiltered = displayBlogs.length;
+          const filteredBlogs = blogs
+            .filter(blog => !excludedCategories.includes(blog.category))
+            .filter(blog => !selectedCategory || blog.category === selectedCategory);
+          
+          const totalFiltered = filteredBlogs.length;
           const allVisible = visibleCount >= totalFiltered;
-
+          
           // Only show button if there are more than 3 blogs
           if (totalFiltered <= 3) return null;
-
+          
           if (allVisible) {
             // Show "See Less Blogs" button
             return (
               <div className="mt-12 text-center">
-                <Button
-                  variant="outline"
+                <Button 
+                  variant="outline" 
                   className="glassmorphic-btn"
                   onClick={() => {
                     setVisibleCount(3);
+                    setSelectedCategory(null); // Clear filter
+                    setShowCategoryFilter(false); // Hide category filter
                   }}
                 >
                   See Less Blogs
@@ -315,8 +368,8 @@ const BlogsSection = () => {
             // Show "See More Blogs" button
             return (
               <div className="mt-12 text-center">
-                <Button
-                  variant="outline"
+                <Button 
+                  variant="outline" 
                   className="glassmorphic-btn"
                   onClick={() => setVisibleCount(prev => prev + 3)}
                 >
