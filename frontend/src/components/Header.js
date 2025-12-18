@@ -98,25 +98,36 @@ const Header = ({ personalInfo }) => {
               <Award className="w-4 h-4 mr-2" />
               Certifications
             </button>
-            <div className="relative">
+            {/* SPLIT BUTTON: Blogs & Dropdown */}
+            <div className="relative flex items-center group">
+              {/* 1. Main Button: Navigate Only */}
               <button 
-                onClick={() => {
-                  scrollToSection('blogs');
-                  setShowBlogCategories(!showBlogCategories);
-                }}
-                className="glassmorphic-nav-btn font-medium nav-blink-gradient flex items-center"
+                onClick={() => scrollToSection('blogs')}
+                className="glassmorphic-nav-btn font-medium nav-blink-gradient flex items-center rounded-r-none border-r-0 pr-2 z-10"
+                title="Go to Blogs Section"
               >
                 <BookOpen className="w-4 h-4 mr-2" />
                 Blogs
-                <ChevronDown className={`w-4 h-4 ml-1 transition-transform ${showBlogCategories ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* 2. Toggle Button: Menu Only */}
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowBlogCategories(!showBlogCategories);
+                }}
+                className="glassmorphic-nav-btn font-medium nav-blink-gradient flex items-center rounded-l-none pl-1 border-l border-white/10 z-10 hover:bg-white/10"
+                title="Toggle Categories"
+              >
+                <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${showBlogCategories ? 'rotate-180' : ''}`} />
               </button>
               
               {/* Blog Categories Dropdown */}
               {showBlogCategories && (
-                <div className="absolute mt-2 w-64 bg-background border border-border rounded-md shadow-lg py-2 z-50">
+                <div className="absolute top-full right-0 mt-2 w-64 bg-background border border-border rounded-md shadow-lg py-2 z-50 fade-in-up">
                   <div className="px-4 py-2 border-b border-border">
                     <p className="text-sm font-medium text-muted-foreground flex items-center">
-                      <Filter className="w-4 h-4 mr-1" /> Blog Categories
+                      <Filter className="w-4 h-4 mr-1" /> Filter by Category
                     </p>
                   </div>
                   <div className="max-h-64 overflow-y-auto py-2">
@@ -126,8 +137,9 @@ const Header = ({ personalInfo }) => {
                         onClick={() => {
                           navigate(`/?category=${encodeURIComponent(category)}#blogs`);
                           setShowBlogCategories(false);
+                          scrollToSection('blogs');
                         }}
-                        className="w-full text-left px-4 py-2 text-sm hover:bg-secondary transition-colors"
+                        className="w-full text-left px-4 py-2 text-sm hover:bg-secondary transition-colors text-foreground"
                       >
                         {category}
                       </button>
