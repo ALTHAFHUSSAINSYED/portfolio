@@ -56,8 +56,8 @@ const BlogsSection = () => {
       const localRes = await fetch('/data/blogs.json');
       if (localRes.ok) {
         const data = await localRes.json();
-        // Ensure data is an array
-        const blogsArray = Array.isArray(data) ? data : [];
+        // Extract blogs array from the response (handle both {blogs: [...]} and [...] formats)
+        const blogsArray = Array.isArray(data) ? data : (data.blogs || []);
         // Filter to ONLY show allowed categories
         const filteredData = blogsArray.filter(blog => 
           blog.category && allowedCategories.includes(blog.category)
