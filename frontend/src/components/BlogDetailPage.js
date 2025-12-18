@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Newspaper, ArrowLeft, Calendar, Tag, ExternalLink } from 'lucide-react';
@@ -100,24 +101,101 @@ const BlogDetailPage = () => {
   
   if (!blog) return null;
 
+  // SEO meta data
+  const siteUrl = 'https://www.althafportfolio.site';
+  const blogUrl = `${siteUrl}/blogs/${blog.id}`;
+  const imageUrl = blog.imageUrl || `${siteUrl}/profile-pic.jpg`;
+  const description = blog.summary || blog.topic || 'Read this article on Althaf Hussain\'s portfolio';
+  const keywords = blog.tags ? blog.tags.join(', ') : 'software engineering, tech blog';
+  const publishedDate = blog.created_at ? new Date(blog.created_at).toISOString() : new Date().toISOString();
+  
+  // Extract plain text from markdown for JSON-LD
+  const contentPreview = blog.content 
+    ? blog.content.replace(/[#*`_\[\]]/g, '').substring(0, 200) 
+    : description;
+
   return (
-    <section className="py-20 bg-background text-foreground">
-      <div className="max-w-4xl mx-auto px-4">
-        <button
-          className="inline-flex items-center text-primary hover:text-primary/80 mb-6 font-semibold border border-primary rounded px-4 py-2 bg-background"
-          onClick={() => {
-            // Smooth scroll to blogs section
-            navigate('/');
-            setTimeout(() => {
-              const blogsSection = document.getElementById('blogs');
-              if (blogsSection) {
-                blogsSection.scrollIntoView({ behavior: 'smooth' });
+    <>
+      <Helmet>
+        {/* Primary Meta Tags */}
+        <title>{blog.title} | Althaf Hussain</title>
+        <meta name="title" content={blog.title} />
+        <meta name="description" content={description} />
+        <meta name="keywords" content={keywords} />
+        <meta name="author" content="Althaf Hussain" />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={blogUrl} />
+        <meta property="og:title" content={blog.title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:image" content={imageUrl} />
+        <meta property="article:published_time" content={publishedDate} />
+        <meta property="article:author" content="Althaf Hussain" />
+        {blog.tags && blog.tags.map((tag, idx) => (
+          <meta key={`og-tag-${idx}`} property="article:tag" content={tag} />
+        ))}
+        
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content={blogUrl} />
+        <meta property="twitter:title" content={blog.title} />
+        <meta property="twitter:description" content={description} />
+        <meta property="twitter:image" content={imageUrl} />
+        
+        {/* Canonical URL */}
+        <link rel="canonical" href={blogUrl} />
+        
+        {/* JSON-LD Structured Data for SEO */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            "headline": blog.title,
+            "description": description,
+            "image": imageUrl,
+            "datePublished": publishedDate,
+            "dateModified": publishedDate,
+            "author": {
+              "@type": "Person",
+              "name": "Althaf Hussain",
+              "url": siteUrl
+            },
+            "publisher": {
+              "@type": "Person",
+              "name": "Althaf Hussain",
+              "logo": {
+                "@type": "ImageObject",
+                "url": `${siteUrl}/profile-pic.jpg`
               }
-            }, 100);
-          }}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to all blogs
-        </button>
+            },
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": blogUrl
+            },
+            "keywords": keywords,
+            "articleBody": contentPreview
+          })}
+        </script>
+      </Helmet>
+      
+      <section className="py-20 bg-background text-foreground">
+        <div className="max-w-4xl mx-auto px-4">
+          <button
+            className="inline-flex items-center text-primary hover:text-primary/80 mb-6 font-semibold border border-primary rounded px-4 py-2 bg-background"
+            onClick={() => {
+              // Smooth scroll to blogs section
+              navigate('/');
+              setTimeout(() => {
+                const blogsSection = document.getElementById('blogs');
+                if (blogsSection) {
+                  blogsSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }, 100);
+            }}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back to all blogs
+          </button>
         
         <Card className="p-8 relative block-card shadow-lg">
           {/* Header Section */}
@@ -266,6 +344,7 @@ const BlogDetailPage = () => {
         </Card>
       </div>
     </section>
+    </>
   );
 };
 
