@@ -23,17 +23,59 @@ const BlogDetailPage = () => {
   const fetchBlog = async () => {
     setLoading(true);
     try {
-      // Load directly from local blogs.json file
-      const localRes = await fetch('/data/blogs.json');
-      if (!localRes.ok) {
-        throw new Error('Failed to load blogs data');
+      // Try ChromaDB API first
+      let data = null;
+      let succeeded = false;
+      try {
+        const chromaRes = await fetch(`/api/chromadb/blogs/${blogId}`);
+        if (chromaRes.ok) {
+          data = await chromaRes.json();
+          succeeded = true;
+        }
+      } catch (err) {
+        console.log(`Error fetching from ChromaDB: ${err.message}`);
+      }
+      // Fallback to MongoDB if ChromaDB fails
+      if (!succeeded) {
+        const baseUrls = [
+          '',
+          'https://althaf-portfolio.onrender.com',
+          'https://althaf-portfolio.vercel.app',
+          'http://localhost:5000'
+        ];
+        for (const baseUrl of baseUrls) {
+          try {
+            const response = await fetch(`${baseUrl}/api/blogs/${blogId}`);
+            if (response.ok) {
+              data = await response.json();
+              succeeded = true;
+              break;
+            }
+          } catch (err) {
+            console.log(`Error fetching from ${baseUrl}: ${err.message}`);
+          }
+        }
       }
       
-      const allBlogs = await localRes.json();
-      const blog = allBlogs.find(b => b.id === blogId || b._id === blogId);
+      // Final fallback: Load from local blogs.json file
+      if (!succeeded) {
+        try {
+          const localRes = await fetch('/data/blogs.json');
+          if (localRes.ok) {
+            const allBlogs = await localRes.json();
+            data = allBlogs.find(b => b.id === blogId || b._id === blogId);
+            if (data) {
+              succeeded = true;
+              console.log('Loaded blog from local blogs.json');
+            }
+          }
+        } catch (err) {
+          console.log(`Error loading from local blogs.json: ${err.message}`);
+        }
+      }
       
-      if (blog) {
-        setBlog(blog);
+      if (succeeded && data) {
+        setBlog(data);
         setError(null);
       } else {
         throw new Error('Blog not found');
