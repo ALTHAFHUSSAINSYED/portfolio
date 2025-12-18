@@ -56,11 +56,29 @@ const BlogDetailPage = () => {
           }
         }
       }
+      
+      // Final fallback: Load from local blogs.json file
+      if (!succeeded) {
+        try {
+          const localRes = await fetch('/data/blogs.json');
+          if (localRes.ok) {
+            const allBlogs = await localRes.json();
+            data = allBlogs.find(b => b.id === blogId || b._id === blogId);
+            if (data) {
+              succeeded = true;
+              console.log('Loaded blog from local blogs.json');
+            }
+          }
+        } catch (err) {
+          console.log(`Error loading from local blogs.json: ${err.message}`);
+        }
+      }
+      
       if (succeeded && data) {
         setBlog(data);
         setError(null);
       } else {
-        throw new Error('Failed to fetch blog from ChromaDB and MongoDB');
+        throw new Error('Blog not found');
       }
     } catch (err) {
       setError(err.message);
