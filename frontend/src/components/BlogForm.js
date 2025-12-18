@@ -17,8 +17,12 @@ const BlogForm = ({ onSubmit, initialData, onCancel }) => {
     <Card className="p-6 mb-8">
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label className="block font-semibold mb-1">Title</label>
+          <label htmlFor="blog-title" className="block font-semibold mb-1">Title</label>
           <input
+            type="text"
+            id="blog-title"
+            name="blog-title"
+            autoComplete="off"
             className="w-full border rounded px-3 py-2"
             value={title}
             onChange={e => setTitle(e.target.value)}
@@ -26,8 +30,12 @@ const BlogForm = ({ onSubmit, initialData, onCancel }) => {
           />
         </div>
         <div className="mb-4">
-          <label className="block font-semibold mb-1">Summary</label>
+          <label htmlFor="blog-summary" className="block font-semibold mb-1">Summary</label>
           <input
+            type="text"
+            id="blog-summary"
+            name="blog-summary"
+            autoComplete="off"
             className="w-full border rounded px-3 py-2"
             value={summary}
             onChange={e => setSummary(e.target.value)}
@@ -35,8 +43,11 @@ const BlogForm = ({ onSubmit, initialData, onCancel }) => {
           />
         </div>
         <div className="mb-4">
-          <label className="block font-semibold mb-1">Content</label>
+          <label htmlFor="blog-content" className="block font-semibold mb-1">Content</label>
           <textarea
+            id="blog-content"
+            name="blog-content"
+            autoComplete="off"
             className="w-full border rounded px-3 py-2"
             value={content}
             onChange={e => setContent(e.target.value)}
@@ -45,8 +56,12 @@ const BlogForm = ({ onSubmit, initialData, onCancel }) => {
           />
         </div>
         <div className="mb-4">
-          <label className="block font-semibold mb-1">Category</label>
+          <label htmlFor="blog-category" className="block font-semibold mb-1">Category</label>
           <input
+            type="text"
+            id="blog-category"
+            name="blog-category"
+            autoComplete="off"
             className="w-full border rounded px-3 py-2"
             value={category}
             onChange={e => setCategory(e.target.value)}

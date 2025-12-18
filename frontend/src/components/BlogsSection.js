@@ -156,6 +156,9 @@ const BlogsSection = () => {
             {/* Search Bar */}
             <input
               type="text"
+              id="blog-search"
+              name="blog-search"
+              autoComplete="off"
               placeholder="Search blogs..."
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
