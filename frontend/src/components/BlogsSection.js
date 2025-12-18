@@ -52,9 +52,10 @@ const BlogsSection = () => {
   const fetchBlogs = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/blogs`);
-      if (response.ok) {
-        const data = await response.json();
+      // FAST: Load from local JSON immediately for instant performance
+      const localRes = await fetch('/data/blogs.json');
+      if (localRes.ok) {
+        const data = await localRes.json();
         // Filter to ONLY show allowed categories
         const filteredData = data.filter(blog => 
           blog.category && allowedCategories.includes(blog.category)
@@ -69,23 +70,13 @@ const BlogsSection = () => {
         setAllBlogs(sortedBlogs);
         setError(null);
       } else {
-        throw new Error('Failed to fetch blogs');
+        throw new Error('Failed to load blogs');
       }
     } catch (err) {
-      console.error('Error fetching blogs:', err);
+      console.error('Error loading blogs:', err);
       setError(err.message);
-      // Try local fallback
-      try {
-        const localData = await import('../../public/data/blogs.json');
-        const filteredData = (localData.default || []).filter(blog => 
-          blog.category && allowedCategories.includes(blog.category)
-        );
-        setBlogs(filteredData);
-        setAllBlogs(filteredData);
-      } catch (e) {
-        setBlogs([]);
-        setAllBlogs([]);
-      }
+      setBlogs([]);
+      setAllBlogs([]);
     } finally {
       setLoading(false);
     }
