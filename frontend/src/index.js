@@ -35,12 +35,25 @@ const router = createBrowserRouter([
   },
 ]);
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(
-  <React.StrictMode>
-    <ThemeProvider>
-      {/* ✨ MODIFIED: The RouterProvider now supplies the router to your app */}
-      <RouterProvider router={router} />
-    </ThemeProvider>
-  </React.StrictMode>
-);
+const rootElement = document.getElementById("root");
+
+// Support hydration for pre-rendered content (react-snap)
+if (rootElement.hasChildNodes()) {
+  ReactDOM.hydrateRoot(
+    rootElement,
+    <React.StrictMode>
+      <ThemeProvider>
+        <RouterProvider router={router} />
+      </ThemeProvider>
+    </React.StrictMode>
+  );
+} else {
+  const root = ReactDOM.createRoot(rootElement);
+  root.render(
+    <React.StrictMode>
+      <ThemeProvider>
+        <RouterProvider router={router} />
+      </ThemeProvider>
+    </React.StrictMode>
+  );
+}
