@@ -137,11 +137,11 @@ const ContactSection = ({ personalInfo }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-muted-foreground mb-2">Your Name</label>
-                  <Input id="name" name="name" type="text" value={formData.name} onChange={handleInputChange} placeholder="Enter your full name" required className="form-input"/>
+                  <Input id="name" name="name" type="text" autoComplete="name" value={formData.name} onChange={handleInputChange} placeholder="Enter your full name" required className="form-input"/>
                 </div>
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-muted-foreground mb-2">Email Address</label>
-                  <Input id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="your.email@example.com" required className="form-input"/>
+                  <Input id="email" name="email" type="email" autoComplete="email" value={formData.email} onChange={handleInputChange} placeholder="your.email@example.com" required className="form-input"/>
                 </div>
               </div>
               <div>
