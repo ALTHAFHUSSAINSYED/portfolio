@@ -1,0 +1,21 @@
+# Ignore everything by default
+**
+
+# Allow backend files
+!backend/**
+!backend/requirements.txt
+!backend/Dockerfile
+
+# Explicitly ignore heavy/useless folders inside backend (if any)
+backend/__pycache__
+backend/.venv
+backend/.env
+.git
+.github
+frontend
+node_modules
+tests
+*.md
+*.txt
+*.json
+!backend/requirements.txt
