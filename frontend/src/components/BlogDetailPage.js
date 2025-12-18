@@ -29,7 +29,9 @@ const BlogDetailPage = () => {
         throw new Error('Failed to load blogs data');
       }
       
-      const allBlogs = await localRes.json();
+      const data = await localRes.json();
+      // Extract blogs array from the response (handle both {blogs: [...]} and [...] formats)
+      const allBlogs = Array.isArray(data) ? data : (data.blogs || []);
       const blog = allBlogs.find(b => b.id === blogId || b._id === blogId);
       
       if (blog) {
