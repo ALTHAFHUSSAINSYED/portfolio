@@ -61,7 +61,7 @@ class NotificationService:
             
             try:
                 params = {
-                    "from": "Portfolio <onboarding@resend.dev>",
+                    "from": "Portfolio <contact@althafportfolio.site>",
                     "to": [self.to_email],
                     "subject": subject,
                     "html": content
@@ -86,7 +86,7 @@ class NotificationService:
             
         try:
             params = {
-                "from": "Portfolio Contact <onboarding@resend.dev>",
+                "from": "Portfolio Contact <contact@althafportfolio.site>",
                 "to": [self.to_email],
                 "subject": f"New Message from {form_data.name}: {form_data.subject if form_data.subject else 'No Subject'}",
                 "html": f"""
