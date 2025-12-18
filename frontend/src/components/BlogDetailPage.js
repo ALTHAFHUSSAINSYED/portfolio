@@ -38,10 +38,8 @@ const BlogDetailPage = () => {
       // Fallback to MongoDB if ChromaDB fails
       if (!succeeded) {
         const baseUrls = [
-          '',
-          'https://althaf-portfolio.onrender.com',
-          'https://althaf-portfolio.vercel.app',
-          'http://localhost:5000'
+          API_BASE_URL,  // Primary MongoDB API (EC2)
+          'http://localhost:5000'  // Optional: for local testing
         ];
         for (const baseUrl of baseUrls) {
           try {

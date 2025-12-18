@@ -570,6 +570,82 @@ async def delete_project(project_id: str):
         logging.error(f"Database error when deleting project {project_id}: {e}")
         raise HTTPException(status_code=500, detail="Failed to delete project from database")
 
+# --- BLOG API ENDPOINTS ---
+@api_router.get("/blogs/{blog_id}")
+async def get_blog_from_mongodb(blog_id: str):
+    """Get a single blog post by ID from MongoDB"""
+    if db is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Database is not available. Check your MongoDB connection."
+        )
+    
+    try:
+        # Try to find by 'id' field first, then '_id'
+        blog = await db.blogs.find_one({"id": blog_id})
+        if not blog:
+            blog = await db.blogs.find_one({"_id": blog_id})
+        
+        if blog:
+            # Convert ObjectId to string if present
+            if '_id' in blog:
+                blog['_id'] = str(blog['_id'])
+            return blog
+        
+        raise HTTPException(status_code=404, detail=f"Blog with id '{blog_id}' not found")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error fetching blog {blog_id} from MongoDB: {e}")
+        raise HTTPException(status_code=500, detail="Error retrieving blog from database")
+
+@api_router.get("/chromadb/blogs/{blog_id}")
+async def get_blog_from_chromadb(blog_id: str):
+    """Get a single blog post by ID from ChromaDB"""
+    try:
+        # Get ChromaDB credentials
+        chroma_api_key = os.getenv('CHROMA_API_KEY')
+        chroma_tenant = os.getenv('CHROMA_TENANT') or os.getenv('CHROMA_TENANT_ID')
+        chroma_database = os.getenv('CHROMA_DATABASE')
+        
+        if not (chroma_api_key and chroma_tenant and chroma_database):
+            raise HTTPException(
+                status_code=503,
+                detail="ChromaDB credentials not configured"
+            )
+        
+        chroma_client = chromadb.CloudClient(
+            api_key=chroma_api_key,
+            tenant=chroma_tenant,
+            database=chroma_database
+        )
+        
+        # Get the Blogs_data collection
+        collection = chroma_client.get_collection(name='Blogs_data')
+        
+        # Query by ID
+        results = collection.get(ids=[blog_id])
+        
+        if results and results['documents'] and len(results['documents']) > 0:
+            # ChromaDB returns documents as list
+            blog_content = results['documents'][0]
+            metadata = results['metadatas'][0] if results.get('metadatas') else {}
+            
+            # Construct blog object
+            blog = {
+                'id': blog_id,
+                'content': blog_content,
+                **metadata  # Include any metadata stored with the blog
+            }
+            return blog
+        
+        raise HTTPException(status_code=404, detail=f"Blog with id '{blog_id}' not found in ChromaDB")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error fetching blog {blog_id} from ChromaDB: {e}")
+        raise HTTPException(status_code=500, detail=f"Error retrieving blog from ChromaDB: {str(e)}")
+
 # --- AGENT API MODELS ---
 class AgentQuery(BaseModel):
     message: str = Field(..., description="The message to send to the agent")
