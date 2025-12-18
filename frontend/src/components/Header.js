@@ -132,17 +132,17 @@ const Header = ({ personalInfo }) => {
               </div>
               
               {/* ========================================================= */}
-              {/* DROPDOWN MENU (Reduced Width & Offset)                    */}
+              {/* DROPDOWN MENU (Compact & Shifted Right)                   */}
               {/* ========================================================= */}
               {showBlogCategories && (
-                <div className="absolute top-full right-[-20px] mt-2 w-64 bg-background/95 backdrop-blur-md border border-cyan-400/30 rounded-xl shadow-2xl shadow-cyan-900/20 py-2 z-50 fade-in-up origin-top-right">
+                <div className="absolute top-full right-[-60px] mt-2 w-56 bg-background/95 backdrop-blur-md border border-cyan-400/30 rounded-xl shadow-2xl shadow-cyan-900/20 py-2 z-50 fade-in-up origin-top-right">
                   <div className="px-4 py-2 border-b border-border/50 bg-secondary/30">
-                    <p className="text-xs font-bold text-cyan-soft uppercase tracking-wider flex items-center">
-                      <Filter className="w-3 h-3 mr-2" /> 
-                      Select Topic
+                    <p className="text-xs font-semibold text-foreground flex items-center">
+                      <Filter className="w-3 h-3 mr-2 text-cyan-soft" /> 
+                      Filter by Topic
                     </p>
                   </div>
-                  <div className="max-h-64 overflow-y-auto py-1 custom-scrollbar">
+                  <div className="max-h-64 overflow-y-auto py-2 custom-scrollbar">
                     {[
                       'Cloud Computing', 
                       'DevOps', 
@@ -157,7 +157,7 @@ const Header = ({ personalInfo }) => {
                           setShowBlogCategories(false);
                           scrollToSection('blogs');
                         }}
-                        className="w-full text-left px-4 py-2 text-sm text-muted-foreground hover:text-cyan-soft hover:bg-cyan-400/10 transition-all duration-200 border-l-2 border-transparent hover:border-cyan-400"
+                        className="w-full text-left px-4 py-2.5 text-sm text-muted-foreground hover:text-cyan-soft hover:bg-cyan-400/10 transition-all duration-200 border-l-2 border-transparent hover:border-cyan-400"
                       >
                         {category}
                       </button>
