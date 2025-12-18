@@ -258,24 +258,24 @@ const BlogsSection = () => {
                         </span>
                       </div>
 
-                      {/* Title - Bold and Eye-catching */}
-                      <h3 className="text-lg font-bold text-foreground leading-snug group-hover:text-cyan-soft transition-colors line-clamp-2 mb-2">
+                      {/* Title - Consistent Medium Font */}
+                      <h3 className="text-base font-semibold text-foreground leading-snug group-hover:text-cyan-soft transition-colors line-clamp-2 mb-2">
                         {blog.title}
                       </h3>
                     </div>
 
-                    {/* Multi-line Attractive Teaser (2-3 lines) */}
+                    {/* Multi-line Attractive Teaser - Consistent Font */}
                     <div className="px-4 pb-3 flex-grow">
                       <p className="text-muted-foreground text-sm line-clamp-3 leading-relaxed">
                         {blog.summary}
                       </p>
                     </div>
 
-                    {/* Compact Footer with Read More */}
+                    {/* Compact Footer with Read More - Consistent Font */}
                     <div className="px-4 py-2 bg-secondary/10 border-t border-white/5 mt-auto">
                       <Link
                         to={`/blogs/${blog.id || blog._id}`}
-                        className="text-xs font-bold text-cyan-400 hover:text-cyan-300 transition-colors flex items-center uppercase tracking-wider"
+                        className="text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors flex items-center"
                       >
                         Read More <Bookmark className="w-3 h-3 ml-2" />
                       </Link>
