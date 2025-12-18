@@ -1,5 +1,10 @@
 # How to Scale Enterprise Integration Without Breaking Your Budget: A Low-Code Approach
 
+**By Althaf Hussain Syed**  
+*DevOps Engineer | Cloud Architect | CCIM Originator*
+
+---
+
 In 2025, most enterprises aren't failing at integration because of technology.
 They're failing because integration has quietly become one of their biggest, least visible cost centers—and most executives have no idea it's happening.
 

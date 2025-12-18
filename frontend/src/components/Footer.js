@@ -172,7 +172,10 @@ const Footer = ({ personalInfo }) => {
             <div className={`text-center md:text-left ${isVisible ? 'fade-in-up stagger-4' : ''}`}>
                {/* ✨ MODIFIED: Uses theme-aware text colors */}
               <p className="text-muted-foreground glow-text">
-                © {currentYear} <span className="owner-name">{personalInfo.name}</span>. All rights reserved.
+                © {currentYear} <span className="owner-name">Althaf Hussain Syed</span>. All rights reserved.
+              </p>
+              <p className="text-muted-foreground text-sm mt-1">
+                Original content. Unauthorized reproduction prohibited.
               </p>
               <p className="text-muted-foreground text-sm mt-1">
                 Built with Passion • <span className="text-gradient-animate">Made with ❤️</span>

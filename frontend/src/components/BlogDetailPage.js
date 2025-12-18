@@ -158,12 +158,17 @@ const BlogDetailPage = () => {
             "dateModified": publishedDate,
             "author": {
               "@type": "Person",
-              "name": "Althaf Hussain",
-              "url": siteUrl
+              "name": "Althaf Hussain Syed",
+              "jobTitle": "DevOps Engineer | Cloud Architect",
+              "url": siteUrl,
+              "sameAs": [
+                "https://www.linkedin.com/in/althafhussainsyed/",
+                "https://github.com/ALTHAFHUSSAINSYED"
+              ]
             },
             "publisher": {
               "@type": "Person",
-              "name": "Althaf Hussain",
+              "name": "Althaf Hussain Syed",
               "logo": {
                 "@type": "ImageObject",
                 "url": `${siteUrl}/profile-pic.jpg`
@@ -203,18 +208,36 @@ const BlogDetailPage = () => {
             <Newspaper className="w-6 h-6 text-cyan-400" />
           </div>
           
-          <h1 className="text-4xl font-bold mb-6">{blog.title}</h1>
+          <h1 className="text-4xl font-bold mb-4">{blog.title}</h1>
+          
+          {/* Author Byline */}
+          <div className="mb-6 pb-6 border-b border-border">
+            <div className="flex items-center gap-3 mb-3">
+              <img 
+                src="/profile-pic.jpg" 
+                alt="Althaf Hussain Syed"
+                className="w-12 h-12 rounded-full border-2 border-primary"
+              />
+              <div>
+                <p className="text-lg font-semibold text-foreground">Althaf Hussain Syed</p>
+                <p className="text-sm text-muted-foreground">DevOps Engineer | Cloud Architect | CCIM Originator</p>
+              </div>
+            </div>
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Calendar className="mr-2 h-4 w-4" />
+              <span className="font-medium">Published:</span>
+              <span className="ml-2">
+                {blog.created_at && new Date(blog.created_at).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </span>
+            </div>
+          </div>
           
           {/* Meta Information */}
           <div className="flex flex-wrap gap-2 mb-6">
-            <div className="flex items-center text-sm text-muted-foreground">
-              <Calendar className="mr-1 h-4 w-4" />
-              {blog.created_at && new Date(blog.created_at).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
-            </div>
             
             <div className="flex flex-wrap gap-2">
               {blog.category && (
@@ -305,6 +328,68 @@ const BlogDetailPage = () => {
             </div>
           )}
 
+          {/* Author Bio Section */}
+          <div className="mt-12 pt-8 border-t-2 border-primary/30">
+            <div className="bg-secondary/30 rounded-lg p-6">
+              <h3 className="text-xl font-bold mb-4 text-foreground">About the Author</h3>
+              <div className="flex flex-col md:flex-row gap-6">
+                <div className="flex-shrink-0">
+                  <img 
+                    src="/profile-pic.jpg" 
+                    alt="Althaf Hussain Syed"
+                    className="w-24 h-24 rounded-full border-4 border-primary"
+                  />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-lg font-semibold mb-2">Althaf Hussain Syed</h4>
+                  <p className="text-sm text-primary font-medium mb-3">DevOps Engineer | AWS Solutions Architect | Cloud Infrastructure Specialist</p>
+                  <p className="text-muted-foreground leading-relaxed mb-4">
+                    Althaf Hussain Syed is a DevOps Engineer with 3.5+ years of experience building scalable cloud infrastructure 
+                    and automation solutions for enterprise clients. Currently working as Analyst III Infrastructure Services at DXC Technology, 
+                    he specializes in AWS cloud architecture, CI/CD automation, and containerized deployments using Docker and Kubernetes.
+                  </p>
+                  <p className="text-muted-foreground leading-relaxed mb-4">
+                    He holds multiple cloud certifications including AWS Solutions Architect Associate, AWS AI Practitioner, 
+                    Google Cloud Professional Architect, and Azure Administrator Associate. His work focuses on reducing manual 
+                    effort through end-to-end automation (achieving 70% efficiency improvements) and implementing enterprise-grade 
+                    DevOps practices aligned with ITIL and SDLC frameworks.
+                  </p>
+                  <p className="text-muted-foreground leading-relaxed mb-4">
+                    Creator of the <strong>Change-Cost Integration Model (CCIM)</strong> framework for enterprise integration strategy. 
+                    Recognized with multiple DXC CHAMPS Awards for operational excellence and consistent delivery of critical infrastructure services.
+                  </p>
+                  <div className="flex gap-4 mt-4">
+                    <a 
+                      href="https://www.linkedin.com/in/althafhussainsyed/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      LinkedIn
+                    </a>
+                    <a 
+                      href="https://github.com/ALTHAFHUSSAINSYED" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      GitHub
+                    </a>
+                    <a 
+                      href="mailto:allualthaf42@gmail.com"
+                      className="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      Email
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* References and Sources */}
           {blog.sources && blog.sources.length > 0 && (
             <div className="mt-8 pt-6 border-t border-border">
@@ -327,20 +412,13 @@ const BlogDetailPage = () => {
             </div>
           )}
 
-          {/* Author Info */}
-          {blog.author && (
-            <div className="mt-8 pt-6 border-t border-border flex items-center">
-              <img 
-                src={blog.author.avatar || "/profile-pic.jpg"} 
-                alt={blog.author.name}
-                className="w-12 h-12 rounded-full mr-4"
-              />
-              <div>
-                <h3 className="text-lg font-semibold">{blog.author.name}</h3>
-                <p className="text-sm text-muted-foreground">{blog.author.bio}</p>
-              </div>
-            </div>
-          )}
+          {/* Copyright Notice */}
+          <div className="mt-8 pt-6 border-t border-border text-center">
+            <p className="text-sm text-muted-foreground">
+              © {new Date(blog.created_at || Date.now()).getFullYear()} Althaf Hussain Syed. Original content. 
+              <span className="block mt-1">Unauthorized reproduction prohibited.</span>
+            </p>
+          </div>
         </Card>
       </div>
     </section>
