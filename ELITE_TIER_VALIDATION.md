@@ -216,7 +216,7 @@
 
 ---
 
-## Next Steps: Regenerate Remaining 10 Blogs
+## Next Steps: Regenerate Remaining 5 Blogs
 
 ### Framework Assignment (from feedback.md)
 1. **Cybersecurity** → SFAM (Security-First Accountability Model)
@@ -224,11 +224,8 @@
 3. **Software Development** → FDQM (Feedback-Driven Quality Model)
 4. **DevOps** → ODOM (Ownership-Driven Operations Model)
 5. **Cloud Computing** → DFCM (Discipline-First Cloud Model)
-6. **Mobile Development** → MFUM (Mobile-First UX Model) *[to be created]*
-7. **Web Development** → CFPM (Component-First Performance Model) *[to be created]*
-8. **Data Science** → DMVM (Data Maturity Value Model) *[to be created]*
-9. **Blockchain** → SFIM (Security-First Implementation Model) *[to be created]*
-10. **IoT** → EFIM (Edge-First Integration Model) *[to be created]*
+
+**Note:** Mobile, Web, Data Science, Blockchain, and IoT topics removed per user request (not relevant to core expertise)
 
 ### Regeneration Process (Per Blog)
 1. Read topic and current generic content
@@ -244,9 +241,9 @@
 11. Commit and deploy
 
 ### Estimated Timeline
-- **Per blog:** 2-3 hours (including validation)
-- **All 10 blogs:** 20-30 hours (2-3 weeks with other work)
-- **Deployment frequency:** Batch of 3-4 blogs at a time
+- **Per blog:** 3-4 hours (including validation)
+- **All 5 blogs:** 15-20 hours (2-3 weeks with other work)
+- **Deployment frequency:** Batch of 2-3 blogs at a time
 
 ---
 
@@ -256,7 +253,7 @@
 ✅ **SEO Infrastructure:** Complete and production-ready
 ✅ **Crawlability:** AI models and search engines can access content
 ✅ **Performance:** Pre-rendering reduces load time by ~50%
-✅ **Scalability:** Framework documented for remaining 10 blogs
+✅ **Scalability:** Framework documented for remaining 5 blogs
 ✅ **Monetization:** CTA with urgency and authority positioning
 ✅ **Validation Framework:** Comprehensive 92-95% gate established
 
@@ -267,9 +264,9 @@
 **Blog Status:** ✅ ELITE TIER (100/100)
 **SEO Status:** ✅ PRODUCTION READY
 **Deployment Status:** ⏳ IN PROGRESS (AWS Amplify)
-**Remaining Work:** Regenerate 10 blogs using same framework
+**Remaining Work:** Regenerate 5 blogs using same framework
 
-**Estimated Time to Full Launch:** 2-3 weeks for all 11 elite-tier blogs
+**Estimated Time to Full Launch:** 2-3 weeks for all 6 elite-tier blogs (Low-Code done + 5 remaining)
 
 ---
 
