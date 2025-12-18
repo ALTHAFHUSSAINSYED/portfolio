@@ -56,8 +56,10 @@ const BlogsSection = () => {
       const localRes = await fetch('/data/blogs.json');
       if (localRes.ok) {
         const data = await localRes.json();
+        // Ensure data is an array
+        const blogsArray = Array.isArray(data) ? data : [];
         // Filter to ONLY show allowed categories
-        const filteredData = data.filter(blog => 
+        const filteredData = blogsArray.filter(blog => 
           blog.category && allowedCategories.includes(blog.category)
         );
         // Sort by date (newest first)
