@@ -444,14 +444,22 @@ code {
     transform: scale(1.08);
   }
 
+  /* OPTIMIZED: Replaces 'transition: all' with specific properties to remove input delay */
   .hover-glow {
-    transition: all 0.4s ease;
+    transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
+    will-change: box-shadow, transform; /* Tells browser to prep GPU */
   }
 
   .hover-glow:hover {
-    box-shadow: 0 0 30px rgba(34, 211, 238, 0.6), 0 0 60px rgba(236, 72, 153, 0.4);
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.4); /* Reduced spread for faster rendering */
     border-color: rgba(34, 211, 238, 0.8);
-    text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    /* Removed expensive text-shadow animation on container hover */
+    transform: translateX(4px); /* Smooth movement indicator */
+  }
+
+  /* Fix for the "Stuck" text highlight */
+  .text-highlight-smooth {
+    transition: color 0.2s ease-out;
   }
 
   .hover-rotate {
@@ -634,13 +642,22 @@ code {
     animation: gradientShift 6s ease infinite;
   }
 
-  /* ✨ NEW: Theme-specific styles for components */
-  .neon-card, .form-input, header {
+  /* ✨ OPTIMIZED: Hardware Accelerated Card with specific transitions */
+  .neon-card {
+    /* GPU Acceleration Hack - creates a new layer */
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    
+    /* Use specific transitions */
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease, background-color 0.4s ease, border-color 0.4s ease;
+  }
+
+  .form-input, header {
       transition: background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
   }
  
   .dark .neon-card {
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(8px); /* Reduced blur for performance */
     background: rgba(0, 0, 0, 0.8);
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
@@ -656,7 +673,7 @@ code {
   .light .neon-card {
     background: rgba(255, 255, 255, 0.92);
     border: 1px solid rgba(0, 0, 0, 0.12); /* slightly darker border for definition */
-    backdrop-filter: blur(6px);
+    backdrop-filter: blur(8px); /* Reduced blur for performance */
   }
 
   .light .neon-card:hover {

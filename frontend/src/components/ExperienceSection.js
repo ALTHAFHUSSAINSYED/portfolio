@@ -53,13 +53,13 @@ const ExperienceSection = ({ experience }) => {
 
         <div className="space-y-8">
           {experience.map((job, index) => (
-            // ✨ MODIFIED: Removed redundant/conflicting color classes to let neon-card work
-            <Card 
-              key={index} 
-              className={`p-8 transition-all duration-500 backdrop-blur-sm neon-card hover-lift hover-shine ${
-                isVisible ? `fade-in-up stagger-${index + 2}` : ''
-              }`}
+            // 1. OUTER WRAPPER: Handles Entrance Animation ONLY (No hover effects here)
+            <div 
+              key={index}
+              className={`${isVisible ? `fade-in-up stagger-${index + 2}` : 'opacity-0'}`}
             >
+              {/* 2. INNER CARD: Handles Hover Effects ONLY */}
+              <Card className="p-8 backdrop-blur-md bg-background/40 border border-white/10 rounded-xl neon-card hover-lift">
               {/* Company Header */}
               <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
                 <div className="flex items-center space-x-4 mb-4 md:mb-0">
@@ -99,13 +99,13 @@ const ExperienceSection = ({ experience }) => {
                   {job.achievements.map((achievement, achievementIndex) => (
                     <div 
                       key={achievementIndex} 
-                      className={`flex items-start space-x-3 hover-glow transition-all duration-300 p-2 rounded ${
-                        isVisible ? `fade-in-right stagger-${achievementIndex + 3}` : ''
-                      }`}
+                      // REMOVED 'hover-glow' and 'transition-all'. Added simple classes.
+                      className="group flex items-start space-x-3 p-2 rounded-lg hover:bg-white/5 transition-colors duration-200 cursor-default"
                     >
-                      <CheckCircle className="w-5 h-5 text-green-soft mt-0.5 flex-shrink-0 pulse-shine" />
-                      {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
-                      <p className="text-muted-foreground leading-relaxed glow-text">
+                      <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
+                      
+                      {/* Smooth Color Transition for Text */}
+                      <p className="text-muted-foreground leading-relaxed text-highlight-smooth group-hover:text-white">
                         {achievement}
                       </p>
                     </div>
@@ -118,22 +118,20 @@ const ExperienceSection = ({ experience }) => {
                 <h5 className="text-lg font-semibold mb-4 shine-text">
                   Technologies & Tools
                 </h5>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-2">
                   {job.technologies.map((tech, techIndex) => (
                     <Badge 
                       key={techIndex} 
                       variant="outline" 
-                      // ✨ MODIFIED: Changed bg-black/50 to bg-background/50
-                      className={`border-cyan-400/30 text-cyan-soft bg-background/50 px-3 py-1 hover:bg-cyan-400/10 transition-all duration-300 hover-scale hover-glow sparkle-text ${
-                        isVisible ? `scale-in stagger-${techIndex + 1}` : ''
-                      }`}
+                      className="bg-secondary/20 hover:bg-cyan-500/10 text-muted-foreground hover:text-cyan-400 border-white/10 hover:border-cyan-500/50 transition-colors duration-300"
                     >
                       {tech}
                     </Badge>
                   ))}
                 </div>
               </div>
-            </Card>
+              </Card>
+            </div>
           ))}
         </div>
 
