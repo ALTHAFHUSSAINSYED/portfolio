@@ -34,7 +34,8 @@ const ProjectDetailsPage = () => {
   }, [projectId]);
 
   const handleGoBack = () => {
-    navigate(-1);
+    // Pass state to teleport directly to projects section
+    navigate('/', { state: { scrollTo: 'projects' } });
   };
 
   if (loading) {
