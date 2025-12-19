@@ -201,7 +201,8 @@ const BlogsSection = () => {
         
         {loading ? (
           <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+            {/* FIXED: Spinner visible in light mode (Cyan) */}
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-500"></div>
           </div>
         ) : error ? (
           <div className="mt-4 p-4 bg-red-100 dark:bg-red-900/20 rounded-lg text-center">
@@ -245,39 +246,43 @@ const BlogsSection = () => {
               {displayBlogs
                 .slice(0, visibleCount)
                 .map((blog, idx) => (
-                  <Card key={blog.id || blog._id || idx} className="flex flex-col overflow-hidden transition-all duration-300 backdrop-blur-sm hover:shadow-lg hover:shadow-cyan-500/20 group border-border/40 h-auto">
+                  <Card 
+                    key={blog.id || blog._id || idx} 
+                    className="flex flex-col overflow-hidden neon-card hover-lift group h-auto"
+                  >
                     {/* Compact Header with Badge and Date */}
-                    <div className="p-4 pb-2">
-                      <div className="flex justify-between items-start mb-2">
-                        <Badge className="bg-cyan-500/10 text-cyan-300 border-cyan-500/30 text-xs px-2 py-0.5">
+                    <div className="p-5 pb-2">
+                      <div className="flex justify-between items-start mb-3">
+                        <Badge className="bg-cyan-500/10 text-cyan-500 dark:text-cyan-300 border-cyan-500/30 text-xs px-2 py-0.5">
                           {blog.category}
                         </Badge>
-                        <span className="text-[10px] text-muted-foreground flex items-center">
+                        <span className="text-[10px] text-muted-foreground flex items-center bg-secondary/50 px-2 py-1 rounded-full">
                           <Calendar className="w-3 h-3 mr-1" /> 
                           {blog.created_at && new Date(blog.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </span>
                       </div>
 
-                      {/* Title - Consistent Medium Font */}
-                      <h3 className="text-base font-semibold text-foreground leading-snug group-hover:text-cyan-soft transition-colors line-clamp-2 mb-2">
+                      {/* Title - Highlights on hover */}
+                      <h3 className="text-lg font-bold text-foreground leading-snug group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors line-clamp-2 mb-2">
                         {blog.title}
                       </h3>
                     </div>
 
-                    {/* Multi-line Attractive Teaser - Consistent Font */}
-                    <div className="px-4 pb-3 flex-grow">
+                    {/* Multi-line Attractive Teaser */}
+                    <div className="px-5 pb-4 flex-grow">
                       <p className="text-muted-foreground text-sm line-clamp-3 leading-relaxed">
                         {blog.summary}
                       </p>
                     </div>
 
-                    {/* Compact Footer with Read More - Consistent Font */}
-                    <div className="px-4 py-2 bg-secondary/10 border-t border-white/5 mt-auto">
+                    {/* Footer with Read More - Highlights Arrow */}
+                    <div className="px-5 py-4 border-t border-border/40 mt-auto bg-secondary/5">
                       <Link
                         to={`/blogs/${blog.id || blog._id}`}
-                        className="text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors flex items-center"
+                        className="text-sm font-bold text-cyan-600 dark:text-cyan-400 hover:text-cyan-800 dark:hover:text-cyan-300 transition-colors flex items-center"
                       >
-                        Read More <Bookmark className="w-3 h-3 ml-2" />
+                        Read Article 
+                        <Bookmark className="w-4 h-4 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
                       </Link>
                     </div>
                   </Card>
