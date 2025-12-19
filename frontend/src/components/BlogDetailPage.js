@@ -220,7 +220,7 @@ const BlogDetailPage = () => {
               />
               <div>
                 <p className="text-lg font-semibold text-foreground">Althaf Hussain Syed</p>
-                <p className="text-sm text-muted-foreground">DevOps Engineer | Cloud Architect | CCIM Originator</p>
+                <p className="text-sm text-muted-foreground">DevOps Engineer | Cloud Architect</p>
               </div>
             </div>
             <div className="flex items-center text-sm text-muted-foreground">
@@ -281,7 +281,17 @@ const BlogDetailPage = () => {
           {/* Main Content */}
           <div className="mt-6 prose prose-lg dark:prose-invert max-w-none">
             {blog.content ? (
-              <div dangerouslySetInnerHTML={{ __html: renderMarkdown(blog.content) }} />
+              <div 
+                className="
+                  [&_p]:text-lg [&_p]:text-gray-300 [&_p]:leading-relaxed [&_p]:mb-6
+                  [&_li]:text-lg [&_li]:text-gray-300
+                  [&_h1]:text-3xl [&_h1]:text-white [&_h1]:mb-6
+                  [&_h2]:text-2xl [&_h2]:text-cyan-400 [&_h2]:mt-10 [&_h2]:mb-4
+                  [&_h3]:text-xl [&_h3]:text-pink-400 [&_h3]:mt-8 [&_h3]:mb-3
+                  [&_strong]:text-white
+                "
+                dangerouslySetInnerHTML={{ __html: renderMarkdown(blog.content) }} 
+              />
             ) : (
               <div className="text-red-500 font-semibold">Full blog content is not available for this entry.</div>
             )}

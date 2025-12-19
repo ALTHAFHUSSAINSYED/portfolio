@@ -1,7 +1,7 @@
 # How to Scale Enterprise Integration Without Breaking Your Budget: A Low-Code Approach
 
 **By Althaf Hussain Syed**  
-*DevOps Engineer | Cloud Architect | CCIM Originator*
+*DevOps Engineer | Cloud Architect*
 
 ---
 
