@@ -1,0 +1,205 @@
+{
+  "personalInfo": {
+    "name": "Althaf Hussain Syed",
+    "title": "DevOps Engineer | Cloud & Infrastructure Specialist",
+    "email": "allualthaf42@gmail.com",
+    "phone": "+91 8184812249",
+    "location": "Hyderabad, India",
+    "linkedin": "https://www.linkedin.com/in/althafhussainsyed/",
+    "summary": "Motivated DevOps Engineer with 3.5 years of experience supporting AWS cloud environments, CI/CD pipelines, and container-based deployments. Skilled in building automation, deployment support, and environment monitoring using Terraform, Jenkins, Docker, and Kubernetes. Works effectively with cross-functional teams and follows ITIL and SDLC practices to maintain stable and compliant operations. Focused on reliability, task ownership, and continuous improvement within enterprise infrastructure.",
+    "heroSummary": "DevOps Engineer specializing in AWS cloud infrastructure, CI/CD automation, and container orchestration. Proven track record in building scalable pipelines and reducing manual effort by 70%. Certified across AWS, Azure, and Google Cloud platforms. Committed to operational excellence and continuous improvement."
+  },
+  "skills": {
+    "cloudPlatforms": [
+      {"name": "AWS", "level": "Advanced", "certifications": 3},
+      {"name": "Google Cloud Platform", "level": "Advanced", "certifications": 1},
+      {"name": "Microsoft Azure", "level": "Advanced", "certifications": 2}
+    ],
+    "cicd": [
+      {"name": "Jenkins", "level": "Intermediate"},
+      {"name": "GitHub Actions", "level": "Intermediate"},
+      {"name": "GitLab CI", "level": "Intermediate"},
+      {"name": "AWS CodePipeline", "level": "Intermediate"}
+    ],
+    "containerization": [
+      {"name": "Docker", "level": "Intermediate"},
+      {"name": "Kubernetes", "level": "Intermediate"},
+      {"name": "Amazon ECS", "level": "Intermediate"}
+    ],
+    "iac": [
+      {"name": "Terraform", "level": "Intermediate"},
+      {"name": "Ansible", "level": "Intermediate"}
+    ],
+    "monitoring": [
+      {"name": "CloudWatch", "level": "Intermediate"},
+      {"name": "Prometheus", "level": "Intermediate"},
+      {"name": "Grafana", "level": "Intermediate"},
+      {"name": "Dynatrace", "level": "Intermediate"}
+    ],
+    "buildQuality": [
+      {"name": "Maven", "level": "Intermediate"},
+      {"name": "SonarQube", "level": "Intermediate"},
+      {"name": "Nexus", "level": "Intermediate"},
+      {"name": "Trivy", "level": "Intermediate"}
+    ],
+    "programming": [
+      {"name": "Python", "level": "Intermediate"},
+      {"name": "Bash Scripting", "level": "Intermediate"}
+    ],
+    "srm": [
+      {"name": "GitHub", "level": "Intermediate"},
+      {"name": "GitLab", "level": "Intermediate"},
+      {"name": "Bitbucket", "level": "Intermediate"}
+    ]
+  },
+  "experience": [
+    {
+      "company": "DXC Technology",
+      "position": "Analyst III Infrastructure Services | DevOps Engineer",
+      "duration": "Aug 2022 – Present",
+      "location": "Hyderabad, India",
+      "project": "Cloud Platform Automation & Delivery | AWS Managed Services",
+      "achievements": [
+        "Supporting automation, deployment, and environment operations in AWS Managed Services setup with CI/CD execution and environment monitoring",
+        "Maintained Jenkins pipelines and GitHub Actions for build, test, and deployment with Maven, SonarQube quality gates, and Docker image builds",
+        "Implemented end-to-end CI/CD automation, reducing manual effort by ~70% and improving delivery efficiency",
+        "Containerized applications using Docker and supported deployments in Kubernetes environments",
+        "Monitored system health and logs using CloudWatch, Grafana, Prometheus and Dynatrace",
+        "Managed incidents and change requests via ServiceNow, participating in daily stand-ups and CAB calls",
+        "Created and maintained Standard Operating Procedures (SOPs) and runbooks for CI/CD and monitoring tasks",
+        "Developed custom ServiceNow dashboard for incident tracking and SLA breach reporting",
+        "Received DXC CHAMPS Award (FY24 Q1) for consistent delivery and reliable execution of infrastructure operations",
+        "Received DXC CHAMPS Award (FY26 H1) for sustained performance and operational excellence"
+      ],
+      "technologies": ["AWS", "Terraform", "Jenkins", "GitHub Actions", "Docker", "Kubernetes", "Maven", "SonarQube", "ECR", "CloudWatch", "Prometheus", "Grafana", "Dynatrace", "ServiceNow"]
+    }
+  ],
+  "education": [
+    {
+      "degree": "Master of Science in Computer Science",
+      "institution": "Acharya Nagarjuna University",
+      "duration": "Dec 2022 – June 2024",
+      "location": "Andhra Pradesh, India"
+    },
+    {
+      "degree": "Bachelor of Science in Computer Science",
+      "institution": "Acharya Nagarjuna University",
+      "duration": "June 2019 – June 2022",
+      "location": "Andhra Pradesh, India"
+    }
+  ],
+  "certifications": [
+    {"name": "AWS Certified Solutions Architect – Associate", "issuer": "Amazon Web Services", "year": "2024", "category": "aws"},
+    {"name": "AWS Certified AI Practitioner", "issuer": "Amazon Web Services", "year": "2024", "category": ["aws", "ai"]},
+    {"name": "AWS Cloud Practitioner", "issuer": "Amazon Web Services", "year": "2023", "category": "aws"},
+    {"name": "Google Cloud Professional Cloud Architect", "issuer": "Google Cloud", "year": "2024", "category": "gcp"},
+    {"name": "Microsoft Azure Administrator Associate (AZ-104)", "issuer": "Microsoft", "year": "2024", "category": "azure"},
+    {"name": "Azure Fundamentals (AZ-900)", "issuer": "Microsoft", "year": "2023", "category": "azure"},
+    {"name": "GitHub Foundations", "issuer": "GitHub", "year": "2024", "category": "github"},
+    {"name": "Generative AI Certified", "issuer": "Oracle", "year": "2024", "category": ["oracle", "ai"]}
+  ],
+  "achievements": [
+    {"title": "DXC CHAMPS Award – FY24 Q1", "description": "Recognised for consistent delivery, ownership of priority tasks, and reliable execution of infrastructure operations and production deployments"},
+    {"title": "DXC CHAMPS Award – FY26 H1", "description": "Awarded for sustained performance, end-to-end accountability, and operational excellence in supporting critical infrastructure services"},
+    {"title": "Multi-Cloud Certified Professional", "description": "Achieved 8+ professional certifications across three major cloud platforms: AWS, GCP, and Azure"},
+    {"title": "CI/CD Automation Excellence", "description": "Implemented end-to-end CI/CD automation, reducing manual effort by 70% and improving delivery efficiency"},
+    {"title": "100% On-Time Project Delivery", "description": "Consistently delivered all assigned infrastructure projects and change requests within committed timelines, maintaining zero SLA breaches"}
+  ],
+  "professionalInterests": [
+    "Willing to upskill in MLOps (Machine Learning Operations) and AIOps (Artificial Intelligence for IT Operations) to support modern automation and operational efficiency",
+    "Interested in exploring MLOps and AIOps concepts as part of long-term career development"
+  ],
+  "languages": ["English", "Hindi", "Telugu"],
+  "projects": [
+    {
+      "id": "cloud-native-cicd-aws",
+      "title": "Cloud-Native Microservices CI/CD Pipeline on AWS",
+      "description": "Architected and deployed a comprehensive CI/CD pipeline for microservices architecture on AWS, implementing containerization with Docker and orchestration with Kubernetes (EKS). The solution automated build, test, security scanning, and deployment workflows while ensuring zero-downtime deployments and comprehensive monitoring.",
+      "technologies": ["AWS EKS", "Jenkins", "Docker", "Kubernetes", "AWS CodePipeline", "Amazon ECR", "AWS CloudWatch", "Terraform", "Helm", "Prometheus", "Grafana", "SonarQube", "Trivy"],
+      "category": "Cloud Computing",
+      "challenges": [
+        "Designing scalable microservices architecture supporting 20+ services with independent deployment cycles",
+        "Implementing zero-downtime deployments using blue-green and canary strategies",
+        "Ensuring container security compliance with vulnerability scanning and policy enforcement",
+        "Managing infrastructure as code for consistent environment provisioning across dev, staging, and production"
+      ],
+      "solutions": [
+        "Built multi-stage Jenkins pipelines with parallel execution reducing build time by 60%",
+        "Implemented Helm charts for standardized Kubernetes deployments with version control",
+        "Integrated Trivy for container image scanning blocking deployments with critical vulnerabilities",
+        "Created Terraform modules for EKS cluster provisioning with auto-scaling and high availability",
+        "Configured Prometheus and Grafana for real-time monitoring with custom alerting rules"
+      ],
+      "achievements": [
+        "Reduced deployment time from 2 hours to 15 minutes through automation",
+        "Achieved 99.9% uptime with zero-downtime deployment strategies",
+        "Decreased infrastructure provisioning time by 70% using IaC",
+        "Identified and remediated 100+ security vulnerabilities through automated scanning"
+      ],
+      "duration": "6 months",
+      "role": "Lead DevOps Engineer",
+      "teamSize": "5 engineers"
+    },
+    {
+      "id": "aws-terraform-ansible-automation",
+      "title": "AWS Infrastructure Automation with Terraform & Ansible",
+      "description": "Designed and implemented a complete Infrastructure as Code (IaC) solution using Terraform and Ansible to automate AWS infrastructure provisioning, configuration management, and application deployment. The solution enabled consistent, repeatable infrastructure deployments across multiple environments while reducing manual configuration errors and deployment time.",
+      "technologies": ["Terraform", "Ansible", "AWS", "AWS VPC", "Amazon EC2", "Amazon RDS", "AWS S3", "AWS IAM", "AWS Lambda", "Python", "Bash", "Git", "Jenkins"],
+      "category": "DevOps",
+      "challenges": [
+        "Managing complex multi-tier AWS infrastructure spanning VPC, compute, database, and storage resources",
+        "Ensuring consistent configuration across development, staging, and production environments",
+        "Implementing secure credential management and least-privilege access controls",
+        "Creating reusable, modular IaC templates to support multiple projects and teams"
+      ],
+      "solutions": [
+        "Developed reusable Terraform modules for VPC, EC2, RDS, S3, and IAM with parameterized configurations",
+        "Implemented Terraform remote state management using S3 with DynamoDB state locking for team collaboration",
+        "Created Ansible playbooks for application deployment, server hardening, and configuration drift detection",
+        "Built CI/CD pipeline integrating Terraform validation, planning, and automated approval workflows",
+        "Implemented AWS Secrets Manager for secure credential storage with Ansible dynamic inventory"
+      ],
+      "achievements": [
+        "Reduced infrastructure provisioning time from 3 days to 30 minutes",
+        "Eliminated 95% of manual configuration errors through automation",
+        "Enabled infrastructure version control and rollback capabilities",
+        "Decreased environment inconsistency issues by 80% through standardized templates",
+        "Automated security patching across 50+ EC2 instances reducing patch window from days to hours"
+      ],
+      "duration": "4 months",
+      "role": "Senior DevOps Engineer",
+      "teamSize": "3 engineers"
+    },
+    {
+      "id": "aws-cloudwatch-grafana-monitoring",
+      "title": "AWS CloudWatch & Grafana Monitoring Automation",
+      "description": "Engineered a comprehensive monitoring and observability platform integrating AWS CloudWatch, Prometheus, and Grafana to provide real-time visibility into application performance, infrastructure health, and business metrics. The solution automated alert management, incident response, and performance optimization across distributed microservices architecture.",
+      "technologies": ["AWS CloudWatch", "Grafana", "Prometheus", "AWS Lambda", "Amazon SNS", "Python", "CloudWatch Logs Insights", "CloudWatch Metrics", "CloudWatch Alarms", "AWS Systems Manager", "Terraform"],
+      "category": "Cloud Computing",
+      "challenges": [
+        "Consolidating monitoring data from multiple AWS services and custom applications into unified dashboards",
+        "Reducing alert fatigue by implementing intelligent alerting with contextual threshold tuning",
+        "Enabling proactive issue detection before customer impact through predictive analytics",
+        "Creating cost-effective logging and metrics retention strategy for compliance requirements"
+      ],
+      "solutions": [
+        "Deployed Prometheus for metrics aggregation with custom exporters for application-specific KPIs",
+        "Built 15+ Grafana dashboards providing real-time visibility into CPU, memory, network, and application metrics",
+        "Implemented CloudWatch Logs Insights queries for automated log analysis and anomaly detection",
+        "Created Lambda functions for intelligent alert routing based on severity, time, and on-call schedules",
+        "Configured CloudWatch metric filters and alarms with dynamic threshold adjustment using AWS Lambda",
+        "Integrated SNS for multi-channel alerting (email, SMS, Slack) with escalation policies"
+      ],
+      "achievements": [
+        "Reduced mean time to detection (MTTD) by 75% through proactive monitoring",
+        "Decreased false positive alerts by 60% using intelligent threshold management",
+        "Improved incident response time by 50% with automated alert routing and runbook integration",
+        "Achieved 30% cost reduction in CloudWatch expenses through optimized log retention policies",
+        "Enabled data-driven capacity planning reducing over-provisioning by 40%"
+      ],
+      "duration": "3 months",
+      "role": "DevOps Engineer",
+      "teamSize": "4 engineers"
+    }
+  ]
+}
