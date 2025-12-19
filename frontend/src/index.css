@@ -13,6 +13,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
     margin: 0;
     /* Use theme-aware body font stack */
@@ -329,10 +334,31 @@ code {
     transform: scale(0.8);
   }
 
-  .rotate-in {
-    animation: rotateIn 1.2s ease-out forwards;
+  /* REPLACED: Heavy flip animation with lightweight fade-up */
+  .card-animation {
     opacity: 0;
-    transform: rotate(-10deg) scale(0.9);
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    will-change: opacity, transform;
+  }
+
+  .card-animation.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Hardware Acceleration for smooth scrolling */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+
+  /* Legacy support - keeping rotate-in but making it lightweight */
+  .rotate-in {
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
   }
 
   /* Staggered animations with more variety */
@@ -381,14 +407,15 @@ code {
     animation: pulseShine 3s ease-in-out infinite;
   }
 
-  /* Enhanced Interactive Animations */
+  /* Enhanced Interactive Animations - Optimized for performance */
   .hover-lift {
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+    will-change: transform;
   }
 
   .hover-lift:hover {
-    transform: translateY(-12px) scale(1.02);
-    box-shadow: 0 25px 50px rgba(34, 211, 238, 0.3), 0 0 30px rgba(236, 72, 153, 0.2);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(34, 211, 238, 0.2), 0 0 20px rgba(236, 72, 153, 0.15);
   }
 
   .hover-scale {
@@ -731,10 +758,11 @@ code {
     }
   }
 
+  /* REPLACED: Heavy rotate animation with simple fade-up */
   @keyframes rotateIn {
     to {
       opacity: 1;
-      transform: rotate(0deg) scale(1);
+      transform: translateY(0);
     }
   }
 
