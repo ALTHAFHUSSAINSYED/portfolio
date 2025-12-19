@@ -115,17 +115,36 @@ def sync_to_chromadb(projects):
         ids = []
         
         for project in projects:
-            # Create rich text representation for embedding
+            # Create rich text representation with FULL implementation details for embedding
+            challenges_text = '\n'.join(f"- {c}" for c in project.get('challenges', []))
+            solutions_text = '\n'.join(f"- {s}" for s in project.get('solutions', []))
+            achievements_text = '\n'.join(f"- {a}" for a in project.get('achievements', []))
+            
             doc_text = f"""
-Title: {project['title']}
+Project Title: {project['title']}
+
 Description: {project['description']}
+
 Category: {project.get('category', 'DevOps')}
-Technologies: {', '.join(project.get('technologies', []))}
-Challenges: {' | '.join(project.get('challenges', []))}
-Solutions: {' | '.join(project.get('solutions', []))}
-Achievements: {' | '.join(project.get('achievements', []))}
+
 Role: {project.get('role', 'DevOps Engineer')}
 Duration: {project.get('duration', 'N/A')}
+Team Size: {project.get('teamSize', 'N/A')}
+
+Technologies Used:
+{', '.join(project.get('technologies', []))}
+
+Challenges:
+{challenges_text}
+
+Solutions Implemented:
+{solutions_text}
+
+Key Achievements:
+{achievements_text}
+
+Full Implementation Details:
+This project involved {project['description']} The team of {project.get('teamSize', 'N/A')} worked for {project.get('duration', 'N/A')} to deliver a comprehensive solution using {', '.join(project.get('technologies', [])[:5])}. The implementation addressed critical challenges including {' and '.join(project.get('challenges', [])[:2])}. The solutions delivered measurable results with achievements such as {' and '.join(project.get('achievements', [])[:2])}.
 """
             
             metadata = {
