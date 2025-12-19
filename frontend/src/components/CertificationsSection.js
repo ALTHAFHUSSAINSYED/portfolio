@@ -31,14 +31,14 @@ const CertificationsSection = ({ certifications }) => {
   }, []);
 
   const categories = {
-    all: { name: 'All Certifications', color: 'text-white', bg: 'bg-gray-600/20' },
-    aws: { name: 'AWS', color: 'text-orange-400', bg: 'bg-orange-500/20' },
-    gcp: { name: 'Google Cloud', color: 'text-blue-400', bg: 'bg-blue-500/20' },
-    azure: { name: 'Microsoft Azure', color: 'text-blue-500', bg: 'bg-blue-600/20' },
-    oracle: { name: 'Oracle', color: 'text-red-400', bg: 'bg-red-500/20' },
-    devops: { name: 'DevOps', color: 'text-green-400', bg: 'bg-green-500/20' },
-    ai: { name: 'AI/ML', color: 'text-purple-400', bg: 'bg-purple-500/20' },
-    github: { name: 'GitHub', color: 'text-gray-300', bg: 'bg-gray-500/20' }
+    all: { name: 'All Certifications', color: 'text-gray-900 dark:text-white', bg: 'bg-gray-200 dark:bg-gray-600/20' },
+    aws: { name: 'AWS', color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-100 dark:bg-orange-500/20' },
+    gcp: { name: 'Google Cloud', color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-500/20' },
+    azure: { name: 'Microsoft Azure', color: 'text-blue-700 dark:text-blue-500', bg: 'bg-blue-100 dark:bg-blue-600/20' },
+    oracle: { name: 'Oracle', color: 'text-red-600 dark:text-red-400', bg: 'bg-red-100 dark:bg-red-500/20' },
+    devops: { name: 'DevOps', color: 'text-green-600 dark:text-green-400', bg: 'bg-green-100 dark:bg-green-500/20' },
+    ai: { name: 'AI/ML', color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-100 dark:bg-purple-500/20' },
+    github: { name: 'GitHub', color: 'text-gray-700 dark:text-gray-300', bg: 'bg-gray-200 dark:bg-gray-500/20' }
   };
 
   const filteredCertifications = selectedCategory === 'all' 
@@ -143,8 +143,7 @@ const CertificationsSection = ({ certifications }) => {
                 </div>
                 
                 <div className="flex-1 min-w-0">
-                  {/* ✨ MODIFIED: Changed text-white to text-foreground */}
-                  <h3 className="font-semibold text-foreground mb-2 leading-tight group-hover:text-cyan-soft transition-all duration-300 shine-text-slow">
+                  <h3 className="font-semibold text-gray-900 dark:text-foreground mb-2 leading-tight group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-all duration-300 shine-text-slow">
                     {cert.name}
                   </h3>
                   {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}

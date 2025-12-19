@@ -273,16 +273,16 @@ const BlogDetailPage = () => {
           )}
           
           {/* Main Content */}
-          <div className="mt-6 prose prose-lg dark:prose-invert max-w-none">
+          <div className="mt-6 prose dark:prose-invert max-w-none">
             {blog.content ? (
               <div 
                 className="
-                  [&_p]:text-lg [&_p]:text-gray-300 [&_p]:leading-relaxed [&_p]:mb-6
-                  [&_li]:text-lg [&_li]:text-gray-300
-                  [&_h1]:text-3xl [&_h1]:text-white [&_h1]:mb-6
-                  [&_h2]:text-2xl [&_h2]:text-cyan-400 [&_h2]:mt-10 [&_h2]:mb-4
-                  [&_h3]:text-xl [&_h3]:text-pink-400 [&_h3]:mt-8 [&_h3]:mb-3
-                  [&_strong]:text-white
+                  [&_p]:text-lg [&_p]:text-gray-800 dark:[&_p]:text-gray-300 [&_p]:leading-relaxed [&_p]:mb-6
+                  [&_li]:text-lg [&_li]:text-gray-800 dark:[&_li]:text-gray-300
+                  [&_h1]:text-3xl [&_h1]:text-gray-900 dark:[&_h1]:text-white [&_h1]:mb-6
+                  [&_h2]:text-2xl [&_h2]:text-cyan-600 dark:[&_h2]:text-cyan-400 [&_h2]:mt-10 [&_h2]:mb-4
+                  [&_h3]:text-xl [&_h3]:text-pink-600 dark:[&_h3]:text-pink-400 [&_h3]:mt-8 [&_h3]:mb-3
+                  [&_strong]:text-gray-900 dark:[&_strong]:text-white
                 "
                 dangerouslySetInnerHTML={{ __html: renderMarkdown(blog.content) }} 
               />

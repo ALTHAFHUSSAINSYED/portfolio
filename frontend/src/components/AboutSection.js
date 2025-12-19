@@ -52,13 +52,14 @@ const AboutSection = ({ personalInfo, achievements }) => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
-          <h2 className={`text-3xl md:text-4xl font-bold mb-4 text-gradient-animate ${isVisible ? 'fade-in-up' : ''}`}>
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900 dark:text-white shine-text">
             About Me
           </h2>
-          {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
-          <p className={`text-lg text-muted-foreground max-w-3xl mx-auto ${isVisible ? 'fade-in-up stagger-1' : ''}`}>
-            Passionate DevOps engineer specializing in cloud infrastructure and automation solutions
-          </p>
+          <div className="max-w-4xl mx-auto text-lg text-gray-700 dark:text-muted-foreground leading-relaxed">
+            <p className="mb-4">
+              Passionate DevOps engineer specializing in cloud infrastructure and automation solutions
+            </p>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12 items-start">
