@@ -189,14 +189,15 @@ const BlogDetailPage = () => {
           <button
             className="inline-flex items-center text-primary hover:text-primary/80 mb-6 font-semibold border border-primary rounded px-4 py-2 bg-background"
             onClick={() => {
-              // Smooth scroll to blogs section
-              navigate('/');
+              // Navigate to home with blogs hash
+              navigate('/#blogs');
+              // Also scroll after navigation completes
               setTimeout(() => {
                 const blogsSection = document.getElementById('blogs');
                 if (blogsSection) {
-                  blogsSection.scrollIntoView({ behavior: 'smooth' });
+                  blogsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
-              }, 100);
+              }, 300);
             }}
           >
             <ArrowLeft className="mr-2 h-4 w-4" /> Back to all blogs
