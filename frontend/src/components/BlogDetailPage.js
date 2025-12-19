@@ -81,7 +81,8 @@ const BlogDetailPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex justify-center items-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        {/* ✨ FIXED: Spinner is now Cyan (visible on both black and white) instead of Primary (White) */}
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-600 dark:border-cyan-400"></div>
       </div>
     );
   }
