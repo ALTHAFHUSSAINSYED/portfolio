@@ -187,7 +187,7 @@ const BlogDetailPage = () => {
       <section className="py-20 bg-background text-foreground">
         <div className="max-w-4xl mx-auto px-4">
           <button
-            className="inline-flex items-center text-primary hover:text-primary/80 mb-6 font-semibold border border-primary rounded px-4 py-2 bg-background"
+            className="inline-flex items-center text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 mb-6 font-semibold border-2 border-cyan-600 dark:border-cyan-400 rounded px-4 py-2 bg-white dark:bg-background shadow-sm hover:shadow-md transition-all"
             onClick={() => {
               // Pass state to teleport directly to blogs section
               navigate('/', { state: { scrollTo: 'blogs' } });
