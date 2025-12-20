@@ -420,7 +420,9 @@ async def create_project(
 @api_router.post("/contact")
 async def send_contact_email(form: ContactForm):
     try:
-        return await notification_service.send_contact_email(form)
+        response = await notification_service.send_contact_email(form)
+        trigger_portfolio_sync()
+        return response
     except Exception as e:
         logger.error(f"Contact error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
