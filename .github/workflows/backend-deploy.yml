@@ -59,6 +59,16 @@ jobs:  # WHAT jobs to run (can have multiple jobs, but we have one)
             echo "ℹ️ No data file changes detected - skipping ChromaDB repopulation"  # Skip message
           fi  # End of if statement
 
+      - name: Kill process on port 8000
+        run: |
+          PID=$(sudo lsof -ti:8000)
+          if [ -n "$PID" ]; then
+            sudo kill -9 $PID
+            echo "Killed process $PID on port 8000."
+          else
+            echo "No process found on port 8000."
+          fi
+
       - name: Deploy and restart backend  # Step 4: Build and deploy the Docker container
         run: |  # Multi-line shell script
           cd /home/ec2-user/portfolio  # Go to project root on EC2
