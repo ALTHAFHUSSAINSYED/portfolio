@@ -75,14 +75,21 @@ def sync_complete_portfolio():
             embedding_function=LocalEmbeddingFunction()
         )
     
-    # Load portfolio data
+    # Load portfolio data (JSON) and Resume Details.txt
     json_path = 'portfolio_data_complete.json' if os.path.exists('portfolio_data_complete.json') else 'backend/portfolio_data_complete.json'
     with open(json_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
-    
+
+    # Parse Resume Details.txt
+    resume_txt_path = 'Resume Details.txt' if os.path.exists('Resume Details.txt') else 'backend/Resume Details.txt'
+    resume_txt = ''
+    if os.path.exists(resume_txt_path):
+        with open(resume_txt_path, 'r', encoding='utf-8') as f:
+            resume_txt = f.read()
+
     docs, metas, ids = [], [], []
-    
-    # 1. PERSONAL INFO / RESUME
+
+    # 1. PERSONAL INFO / RESUME (from JSON and Resume Details.txt)
     print("\n📝 Processing Personal Info...")
     info = data.get('personalInfo', {})
     if info:
@@ -104,8 +111,19 @@ def sync_complete_portfolio():
             "email": info.get('email', '')
         })
         ids.append("personal_info")
-        print(f"  ✓ Personal Info")
-    
+        print(f"  ✓ Personal Info (JSON)")
+
+    # Add Resume Details.txt as a separate doc
+    if resume_txt:
+        docs.append(clean(resume_txt))
+        metas.append({
+            "type": "resume_txt",
+            "section": "resume_txt",
+            "source": "Resume Details.txt"
+        })
+        ids.append("resume_txt")
+        print(f"  ✓ Resume Details.txt")
+
     # 1B. CONTACT INFORMATION (separate entry for chatbot)
     print("\n📞 Processing Contact Information...")
     if info:
@@ -116,7 +134,6 @@ def sync_complete_portfolio():
         Location: {info.get('location')}
         LinkedIn Profile: {info.get('linkedin')}
         Professional Title: {info.get('title')}
-        
         You can reach out via email at {info.get('email')} or phone at {info.get('phone')}.
         Located in {info.get('location')}.
         Connect on LinkedIn: {info.get('linkedin')}
@@ -294,24 +311,51 @@ def sync_complete_portfolio():
     if not pdf_text:
         print("  ⚠️  Resume PDF not found or could not be extracted")
     
-    # 10. ADD ALL TO CHROMADB
-    print("\n💾 Adding to ChromaDB...")
-    if docs:
-        coll.add(documents=docs, metadatas=metas, ids=ids)
-        print(f"✅ Added {len(docs)} items to ChromaDB portfolio collection")
-        
+    # 10. ADD ALL TO CHROMADB (only if new data is present)
+    print("\n💾 Adding to ChromaDB (portfolio collection)...")
+    # Get current IDs in ChromaDB
+    existing_ids = set()
+    try:
+        existing = coll.get(include=["ids"])
+        existing_ids = set(existing["ids"])
+    except Exception:
+        pass
+
+    # Only add new docs (by id)
+    new_docs, new_metas, new_ids = [], [], []
+    for d, m, i in zip(docs, metas, ids):
+        if i not in existing_ids:
+            new_docs.append(d)
+            new_metas.append(m)
+            new_ids.append(i)
+
+    if new_docs:
+        coll.add(documents=new_docs, metadatas=new_metas, ids=new_ids)
+        print(f"✅ Added {len(new_docs)} new items to ChromaDB portfolio collection")
+        # Send email notification (import notification_service dynamically)
+        try:
+            import importlib.util
+            notif_spec = importlib.util.find_spec("backend.notification_service")
+            if notif_spec:
+                notification_service = importlib.util.module_from_spec(notif_spec)
+                notif_spec.loader.exec_module(notification_service)
+                to_email = os.getenv("TO_EMAIL") or getattr(notification_service, "to_email", None)
+                if hasattr(notification_service, "send_blog_notification"):
+                    notification_service.send_blog_notification(True, {"section": "portfolio", "count": len(new_docs)}, None)
+                print(f"📧 Notification sent to {to_email}")
+        except Exception as e:
+            print(f"⚠️  Could not send notification: {e}")
         # Show summary
         print("\n📊 SUMMARY:")
         sections = {}
-        for meta in metas:
+        for meta in new_metas:
             section = meta.get('section', 'unknown')
             sections[section] = sections.get(section, 0) + 1
-        
         for section, count in sorted(sections.items()):
             print(f"  {section}: {count} items")
     else:
-        print("❌ No data to add")
-    
+        print("❌ No new data to add")
+
     print("\n" + "=" * 70)
     print("✅ COMPLETE PORTFOLIO SYNC FINISHED")
 
