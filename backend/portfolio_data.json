@@ -30,7 +30,7 @@
     {
       "title": "Multi-Cloud CI/CD Pipeline",
       "description": "Designed and implemented end-to-end CI/CD pipelines across AWS, GCP, and Azure environments",
-      "technologies": "[\"Jenkins\", \"AWS CodePipeline\", \"GCP Cloud Build\", \"Docker\", \"Kubernetes"
+        "technologies": ["Jenkins", "AWS CodePipeline", "GCP Cloud Build", "Docker", "Kubernetes"]
     }
   ],
   "certifications": [
