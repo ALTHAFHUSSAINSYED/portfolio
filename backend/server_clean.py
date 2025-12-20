@@ -11,7 +11,6 @@ from typing import List, Optional, Union
 
 # Third-party imports
 from fastapi import FastAPI, APIRouter, UploadFile, File, Form, HTTPException, status, BackgroundTasks
-from fastapi import Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
@@ -19,7 +18,6 @@ from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field, EmailStr
 import bleach
-import subprocess
 import cloudinary
 import cloudinary.uploader
 import google.generativeai as genai
@@ -32,25 +30,12 @@ try:
     from backend import agent_service
     from backend.ai_service import gemini_service
     from backend.notification_service import notification_service
-    from backend.security_utils import sanitize_html
+    from backend.security_utils import sanitize_html, SecurityHeadersMiddleware, HTTPSRedirectMiddleware
     from backend.models import ChatbotQuery
     HAS_AGENT_SERVICE = True
-except ImportError as e:
-    HAS_AGENT_SERVICE = False
-    print(f"⚠️ Warning: Some backend services could not be imported: {e}")
-    # Define fallback for sanitize_html if import fails
-    def sanitize_html(text):
-        return bleach.clean(text)
-
-# Security middleware with fallback
-try:
-    from backend.security_utils import SecurityHeadersMiddleware, HTTPSRedirectMiddleware
-    HAS_SECURITY_MIDDLEWARE = True
 except ImportError:
-    SecurityHeadersMiddleware = None
-    HTTPSRedirectMiddleware = None
-    HAS_SECURITY_MIDDLEWARE = False
-    print("⚠️ Warning: Security middleware not available")
+    HAS_AGENT_SERVICE = False
+    print("⚠️ Warning: Some backend services could not be imported.")
 
 # --- CONFIGURATION ---
 ROOT_DIR = Path(__file__).parent
@@ -171,9 +156,8 @@ app = FastAPI(title="Portfolio API", version="1.0.0", lifespan=lifespan)
 api_router = APIRouter(prefix="/api")
 
 # --- MIDDLEWARE (Order Matters!) ---
-# 1. Security Headers (if available)
-if HAS_SECURITY_MIDDLEWARE and SecurityHeadersMiddleware:
-    app.add_middleware(SecurityHeadersMiddleware)
+# 1. Security Headers
+app.add_middleware(SecurityHeadersMiddleware)
 
 # 2. CORS (CRITICAL FIX: Explicitly handle origins)
 # Get origins from env, defaulting to your known domains if missing
@@ -199,19 +183,13 @@ class ContactForm(BaseModel):
     message: str
 
 class Project(BaseModel):
-    id: str
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
-    title: str
     summary: str
-    description: str
-    details: str = ""
+    details: str
     image_url: str
     technologies: List[str] = []
-    challenges: List[str] = []
-    solutions: List[str] = []
-    outcomes: List[str] = []
-    github_url: Optional[str] = None
-    live_url: Optional[str] = None
+    key_outcomes: str
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
 class BlogPostRequest(BaseModel):
@@ -318,67 +296,14 @@ async def trigger_blog_generation():
 
 @api_router.get("/projects", response_model=List[Project])
 async def get_projects():
-    """
-    Load projects directly from local portfolio_data.json
-    Bypasses MongoDB to ensure data structure is perfect.
-        # --- Helper: Trigger portfolio sync after relevant changes ---
-        def trigger_portfolio_sync():
-            try:
-                result = subprocess.run([sys.executable, "backend/sync_complete_portfolio.py"], capture_output=True, text=True)
-                logger.info(f"Portfolio sync triggered. Output: {result.stdout}")
-            except Exception as e:
-                logger.error(f"Failed to trigger portfolio sync: {e}")
-
-    """
-            response = await notification_service.send_contact_email(form)
-            trigger_portfolio_sync()
-            return response
-        # 1. Locate the file
-        json_path = ROOT_DIR / 'portfolio_data.json'
-        if not json_path.exists():
-            # Fallback for development paths
-            json_path = Path('portfolio_data.json')
-            
-        if not json_path.exists():
-            logger.error("portfolio_data.json not found")
-            return []
-
-        # 2. Read the file
-        with open(json_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-
-        raw_projects = data.get('projects', [])
-        clean_projects = []
-
-        # 3. Map JSON to Pydantic Model
-        for p in raw_projects:
-            clean_projects.append({
-                "id": str(p.get("id", uuid.uuid4())),
-                "name": p.get("title", "Untitled"),
-                "title": p.get("title", "Untitled"),
-                "summary": p.get("description", ""),
-                "description": p.get("description", ""),
-                "details": p.get("description", ""),
-                "image_url": p.get("image", ""),
-                
-                # ARRAYS - Passed directly!
-                "technologies": p.get("technologies", []),
-                "challenges": p.get("challenges", []),
-                "solutions": p.get("solutions", []),
-                "outcomes": p.get("outcomes", []),
-                
-                "github_url": p.get("github", ""),
-                "live_url": p.get("link", ""),
-                "timestamp": datetime.utcnow()
-            })
-
-        logger.info(f"Loaded {len(clean_projects)} projects from local file.")
-        return clean_projects
-
-    except Exception as e:
-        logger.error(f"Error reading local projects: {e}")
+    if db is None:
         return []
-
+    try:
+        projects = await db.projects.find().to_list(length=100)
+        return projects
+    except Exception as e:
+        logger.error(f"Error fetching projects: {e}")
+        return []
 
 @api_router.post("/projects", status_code=status.HTTP_201_CREATED)
 async def create_project(
@@ -391,6 +316,7 @@ async def create_project(
 ):
     if db is None:
         raise HTTPException(status_code=503, detail="Database unavailable")
+    
     # Upload to Cloudinary
     try:
         upload_result = cloudinary.uploader.upload(file.file, folder="portfolio_projects")
@@ -408,13 +334,8 @@ async def create_project(
         "key_outcomes": bleach.clean(key_outcomes),
         "timestamp": datetime.utcnow()
     }
+    
     await db.projects.insert_one(project_data)
-    # Trigger project sync (only for new project)
-    try:
-        result = subprocess.run([sys.executable, "backend/sync_projects.py"], capture_output=True, text=True)
-        logger.info(f"Project sync triggered. Output: {result.stdout}")
-    except Exception as e:
-        logger.error(f"Failed to trigger project sync: {e}")
     return project_data
 
 @api_router.post("/contact")
@@ -425,19 +346,12 @@ async def send_contact_email(form: ContactForm):
         logger.error(f"Contact error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-
 @api_router.post("/generate-blog")
 async def generate_blog(request: BlogPostRequest):
     if not HAS_AGENT_SERVICE:
         return JSONResponse(status_code=503, content={"error": "Agent service unavailable"})
     try:
         blog = agent_service.generate_blog_now(request.topic)
-        # Trigger blog sync (only for new blog)
-        try:
-            result = subprocess.run([sys.executable, "backend/migrate_local_blogs_new.py"], capture_output=True, text=True)
-            logger.info(f"Blog sync triggered. Output: {result.stdout}")
-        except Exception as e:
-            logger.error(f"Failed to trigger blog sync: {e}")
         return blog
     except Exception as e:
         logger.error(f"Blog generation error: {e}")
@@ -452,20 +366,13 @@ async def get_blogs():
         return []
 
 @api_router.post("/ask-all-u-bot")
-async def ask_agent(query: dict):
+async def ask_agent(query: ChatbotQuery):
     """Corporate RAG Chatbot: Strict RAG with Gemma 3"""
-    if not ChatbotQuery:
-        # Fallback if model not available
-        message = query.get('message', '')
-    else:
-        query_obj = ChatbotQuery(**query)
-        message = query_obj.message
-    
     try:
         # Step 1: Retrieve ONLY relevant data from ChromaDB
-        portfolio_context = await get_portfolio_context(message)
+        portfolio_context = await get_portfolio_context(query.message)
         
-        logging.info(f"ChromaDB retrieval for '{message[:50]}...': {len(portfolio_context) if portfolio_context else 0} chars")
+        logging.info(f"ChromaDB retrieval for '{query.message[:50]}...': {len(portfolio_context) if portfolio_context else 0} chars")
 
         # Step 2: Configure Gemma 3
         genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
@@ -500,13 +407,13 @@ RAW CONTEXT (Your ONLY source of truth):
 Remember: Rewrite this data into nice sentences. Do NOT invent new facts."""
 
         # Step 4: Generate human-like response
-        user_prompt = f"User Question: {message}\n\nRewrite the Context into a polished, professional answer:"
+        user_prompt = f"User Question: {query.message}\n\nRewrite the Context into a polished, professional answer:"
         full_prompt = f"{system_instruction}\n\n{user_prompt}"
         
         response = model.generate_content(full_prompt)
 
         if response.text:
-            logging.info(f"Successfully processed RAG query: {message[:100]}")
+            logging.info(f"Successfully processed RAG query: {query.message[:100]}")
             return JSONResponse(
                 status_code=200,
                 content={
