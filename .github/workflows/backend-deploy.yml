@@ -61,13 +61,14 @@ jobs:  # WHAT jobs to run (can have multiple jobs, but we have one)
 
       - name: Kill process on port 8000
         run: |
-          PID=$(sudo lsof -ti:8000)
+          PID=$(sudo lsof -ti:8000 || true)
           if [ -n "$PID" ]; then
             sudo kill -9 $PID
             echo "Killed process $PID on port 8000."
           else
             echo "No process found on port 8000."
           fi
+          exit 0
 
       - name: Deploy and restart backend  # Step 4: Build and deploy the Docker container
         run: |  # Multi-line shell script
