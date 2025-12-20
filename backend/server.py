@@ -316,23 +316,21 @@ async def trigger_blog_generation():
     await scheduled_blog_generation()
     return {"status": "Triggered blog generation and notification"}
 
+# --- Helper: Trigger portfolio sync after relevant changes ---
+def trigger_portfolio_sync():
+    try:
+        result = subprocess.run([sys.executable, "backend/sync_complete_portfolio.py"], capture_output=True, text=True)
+        logger.info(f"Portfolio sync triggered. Output: {result.stdout}")
+    except Exception as e:
+        logger.error(f"Failed to trigger portfolio sync: {e}")
+
 @api_router.get("/projects", response_model=List[Project])
 async def get_projects():
     """
     Load projects directly from local portfolio_data.json
     Bypasses MongoDB to ensure data structure is perfect.
-        # --- Helper: Trigger portfolio sync after relevant changes ---
-        def trigger_portfolio_sync():
-            try:
-                result = subprocess.run([sys.executable, "backend/sync_complete_portfolio.py"], capture_output=True, text=True)
-                logger.info(f"Portfolio sync triggered. Output: {result.stdout}")
-            except Exception as e:
-                logger.error(f"Failed to trigger portfolio sync: {e}")
-
     """
-            response = await notification_service.send_contact_email(form)
-            trigger_portfolio_sync()
-            return response
+    try:
         # 1. Locate the file
         json_path = ROOT_DIR / 'portfolio_data.json'
         if not json_path.exists():
