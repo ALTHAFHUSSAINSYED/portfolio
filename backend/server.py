@@ -385,8 +385,6 @@ async def get_projects():
                 "live_url": p.get("live_url", ""),
                 "timestamp": p.get("timestamp", datetime.utcnow())
             })
-        return clean_projects
-            })
 
         logger.info(f"Loaded {len(clean_projects)} projects from local file.")
         return clean_projects
