@@ -1,3 +1,20 @@
+import google.generativeai as genai
+from chromadb import EmbeddingFunction, Documents, Embeddings
+# Configure Gemini for the Server
+genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
+
+# --- EMBEDDING FUNCTION FOR SERVER ---
+class GeminiEmbeddingFunction(EmbeddingFunction):
+    def __call__(self, input: Documents) -> Embeddings:
+        # Note: We use 'retrieval_query' here because the user is ASKING a question
+        return [
+            genai.embed_content(
+                model='models/text-embedding-004',
+                content=text,
+                task_type="retrieval_query" 
+            )['embedding']
+            for text in input
+        ]
 # backend/server.py - Cleaned & Fixed
 import os
 import sys
@@ -248,47 +265,47 @@ async def get_portfolio_context(query: str) -> str:
             database=chroma_database
         )
         
+
         # Search ALL 3 collections
         collection_names = ['portfolio', 'Blogs_data', 'Projects_data']
         
         for collection_name in collection_names:
             try:
-                collection = chroma_client.get_collection(name=collection_name)
+                # UPDATED: Connect using our custom Gemini Function
+                collection = chroma_client.get_collection(
+                    name=collection_name,
+                    embedding_function=GeminiEmbeddingFunction()
+                )
                 
-                # Use embedding model if available, otherwise text search
-                if embedding_model:
-                    embedding = embedding_model.encode([query]).tolist()
-                    results = collection.query(query_embeddings=embedding, n_results=30)
-                else:
-                    results = collection.query(query_texts=[query], n_results=30)
+                # UPDATED: Perform the query
+                # ChromaDB handles the embedding automatically using the function above
+                results = collection.query(
+                    query_texts=[query], 
+                    n_results=10
+                )
                 
                 # Apply similarity threshold
                 docs = results.get('documents', [[]])[0]
                 distances = results.get('distances', [[]])[0]
                 
-                # Filter by similarity
+                # ... (Keep the rest of your filtering logic here) ...
                 filtered_docs = []
                 for i, (doc, dist) in enumerate(zip(docs, distances)):
                     logging.info(f"{collection_name} result {i+1}: distance={dist:.4f}, doc_preview={doc[:80]}...")
-                    
                     if dist < 1.3:
                         filtered_docs.append(doc)
-                        logging.info(f"  ✅ ACCEPTED (distance={dist:.4f})")
+                        logging.info(f"  ACCEPTED (distance={dist:.4f})")
                     else:
-                        logging.info(f"  ❌ REJECTED (distance={dist:.4f} >= 1.3)")
-                
+                        logging.info(f"  REJECTED (distance={dist:.4f} >= 1.3)")
                 if not filtered_docs and docs:
-                    # Fallback: include top results
                     fallback_docs = docs[:min(3, len(docs))]
                     filtered_docs.extend(fallback_docs)
                     logging.info(f"No items under threshold for {collection_name}; including top {len(fallback_docs)} result(s)")
-
                 if filtered_docs:
                     all_context.extend(filtered_docs)
                     logging.info(f"Found {len(filtered_docs)} relevant results in {collection_name}")
                 else:
                     logging.info(f"No relevant results in {collection_name}")
-                    
             except Exception as e:
                 logging.error(f"Error accessing {collection_name}: {e}")
                 continue
