@@ -60,6 +60,7 @@ jobs:  # WHAT jobs to run (can have multiple jobs, but we have one)
           CHROMA_API_KEY=${{ secrets.CHROMA_API_KEY }}
           CHROMA_TENANT_ID=${{ secrets.CHROMA_TENANT }}
           CHROMA_DB_NAME=Development
+          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
           EOF
           # 4. Run the script (Now it is the CLEAN version)
           if git diff HEAD~1 HEAD --name-only | grep -E "(portfolio_data\.json|formatted_data\.json|fixed_data\.json)"; then
