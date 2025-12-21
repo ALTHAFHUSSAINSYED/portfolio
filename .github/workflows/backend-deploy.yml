@@ -88,7 +88,7 @@ jobs:  # WHAT jobs to run (can have multiple jobs, but we have one)
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_KEY }}
+          key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/ec2-user/portfolio
             # 1. FORCE RESET local changes (Fixes the conflict/bad file issue)
