@@ -52,11 +52,11 @@ jobs:  # WHAT jobs to run (can have multiple jobs, but we have one)
         run: |  # Multi-line shell script
           cd /home/ec2-user/portfolio/backend  # Go to backend folder on EC2
           if git diff HEAD~1 HEAD --name-only | grep -E "(portfolio_data\.json|formatted_data\.json|fixed_data\.json)"; then  # Check if data files changed in last commit
-            echo "📋 Data files changed - repopulating ChromaDB..."  # If files changed, show message
+            echo "Data files changed - repopulating ChromaDB..."  # If files changed, show message
             python3 populate_vector_db.py  # Run the database population script
-            echo "✅ ChromaDB repopulated successfully!"  # Success message
+            echo " ChromaDB repopulated successfully!"  # Success message
           else  # If no data files changed
-            echo "ℹ️ No data file changes detected - skipping ChromaDB repopulation"  # Skip message
+            echo " No data file changes detected - skipping ChromaDB repopulation"  # Skip message
           fi  # End of if statement
 
       - name: Kill process on port 8000
@@ -106,19 +106,19 @@ jobs:  # WHAT jobs to run (can have multiple jobs, but we have one)
           attempt=0  # Start attempt counter at 0
           while [ $attempt -lt $max_attempts ]; do  # Loop while attempts < max
             if curl -f http://localhost:8000/ > /dev/null 2>&1; then  # Try to curl the health endpoint
-              echo "✅ Backend is healthy!"  # If curl succeeds (HTTP 200)
+              echo " Backend is healthy!"  # If curl succeeds (HTTP 200)
               exit 0  # Success - exit the script
             fi  # End of if
             echo "Attempt $((attempt+1))/$max_attempts failed, retrying..."  # Failure message with attempt count
             sleep 5  # Wait 5 seconds before retrying
             attempt=$((attempt+1))  # Increment attempt counter
           done  # End of while loop
-          echo "❌ Backend health check failed!"  # If all attempts failed
+          echo " Backend health check failed!"  # If all attempts failed
           exit 1  # Failure - stop the workflow
 
       - name: Tag Docker image for registry  # Step 7: Tag the Docker image for registry (only runs if health check passed)
         run: |  # Multi-line shell script
-          echo "🏷️ Tagging image for registry..."  # Status message
+          echo " Tagging image for registry..."  # Status message
           COMMIT_SHA=$(git rev-parse --short HEAD)  # Get short commit hash for unique versioning
           IMAGE_TAG="kubealthaf/portfolio-backend:${COMMIT_SHA}"  # Unique tag with commit
           LATEST_TAG="kubealthaf/portfolio-backend:latest"  # Latest tag for easy pulling
@@ -126,20 +126,20 @@ jobs:  # WHAT jobs to run (can have multiple jobs, but we have one)
           echo "LATEST_TAG=${LATEST_TAG}" >> $GITHUB_ENV  # Save for next steps
           sudo docker tag portfolio-backend $IMAGE_TAG  # Tag the local image
           sudo docker tag portfolio-backend $LATEST_TAG  # Tag the local image
-          echo "✅ Images tagged as: $IMAGE_TAG and $LATEST_TAG"  # Success message
+          echo " Images tagged as: $IMAGE_TAG and $LATEST_TAG"  # Success message
 
       - name: Login to Docker registry  # Step 8: Login to Docker Hub (only runs if health check passed)
         run: |  # Multi-line shell script
-          echo "🔐 Logging into Docker registry..."  # Status message
+          echo " Logging into Docker registry..."  # Status message
           echo "${{ secrets.DOCKER_PASSWORD }}" | sudo docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin  # Use secrets for authentication
-          echo "✅ Successfully logged into Docker registry"  # Success message
+          echo " Successfully logged into Docker registry"  # Success message
 
       - name: Push image to registry  # Step 9: Push images to Docker Hub (only runs if health check passed)
         run: |  # Multi-line shell script
           echo "📤 Pushing images to registry..."  # Status message
           sudo docker push $IMAGE_TAG  # Push versioned image
           sudo docker push $LATEST_TAG  # Push latest image
-          echo "✅ Images successfully pushed to registry!"  # Success message
-          echo "🖼️ Images available at:"  # Show URLs
+          echo " Images successfully pushed to registry!"  # Success message
+          echo " Images available at:"  # Show URLs
           echo "  - $IMAGE_TAG"  # Shows the tagged image URL
           echo "  - $LATEST_TAG"  # Shows the latest image URL
