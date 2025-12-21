@@ -19,7 +19,54 @@ class GeminiEmbeddingFunction(EmbeddingFunction):
         ]
 # backend/server.py - Cleaned & Fixed
 import os
-import sys
+
+        @api_router.get("/projects/{project_id}", response_model=Project)
+        async def get_project_details(project_id: str):
+            """
+            Fetch a single project by ID.
+            Priority: MongoDB -> Local JSON (Fallback)
+            """
+            # 1. Try MongoDB First
+            if db is not None:
+                try:
+                    project = await db.projects.find_one({"id": project_id})
+                    if project:
+                        if "_id" in project:
+                            del project["_id"]
+                        return project
+                except Exception as e:
+                    logger.error(f"MongoDB read error for {project_id}: {e}")
+
+            # 2. Fallback to Local JSON
+            for filename in ['portfolio_data_complete.json', 'portfolio_data.json']:
+                try:
+                    json_path = ROOT_DIR / filename
+                    if not json_path.exists():
+                        json_path = Path(f'backend/{filename}')
+            
+                    if json_path.exists():
+                        with open(json_path, 'r', encoding='utf-8') as f:
+                            data = json.load(f)
+                            for p in data.get('projects', []):
+                                if str(p.get("id")) == project_id:
+                                    return {
+                                        "id": str(p.get("id")),
+                                        "name": p.get("name", p.get("title", "Untitled")),
+                                        "title": p.get("title", p.get("name", "Untitled")),
+                                        "summary": p.get("summary", p.get("description", "")),
+                                        "description": p.get("description", ""),
+                                        "details": p.get("details", p.get("content", "")),
+                                        "image_url": p.get("image_url", ""),
+                                        "technologies": p.get("technologies", []),
+                                        "key_outcomes": p.get("key_outcomes", ""),
+                                        "github_url": p.get("github_url", ""),
+                                        "live_url": p.get("live_url", ""),
+                                        "timestamp": p.get("timestamp", datetime.utcnow())
+                                    }
+                except Exception:
+                    continue
+
+            raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
 import logging
 import uuid
 import json
