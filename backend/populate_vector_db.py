@@ -5,7 +5,7 @@ import chromadb
 import uuid
 from dotenv import load_dotenv
 
-# Load environment variables yes
+# Load environment variables yes and now
 load_dotenv()
 
 def get_chroma_client():
