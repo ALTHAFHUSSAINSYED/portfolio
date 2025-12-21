@@ -6,196 +6,210 @@ import glob
 import google.generativeai as genai
 from chromadb import Documents, EmbeddingFunction, Embeddings
 from dotenv import load_dotenv
+from pymongo import MongoClient
 
 # Load environment variables
 load_dotenv()
 
 # --- 1. CONFIGURATION ---
 GOOGLE_API_KEY = os.getenv('GEMINI_API_KEY')
+MONGO_URL = os.getenv('MONGO_URL')
+CHROMA_API_KEY = os.getenv('CHROMA_API_KEY')
+CHROMA_TENANT_ID = os.getenv('CHROMA_TENANT_ID')
+CHROMA_DB_NAME = os.getenv('CHROMA_DB_NAME', 'Development')
+
 if not GOOGLE_API_KEY:
     print("[ERROR] GEMINI_API_KEY is missing.")
     exit(1)
 
-# Configure the Gemini API
-try:
-    genai.configure(api_key=GOOGLE_API_KEY)
-except Exception as e:
-    print(f"[WARN] Gemini configuration warning: {e}")
+# Configure Gemini
+genai.configure(api_key=GOOGLE_API_KEY)
 
-# --- 2. DEFINE THE NEW EMBEDDING CLASS ---
+# --- 2. GEMINI EMBEDDING CLASS ---
 class GeminiEmbeddingFunction(EmbeddingFunction):
-    def __init__(self):
-
-        import chromadb
-        import os
-        import json
-        import re
-        import glob
-        import time
-        import google.generativeai as genai
-        from chromadb import Documents, EmbeddingFunction, Embeddings
-        from dotenv import load_dotenv
-
-        # Load environment variables
-        load_dotenv()
-
-        # --- 1. CONFIGURATION ---
-        GOOGLE_API_KEY = os.getenv('GEMINI_API_KEY')
-        if not GOOGLE_API_KEY:
-            print("[ERROR] GEMINI_API_KEY is missing.")
-            exit(1)
-
-        # Configure the Gemini API
+    def __call__(self, input: Documents) -> Embeddings:
+        model = 'models/text-embedding-004'
         try:
-            genai.configure(api_key=GOOGLE_API_KEY)
+            return [
+                genai.embed_content(
+                    model=model,
+                    content=text,
+                    task_type="retrieval_document"
+                )['embedding']
+                for text in input
+            ]
         except Exception as e:
-            print(f"[WARN] Gemini configuration warning: {e}")
+            print(f"[ERROR] Embedding failed: {e}")
+            return [[0.0] * 768 for _ in input]
 
-        # --- 2. DEFINE THE NEW EMBEDDING CLASS ---
-        class GeminiEmbeddingFunction(EmbeddingFunction):
-            def __init__(self):
-                # Dummy init to silence DeprecationWarning
-                pass
+def clean_text(text):
+    if not text: return ""
+    return re.sub(r'\s+', ' ', str(text)).strip()
 
-            def __call__(self, input: Documents) -> Embeddings:
-                model = 'models/text-embedding-004'
-                try:
-                    return [
-                        genai.embed_content(
-                            model=model,
-                            content=text,
-                            task_type="retrieval_document"
-                        )['embedding']
-                        for text in input
-                    ]
-                except Exception as e:
-                    print(f"[ERROR] Embedding failed: {e}")
-                    # Return empty embedding on failure to prevent full crash (fallback)
-                    return [[0.0] * 768 for _ in input]
+def safe_meta(val):
+    return "Unknown" if val is None else str(val)
 
-        def clean_text(text):
-            # Simple cleaner to remove messy whitespace
-            if not text: return ""
-            text = re.sub(r'\s+', ' ', str(text)).strip()
-            return text
+def main():
+    print("🚀 [START] Starting Database Population...")
 
-        def safe_meta(val):
-            """CRITICAL FIX: Ensure metadata is never None"""
-            if val is None:
-                return "Unknown"
-            return str(val)
+    # --- 3. CONNECT TO CHROMA DB ---
+    try:
+        if CHROMA_API_KEY:
+            print("[INFO] Connecting to Chroma Cloud...")
+            client = chromadb.CloudClient(
+                api_key=CHROMA_API_KEY,
+                tenant=CHROMA_TENANT_ID,
+                database=CHROMA_DB_NAME
+            )
+        else:
+            print("[INFO] Connecting to Local ChromaDB...")
+            client = chromadb.PersistentClient(path="chroma_db")
+    except Exception as e:
+        print(f"[ERROR] Chroma Connection Failed: {e}")
+        return
 
-        def main():
-            print("[INFO] Starting Database Sync (Powered by Google Gemini)...")
+    # --- 4. PREPARE COLLECTIONS ---
+    # We delete and recreate to ensure a fresh sync
+    for name in ["portfolio", "Projects_data", "Blogs_data"]:
+        try:
+            client.delete_collection(name)
+            print(f"[INFO] Cleared old collection: {name}")
+        except:
+            pass
 
-            # --- 3. CONNECT TO CHROMA DB ---
+    portfolio_col = client.create_collection("portfolio", embedding_function=GeminiEmbeddingFunction())
+    projects_col = client.create_collection("Projects_data", embedding_function=GeminiEmbeddingFunction())
+    blogs_col = client.create_collection("Blogs_data", embedding_function=GeminiEmbeddingFunction())
+    
+    print("✅ Collections Ready.")
+
+    # ==========================================
+    # 1. SYNC BLOGS -> 'Blogs_data'
+    # ==========================================
+    blog_dir = "generated_blogs"
+    if not os.path.exists(blog_dir):
+        blog_dir = "backend/generated_blogs" # Fallback if running from root
+
+    if os.path.exists(blog_dir):
+        files = glob.glob(f"{blog_dir}/*.json")
+        print(f"[SYNC] Found {len(files)} Blogs. Syncing to 'Blogs_data'...")
+        
+        for i, filepath in enumerate(files):
             try:
-                if os.getenv('CHROMA_API_KEY'):
-                    print("[INFO] Connecting to Chroma Cloud...")
-                    client = chromadb.CloudClient(
-                        api_key=os.getenv('CHROMA_API_KEY'),
-                        tenant=os.getenv('CHROMA_TENANT_ID'),
-                        database=os.getenv('CHROMA_DB_NAME', 'Development')
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    blog = json.load(f)
+                    title = safe_meta(blog.get('title'))
+                    content = safe_meta(blog.get('content'))
+                    
+                    # Store structured blog data
+                    text = f"Blog Title: {title}. Content: {content[:3000]}..." # Limit chunk size
+                    
+                    blogs_col.add(
+                        ids=[f"blog_{i}"], 
+                        documents=[clean_text(text)], 
+                        metadatas=[{"title": title, "type": "blog", "category": safe_meta(blog.get('tags', ['General'])[0])}]
                     )
-                else:
-                    print("[INFO] Connecting to Local ChromaDB...")
-                    client = chromadb.PersistentClient(path="chroma_db")
             except Exception as e:
-                print(f"[ERROR] Connection Failed: {e}")
-                return
+                print(f"[WARN] Skipped blog {filepath}: {e}")
+    else:
+        print("[WARN] No generated_blogs directory found.")
 
-            # --- 4. WIPE AND RECREATE COLLECTIONS ---
-            collections = ["portfolio", "Projects_data", "Blogs_data"]
-    
-            for col in collections:
-                try:
-                    client.delete_collection(col)
-                    print(f"[INFO] Deleted old '{col}' collection.")
-                except:
-                    pass 
-        
-            portfolio_col = client.create_collection(name="portfolio", embedding_function=GeminiEmbeddingFunction())
-            projects_col = client.create_collection(name="Projects_data", embedding_function=GeminiEmbeddingFunction())
-            blogs_col = client.create_collection(name="Blogs_data", embedding_function=GeminiEmbeddingFunction())
-            print("[SUCCESS] Created fresh collections with Gemini Embeddings (768 dimensions).")
-
-            # --- 5. LOAD PORTFOLIO AND PROJECTS ---
-            json_path = 'portfolio_data.json'
-            if not os.path.exists(json_path):
-                json_path = 'backend/portfolio_data.json'
-    
-            if os.path.exists(json_path):
-                with open(json_path, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    print(f"[INFO] Loaded {json_path}")
+    # ==========================================
+    # 2. SYNC PROJECTS -> 'Projects_data' (FROM MONGODB)
+    # ==========================================
+    if MONGO_URL:
+        try:
+            print("[SYNC] Connecting to MongoDB to fetch Projects...")
+            mongo_client = MongoClient(MONGO_URL)
+            db = mongo_client[os.getenv('DB_NAME', 'portfolioDB')]
+            projects_cursor = db.projects.find({})
             
-                # Process Projects
-                if "projects" in data:
-                    print(f"[INFO] Syncing {len(data['projects'])} Projects...")
-                    for i, proj in enumerate(data["projects"]):
-                        # Construct text safely
-                        name = safe_meta(proj.get('name'))
-                        summary = safe_meta(proj.get('summary'))
-                        tech = ", ".join(proj.get('technologies', []))
-                        details = safe_meta(proj.get('details'))
+            count = 0
+            for p in projects_cursor:
+                p_name = safe_meta(p.get('name') or p.get('title'))
+                p_summary = safe_meta(p.get('summary'))
+                p_details = safe_meta(p.get('details'))
+                p_tech = ", ".join(p.get('technologies', []))
                 
-                        text = f"Project: {name}. Summary: {summary}. Tech Stack: {tech}. Details: {details}"
-                        clean_doc = clean_text(text)
+                # Create rich context for the project
+                text = f"Project: {p_name}. Tech Stack: {p_tech}. Summary: {p_summary}. Implementation Details: {p_details}"
                 
-                        # Add to 'portfolio'
-                        portfolio_col.add(
-                            ids=[f"proj_{i}"], 
-                            documents=[clean_doc], 
-                            metadatas=[{"type": "project", "title": name}]
-                        )
-                
-                        # Add to 'Projects_data'
-                        projects_col.add(
-                            ids=[f"proj_{i}"], 
-                            documents=[clean_doc], 
-                            metadatas=[{"name": name, "category": "Project"}]
-                        )
+                projects_col.add(
+                    ids=[str(p.get('id', p.get('_id')))],
+                    documents=[clean_text(text)],
+                    metadatas=[{"name": p_name, "category": "Project", "source": "MongoDB"}]
+                )
+                count += 1
+            print(f"✅ Synced {count} Projects from MongoDB to 'Projects_data'.")
+        except Exception as e:
+            print(f"[ERROR] Failed to sync projects from MongoDB: {e}")
+    else:
+        print("[WARN] MONGO_URL not set. Skipping Project Sync.")
 
-                # Process Skills
-                if "skills" in data:
-                    print("[INFO] Syncing Skills...")
-                    for cat, skills in data["skills"].items():
-                        cat_safe = safe_meta(cat)
-                        skill_list = ", ".join([safe_meta(s['name'] if isinstance(s, dict) else s) for s in skills])
-                        text = f"Skill Category: {cat_safe}. Skills: {skill_list}."
-                
-                        portfolio_col.add(
-                            ids=[f"skill_{cat_safe}"], 
-                            documents=[clean_text(text)], 
-                            metadatas=[{"type": "skill", "category": cat_safe}]
-                        )
+    # ==========================================
+    # 3. SYNC PORTFOLIO -> 'portfolio' (Resume, Skills, etc.)
+    # ==========================================
+    print("[SYNC] Syncing Skills, Education, and Resume to 'portfolio'...")
 
-            # --- 6. LOAD BLOGS ---
-            blog_dir = "generated_blogs"
-            if not os.path.exists(blog_dir):
-                blog_dir = "backend/generated_blogs"
-        
-            if os.path.exists(blog_dir):
-                files = glob.glob(f"{blog_dir}/*.json")
-                if files:
-                    print(f"[INFO] Syncing {len(files)} Blogs...")
-                    for i, filepath in enumerate(files):
-                        try:
-                            with open(filepath, 'r', encoding='utf-8') as f:
-                                blog = json.load(f)
-                                title = safe_meta(blog.get('title'))
-                                content = safe_meta(blog.get('content'))
-                                text = f"Blog Title: {title}. Content: {content[:2000]}..."
-                        
-                                blogs_col.add(
-                                    ids=[f"blog_{i}"], 
-                                    documents=[clean_text(text)], 
-                                    metadatas=[{"title": title, "type": "blog"}]
-                                )
-                        except Exception as e:
-                            print(f"[WARN] Skipped blog {filepath}: {e}")
+    # A. Sync Resume Details.txt
+    resume_path = "../Resume Details.txt" # Assuming script runs in backend/
+    if not os.path.exists(resume_path):
+        resume_path = "Resume Details.txt" # Try root
+    
+    if os.path.exists(resume_path):
+        with open(resume_path, 'r', encoding='utf-8') as f:
+            resume_content = f.read()
+            portfolio_col.add(
+                ids=["resume_full"],
+                documents=[clean_text(resume_content)],
+                metadatas=[{"type": "resume", "title": "Full Resume"}]
+            )
+            print("✅ Resume Details synced.")
+    else:
+        print("[WARN] Resume Details.txt not found.")
 
-            print("[SUCCESS] Database has been completely repopulated!")
+    # B. Sync Skills & Education from JSON (ignoring projects)
+    json_path = 'portfolio_data.json'
+    if not os.path.exists(json_path): json_path = 'backend/portfolio_data.json'
+    
+    if os.path.exists(json_path):
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            
+            # Skills
+            if "skills" in data:
+                for cat, skills in data["skills"].items():
+                    skill_str = ", ".join([s['name'] if isinstance(s, dict) else s for s in skills])
+                    text = f"Skill Category: {cat}. Skills: {skill_str}."
+                    portfolio_col.add(
+                        ids=[f"skill_{cat}"],
+                        documents=[clean_text(text)],
+                        metadatas=[{"type": "skill", "category": cat}]
+                    )
+            
+            # Education
+            if "education" in data:
+                for i, edu in enumerate(data["education"]):
+                    text = f"Education: {edu.get('degree')} at {edu.get('institution')}. Year: {edu.get('year')}."
+                    portfolio_col.add(
+                        ids=[f"edu_{i}"],
+                        documents=[clean_text(text)],
+                        metadatas=[{"type": "education"}]
+                    )
+                    
+            # Certifications
+            if "certifications" in data:
+                for i, cert in enumerate(data["certifications"]):
+                    text = f"Certification: {cert.get('name')} from {cert.get('issuer')}."
+                    portfolio_col.add(
+                        ids=[f"cert_{i}"],
+                        documents=[clean_text(text)],
+                        metadatas=[{"type": "certification"}]
+                    )
+                    
+            print("✅ Skills, Education, and Certifications synced.")
 
-        if __name__ == "__main__":
-            main()
+    print("🎉 [SUCCESS] All Data Synced Successfully!")
+
+if __name__ == "__main__":
+    main()
