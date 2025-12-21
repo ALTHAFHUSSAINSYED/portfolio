@@ -98,14 +98,17 @@ def populate_db():
         except Exception as e:
             print(f"[WARN] Could not clear old projects: {e}")
 
+
         ids = []
         documents = []
         metadatas = []
+        batch_size = 100
+        total_added = 0
 
         for proj in data["projects"]:
             # Generate a consistent ID
             p_id = proj.get("id", str(uuid.uuid4()))
-            
+
             # Create text for embedding
             full_text = (
                 f"Title: {proj.get('name', '')}\n"
@@ -122,13 +125,23 @@ def populate_db():
                 "category": "Project"
             })
 
+            if len(ids) == batch_size:
+                try:
+                    projects_col.add(ids=ids, documents=documents, metadatas=metadatas)
+                    total_added += len(ids)
+                    print(f"[SUCCESS] Added {len(ids)} projects to ChromaDB (batch).")
+                except Exception as e:
+                    print(f"[ERROR] Failed to add batch of projects: {e}")
+                ids, documents, metadatas = [], [], []
+
         if ids:
             try:
                 projects_col.add(ids=ids, documents=documents, metadatas=metadatas)
-                print(f"[SUCCESS] Added {len(ids)} projects to ChromaDB.")
+                total_added += len(ids)
+                print(f"[SUCCESS] Added {len(ids)} projects to ChromaDB (final batch).")
             except Exception as e:
-                print(f"[ERROR] Failed to add projects: {e}")
-        else:
+                print(f"[ERROR] Failed to add final batch of projects: {e}")
+        if total_added == 0:
             print("[WARN] No projects found in JSON.")
 
     # 5. Sync Resume/Portfolio Info (Optional)
