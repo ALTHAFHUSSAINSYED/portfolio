@@ -27,7 +27,7 @@ def clean(text):
     return re.sub(r'\s+', ' ', str(text)).strip()
 
 def main():
-    print("íº€ Syncing Portfolio (Resume/Skills/Experience/Certifications)...")
+    print("ðŸ”„ Syncing Portfolio (Resume/Skills/Experience/Certifications)...")
     
     # 1. WIPE OLD DATA
     try: 
