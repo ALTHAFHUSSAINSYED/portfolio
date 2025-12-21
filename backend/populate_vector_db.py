@@ -47,7 +47,7 @@ def get_chroma_client():
 
 def populate_db():
     print("="*50)
-    print("[START] Starting Database Population")
+    print("[INFO] Starting Database Population")
     print("="*50)
 
     # 1. Connect
@@ -86,7 +86,7 @@ def populate_db():
         return
 
     # 4. Sync Projects
-    print("[INFO] Syncing Projects...")
+    print("[INFO] Syncing Projects (Resume/Skills/Experience/Certifications)...")
     
     if "projects" in data:
         # Optional: Clear existing data to prevent duplicates
