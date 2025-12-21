@@ -23,6 +23,7 @@ jobs:
           CHROMA_API_KEY=${{ secrets.CHROMA_API_KEY }}
           CHROMA_TENANT=${{ secrets.CHROMA_TENANT }}
           CHROMA_DB_NAME=Development
+          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
           EOF
           
           # 4. Run the updated script
