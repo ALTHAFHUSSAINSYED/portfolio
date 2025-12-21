@@ -110,7 +110,7 @@ jobs:  # WHAT jobs to run (can have multiple jobs, but we have one)
             docker stop portfolio-backend || true
             docker rm portfolio-backend || true
             docker build -t portfolio-backend -f backend/Dockerfile .
-            docker run -d --memory=1g --name portfolio-backend --restart always -p 8000:8000 --env-file backend/.env portfolio-backend
+            docker run -d --memory=3g --name portfolio-backend --restart always -p 8000:8000 --env-file backend/.env portfolio-backend
 
       - name: Check Docker logs if failed
         if: failure()
