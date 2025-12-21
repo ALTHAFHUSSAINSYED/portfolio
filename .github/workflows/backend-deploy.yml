@@ -119,11 +119,6 @@ jobs:  # WHAT jobs to run (can have multiple jobs, but we have one)
           echo "[INFO] Checking Docker logs for portfolio-backend..."
           sudo docker logs portfolio-backend || echo "No logs found. Container may not have started."
 
-      - name: Run Database Sync (populate_vector_db)
-        run: |
-          # 4. Optional: Run Database Sync (Now with the clean file)
-          docker exec portfolio-backend python3 backend/populate_vector_db.py
-
       - name: Wait for container to start  # Step 5: Wait for container to start up
         run: |  # Multi-line shell script
           echo "Waiting for container to start..."  # Status message
