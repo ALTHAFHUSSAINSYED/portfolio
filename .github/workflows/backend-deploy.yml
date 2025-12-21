@@ -48,16 +48,29 @@ jobs:  # WHAT jobs to run (can have multiple jobs, but we have one)
           EOF
           chmod 600 .env  # Set file permissions (owner read/write only)
 
-      - name: Repopulate ChromaDB (if data files changed)  # Step 3: Update vector database if portfolio data changed
-        run: |  # Multi-line shell script
-          cd /home/ec2-user/portfolio/backend  # Go to backend folder on EC2
-          if git diff HEAD~1 HEAD --name-only | grep -E "(portfolio_data\.json|formatted_data\.json|fixed_data\.json)"; then  # Check if data files changed in last commit
-            echo "Data files changed - repopulating ChromaDB..."  # If files changed, show message
-            python3 populate_vector_db.py  # Run the database population script
-            echo " ChromaDB repopulated successfully!"  # Success message
-          else  # If no data files changed
-            echo " No data file changes detected - skipping ChromaDB repopulation"  # Skip message
-          fi  # End of if statement
+      - name: Repopulate ChromaDB (if data files changed)
+        run: |
+          # 1. CRITICAL FIX: Force update the script on the server immediately
+          # We copy the clean file from the Runner Workspace -> Server Folder
+          cp backend/populate_vector_db.py /home/ec2-user/portfolio/backend/populate_vector_db.py
+          # 2. Go to the backend folder
+          cd /home/ec2-user/portfolio/backend
+          # 3. Create a temporary .env for the script to use
+          cat > .env << EOF
+          CHROMA_API_KEY=${{ secrets.CHROMA_API_KEY }}
+          CHROMA_TENANT_ID=${{ secrets.CHROMA_TENANT }}
+          CHROMA_DB_NAME=Development
+          EOF
+          # 4. Run the script (Now it is the CLEAN version)
+          if git diff HEAD~1 HEAD --name-only | grep -E "(portfolio_data\.json|formatted_data\.json|fixed_data\.json)"; then
+            echo "[INFO] Data files changed - repopulating ChromaDB..."
+            python3 populate_vector_db.py
+            echo "[SUCCESS] ChromaDB repopulated!"
+          else
+            echo "[INFO] No data file changes detected - skipping."
+          fi
+          # 5. Clean up
+          rm -f .env
 
       - name: Kill process on port 8000
         run: |
