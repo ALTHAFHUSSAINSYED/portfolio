@@ -1,30 +1,111 @@
-name: Repopulate ChromaDB
+import os
+import json
+import chromadb
+import uuid
+import sys
+from dotenv import load_dotenv
 
-on:
-  workflow_dispatch:  # Manual trigger only
+# Force UTF-8 encoding for standard output to prevent console crashes
+sys.stdout.reconfigure(encoding='utf-8')
 
-jobs:
-  repopulate:
-    runs-on: self-hosted
-    steps:
-      - name: Checkout latest code
-        uses: actions/checkout@v4
+# Load environment variables
+load_dotenv()
 
-      - name: Repopulate ChromaDB from cleaned data
-        run: |
-          cd /home/ec2-user/portfolio/backend
-          
-          # Create .env file with credentials
-          cat > .env << EOF
-          CHROMA_API_KEY=${{ secrets.CHROMA_API_KEY }}
-          CHROMA_TENANT=${{ secrets.CHROMA_TENANT }}
-          CHROMA_DATABASE=Development
-          EOF
-          
-          echo "[INFO] Running ChromaDB repopulation script..."
-          python3 populate_vector_db.py
-          
-          echo "[SUCCESS] ChromaDB repopulated successfully!"
-          
-          # Clean up .env
-          rm -f .env
+def get_chroma_client():
+    """
+    Returns a ChromaDB client.
+    Tries Cloud first, then falls back to Local if keys are missing.
+    """
+    api_key = os.getenv('CHROMA_API_KEY')
+    tenant_id = os.getenv('CHROMA_TENANT')  # Changed to match your workflow secret name
+    db_name = os.getenv('CHROMA_DATABASE', 'Development')
+
+    # 1. Try Cloud Connection
+    if api_key and tenant_id:
+        try:
+            print("[CONNECT] Attempting to connect to Chroma Cloud...")
+            client = chromadb.CloudClient(
+                api_key=api_key,
+                tenant=tenant_id,
+                database=db_name
+            )
+            print("[SUCCESS] Connected to Chroma Cloud.")
+            return client
+        except Exception as e:
+            print(f"[ERROR] Cloud connection failed: {e}")
+            print("[WARN] Falling back to Local Mode...")
+
+    # 2. Local Fallback
+    print("[CONNECT] Using Local ChromaDB...")
+    return chromadb.PersistentClient(path="chroma_db")
+
+def populate_db():
+    print("="*50)
+    print("[START] Starting Database Population")
+    print("="*50)
+
+    client = get_chroma_client()
+
+    # Create/Get Collection
+    try:
+        # Delete old collection to ensure a fresh start
+        try:
+            client.delete_collection(name="portfolio")
+            print("[INFO] Deleted old portfolio collection.")
+        except:
+            pass
+
+        collection = client.create_collection(name="portfolio")
+        print("[INFO] Created fresh portfolio collection.")
+    except Exception as e:
+        print(f"[ERROR] Collection setup failed: {e}")
+        return
+
+    # Load JSON
+    json_path = "portfolio_data.json"
+    if not os.path.exists(json_path):
+        print(f"[ERROR] Could not find {json_path}")
+        return
+
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        print(f"[INFO] Loaded {json_path}")
+    except Exception as e:
+        print(f"[ERROR] Failed to read JSON: {e}")
+        return
+
+    # Process & Add Data
+    ids = []
+    documents = []
+    metadatas = []
+    
+    # 1. Projects
+    if "projects" in data:
+        print(f"[INFO] Processing {len(data['projects'])} projects...")
+        for proj in data["projects"]:
+            p_id = proj.get("id", str(uuid.uuid4()))
+            
+            # Create embedding text
+            text = f"Project: {proj.get('name', '')}. " \
+                   f"Summary: {proj.get('summary', '')}. " \
+                   f"Tech: {', '.join(proj.get('technologies', []))}. " \
+                   f"Details: {proj.get('details', '')}"
+            
+            ids.append(p_id)
+            documents.append(text)
+            metadatas.append({"category": "project", "title": proj.get("name", "")})
+
+    # 2. Add to Chroma
+    if ids:
+        collection.add(ids=ids, documents=documents, metadatas=metadatas)
+        print(f"[SUCCESS] Added {len(ids)} items to ChromaDB.")
+    else:
+        print("[WARN] No data found to add.")
+
+    print("="*50)
+    print("[DONE] Finished.")
+    print("="*50)
+
+if __name__ == "__main__":
+    populate_db()
