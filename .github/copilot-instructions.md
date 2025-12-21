@@ -121,7 +121,8 @@ search_cache.set(query, results)
 - **Middleware Order:** SecurityHeadersMiddleware → CORSMiddleware (order matters!)
 - **Guardrails:** `guardrails.py` defines blocked topics, greeting patterns for chatbot
 
-### Error Handling & Logging
+
+### Error Handling, Logging & Commit Policy
 ```python
 logger = logging.getLogger('PortfolioBackend')  # or 'AlluAgent' for agent service
 try:
@@ -133,6 +134,11 @@ except Exception as e:
 ```
 - **Log Files:** `agent.log` (for agent service), stdout (for server logs)
 - **Structured Logging:** Use formatted strings with context (timestamps, function names)
+
+### Commit & Push Policy
+- All error fixes, code changes, and corrections must be committed and pushed directly to the remote repository immediately after validation.
+- Do not leave local changes uncommitted; always ensure the remote repository is up to date after any fix.
+- This applies to syntax errors, logic errors, and any other corrections made during development or troubleshooting.
 
 ## Integration Points & External Dependencies
 

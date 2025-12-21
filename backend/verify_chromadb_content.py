@@ -3,7 +3,7 @@
 Verify ChromaDB Projects_data contains FULL implementation details
 Run this script to check what data is actually stored in ChromaDB
 """
-
+#done
 import os
 import chromadb
 from dotenv import load_dotenv
