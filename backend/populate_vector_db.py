@@ -102,7 +102,7 @@ def populate_db():
         ids = []
         documents = []
         metadatas = []
-        batch_size = 100
+        batch_size = 10  # lowered from 100 to 10 to reduce memory usage
         total_added = 0
 
         for proj in data["projects"]:
