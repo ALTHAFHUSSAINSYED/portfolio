@@ -21,10 +21,10 @@ jobs:
           CHROMA_DATABASE=Development
           EOF
           
-          echo "📋 Running ChromaDB repopulation script..."
+          echo "[INFO] Running ChromaDB repopulation script..."
           python3 populate_vector_db.py
           
-          echo "✅ ChromaDB repopulated successfully!"
+          echo "[SUCCESS] ChromaDB repopulated successfully!"
           
           # Clean up .env
           rm -f .env

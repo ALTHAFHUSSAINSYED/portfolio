@@ -18,6 +18,6 @@ jobs:
       
       - name: Frontend changes detected
         run: |
-          echo "✅ Frontend changes detected!"
-          echo "📦 AWS Amplify will automatically deploy from connected repository"
-          echo "🔗 Check deployment status at: https://console.aws.amazon.com/amplify"
+          echo "[SUCCESS] Frontend changes detected!"
+          echo "[INFO] AWS Amplify will automatically deploy from connected repository"
+          echo "[LINK] Check deployment status at: https://console.aws.amazon.com/amplify"
