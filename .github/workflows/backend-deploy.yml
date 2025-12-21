@@ -2,7 +2,7 @@
 # This file defines an automated CI/CD pipeline that runs on GitHub's servers
 # When you push code, it automatically builds, tests, and deploys your backend
 
-name: Deploy Backend to EC2  # Display name shown in GitHub Actions UI
+name: Deploy Backend to EC2  # #Display name shown in GitHub Actions UI
 
 on:  # WHEN does this workflow run? (triggers section)
   push:  # Trigger on git push events
@@ -161,4 +161,4 @@ jobs:  # WHAT jobs to run (can have multiple jobs, but we have one)
           echo " Images successfully pushed to registry!"  # Success message
           echo " Images available at:"  # Show URLs
           echo "  - $IMAGE_TAG"  # Shows the tagged image URL
-          echo "  - $LATEST_TAG"  # Shows the latest image URL
+          echo "  - $LATEST_TAG"  # Shows the latest image and URL
