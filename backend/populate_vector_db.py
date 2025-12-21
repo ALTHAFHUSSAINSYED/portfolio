@@ -3,6 +3,7 @@ import os
 import json
 import chromadb
 import uuid
+import gc
 from dotenv import load_dotenv
 
 # Load environment variables yes and now
@@ -102,7 +103,7 @@ def populate_db():
         ids = []
         documents = []
         metadatas = []
-        batch_size = 10  # lowered from 100 to 10 to reduce memory usage
+        batch_size = 2  # lowered further to 2 to minimize memory usage
         total_added = 0
 
         for proj in data["projects"]:
@@ -133,6 +134,7 @@ def populate_db():
                 except Exception as e:
                     print(f"[ERROR] Failed to add batch of projects: {e}")
                 ids, documents, metadatas = [], [], []
+                gc.collect()
 
         if ids:
             try:
@@ -141,6 +143,8 @@ def populate_db():
                 print(f"[SUCCESS] Added {len(ids)} projects to ChromaDB (final batch).")
             except Exception as e:
                 print(f"[ERROR] Failed to add final batch of projects: {e}")
+            ids, documents, metadatas = [], [], []
+            gc.collect()
         if total_added == 0:
             print("[WARN] No projects found in JSON.")
 
