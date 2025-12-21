@@ -1,3 +1,5 @@
+
+import os
 import google.generativeai as genai
 from chromadb import EmbeddingFunction, Documents, Embeddings
 # Configure Gemini for the Server
