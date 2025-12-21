@@ -128,19 +128,22 @@ jobs:  # WHAT jobs to run (can have multiple jobs, but we have one)
       - name: Health check  # Step 6: Test that the backend is working
         run: |  # Multi-line shell script
           echo "Running health check..."  # Status message
-          max_attempts=10  # Try up to 10 times
-          attempt=0  # Start attempt counter at 0
-          while [ $attempt -lt $max_attempts ]; do  # Loop while attempts < max
-            if curl -f http://localhost:8000/ > /dev/null 2>&1; then  # Try to curl the health endpoint
-              echo " Backend is healthy!"  # If curl succeeds (HTTP 200)
-              exit 0  # Success - exit the script
-            fi  # End of if
-            echo "Attempt $((attempt+1))/$max_attempts failed, retrying..."  # Failure message with attempt count
-            sleep 5  # Wait 5 seconds before retrying
-            attempt=$((attempt+1))  # Increment attempt counter
-          done  # End of while loop
-          echo " Backend health check failed!"  # If all attempts failed
-          exit 1  # Failure - stop the workflow
+          # INCREASED TIMEOUT: Wait up to 5 minutes (60 attempts * 5 seconds)
+          max_attempts=60
+          attempt=0
+          while [ $attempt -lt $max_attempts ]; do
+            if curl -f http://localhost:8000/ > /dev/null 2>&1; then
+              echo "✅ Backend is healthy! Server started successfully."
+              exit 0
+            fi
+            echo "Attempt $((attempt+1))/$max_attempts: Server not ready yet (Database Sync in progress)..."
+            sleep 5
+            attempt=$((attempt+1))
+          done
+          echo "❌ Backend health check failed after 5 minutes!"
+          # Print logs to see why it failed
+          sudo docker logs portfolio-backend --tail 100
+          exit 1
 
       - name: Tag Docker image for registry  # Step 7: Tag the Docker image for registry (only runs if health check passed)
         run: |  # Multi-line shell script
