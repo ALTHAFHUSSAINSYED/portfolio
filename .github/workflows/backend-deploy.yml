@@ -1,8 +1,9 @@
 # GitHub Actions Workflow File - Complete Learning Guide with Inline Comments
 # This file defines an automated CI/CD pipeline that runs on GitHub's servers
 # When you push code, it automatically builds, tests, and deploys your backend
-#done
-name: Deploy Backend to EC2  # #Display name shown in GitHub Actions UI
+# done
+
+name: Deploy Backend to EC2  # Display name shown in GitHub Actions UI
 
 on:  # WHEN does this workflow run? (triggers section)
   push:  # Trigger on git push events
@@ -16,17 +17,17 @@ on:  # WHEN does this workflow run? (triggers section)
     branches:  # Only run on pushes to these branches
       - main  # Production branch
 
-jobs:  # WHAT jobs to run (can have multiple jobs, but we have one)
-  deploy:  # Job name (unique identifier for this job)
-    runs-on: self-hosted  # Run on YOUR EC2 server (not GitHub's servers)
+jobs:  # WHAT jobs to run
+  deploy:  # Job name
+    runs-on: self-hosted  # Run on YOUR EC2 server
 
-    steps:  # STEPS to execute (run in order - like a recipe)
+    steps:  # STEPS to execute
 
-      - name: Checkout code  # Step 1: Get the code from GitHub (human-readable step name)
-        uses: actions/checkout@v4  # Use GitHub's pre-built "checkout" action (version 4)
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Create environment file  # Step 2: Create environment variables file
-        run: |  # Multi-line shell script (pipe | means multi-line)
+      - name: Create environment file
+        run: |
           cd /home/ec2-user/portfolio/backend
           cat > .env << EOF
           MONGO_URL=${{ secrets.MONGO_URL }}
@@ -46,23 +47,19 @@ jobs:  # WHAT jobs to run (can have multiple jobs, but we have one)
           RESEND_API_KEY=${{ secrets.RESEND_KEY }}
           TO_EMAIL=${{ secrets.TO_EMAIL }}
           EOF
-          chmod 600 .env  # Set file permissions (owner read/write only)
+          chmod 600 .env
 
       - name: Repopulate ChromaDB (if data files changed)
         run: |
-          # 1. CRITICAL FIX: Force update the script on the server immediately
-          # We copy the clean file from the Runner Workspace -> Server Folder
           cp backend/populate_vector_db.py /home/ec2-user/portfolio/backend/populate_vector_db.py
-          # 2. Go to the backend folder
           cd /home/ec2-user/portfolio/backend
-          # 3. Create a temporary .env for the script to use
           cat > .env << EOF
           CHROMA_API_KEY=${{ secrets.CHROMA_API_KEY }}
           CHROMA_TENANT_ID=${{ secrets.CHROMA_TENANT }}
           CHROMA_DB_NAME=Development
           GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
           EOF
-          # 4. Run the script (Now it is the CLEAN version)
+
           if git diff HEAD~1 HEAD --name-only | grep -E "(portfolio_data\.json|formatted_data\.json|fixed_data\.json)"; then
             echo "[INFO] Data files changed - repopulating ChromaDB..."
             python3 populate_vector_db.py
@@ -70,7 +67,7 @@ jobs:  # WHAT jobs to run (can have multiple jobs, but we have one)
           else
             echo "[INFO] No data file changes detected - skipping."
           fi
-          # 5. Clean up
+
           rm -f .env
 
       - name: Kill process on port 8000
@@ -92,11 +89,13 @@ jobs:  # WHAT jobs to run (can have multiple jobs, but we have one)
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/ec2-user/portfolio
-            # 1. FORCE RESET local changes (Fixes the conflict/bad file issue)
+
+            # FORCE RESET (prevents corrupted files surviving)
             git fetch --all
             git reset --hard origin/main
             git pull origin main
-            # 2. Update .env file dynamically
+
+            # Update environment file
             cd backend
             echo "MONGO_URL=${{ secrets.MONGO_URL }}" > .env
             echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> .env
@@ -107,69 +106,43 @@ jobs:  # WHAT jobs to run (can have multiple jobs, but we have one)
             echo "CHROMA_TENANT_ID=${{ secrets.CHROMA_TENANT }}" >> .env
             echo "CHROMA_DB_NAME=Development" >> .env
             cd ..
-            # 3. Restart Docker Container (To apply changes)
+
+            # HARD CLEAN Docker (important after crash loops)
             docker stop portfolio-backend || true
             docker rm portfolio-backend || true
-            docker build -t portfolio-backend -f backend/Dockerfile .
-            docker run -d --memory=5g --name portfolio-backend --restart always -p 8000:8000 --env-file backend/.env portfolio-backend
+            docker image prune -f
 
-      - name: Check Docker logs if failed
-        if: failure()
+            # Rebuild & run
+            docker build --no-cache -t portfolio-backend -f backend/Dockerfile .
+            docker run -d \
+              --memory=5g \
+              --name portfolio-backend \
+              --restart always \
+              -p 8000:8000 \
+              --env-file backend/.env \
+              portfolio-backend
+
+      - name: Wait for container to start
         run: |
-          echo "[INFO] Checking Docker logs for portfolio-backend..."
-          sudo docker logs portfolio-backend || echo "No logs found. Container may not have started."
+          echo "Waiting for container to start..."
+          sleep 10
+          sudo docker logs portfolio-backend --tail 50
 
-      - name: Wait for container to start  # Step 5: Wait for container to start up
-        run: |  # Multi-line shell script
-          echo "Waiting for container to start..."  # Status message
-          sleep 10  # Wait 10 seconds for container to initialize
-          sudo docker logs portfolio-backend --tail 50  # Show last 50 lines of container logs
-
-      - name: Health check  # Step 6: Test that the backend is working
-        run: |  # Multi-line shell script
-          echo "Running health check..."  # Status message
-          # INCREASED TIMEOUT: Wait up to 5 minutes (60 attempts * 5 seconds)
+      - name: Health check
+        run: |
+          echo "Running health check..."
           max_attempts=60
           attempt=0
           while [ $attempt -lt $max_attempts ]; do
             if curl -f http://localhost:8000/ > /dev/null 2>&1; then
-              echo "✅ Backend is healthy! Server started successfully."
+              echo "Backend is healthy!"
               exit 0
             fi
-            echo "Attempt $((attempt+1))/$max_attempts: Server not ready yet (Database Sync in progress)..."
+            echo "Attempt $((attempt+1))/$max_attempts: Server not ready..."
             sleep 5
             attempt=$((attempt+1))
           done
-          echo "❌ Backend health check failed after 5 minutes!"
-          # Print logs to see why it failed
+
+          echo "Backend health check failed!"
           sudo docker logs portfolio-backend --tail 100
           exit 1
-
-      - name: Tag Docker image for registry  # Step 7: Tag the Docker image for registry (only runs if health check passed)
-        run: |  # Multi-line shell script
-          echo " Tagging image for registry..."  # Status message
-          COMMIT_SHA=$(git rev-parse --short HEAD)  # Get short commit hash for unique versioning
-          IMAGE_TAG="kubealthaf/portfolio-backend:${COMMIT_SHA}"  # Unique tag with commit
-          LATEST_TAG="kubealthaf/portfolio-backend:latest"  # Latest tag for easy pulling
-          echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV  # Save for next steps (GitHub environment variable)
-          echo "LATEST_TAG=${LATEST_TAG}" >> $GITHUB_ENV  # Save for next steps
-          sudo docker tag portfolio-backend $IMAGE_TAG  # Tag the local image
-          sudo docker tag portfolio-backend $LATEST_TAG  # Tag the local image
-          echo " Images tagged as: $IMAGE_TAG and $LATEST_TAG"  # Success message
-
-      - name: Login to Docker registry  # Step 8: Login to Docker Hub (only runs if health check passed)
-        run: |  # Multi-line shell script
-          echo " Logging into Docker registry..."  # Status message
-          echo "${{ secrets.DOCKER_PASSWORD }}" | sudo docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin  # Use secrets for authentication
-          echo " Successfully logged into Docker registry"  # Success message
-
-      - name: Push image to registry  # Step 9: Push images to Docker Hub (only runs if health check passed)
-        run: |  # Multi-line shell script
-          echo " Pushing images to registry..."  # Status message
-          sudo docker push $IMAGE_TAG  # Push versioned image
-          sudo docker push $LATEST_TAG  # Push latest image
-          echo " Images successfully pushed to registry!"  # Success message
-          echo " Images available at:"  # Show URLs
-          echo "  - $IMAGE_TAG"  # Shows the tagged image URL
-          echo "  - $LATEST_TAG"  # Shows the latest image and URL
-#END TOGGLE
