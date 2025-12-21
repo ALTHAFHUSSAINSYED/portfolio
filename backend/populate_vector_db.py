@@ -1,8 +1,8 @@
+
 import os
 import json
 import chromadb
 import uuid
-from chromadb.config import Settings
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -33,8 +33,17 @@ def get_chroma_client():
             print("[WARN] Falling back to Local Mode...")
 
     # 2. Local Fallback
-    print("[CONNECT] Using Local ChromaDB (backend/chroma_db)...")
-    return chromadb.PersistentClient(path="chroma_db")
+    # Try different paths to ensure we find the folder
+    possible_paths = ["chroma_db", "backend/chroma_db", "./chroma_db"]
+    path = "chroma_db"
+    
+    for p in possible_paths:
+        if os.path.exists(p):
+            path = p
+            break
+            
+    print(f"[CONNECT] Using Local ChromaDB at: {path}")
+    return chromadb.PersistentClient(path=path)
 
 def populate_db():
     print("="*50)
@@ -46,49 +55,58 @@ def populate_db():
 
     # 2. Get/Create Collections
     # We use get_or_create to avoid errors if they don't exist
-    portfolio_col = client.get_or_create_collection("portfolio")
-    projects_col = client.get_or_create_collection("Projects_data")
-    
-    print("[INFO] Collections ready: portfolio, Projects_data")
-
-    # 3. Load Data from JSON
-    # We look for the file in the current directory or 'backend/'
-    json_path = "portfolio_data.json"
-    if not os.path.exists(json_path):
-        json_path = "backend/portfolio_data.json"
-    
-    if not os.path.exists(json_path):
-        print(f"[ERROR] Could not find {json_path}")
+    try:
+        portfolio_col = client.get_or_create_collection("portfolio")
+        projects_col = client.get_or_create_collection("Projects_data")
+        print("[INFO] Collections ready: portfolio, Projects_data")
+    except Exception as e:
+        print(f"[ERROR] Failed to get collections: {e}")
         return
 
-    with open(json_path, 'r', encoding='utf-8') as f:
-        data = json.load(f)
+    # 3. Load Data from JSON
+    # Look for the file in current or parent directory
+    json_paths = ["portfolio_data.json", "backend/portfolio_data.json", "../portfolio_data.json"]
+    json_path = None
+    
+    for p in json_paths:
+        if os.path.exists(p):
+            json_path = p
+            break
+    
+    if not json_path:
+        print("[ERROR] Could not find portfolio_data.json")
+        return
 
-    # 4. Sync Projects (The part that was crashing)
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            print(f"[INFO] Loaded JSON data from {json_path}")
+    except Exception as e:
+        print(f"[ERROR] Failed to read JSON file: {e}")
+        return
+
+    # 4. Sync Projects
     print("[INFO] Syncing Projects...")
     
     if "projects" in data:
-        # Clear existing to avoid duplicates? 
-        # Ideally, we verify before adding, but for populate script, 
-        # deleting old data ensures clean state.
+        # Optional: Clear existing data to prevent duplicates
         try:
             existing_ids = projects_col.get()['ids']
             if existing_ids:
                 projects_col.delete(ids=existing_ids)
                 print(f"[INFO] Cleared {len(existing_ids)} old projects.")
-        except:
-            pass
+        except Exception as e:
+            print(f"[WARN] Could not clear old projects: {e}")
 
         ids = []
         documents = []
         metadatas = []
 
         for proj in data["projects"]:
-            # Generate a consistent ID or use existing
+            # Generate a consistent ID
             p_id = proj.get("id", str(uuid.uuid4()))
             
-            # Create a rich document text for embedding
-            # We combine all fields so the AI can search everything
+            # Create text for embedding
             full_text = (
                 f"Title: {proj.get('name', '')}\n"
                 f"Summary: {proj.get('summary', '')}\n"
@@ -105,14 +123,16 @@ def populate_db():
             })
 
         if ids:
-            projects_col.add(ids=ids, documents=documents, metadatas=metadatas)
-            print(f"[SUCCESS] Added {len(ids)} projects to ChromaDB.")
+            try:
+                projects_col.add(ids=ids, documents=documents, metadatas=metadatas)
+                print(f"[SUCCESS] Added {len(ids)} projects to ChromaDB.")
+            except Exception as e:
+                print(f"[ERROR] Failed to add projects: {e}")
         else:
             print("[WARN] No projects found in JSON.")
 
-    # 5. Sync Resume/Portfolio Info
-    print("[INFO] Syncing Resume & Skills...")
-    # (Add logic here if you populate the 'portfolio' collection too)
+    # 5. Sync Resume/Portfolio Info (Optional)
+    # You can add logic here if you need to populate the 'portfolio' collection
     # ...
 
     print("="*50)
@@ -120,7 +140,10 @@ def populate_db():
     print("="*50)
 
 if __name__ == "__main__":
-    populate_db()
+    try:
+        populate_db()
+    except Exception as e:
+        print(f"[CRITICAL ERROR] Script crashed: {e}")
         name="portfolio",
         embedding_function=LocalEmbeddingFunction()
     )
