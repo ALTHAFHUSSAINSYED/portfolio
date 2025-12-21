@@ -88,14 +88,15 @@ jobs:  # WHAT jobs to run (can have multiple jobs, but we have one)
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          key: ${{ secrets.EC2_KEY }}
           script: |
-            cd /home/ec2-user/portfolio/backend
+            cd /home/ec2-user/portfolio
             # 1. FORCE RESET local changes (Fixes the conflict/bad file issue)
             git fetch --all
             git reset --hard origin/main
             git pull origin main
             # 2. Update .env file dynamically
+            cd backend
             echo "MONGO_URL=${{ secrets.MONGO_URL }}" > .env
             echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> .env
             echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> .env
@@ -104,11 +105,12 @@ jobs:  # WHAT jobs to run (can have multiple jobs, but we have one)
             echo "CHROMA_API_KEY=${{ secrets.CHROMA_API_KEY }}" >> .env
             echo "CHROMA_TENANT_ID=${{ secrets.CHROMA_TENANT }}" >> .env
             echo "CHROMA_DB_NAME=Development" >> .env
+            cd ..
             # 3. Restart Docker Container (To apply changes)
             docker stop portfolio-backend || true
             docker rm portfolio-backend || true
-            docker build -t portfolio-backend .
-            docker run -d --name portfolio-backend --restart always -p 8000:8000 --env-file .env portfolio-backend
+            docker build -t portfolio-backend -f backend/Dockerfile .
+            docker run -d --name portfolio-backend --restart always -p 8000:8000 --env-file backend/.env portfolio-backend
             # 4. Optional: Run Database Sync (Now with the clean file)
             docker exec portfolio-backend python3 backend/populate_vector_db.py
 
