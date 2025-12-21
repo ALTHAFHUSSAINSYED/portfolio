@@ -332,13 +332,11 @@ async def get_projects():
     """
     try:
         # 1. Locate the file
-        json_path = ROOT_DIR / 'portfolio_data.json'
+        json_path = ROOT_DIR / 'portfolio_data_complete.json'
         if not json_path.exists():
-            # Fallback for development paths
-            json_path = Path('portfolio_data.json')
-            
+            json_path = Path('backend/portfolio_data_complete.json')
         if not json_path.exists():
-            logger.error("portfolio_data.json not found")
+            logger.error("portfolio_data_complete.json not found")
             return []
 
         # 2. Read the file
@@ -357,17 +355,20 @@ async def get_projects():
                 "summary": p.get("description", ""),
                 "description": p.get("description", ""),
                 "details": p.get("description", ""),
-                "image_url": p.get("image", ""),
-                
-                # ARRAYS - Passed directly!
+                "image_url": p.get("image_url", ""),
+                "category": p.get("category", ""),
                 "technologies": p.get("technologies", []),
                 "challenges": p.get("challenges", []),
                 "solutions": p.get("solutions", []),
-                "outcomes": p.get("outcomes", []),
-                
-                "github_url": p.get("github", ""),
-                "live_url": p.get("link", ""),
-                "timestamp": datetime.utcnow()
+                "achievements": p.get("achievements", []),
+                "duration": p.get("duration", ""),
+                "role": p.get("role", ""),
+                "teamSize": p.get("teamSize", ""),
+                "github_url": p.get("github_url", ""),
+                "live_url": p.get("live_url", ""),
+                "timestamp": p.get("timestamp", datetime.utcnow())
+            })
+        return clean_projects
             })
 
         logger.info(f"Loaded {len(clean_projects)} projects from local file.")
