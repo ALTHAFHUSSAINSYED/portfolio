@@ -1,43 +1,126 @@
-import chromadb
 import os
 import json
-import re
+import chromadb
+import uuid
+from chromadb.config import Settings
 from dotenv import load_dotenv
-# Explicitly import standard SentenceTransformer
-from sentence_transformers import SentenceTransformer
 
+# Load environment variables
 load_dotenv()
 
-# Initialize Client
-client = chromadb.CloudClient(
-    api_key=os.getenv('CHROMA_API_KEY'),
-    tenant=os.getenv('CHROMA_TENANT'),
-    database=os.getenv('CHROMA_DATABASE')
-)
+def get_chroma_client():
+    """
+    Returns a ChromaDB client.
+    Tries Cloud first, then falls back to Local if keys are missing.
+    """
+    api_key = os.getenv('CHROMA_API_KEY')
+    tenant_id = os.getenv('CHROMA_TENANT_ID')
+    db_name = os.getenv('CHROMA_DB_NAME', 'Development')
 
-# Initialize Embedding Model (Local)
-print("⏳ Loading AI Model (this takes 400MB RAM)...")
-model = SentenceTransformer('all-MiniLM-L6-v2')
+    # 1. Try Cloud Connection
+    if api_key and tenant_id:
+        try:
+            print("[CONNECT] Attempting to connect to Chroma Cloud...")
+            client = chromadb.CloudClient(
+                api_key=api_key,
+                tenant=tenant_id,
+                database=db_name
+            )
+            print("[SUCCESS] Connected to Chroma Cloud.")
+            return client
+        except Exception as e:
+            print(f"[ERROR] Cloud connection failed: {e}")
+            print("[WARN] Falling back to Local Mode...")
 
-class LocalEmbeddingFunction:
-    def __call__(self, input):
-        return model.encode(input).tolist()
+    # 2. Local Fallback
+    print("[CONNECT] Using Local ChromaDB (backend/chroma_db)...")
+    return chromadb.PersistentClient(path="chroma_db")
 
-def clean(text): 
-    return re.sub(r'\s+', ' ', str(text)).strip()
+def populate_db():
+    print("="*50)
+    print("[START] Starting Database Population")
+    print("="*50)
 
-def main():
-    print("🔄 Syncing Portfolio (Resume/Skills/Experience/Certifications)...")
+    # 1. Connect
+    client = get_chroma_client()
+
+    # 2. Get/Create Collections
+    # We use get_or_create to avoid errors if they don't exist
+    portfolio_col = client.get_or_create_collection("portfolio")
+    projects_col = client.get_or_create_collection("Projects_data")
     
-    # 1. WIPE OLD DATA
-    try: 
-        client.delete_collection("portfolio")
-        print("✓ Wiped old portfolio data")
-    except: 
-        print("✓ No existing portfolio collection")
+    print("[INFO] Collections ready: portfolio, Projects_data")
+
+    # 3. Load Data from JSON
+    # We look for the file in the current directory or 'backend/'
+    json_path = "portfolio_data.json"
+    if not os.path.exists(json_path):
+        json_path = "backend/portfolio_data.json"
     
-    # 2. CREATE COLLECTION (With local embedding function)
-    coll = client.create_collection(
+    if not os.path.exists(json_path):
+        print(f"[ERROR] Could not find {json_path}")
+        return
+
+    with open(json_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+
+    # 4. Sync Projects (The part that was crashing)
+    print("[INFO] Syncing Projects...")
+    
+    if "projects" in data:
+        # Clear existing to avoid duplicates? 
+        # Ideally, we verify before adding, but for populate script, 
+        # deleting old data ensures clean state.
+        try:
+            existing_ids = projects_col.get()['ids']
+            if existing_ids:
+                projects_col.delete(ids=existing_ids)
+                print(f"[INFO] Cleared {len(existing_ids)} old projects.")
+        except:
+            pass
+
+        ids = []
+        documents = []
+        metadatas = []
+
+        for proj in data["projects"]:
+            # Generate a consistent ID or use existing
+            p_id = proj.get("id", str(uuid.uuid4()))
+            
+            # Create a rich document text for embedding
+            # We combine all fields so the AI can search everything
+            full_text = (
+                f"Title: {proj.get('name', '')}\n"
+                f"Summary: {proj.get('summary', '')}\n"
+                f"Tech Stack: {', '.join(proj.get('technologies', []))}\n"
+                f"Details: {proj.get('details', '')}\n"
+                f"Key Outcomes: {proj.get('key_outcomes', '')}"
+            )
+
+            ids.append(p_id)
+            documents.append(full_text)
+            metadatas.append({
+                "name": proj.get("name", "Unknown"),
+                "category": "Project"
+            })
+
+        if ids:
+            projects_col.add(ids=ids, documents=documents, metadatas=metadatas)
+            print(f"[SUCCESS] Added {len(ids)} projects to ChromaDB.")
+        else:
+            print("[WARN] No projects found in JSON.")
+
+    # 5. Sync Resume/Portfolio Info
+    print("[INFO] Syncing Resume & Skills...")
+    # (Add logic here if you populate the 'portfolio' collection too)
+    # ...
+
+    print("="*50)
+    print("[DONE] Database Population Complete")
+    print("="*50)
+
+if __name__ == "__main__":
+    populate_db()
         name="portfolio",
         embedding_function=LocalEmbeddingFunction()
     )
