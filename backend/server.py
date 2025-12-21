@@ -1,11 +1,3 @@
-# Full file preserved verbatim except for whitespace normalization
-# Changes made:
-# 1) Removed emojis from strings/comments
-# 2) Normalized to UTF-8
-# 3) Converted tabs to 4 spaces
-# 4) Fixed accidental leading indentation before decorators
-# NO logic changes
-
 import os
 import sys
 import logging
@@ -44,8 +36,7 @@ try:
     HAS_AGENT_SERVICE = True
 except ImportError as e:
     HAS_AGENT_SERVICE = False
-    print(f"Warning: Some backend services could not be imported: {e}")
-
+    print(f"⚠️ Warning: Some backend services could not be imported: {e}")
     def sanitize_html(text):
         return bleach.clean(text)
 
@@ -59,19 +50,19 @@ except ImportError:
 
 # --- CONFIGURATION ---
 ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / ".env")
+load_dotenv(ROOT_DIR / '.env')
 
 # Configure Logging
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.StreamHandler(sys.stdout)],
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler(sys.stdout)]
 )
-logger = logging.getLogger("PortfolioBackend")
+logger = logging.getLogger('PortfolioBackend')
 
 # Database Setup
-mongo_url = os.environ.get("MONGO_URL")
-db_name = os.environ.get("DB_NAME", "portfolioDB")
+mongo_url = os.environ.get('MONGO_URL')
+db_name = os.environ.get('DB_NAME', 'portfolioDB')
 client = None
 db = None
 
@@ -79,20 +70,20 @@ if mongo_url:
     try:
         client = AsyncIOMotorClient(mongo_url)
         db = client[db_name]
-        print(f"Connected to MongoDB: {db_name}")
+        print(f"✅ Connected to MongoDB: {db_name}")
     except Exception as e:
-        print(f"MongoDB Connection Error: {e}")
+        print(f"❌ MongoDB Connection Error: {e}")
 
 # Cloudinary Setup
 cloudinary.config(
-    cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
-    api_key=os.environ.get("CLOUDINARY_API_KEY"),
-    api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
-    secure=True,
+    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.environ.get('CLOUDINARY_API_KEY'),
+    api_secret=os.environ.get('CLOUDINARY_API_SECRET'),
+    secure=True
 )
 
 # Configure Gemini
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
 
 # --- EMBEDDING FUNCTION FOR SERVER ---
 class GeminiEmbeddingFunction(EmbeddingFunction):
@@ -100,10 +91,10 @@ class GeminiEmbeddingFunction(EmbeddingFunction):
         try:
             return [
                 genai.embed_content(
-                    model="models/text-embedding-004",
+                    model='models/text-embedding-004',
                     content=text,
-                    task_type="retrieval_query",
-                )["embedding"]
+                    task_type="retrieval_query" 
+                )['embedding']
                 for text in input
             ]
         except Exception as e:
@@ -119,7 +110,7 @@ async def scheduled_blog_generation():
         logger.info("Starting scheduled blog generation")
         topic = "Latest Trends in AI and Machine Learning"
         content = gemini_service.generate_blog_post(topic)
-
+        
         if content:
             blog_data = {
                 "title": content["title"],
@@ -127,28 +118,28 @@ async def scheduled_blog_generation():
                 "author": "Allu Bot",
                 "createdAt": datetime.now(timezone.utc),
                 "tags": content.get("tags", ["AI", "Technology"]),
-                "_id": "auto-" + datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S"),
+                "_id": "auto-" + datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
             }
             await notification_service.send_blog_notification(True, blog_data)
-            logger.info("Blog posted successfully")
+            logger.info("✅ Blog posted successfully!")
         else:
-            logger.error("Blog generation failed - no content")
+            logger.error("❌ Blog generation failed - no content")
     except Exception as e:
         logger.error(f"Error in blog generation: {e}")
 
 # --- LIFESPAN MANAGER ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("Starting Scheduler")
+    print("🚀 Starting Scheduler...")
     production_cron = CronTrigger(hour=1, minute=0, timezone=timezone.utc)
     scheduler.add_job(scheduled_blog_generation, production_cron)
     scheduler.start()
-
+    
     if HAS_AGENT_SERVICE:
         threading.Thread(target=agent_service.initialize_agent, daemon=True).start()
-
+    
     yield
-    print("Shutting down Scheduler")
+    print("🛑 Shutting down Scheduler...")
     scheduler.shutdown()
 
 # --- APP INSTANCE ---
@@ -159,14 +150,21 @@ api_router = APIRouter(prefix="/api")
 if HAS_SECURITY_MIDDLEWARE and SecurityHeadersMiddleware:
     app.add_middleware(SecurityHeadersMiddleware)
 
-default_origins = (
-    "http://localhost:3000,"
-    "https://www.althafportfolio.site,"
-    "https://althafportfolio.site,"
+# Explicitly define allowed origins
+default_origins = [
+    "http://localhost:3000",
+    "https://www.althafportfolio.site",
+    "https://althafportfolio.site",
     "https://api.althafportfolio.site"
-)
-origins_env = os.environ.get("CORS_ORIGINS", default_origins)
-origins = [origin.strip() for origin in origins_env.split(",") if origin.strip()]
+]
+
+origins_env = os.environ.get('CORS_ORIGINS')
+if origins_env:
+    origins = [origin.strip() for origin in origins_env.split(',') if origin.strip()]
+else:
+    origins = default_origins
+
+print(f"🌍 CORS Allowed Origins: {origins}")
 
 app.add_middleware(
     CORSMiddleware,
@@ -204,34 +202,35 @@ class BlogPostRequest(BaseModel):
 async def get_portfolio_context(query: str) -> str:
     all_context = []
     try:
-        chroma_api_key = os.getenv("CHROMA_API_KEY")
-        chroma_tenant = os.getenv("CHROMA_TENANT") or os.getenv("CHROMA_TENANT_ID")
-        chroma_database = os.getenv("CHROMA_DATABASE")
-
+        chroma_api_key = os.getenv('CHROMA_API_KEY')
+        chroma_tenant = os.getenv('CHROMA_TENANT') or os.getenv('CHROMA_TENANT_ID')
+        chroma_database = os.getenv('CHROMA_DATABASE')
+        
         if not (chroma_api_key and chroma_tenant and chroma_database):
             return ""
-
+            
         chroma_client = chromadb.CloudClient(
             api_key=chroma_api_key,
             tenant=chroma_tenant,
-            database=chroma_database,
+            database=chroma_database
         )
-
-        collection_names = ["portfolio", "Blogs_data", "Projects_data"]
-
+        
+        collection_names = ['portfolio', 'Blogs_data', 'Projects_data']
+        
         for collection_name in collection_names:
             try:
                 collection = chroma_client.get_collection(
                     name=collection_name,
-                    embedding_function=GeminiEmbeddingFunction(),
+                    embedding_function=GeminiEmbeddingFunction()
                 )
                 results = collection.query(query_texts=[query], n_results=5)
-                docs = results.get("documents", [[]])[0]
+                docs = results.get('documents', [[]])[0]
                 all_context.extend(docs)
             except Exception as e:
                 logger.warning(f"Skipping collection {collection_name}: {e}")
-
-        return "\n\n".join(all_context)
+                continue
+        
+        return '\n\n'.join(all_context)
     except Exception as e:
         logger.error(f"ChromaDB Error: {e}")
         return ""
@@ -242,28 +241,30 @@ async def get_portfolio_context(query: str) -> str:
 def welcome():
     return {"message": "Server is running. API is at /api"}
 
-# --- GET SINGLE PROJECT ---
 @api_router.get("/projects/{project_id}", response_model=Project)
 async def get_project_details(project_id: str):
+    """Fetch a single project by ID."""
+    # 1. Try MongoDB
     if db is not None:
         try:
             project = await db.projects.find_one({"id": project_id})
             if project:
-                project.pop("_id", None)
+                if "_id" in project: del project["_id"]
                 return project
         except Exception as e:
             logger.error(f"MongoDB error: {e}")
 
-    for filename in ["portfolio_data_complete.json", "portfolio_data.json"]:
+    # 2. Fallback to Local JSON
+    for filename in ['portfolio_data_complete.json', 'portfolio_data.json']:
         try:
             json_path = ROOT_DIR / filename
             if not json_path.exists():
-                json_path = Path(f"backend/{filename}")
-
+                json_path = Path(f'backend/{filename}')
+            
             if json_path.exists():
-                with open(json_path, "r", encoding="utf-8") as f:
+                with open(json_path, 'r', encoding='utf-8') as f:
                     data = json.load(f)
-                    for p in data.get("projects", []):
+                    for p in data.get('projects', []):
                         if str(p.get("id")) == project_id:
                             return {
                                 "id": str(p.get("id")),
@@ -277,7 +278,7 @@ async def get_project_details(project_id: str):
                                 "key_outcomes": p.get("key_outcomes", ""),
                                 "github_url": p.get("github_url", ""),
                                 "live_url": p.get("live_url", ""),
-                                "timestamp": p.get("timestamp", datetime.utcnow()),
+                                "timestamp": p.get("timestamp", datetime.utcnow())
                             }
         except Exception:
             continue
@@ -286,22 +287,14 @@ async def get_project_details(project_id: str):
 
 @api_router.get("/projects", response_model=List[Project])
 async def get_projects():
-    try:
-        json_path = ROOT_DIR / "portfolio_data_complete.json"
-        if not json_path.exists():
-            json_path = Path("backend/portfolio_data_complete.json")
-        if not json_path.exists():
-            return []
-
-        with open(json_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-
-        raw_projects = data.get("projects", [])
-        clean_projects = []
-
-        for p in raw_projects:
-            clean_projects.append(
-                {
+    # 1. Try fetching from MongoDB first (Priority)
+    mongo_projects = []
+    if db is not None:
+        try:
+            cursor = db.projects.find({})
+            async for p in cursor:
+                # Normalize fields
+                mongo_projects.append({
                     "id": str(p.get("id", uuid.uuid4())),
                     "name": p.get("name", p.get("title", "Untitled")),
                     "title": p.get("title", p.get("name", "Untitled")),
@@ -313,9 +306,42 @@ async def get_projects():
                     "key_outcomes": p.get("key_outcomes", ""),
                     "github_url": p.get("github_url", ""),
                     "live_url": p.get("live_url", ""),
-                    "timestamp": p.get("timestamp", datetime.utcnow()),
-                }
-            )
+                    "timestamp": p.get("timestamp", datetime.utcnow())
+                })
+            if mongo_projects:
+                return mongo_projects
+        except Exception as e:
+            logger.error(f"Error fetching from MongoDB: {e}")
+
+    # 2. Fallback to Local JSON (Only if Mongo is empty or fails)
+    try:
+        json_path = ROOT_DIR / 'portfolio_data_complete.json'
+        if not json_path.exists():
+            json_path = Path('backend/portfolio_data_complete.json')
+        if not json_path.exists():
+            return []
+
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+
+        raw_projects = data.get('projects', [])
+        clean_projects = []
+
+        for p in raw_projects:
+            clean_projects.append({
+                "id": str(p.get("id", uuid.uuid4())),
+                "name": p.get("name", p.get("title", "Untitled")),
+                "title": p.get("title", p.get("name", "Untitled")),
+                "summary": p.get("summary", p.get("description", "")),
+                "description": p.get("description", ""),
+                "details": p.get("details", ""),
+                "image_url": p.get("image_url", ""),
+                "technologies": p.get("technologies", []),
+                "key_outcomes": p.get("key_outcomes", ""),
+                "github_url": p.get("github_url", ""),
+                "live_url": p.get("live_url", ""),
+                "timestamp": p.get("timestamp", datetime.utcnow())
+            })
         return clean_projects
     except Exception as e:
         logger.error(f"Error reading projects: {e}")
@@ -328,7 +354,7 @@ async def create_project(
     details: str = Form(...),
     technologies: str = Form(...),
     key_outcomes: str = Form(...),
-    file: UploadFile = File(...),
+    file: UploadFile = File(...)
 ):
     if db is None:
         raise HTTPException(status_code=503, detail="Database unavailable")
@@ -346,25 +372,22 @@ async def create_project(
         "description": bleach.clean(summary),
         "details": sanitize_html(details),
         "image_url": image_url,
-        "technologies": [t.strip() for t in bleach.clean(technologies).split(",")],
+        "technologies": [t.strip() for t in bleach.clean(technologies).split(',')],
         "key_outcomes": bleach.clean(key_outcomes),
-        "timestamp": datetime.utcnow(),
+        "timestamp": datetime.utcnow()
     }
     await db.projects.insert_one(project_data)
-
     try:
-        subprocess.run(
-            [sys.executable, "backend/sync_projects.py"], capture_output=True, text=True
-        )
+        subprocess.run([sys.executable, "backend/sync_projects.py"], capture_output=True, text=True)
     except Exception:
         pass
-
     return project_data
 
 @api_router.post("/contact")
 async def send_contact_email(form: ContactForm):
     try:
-        return await notification_service.send_contact_email(form)
+        response = await notification_service.send_contact_email(form)
+        return response
     except Exception as e:
         logger.error(f"Contact error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -374,7 +397,8 @@ async def generate_blog(request: BlogPostRequest):
     if not HAS_AGENT_SERVICE:
         return JSONResponse(status_code=503, content={"error": "Agent service unavailable"})
     try:
-        return agent_service.generate_blog_now(request.topic)
+        blog = agent_service.generate_blog_now(request.topic)
+        return blog
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
@@ -382,39 +406,30 @@ async def generate_blog(request: BlogPostRequest):
 async def get_blogs():
     try:
         from backend.read_local_blogs import get_local_blogs
-
         return get_local_blogs()
     except Exception:
         return []
 
 @api_router.post("/ask-all-u-bot")
 async def ask_agent(query: dict):
-    message = query.get("message", "")
+    message = query.get('message', '')
     try:
         portfolio_context = await get_portfolio_context(message)
-        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-        model = genai.GenerativeModel("models/gemma-3-27b-it")
-
-        system_instruction = (
-            "You are Allu Bot, the professional portfolio assistant for Althaf Hussain Syed.\n"
-            f"Use this Context to answer: {portfolio_context}\n"
-            "If unknown, say you do not have that info."
-        )
-
+        genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
+        model = genai.GenerativeModel('models/gemma-3-27b-it')
+        
+        system_instruction = f"""You are Allu Bot, the professional portfolio assistant for Althaf Hussain Syed.
+        Use this Context to answer: {portfolio_context}
+        If unknown, say you don't have that info."""
+        
         response = model.generate_content(f"{system_instruction}\nUser: {message}")
-
-        return JSONResponse(
-            status_code=200, content={"reply": response.text, "source": "Portfolio"}
-        )
+        
+        return JSONResponse(status_code=200, content={"reply": response.text, "source": "Portfolio"})
     except Exception as e:
-        return JSONResponse(
-            status_code=500,
-            content={"reply": f"Error: {str(e)}", "source": None},
-        )
+        return JSONResponse(status_code=500, content={"reply": f"Error: {str(e)}", "source": None})
 
 app.include_router(api_router)
 
 if __name__ == "__main__":
     import uvicorn
-
     uvicorn.run(app, host="0.0.0.0", port=8000)
