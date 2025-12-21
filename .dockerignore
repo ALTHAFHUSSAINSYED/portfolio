@@ -1,5 +1,7 @@
 # Ignore everything by default
 **
+# Allow start script (CRITICAL FIX)
+!start.sh
 
 # Allow backend files
 !backend/**
