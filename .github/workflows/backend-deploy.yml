@@ -173,4 +173,4 @@ jobs:  # WHAT jobs to run (can have multiple jobs, but we have one)
           echo " Images available at:"  # Show URLs
           echo "  - $IMAGE_TAG"  # Shows the tagged image URL
           echo "  - $LATEST_TAG"  # Shows the latest image and URL
-#END
+#END TOGGLE
