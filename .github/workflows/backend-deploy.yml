@@ -70,28 +70,34 @@ jobs:  # WHAT jobs to run (can have multiple jobs, but we have one)
           fi
           exit 0
 
-      - name: Deploy and restart backend  # Step 4: Build and deploy the Docker container
-        run: |  # Multi-line shell script
-          cd /home/ec2-user/portfolio  # Go to project root on EC2
-          git fetch origin main  # Get latest changes from GitHub
-          git reset --hard origin/main  # Force update to latest commit (destructive!)
-          
-          # 1. Build the NEW image first (While the old one is still running!)
-          # Enable BuildKit for faster builds
-          export DOCKER_BUILDKIT=1
-          sudo -E docker build -t portfolio-backend:new -f backend/Dockerfile .
-          
-          # 2. Stop and remove the old container (Downtime starts here - only <5 seconds)
-          sudo docker rm -f portfolio-backend || true
-          
-          # 3. Rename tagged image to latest
-          sudo docker tag portfolio-backend:new portfolio-backend:latest
-          
-          # 4. Start the new container
-          sudo docker run --env-file /home/ec2-user/portfolio/backend/.env -p 8000:8000 --name portfolio-backend --restart unless-stopped -d portfolio-backend:latest
-          
-          # 5. Clean up dangling images to save space
-          sudo docker image prune -f
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            cd /home/ec2-user/portfolio/backend
+            # 1. FORCE RESET local changes (Fixes the conflict/bad file issue)
+            git fetch --all
+            git reset --hard origin/main
+            git pull origin main
+            # 2. Update .env file dynamically
+            echo "MONGO_URL=${{ secrets.MONGO_URL }}" > .env
+            echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> .env
+            echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> .env
+            echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> .env
+            echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
+            echo "CHROMA_API_KEY=${{ secrets.CHROMA_API_KEY }}" >> .env
+            echo "CHROMA_TENANT_ID=${{ secrets.CHROMA_TENANT }}" >> .env
+            echo "CHROMA_DB_NAME=Development" >> .env
+            # 3. Restart Docker Container (To apply changes)
+            docker stop portfolio-backend || true
+            docker rm portfolio-backend || true
+            docker build -t portfolio-backend .
+            docker run -d --name portfolio-backend --restart always -p 8000:8000 --env-file .env portfolio-backend
+            # 4. Optional: Run Database Sync (Now with the clean file)
+            docker exec portfolio-backend python3 backend/populate_vector_db.py
 
       - name: Wait for container to start  # Step 5: Wait for container to start up
         run: |  # Multi-line shell script
@@ -136,7 +142,7 @@ jobs:  # WHAT jobs to run (can have multiple jobs, but we have one)
 
       - name: Push image to registry  # Step 9: Push images to Docker Hub (only runs if health check passed)
         run: |  # Multi-line shell script
-          echo "📤 Pushing images to registry..."  # Status message
+          echo " Pushing images to registry..."  # Status message
           sudo docker push $IMAGE_TAG  # Push versioned image
           sudo docker push $LATEST_TAG  # Push latest image
           echo " Images successfully pushed to registry!"  # Success message
