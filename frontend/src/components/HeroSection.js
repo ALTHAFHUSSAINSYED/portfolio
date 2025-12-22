@@ -157,7 +157,7 @@ const HeroSection = ({ personalInfo }) => {
               <div className="relative group bg-background rounded-xl">
                 <video
                   ref={leftVideoRef}
-                  src="https://res.cloudinary.com/dtzaicj6s/video/upload/v1766402043/intro_left.mp4"
+                  src="https://res.cloudinary.com/dtzaicj6s/video/upload/intro_left.mp4"
                   autoPlay
                   playsInline
                   loop
@@ -202,7 +202,7 @@ const HeroSection = ({ personalInfo }) => {
               <div className="relative group bg-background rounded-xl">
                 <video
                   ref={rightVideoRef}
-                  src="https://res.cloudinary.com/dtzaicj6s/video/upload/v1766401977/intro_right.mp4"
+                  src="https://res.cloudinary.com/dtzaicj6s/video/upload/intro_right.mp4"
                   autoPlay
                   playsInline
                   loop
