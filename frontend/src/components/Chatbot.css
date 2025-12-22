@@ -26,10 +26,8 @@
   color: white;
   border: none;
   border-radius: 50%;
-  width: 50px;
-  /* Reduced from 60px */
-  height: 50px;
-  /* Reduced from 60px */
+  width: 60px;
+  height: 60px;
   padding: 0;
   display: flex;
   align-items: center;
@@ -38,51 +36,56 @@
   font-size: 24px;
   font-weight: 600;
   position: relative;
-  z-index: 1001;
+  z-index: 1001; /* Ensure the toggle button stays on top */
   box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  /* Smoother transition */
-  overflow: visible;
-  /* Allow badge to be seen */
-  animation: pulse-border 2s infinite;
-  /* Smooth "attraction" animation */
+  transition: all 0.2s ease;
+  overflow: hidden; /* Ensure the image stays within bounds */
 }
 
-@keyframes pulse-border {
-  0% {
-    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7);
-  }
-
-  70% {
-    box-shadow: 0 0 0 10px rgba(37, 99, 235, 0);
-  }
-
-  100% {
-    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
-  }
+.chat-icon-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* STRICT DIMENSION ENFORCEMENT */
+.chat-toggle-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.chat-toggle-fallback {
+  width: 30px;
+  height: 30px;
+  color: white;
+}
+
+.chatbot-toggle:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+}
+
 .chatbot-window {
   background-color: var(--chat-bg-color-light);
   color: var(--chat-text-color-light);
   border: none;
   border-radius: 16px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-  width: 350px !important;
-  /* Fixed width - STRICT */
-  height: 550px !important;
-  /* Fixed height - STRICT */
+  width: 300px; /* Reduced width for compact display */
+  max-width: 90vw;
+  height: 70dvh; /* 70% of dynamic viewport height to keep header visible */
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   position: absolute;
   right: 0;
   bottom: 70px;
   transition: all var(--chat-animation-duration) ease-out;
   animation: slideIn var(--chat-animation-duration) forwards;
-  z-index: 1000;
 }
 
 @keyframes slideIn {
@@ -90,7 +93,6 @@
     opacity: 0;
     transform: translateY(20px) scale(0.95);
   }
-
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -101,22 +103,19 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
+  padding: 8px 12px;
   border-bottom: 1px solid rgba(229, 231, 235, 0.5);
   background: linear-gradient(to right, var(--chat-primary-color), #4f46e5);
   color: white;
   min-height: 56px;
-  flex-shrink: 0;
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
+  overflow: hidden;
 }
 
-/* STRICT AVATAR SIZING */
 .chatbot-avatar {
-  width: 42px !important;
-  height: 42px !important;
-  min-width: 42px;
-  min-height: 42px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   background-color: #fff;
   display: flex;
@@ -124,17 +123,21 @@
   justify-content: center;
   margin-right: 12px;
   margin-left: 4px;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12), 0 0 0 2px rgba(255, 255, 255, 0.35);
+  box-shadow: 0 2px 8px rgba(37,99,235,0.12), 0 0 0 2px rgba(255, 255, 255, 0.35);
   border: 1.5px solid rgba(255, 255, 255, 0.5);
   overflow: hidden;
-  flex-shrink: 0;
 }
 
 .chatbot-avatar img {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
+}
+
+.chatbot-avatar svg {
+  width: 70%;
+  height: 70%;
 }
 
 .chatbot-title-container {
@@ -171,7 +174,7 @@
   height: 40px;
   object-fit: cover;
   border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12), 0 0 0 2px #e5e7eb;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.12), 0 0 0 2px #e5e7eb;
   border: 1.5px solid #e5e7eb;
   margin: 0 2px;
   transition: background-color 0.2s;
@@ -199,13 +202,10 @@
   display: flex;
   align-items: flex-start;
   position: relative;
-  margin-bottom: 0;
-  /* Remove margin as we're using gap in parent */
+  margin-bottom: 0; /* Remove margin as we're using gap in parent */
   animation: messageAppear 0.3s forwards;
-  overflow: visible;
-  /* Prevent any internal scrolling */
-  width: 100%;
-  /* Ensure message takes full width */
+  overflow: visible; /* Prevent any internal scrolling */
+  width: 100%; /* Ensure message takes full width */
 }
 
 @keyframes messageAppear {
@@ -213,11 +213,40 @@
     opacity: 0;
     transform: translateY(10px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.bot-avatar, .user-avatar {
+  width: 38px; /* Increased size */
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 8px;
+  overflow: hidden; /* Ensure image stays within bounds */
+}
+
+.bot-avatar {
+  background-color: var(--chat-primary-color);
+  color: white;
+}
+
+.bot-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-avatar {
+  background-color: #64748b;
+  color: white;
+  margin-left: 8px;
+  margin-right: 0;
 }
 
 .message-content {
@@ -257,37 +286,27 @@
   justify-content: flex-end;
 }
 
-.bot-avatar,
-.user-avatar {
-  width: 38px;
-  /* Increased size */
-  height: 38px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  margin-right: 8px;
-  overflow: hidden;
-  /* Ensure image stays within bounds */
+/* Dark theme support */
+[data-theme="dark"] .chatbot-window {
+  background-color: var(--chat-bg-color-dark);
+  color: var(--chat-text-color-dark);
 }
 
-.bot-avatar {
-  background-color: var(--chat-primary-color);
-  color: white;
+[data-theme="dark"] .chatbot-title {
+  color: var(--chat-text-color-dark);
 }
 
-.bot-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+[data-theme="dark"] .chatbot-message.bot {
+  background-color: var(--chat-bot-bubble-dark);
+  color: var(--chat-text-color-dark);
 }
 
-.user-avatar {
-  background-color: #64748b;
-  color: white;
-  margin-left: 8px;
-  margin-right: 0;
+[data-theme="dark"] .close-button {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .close-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .chatbot-form {
@@ -298,7 +317,6 @@
   height: 64px;
   box-sizing: border-box;
   align-items: center;
-  flex-shrink: 0;
 }
 
 .chatbot-input {
@@ -311,6 +329,12 @@
   font-size: 14px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
   transition: border-color 0.2s;
+}
+
+[data-theme="dark"] .chatbot-input {
+  background-color: #2d3748;
+  color: #e2e8f0;
+  border-color: #4a5568;
 }
 
 .chatbot-input:focus {
@@ -339,128 +363,206 @@
   background-color: #1d4ed8;
 }
 
-/* Suggestion buttons styling - Pills Layout */
+.welcome-animation {
+  animation: bounce-in 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+             shake-hands 3s ease-in-out 1s;
+}
+
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) translateY(40px);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05) translateY(-10px);
+  }
+  70% {
+    transform: scale(0.9) translateY(5px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes shake-hands {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: rotate(-5deg);
+  }
+  20%, 40%, 60%, 80% {
+    transform: rotate(5deg);
+  }
+}
+
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px !important;
+  min-width: 60px;
+}
+
+.typing-indicator span {
+  height: 8px;
+  width: 8px;
+  background: #70757e;
+  border-radius: 50%;
+  margin: 0 2px;
+  display: inline-block;
+  animation: bounce 1.3s linear infinite;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-4px);
+  }
+}
+
+/* Suggestion buttons styling */
 .chatbot-suggestions {
   padding: 8px 16px 12px 16px;
   border-top: 1px solid rgba(229, 231, 235, 0.3);
-  background: transparent;
+  background-color: rgba(0, 0, 0, 0.01);
+}
+
+.suggestion-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  margin: 0 0 8px 0;
+  text-align: center;
 }
 
 .suggestion-buttons {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: flex-end;
-  /* Align RIGHT as requested */
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: none;
+  overflow: visible;
 }
 
 .suggestion-button {
-  background-color: white;
+  background-color: rgba(37, 99, 235, 0.05);
   color: var(--chat-primary-color);
-  border: 1px solid #e2e8f0;
-  padding: 8px 16px;
-  border-radius: 20px;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  padding: 8px 12px;
+  border-radius: 12px;
   font-size: 13px;
   font-weight: 500;
-  text-align: right;
-  /* Text align right */
+  text-align: center;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: normal;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  display: inline-block;
-  width: auto;
-  max-width: 95%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  flex: 0 1 auto;
+  max-width: 45%;
 }
 
 .suggestion-button:hover {
-  background-color: #f8fafc;
-  border-color: var(--chat-primary-color);
+  background-color: rgba(37, 99, 235, 0.1);
   transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
 }
 
-.chatbot-footer {
-  text-align: center;
-  font-size: 13px;
-  /* Increased from 12px */
-  color: #6b7280;
-  padding: 10px;
-  border-top: 1px solid rgba(0, 0, 0, 0.03);
-  letter-spacing: 0.3px;
-  /* Slightly more spacing */
-}
-
-.chatbot-footer a {
-  color: var(--chat-primary-color);
-  /* Blue color */
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.chatbot-footer a:hover {
-  text-decoration: underline;
-}
-
-/* Header Animation - Online Pulse */
-.online-indicator {
-  width: 8px;
-  height: 8px;
-  background-color: #22c55e;
-  border-radius: 50%;
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  /* Position in header top right or near avatar */
-  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
-  animation: pulse-green 2s infinite;
-}
-
-/* Unread Badge Animation */
-.unread-badge {
-  position: absolute;
-  top: 0;
-  right: 0;
-  background: #ef4444;
+.suggestion-button.selected {
+  background-color: var(--chat-primary-color);
   color: white;
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: bold;
-  border: 2px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  animation: bounce-badge 2s infinite;
-  z-index: 10;
 }
 
-@keyframes pulse-green {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
-  }
-
-  70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
-  }
-
-  100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
-  }
+/* Dark theme support for suggestions */
+[data-theme="dark"] .suggestion-title {
+  color: #9ca3af;
 }
 
-@keyframes bounce-badge {
+[data-theme="dark"] .suggestion-button {
+  background-color: rgba(99, 102, 241, 0.1);
+  color: #a5b4fc;
+  border-color: rgba(99, 102, 241, 0.3);
+}
 
-  0%,
-  100% {
-    transform: translateY(0);
-  }
+[data-theme="dark"] .suggestion-button:hover {
+  background-color: rgba(99, 102, 241, 0.2);
+}
 
-  50% {
-    transform: translateY(-3px);
-  }
+/* Override Global Pink Scrollbar - Target ALL scrollbars inside Chatbot Window */
+/* Using !important to force override of global styles in index.css */
+
+/* 1. Target the custom-scrollbar class specifically */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px !important;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #a1a1aa !important; /* Grey color - override pink */
+  background: #a1a1aa !important; /* Override any gradient */
+  border-radius: 10px !important;
+  border: 1px solid transparent !important;
+  background-clip: content-box !important;
+  animation: none !important; /* Remove any glow animations */
+  box-shadow: none !important;
+}
+
+/* 2. Target ANY scrollbar inside the Chatbot Window (messages area, etc) */
+.chatbot-window ::-webkit-scrollbar {
+  width: 5px !important;
+}
+
+.chatbot-window ::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.chatbot-window ::-webkit-scrollbar-thumb {
+  background-color: #a1a1aa !important; /* Force Grey to override global Pink */
+  background: #a1a1aa !important; /* Override any gradient */
+  border-radius: 10px !important;
+  border: 2px solid transparent !important;
+  background-clip: padding-box !important;
+  animation: none !important;
+  box-shadow: none !important;
+}
+
+.chatbot-window ::-webkit-scrollbar-thumb:hover {
+  background-color: #71717a !important; /* Darker grey on hover */
+  background: #71717a !important;
+  box-shadow: none !important;
+}
+
+/* Dark mode support */
+[data-theme="dark"] .chatbot-window ::-webkit-scrollbar-thumb {
+  background-color: #52525b !important;
+  background: #52525b !important;
+}
+
+[data-theme="dark"] .chatbot-window ::-webkit-scrollbar-thumb:hover {
+  background-color: #3f3f46 !important;
+  background: #3f3f46 !important;
+}
+
+/* Firefox scrollbar override */
+.chatbot-window * {
+  scrollbar-width: thin !important;
+  scrollbar-color: #a1a1aa transparent !important;
+}
+
+[data-theme="dark"] .chatbot-window * {
+  scrollbar-color: #52525b transparent !important;
 }
