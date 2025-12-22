@@ -100,7 +100,7 @@
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
   width: 320px !important;
   /* Fixed width */
-  height: 500px !important;
+  height: 450px !important;
   /* Fixed height - reduced significantly */
   display: flex;
   flex-direction: column;
@@ -154,8 +154,24 @@
   margin-left: 2px;
   box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12), 0 0 0 2px rgba(255, 255, 255, 0.35);
   border: 1.5px solid rgba(255, 255, 255, 0.5);
-  overflow: hidden;
+  overflow: visible;
+  /* Changed to visible for online dot */
   flex-shrink: 0;
+  position: relative;
+  /* For absolute positioning of dot */
+}
+
+.online-status {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  background-color: #22c55e;
+  /* Green dot */
+  border: 1.5px solid white;
+  border-radius: 50%;
+  z-index: 10;
 }
 
 .chatbot-avatar img {
@@ -361,7 +377,8 @@
   border: 1px solid #e2e8f0;
   background-color: white;
   color: #1e293b;
-  padding: 12px 16px;
+  padding: 14px 18px;
+  /* Slightly larger field */
   border-radius: 24px;
   font-size: 14px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
@@ -383,8 +400,10 @@
   background-color: var(--chat-primary-color);
   color: white;
   border: none;
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  /* Reduced from 40px */
+  height: 32px;
+  /* Reduced from 40px */
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -393,6 +412,11 @@
   cursor: pointer;
   transition: transform 0.2s, background-color 0.2s;
   box-shadow: 0 2px 5px rgba(37, 99, 235, 0.2);
+}
+
+.send-button svg {
+  width: 16px;
+  height: 16px;
 }
 
 .send-button:hover {
