@@ -293,6 +293,7 @@ const Chatbot = () => {
                   }
                 }}
               />
+              <span className="online-status"></span>
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
