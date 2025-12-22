@@ -28,11 +28,11 @@ const HeroSection = ({ personalInfo }) => {
   const [profilePicLoaded, setProfilePicLoaded] = useState(false); // State to track profile pic load
 
   // Use useMediaQuery hook to check for large screens (Tailwind's 'lg' breakpoint)
-  const isLargeScreen = useMediaQuery('(min-width: 1024px)'); 
+  const isLargeScreen = useMediaQuery('(min-width: 1024px)');
 
   const handleVideoScroll = useCallback(() => {
     const videoElements = [leftVideoRef.current, rightVideoRef.current];
-    const threshold = 150; 
+    const threshold = 150;
 
     videoElements.forEach((videoRef) => {
       if (videoRef) {
@@ -112,7 +112,7 @@ const HeroSection = ({ personalInfo }) => {
           animation: snake-draw 8s linear infinite;
         }
       `}</style>
-      
+
       <div className="absolute inset-0 overflow-hidden z-0">
         <div className="bg-orb bg-orb-1"></div>
         <div className="bg-orb bg-orb-2"></div>
@@ -121,16 +121,16 @@ const HeroSection = ({ personalInfo }) => {
 
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="relative flex flex-col items-center">
-        
+
           <div className="relative z-20 mb-8">
-            <img  
+            <img
               ref={profilePicRef} // Attach ref to profile picture
               src="/profile-pic.jpg"
               alt={personalInfo.name}
               className="w-48 h-48 md:w-56 md:h-56 rounded-full object-cover border-4 border-cyan-400/30 shadow-lg shadow-cyan-500/20"
             />
           </div>
-          
+
           {/* Conditionally render SVG only on large screens */}
           {isLargeScreen && (
             <svg className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet">
@@ -152,15 +152,15 @@ const HeroSection = ({ personalInfo }) => {
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-4 items-start w-full mt-8">
-            
+
             <div className="relative z-30 order-2 lg:order-1 lg:col-span-1 flex justify-center lg:justify-start pt-4">
               <div className="relative group bg-background rounded-xl">
-                <video 
-                  ref={leftVideoRef} 
-                  src="https://res.cloudinary.com/dtzaicj6s/video/upload/v1765735442/intro_left_yxzbkk.mp4" 
-                  autoPlay 
-                  playsInline 
-                  loop 
+                <video
+                  ref={leftVideoRef}
+                  src="https://res.cloudinary.com/dtzaicj6s/video/upload/v1766402043/intro_left.mp4"
+                  autoPlay
+                  playsInline
+                  loop
                   muted={isLeftMuted}
                   className="w-72 h-72 lg:w-[500px] lg:h-80 rounded-xl object-cover border-2 border-pink-500/30 shadow-lg"
                 />
@@ -181,15 +181,15 @@ const HeroSection = ({ personalInfo }) => {
               {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
               <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-3xl mx-auto">{personalInfo.heroSummary}</p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Button 
-                  onClick={downloadResume} 
+                <Button
+                  onClick={downloadResume}
                   size="lg"
                   className="bg-gradient-to-r from-pink-500 to-green-500 text-white hover:from-pink-600 hover:to-pink-600 dark:from-cyan-500 dark:to-purple-500 dark:hover:from-cyan-600 dark:hover:to-purple-600 border-0"
                 >
                   <Download className="w-5 h-5 mr-3" />Download Resume
                 </Button>
-                <Button 
-                  onClick={scrollToContact} 
+                <Button
+                  onClick={scrollToContact}
                   size="lg"
                   className="bg-gradient-to-r from-pink-500 to-green-500 text-white hover:from-pink-600 hover:to-pink-600 dark:from-cyan-500 dark:to-purple-500 dark:hover:from-cyan-600 dark:hover:to-purple-600 border-0"
                 >
@@ -200,12 +200,12 @@ const HeroSection = ({ personalInfo }) => {
 
             <div className="relative z-30 order-3 lg:order-3 lg:col-span-1 flex justify-center lg:justify-end pt-4">
               <div className="relative group bg-background rounded-xl">
-                <video 
-                  ref={rightVideoRef} 
-                  src="https://res.cloudinary.com/dtzaicj6s/video/upload/v1765735441/intro_right_yslwma.mp4" 
-                  autoPlay 
-                  playsInline 
-                  loop 
+                <video
+                  ref={rightVideoRef}
+                  src="https://res.cloudinary.com/dtzaicj6s/video/upload/v1766401977/intro_right.mp4"
+                  autoPlay
+                  playsInline
+                  loop
                   muted={isRightMuted}
                   className="w-72 h-72 lg:w-[500px] lg:h-80 rounded-xl object-cover border-2 border-green-500/30 shadow-lg"
                 />
@@ -215,7 +215,7 @@ const HeroSection = ({ personalInfo }) => {
                 </button>
               </div>
             </div>
-            
+
           </div>
         </div>
       </div>
