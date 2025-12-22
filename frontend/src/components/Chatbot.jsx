@@ -311,10 +311,10 @@ const Chatbot = () => {
           </form>
 
           <div className="chatbot-footer">
-            <span>Empowered by AI • <a href="#" onClick={(e) => {
+            <span>Powered by AI • <a href="#" onClick={(e) => {
               e.preventDefault();
               handleSuggestionClick("How does this chatbot work?");
-            }}>About this chatbot</a></span>
+            }}>About this bot</a></span>
           </div>
         </div>
       )}

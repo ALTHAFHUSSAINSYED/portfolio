@@ -104,13 +104,13 @@
 
 .chatbot-footer {
   text-align: center;
-  font-size: 12px;
-  /* Increased from 11px */
+  font-size: 13px;
+  /* Increased from 12px */
   color: #6b7280;
   padding: 10px;
   border-top: 1px solid rgba(0, 0, 0, 0.03);
-  letter-spacing: 0.2px;
-  /* Slightly longer text feel */
+  letter-spacing: 0.3px;
+  /* Slightly more spacing */
 }
 
 .chatbot-footer a {
