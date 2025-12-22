@@ -25,6 +25,7 @@ import chromadb
 from chromadb import EmbeddingFunction, Documents, Embeddings
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
+from bson import ObjectId
 
 # Local imports
 try:
@@ -241,6 +242,7 @@ async def get_portfolio_context(query: str) -> str:
 def welcome():
     return {"message": "Server is running. API is at /api"}
 
+# --- GET SINGLE PROJECT ---
 @api_router.get("/projects/{project_id}", response_model=Project)
 async def get_project_details(project_id: str):
     """Fetch a single project by ID with safe defaults."""
@@ -253,7 +255,6 @@ async def get_project_details(project_id: str):
             # If not found, try 'slug' or '_id' if valid objectid
             if not project:
                 try:
-                    from bson import ObjectId
                     if ObjectId.is_valid(project_id):
                         project = await db.projects.find_one({"_id": ObjectId(project_id)})
                 except:
@@ -403,6 +404,88 @@ async def create_project(
     await db.projects.insert_one(project_data)
     # Background sync removed to prevent OOM
     return project_data
+
+# --- PUT (UPDATE) PROJECT ---
+@api_router.put("/projects/{project_id}", response_model=Project)
+async def update_project(
+    project_id: str,
+    name: Optional[str] = Form(None),
+    summary: Optional[str] = Form(None),
+    details: Optional[str] = Form(None),
+    technologies: Optional[str] = Form(None),
+    key_outcomes: Optional[str] = Form(None),
+    file: Optional[UploadFile] = File(None)
+):
+    """Update an existing project."""
+    if db is None:
+        raise HTTPException(status_code=503, detail="Database unavailable")
+
+    # Find the project
+    project = await db.projects.find_one({"id": project_id})
+    if not project:
+         if ObjectId.is_valid(project_id):
+            project = await db.projects.find_one({"_id": ObjectId(project_id)})
+    
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    update_data = {}
+    if name: update_data["name"] = bleach.clean(name); update_data["title"] = bleach.clean(name)
+    if summary: update_data["summary"] = bleach.clean(summary); update_data["description"] = bleach.clean(summary)
+    if details: update_data["details"] = sanitize_html(details)
+    if technologies: update_data["technologies"] = [t.strip() for t in bleach.clean(technologies).split(',')]
+    if key_outcomes: update_data["key_outcomes"] = bleach.clean(key_outcomes)
+
+    if file:
+        try:
+            upload_result = cloudinary.uploader.upload(file.file, folder="portfolio_projects")
+            update_data["image_url"] = upload_result.get("secure_url")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Image upload failed: {str(e)}")
+
+    if update_data:
+        update_data["timestamp"] = datetime.utcnow()
+        await db.projects.update_one({"_id": project["_id"]}, {"$set": update_data})
+        
+    # Return updated project
+    updated_project = await db.projects.find_one({"_id": project["_id"]})
+    if "_id" in updated_project: del updated_project["_id"]
+    
+    # Safe return manual construction
+    return {
+        "id": str(updated_project.get("id", project_id)),
+        "name": updated_project.get("name", ""),
+        "title": updated_project.get("title", ""),
+        "summary": updated_project.get("summary", ""),
+        "description": updated_project.get("description", ""),
+        "details": updated_project.get("details", ""),
+        "image_url": updated_project.get("image_url", ""),
+        "technologies": updated_project.get("technologies", []),
+        "key_outcomes": updated_project.get("key_outcomes", ""),
+        "github_url": updated_project.get("github_url", ""),
+        "live_url": updated_project.get("live_url", ""),
+        "timestamp": updated_project.get("timestamp", datetime.utcnow())
+    }
+
+# --- DELETE PROJECT ---
+@api_router.delete("/projects/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_project(project_id: str):
+    """Delete a project by ID."""
+    if db is None:
+        raise HTTPException(status_code=503, detail="Database unavailable")
+    
+    # Try deleting by custom 'id' string first
+    result = await db.projects.delete_one({"id": project_id})
+    
+    # If not found, try deleting by MongoDB '_id'
+    if result.deleted_count == 0:
+        if ObjectId.is_valid(project_id):
+            result = await db.projects.delete_one({"_id": ObjectId(project_id)})
+            
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
+    
+    return None
 
 @api_router.post("/contact")
 async def send_contact_email(form: ContactForm):
