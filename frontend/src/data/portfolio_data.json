@@ -1,0 +1,268 @@
+{
+    "personal_info": {
+        "name": "Althaf Hussain Syed",
+        "title": "Analyst III Infrastructure Services | DevOps Engineer",
+        "email": "allualthaf42@gmail.com",
+        "phone": "+91 8184812249",
+        "location": "Hyderabad, India",
+        "linkedin": "https://www.linkedin.com/in/althafhussainsyed/",
+        "summary": "Motivated DevOps Engineer with 3.5 years of experience supporting AWS cloud environments, CI/CD pipelines, and container-based deployments. Skilled in building automation, deployment support, and environment monitoring using Terraform, Jenkins, Docker, and Kubernetes. Works effectively with cross-functional teams and follows ITIL and SDLC practices to maintain stable and compliant operations. Focused on reliability, task ownership, and continuous improvement within enterprise infrastructure."
+    },
+    "skills": {
+        "Cloud Platforms": [
+            "AWS",
+            "GCP",
+            "Azure"
+        ],
+        "Infrastructure as Code & Automation": [
+            "Terraform",
+            "Ansible",
+            "Bash scripting",
+            "Python"
+        ],
+        "CI/CD": [
+            "Jenkins",
+            "GitHub Actions",
+            "GitLab CI",
+            "AWS CodePipeline"
+        ],
+        "Build & Quality Management": [
+            "Maven",
+            "SDLC collaboration",
+            "Checkstyle",
+            "SonarQube",
+            "Qualitygates",
+            "Trivy"
+        ],
+        "Artifact Repositories": [
+            "Nexus",
+            "AWS CodeArtifact",
+            "ECR",
+            "Docker Hub"
+        ],
+        "Source Control Management": [
+            "GitHub",
+            "GitLab",
+            "Bitbucket"
+        ],
+        "Containerisation & Orchestration": [
+            "Docker",
+            "Kubernetes",
+            "ECS"
+        ],
+        "Monitoring & Logging": [
+            "CloudWatch",
+            "Prometheus",
+            "Grafana",
+            "Dynatrace"
+        ],
+        "Networking & Security": [
+            "VPC",
+            "subnets",
+            "security groups",
+            "IAM"
+        ],
+        "Linux Administration": [
+            "Package management",
+            "user management",
+            "service monitoring",
+            "troubleshooting"
+        ],
+        "Collaboration & Processes": [
+            "Agile/DevOps",
+            "SDLC",
+            "ITIL",
+            "cross-functional team coordination"
+        ],
+        "AI/ML": [
+            "Gen AI/ML basics",
+            "AWS AI services",
+            "Prompt Engineering basics"
+        ],
+        "Soft Skills": [
+            "Leadership",
+            "Communication",
+            "Teamwork",
+            "Problem Solving",
+            "Time Management",
+            "Documentation"
+        ]
+    },
+    "experience": [
+        {
+            "company": "DXC Technology",
+            "role": "Analyst III Infrastructure Services | DevOps Engineer",
+            "duration": "Aug 2022 – Present",
+            "location": "Hyderabad, India",
+            "description": "Cloud Platform Automation & Delivery | AWS Managed Services. Supporting automation, deployment, and environment operations in an AWS Managed Services setup. Involved in CI/CD execution, environment monitoring, and change coordination aligned with ITIL and SDLC frameworks to ensure smooth delivery.",
+            "achievements": [
+                "Supporting automation, deployment, and environment operations in an AWS Managed Services setup.",
+                "Involved in CI/CD execution, environment monitoring, and change coordination aligned with ITIL and SDLC frameworks.",
+                "Attended daily stand-up meetings to share progress, discuss incident status, and coordinate upcoming deployment or change activities.",
+                "Worked on provisioning and managing AWS services based on approved change requests.",
+                "Used Terraform templates to standardise configurations and maintain production consistency.",
+                "Maintained Jenkins pipelines and GitHub Actions for build, test, and deployment.",
+                "Integrated Maven, SonarQube quality gates, and Docker image builds pushed to Amazon ECR.",
+                "Configured Slack notifications for build and deployment updates.",
+                "Implemented end-to-end CI/CD automation, improving delivery efficiency and reducing manual effort by ~70%.",
+                "Containerised applications using Docker and supported deployments in Kubernetes environments.",
+                "Monitored system health and logs using CloudWatch, Grafana, Prometheus and Dynatrace.",
+                "Managed incidents and change requests via ServiceNow.",
+                "Created and maintained Standard Operating Procedures (SOPs) and runbooks."
+            ]
+        }
+    ],
+    "education": [
+        {
+            "degree": "Master of Science (M.Sc.) in Computer Science",
+            "institution": "Acharya Nagarjuna University",
+            "year": "Dec 2022 - June 2024"
+        },
+        {
+            "degree": "Bachelor of Science (B.Sc.) in Computer Science",
+            "institution": "Acharya Nagarjuna University",
+            "year": "June 2019 - June 2022"
+        }
+    ],
+    "achievements": [
+        {
+            "title": "CI/CD Automation",
+            "description": "Implemented end-to-end CI/CD automation, reducing manual effort by 70% and improving delivery efficiency."
+        },
+        {
+            "title": "Operational Visibility",
+            "description": "Developed a custom ServiceNow dashboard for incident tracking and SLA breach reporting, improving operational transparency."
+        },
+        {
+            "title": "Quality Integration",
+            "description": "Integrated SonarQube quality gates, ECR management, and Slack notifications for improved collaboration and feedback."
+        },
+        {
+            "title": "DXC CHAMPS Award – FY24 Q1",
+            "description": "Recognised for consistent delivery, ownership of priority tasks, and reliable execution of infrastructure operations and production deployments."
+        },
+        {
+            "title": "DXC CHAMPS Award – FY26 H1",
+            "description": "Awarded for sustained performance, end-to-end accountability, and operational excellence in supporting critical infrastructure services."
+        }
+    ],
+    "certifications": [
+        {
+            "name": "AWS Certified Solutions Architect – Associate",
+            "issuer": "Amazon Web Services",
+            "year": "2024",
+            "category": "aws"
+        },
+        {
+            "name": "Google Cloud Professional Cloud Architect",
+            "issuer": "Google Cloud",
+            "year": "2024",
+            "category": "gcp"
+        },
+        {
+            "name": "Microsoft Azure Administrator Associate (AZ-104)",
+            "issuer": "Microsoft",
+            "year": "2024",
+            "category": "azure"
+        },
+        {
+            "name": "Oracle Cloud Infrastructure Architect Associate",
+            "issuer": "Oracle",
+            "year": "2024",
+            "category": "oracle"
+        },
+        {
+            "name": "AWS Certified AI Practitioner",
+            "issuer": "Amazon Web Services",
+            "year": "2024",
+            "category": "aws"
+        },
+        {
+            "name": "AWS Cloud Practitioner",
+            "issuer": "Amazon Web Services",
+            "year": "2023",
+            "category": "aws"
+        },
+        {
+            "name": "Azure Fundamentals (AZ-900)",
+            "issuer": "Microsoft",
+            "year": "2023",
+            "category": "azure"
+        },
+        {
+            "name": "GitHub Foundations",
+            "issuer": "GitHub",
+            "year": "2024",
+            "category": "devops"
+        },
+         {
+            "name": "Generative AI Certified",
+            "issuer": "Oracle",
+            "year": "2024",
+            "category": "ai"
+        }
+    ],
+    "projects": [
+        {
+            "id": "aws-terraform-ansible-automation",
+            "name": "AWS Infrastructure Automation with Terraform || Ansible",
+            "summary": "\ud83d\udccc Summary\n\nAutomated provisioning of AWS infrastructure using Terraform.\n\nConfigured servers and applications using Ansible playbooks.\n\nDelivered consistent, repeatable, and secure environment setups across dev, stage, and production.\n\n\n\ud83c\udfaf Objective\n\nReplace manual infrastructure setup with fully automated workflows.\n\nStandardize environment configurations across multiple AWS accounts.\n\nReduce deployment time, configuration drift, and human errors.\n\n\n\ud83d\udc68\u200d\ud83d\udcbb Key Responsibilities\n\nDesigned Terraform modules for core components (VPC, subnets, EC2, IAM, SGs).\n\nImplemented remote state backend using S3 + DynamoDB for state locking.\n\nWrote Ansible playbooks for server provisioning and configuration.\n\nAutomated installation of packages, services, and monitoring agents.\n\nIntegrated Terraform + Ansible workflow into CI/CD for consistent deployments.\n\nEnsured least-privilege IAM access and secure credential handling.\n",
+            "details": "AWS Infrastructure Automation Using Terraform Modules &amp; Ansible\n1\ufe0f\u20e3 Architecture Overview\n\nTerraform used to create full AWS infrastructure using modular design.\n\nCore modules built for VPC, subnets, route tables, IGW, NAT, and security groups.\n\nEC2 module creates VM instances inside private/public subnets.\n\nTerraform module provisions EKS cluster (Kubernetes control plane + worker nodes).\n\nTerraform remote state stored in S3 bucket with DynamoDB state lock.\n\nPost-provisioning configuration handled using Ansible playbooks.\n\n2\ufe0f\u20e3 Terraform Folder Structure (Clean, Scalable Layout)\n\nmain.tf \u2192 Calls all modules\n\nvariables.tf \u2192 Centralized variable definitions\n\noutputs.tf \u2192 Exposes VPC ID, subnets, EC2 IPs, etc.\n\nbackend.tf \u2192 S3 + DynamoDB configuration\n\nmodules/\n\nvpc/\n\nec2/\n\neks/\n\nsecurity-groups/\n\nThis structure exactly matches your Terraform notes.\n\n3\ufe0f\u20e3 Remote Backend Configuration\n\nTerraform state stored in S3 bucket (as per your notes).\n\nDynamoDB table used for state locking and concurrency prevention.\n\nPrevents accidental overwrites during team deployments.\n\nExample Components Created:\n\nS3 bucket \u2192 terraform-backend-state-dev\n\nDynamoDB table \u2192 terraform-lock-table\n\nEncryption enabled (AES-256)\n\nVersioning enabled for rollback\n\n4\ufe0f\u20e3 VPC Module (Based on Your Notes)\n\nModule Includes:\n\nCustom VPC with /16 CIDR\n\nPublic subnets across AZ1 &amp; AZ2\n\nPrivate subnets across AZ1 &amp; AZ2\n\nInternet Gateway\n\nNAT Gateway for private subnet outbound traffic\n\nRoute table associations\n\nTags following AWS best practices\n\nOutputs:\n\nvpc_id\n\npublic_subnets\n\nprivate_subnets\n\n5\ufe0f\u20e3 EC2 Module (Terraform + Cloud-Init Notes)\n\nModule Responsibilities:\n\nCreate EC2 instances in private subnets\n\nAssociate security groups\n\nAttach IAM Role (SSM access)\n\nUse Key Pair for SSH access\n\nAdd user_data script (from your notes)\n\nUser Data Tasks (Based on your notes):\n\nOS update\n\nInstall basic dependencies\n\nInstall CloudWatch agent (optional)\n\nInstall Docker / packages (if required later)\n\n6\ufe0f\u20e3 EKS (Kubernetes Cluster) Module\n\nTerraform Creates:\n\nEKS control plane\n\nNode groups (private subnets)\n\nIAM roles for cluster + nodes\n\nSecurity groups for cluster communication\n\nkubeconfig generated after apply\n\nCluster Highlights:\n\nWorker nodes auto-provisioned\n\nHighly available cluster across 2 AZs\n\nIntegrated with VPC CNI plugin\n\nNodes join cluster automatically\n\n7\ufe0f\u20e3 Ansible Automation (Based on Your Ansible Notes)\n\nRole Structure:\n\nroles/common \u2192 Update packages, install basic tools\n\nroles/webserver \u2192 Install Apache/Nginx (optional)\n\nroles/monitoring \u2192 Install CloudWatch agent\n\nroles/docker \u2192 Install Docker (if needed)\n\nTasks from Your Notes Include:\n\nUpdating OS\n\nInstalling required packages\n\nConfiguring system services\n\nManaging users &amp; permissions\n\nSetting up application directories\n\nEnabling services\n\n8\ufe0f\u20e3 CI/CD Flow (Optional But Derived from Your Notes)\n\nGitHub/GitLab triggers Terraform via Jenkins.\n\nTerraform validates \u2192 plans \u2192 applies infra.\n\nAnsible kicks in to configure EC2 instances.\n\nFinal output: EC2 + EKS cluster ready for deployments.\n\n9\ufe0f\u20e3 Security Controls Implemented\n\nLeast-privilege IAM roles for Terraform.\n\nSecurity groups restrict SSH to allowed IPs only.\n\nNodes and EC2 instances placed inside private subnets.\n\nS3 backend access limited using IAM conditions.\n\n\ud83d\udd1f Key Outcomes\n\nFully automated VPC, EC2, and Kubernetes cluster creation.\n\nZero manual provisioning of AWS resources.\n\nStandardized folder + module structure for future scaling.\n\nInfrastructure logs and states stored securely in S3.\n\nReproducible environments across dev, stage, and prod.\n\nCluster ready for containerized app deployments.\n\n1\ufe0f\u20e31\ufe0f\u20e3 Challenges &amp; Solutions\n\nChallenge: Managing complex VPC configurations.\nSolution: Created reusable VPC module with separate subnet mappings.\n\nChallenge: Terraform state conflicts in team workflows.\nSolution: Implemented S3 remote backend + DynamoDB locking.\n\nChallenge: Manual setup on EC2 was inconsistent.\nSolution: Automated all host-level configurations with Ansible.\n\nChallenge: EKS authentication failures.\nSolution: Generated kubeconfig using Terraform output values.",
+            "image_url": "https://res.cloudinary.com/dtzaicj6s/image/upload/v1766253368/portfolio_projects/mwdp5u6u8dkiy4tbhs9l.png",
+            "technologies": [
+                "Terraform",
+                "Ansible",
+                "AWS",
+                "S3",
+                "DynamoDB",
+                "GitHub",
+                "Jenkins",
+                "VPC",
+                "EC2",
+                "IAM",
+                "Security Groups",
+                "Remote Backend",
+                "SSH"
+            ],
+            "key_outcomes": "\ud83c\udfc6 Key Outcomes\n\nReduced provisioning time from hours to minutes.\n\nAchieved fully repeatable infrastructure deployments.\n\nImproved security posture through automated IAM + SG rules.\n\nEliminated configuration drift across AWS environments.\n\nCentralized IaC workflow that scales smoothly across teams.",
+            "timestamp": "2025-12-19T20:12:02.007000"
+        },
+        {
+            "id": "1265481c-8697-4d42-b39a-f533801bb0d9",
+            "name": "Cloud-Native Microservices CI/CD Pipeline on AWS",
+            "summary": "\ud83d\udccc Summary\n\nAutomated CI/CD pipeline for microservices using Jenkins.\n\nContainerized services with Docker and deployed to Kubernetes (EKS).\n\nIntegrated AWS ECR for secure image storage and versioning.\n\n\n\ud83c\udfaf Objective\n\nEnable end-to-end automated builds, tests, container packaging, and deployments.\n\nReduce manual deployment effort and improve release consistency.\n\nAchieve zero-downtime rollouts across multiple environments.\n\n\n\ud83d\udc68\u200d\ud83d\udcbb Key Responsibilities\n\nDesigned CI/CD pipeline using Jenkins Pipeline-as-Code.\n\nContainerized microservices following Docker best practices.\n\nImplemented secure integration between Jenkins and AWS ECR.\n\nAutomated deployment to Kubernetes using manifests &amp; rollout strategies.\n\nManaged environment-specific configurations and secrets.\n\nSet up basic monitoring for microservice health &amp; performance.\n\n\n\n",
+            "details": "Cloud-Native Microservices CI/CD Pipeline on AWS\n1\ufe0f\u20e3 Architecture Overview\n\nMicroservices hosted in GitHub repository.\n\nJenkins used as central CI/CD orchestrator.\n\nDocker used for container packaging.\n\nAWS ECR used as private image registry.\n\nKubernetes (EKS) used for scalable deployments.\n\nTerraform used to provision EKS cluster and networking.\n\nCloudWatch &amp; Prometheus/Grafana used for basic monitoring.\n\n2\ufe0f\u20e3 CI/CD Workflow (High-Level Flow)\n\nDeveloper pushes code to GitHub branch.\n\nWebhook triggers Jenkins pipeline automatically.\n\nJenkins pulls latest code from GitHub.\n\nUnit tests, static scans, and linting executed.\n\nDocker image built using Dockerfile.\n\nImage tagged with commit SHA or build number.\n\nImage pushed to AWS ECR.\n\nKubernetes deployment files updated automatically.\n\nJenkins applies manifests to EKS using kubectl.\n\nDeployment performed with rolling update strategy.\n\n3\ufe0f\u20e3 Jenkins Pipeline (Stage-by-Stage Breakdown)\n\nStage 1: Checkout\n\nPulls code from GitHub main/dev branches.\n\nValidates branch naming rules.\n\nStage 2: Build\n\nRuns Maven/Gradle/npm build (based on service).\n\nResolves dependencies.\n\nGenerates build artifacts.\n\nStage 3: Code Quality\n\nOptional: SonarQube scan for code smells, coverage, vulnerabilities.\n\nReport uploaded to Sonar dashboard.\n\nStage 4: Unit Tests\n\nExecutes automated tests.\n\nGenerates JUnit reports.\n\nPipeline marks failure if tests fail.\n\nStage 5: Docker Build\n\nBuilds Docker image using Dockerfile.\n\nCopies application artifact into the container.\n\nEnsures image follows best practices (small, secure, multi-stage).\n\nStage 6: Push to ECR\n\nAuthenticates Jenkins to AWS using credentials-binding.\n\nPushes tagged Docker image to ECR repository.\n\nVerifies image upload success.\n\nStage 7: Deploy to Kubernetes\n\nJenkins connects to EKS cluster via kubeconfig.\n\nUpdates Kubernetes Deployment with new image tag.\n\nApplies manifests using kubectl apply.\n\nVerifies rollout status with kubectl rollout status.\n\nStage 8: Notifications\n\nSlack/Email notification on build success/failure.\n\npipeline {\n    agent any                                                               // Use any available Jenkins agent\n\n    environment {\n        APP_NAME = \"sample-microservice\"                                         // Placeholder application name\n        AWS_REGION = \"us-east-1\"                                                 // AWS region for deployments\n        ECR_REPO = \"123456789012.dkr.ecr.us-east-1.amazonaws.com/sample-repo\"    // Fake ECR repo\n        KUBE_CONFIG = credentials('fake-kubeconfig-id')         // Placeholder Jenkins credentials ID\n        AWS_CREDS = credentials('fake-aws-access')               // Placeholder AWS credential binding\n    }\n\n    options {\n        timestamps()                                                                // Add timestamps to build logs\n        buildDiscarder(logRotator(numToKeepStr: '20'))          // Keep last 20 builds only\n    }\n\n    parameters {\n        choice(name: 'ENV', choices: ['dev', 'stage', 'prod'], description: 'Select deployment environment')  // Environment selector\n    }\n\n    stages {\n\n        stage('Checkout') {\n            steps {\n                checkout scm                                                        // Checkout code from source control\n            }\n        }\n\n        stage('Build') {\n            steps {\n                sh 'mvn clean package -DskipTests'               // Build the project (example for Maven projects)\n            }\n        }\n\n        stage('Unit Tests') {\n            steps {\n                sh 'mvn test'                                                       // Run unit tests\n            }\n        }\n\n        stage('Docker Build') {\n            steps {\n                script {\n                    IMAGE_TAG = \"${env.BUILD_NUMBER}\"            // Tag image with Jenkins build number\n                }\n                sh \"docker build -t ${ECR_REPO}:${IMAGE_TAG} .\" // Build Docker image locally\n            }\n        }\n\n        stage('Login to ECR') {\n            steps {\n                withCredentials([AWS_CREDS]) {                                  // Bind fake AWS creds\n                    sh \"aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REPO}\"  // Login to ECR\n                }\n            }\n        }\n\n        stage('Push to ECR') {\n            steps {\n                sh \"docker push ${ECR_REPO}:${IMAGE_TAG}\"       // Push Docker image to ECR\n            }\n        }\n\n        stage('Select Deployment Environment') {\n            steps {\n                script {\n                    switch(params.ENV) {                                        // Switch-case for environment selection\n                        case \"dev\":\n                            DEPLOY_NAMESPACE = \"dev-namespace\"  // Dev namespace\n                            DEPLOY_STRATEGY = \"RollingUpdate\"   // Standard rollout strategy\n                            break\n\n                        case \"stage\":\n                            DEPLOY_NAMESPACE = \"stage-namespace\"// Stage namespace\n                            DEPLOY_STRATEGY = \"RollingUpdate\"   // Rolling update\n                            break\n\n                        case \"prod\":\n                            DEPLOY_NAMESPACE = \"prod-namespace\" // Prod namespace\n                            DEPLOY_STRATEGY = \"BlueGreen\"        // Production uses Blue/Green or safer rollout\n                            break\n                    }\n                }\n            }\n        }\n\n        stage('Approval Required for Production') {\n            when {\n                expression { params.ENV == 'prod' }              // Only trigger approval step for Prod deploys\n            }\n            steps {\n                script {\n                    timeout(time: 20, unit: 'MINUTES') {        // Timeout for manual approval\n                        input message: \"Release Manager approval required for PROD deployment.\", \n                              ok: \"Approve Deployment\"          // Approval button\n                    }\n                }\n            }\n        }\n\n        stage('Deploy to Kubernetes') {\n            steps {\n                withKubeConfig([credentialsId: 'fake-kubeconfig-id']) {            // Bind fake kubeconfig\n                    sh \"\"\"\n                    kubectl set image deployment/${APP_NAME} ${APP_NAME}=${ECR_REPO}:${IMAGE_TAG} -n ${DEPLOY_NAMESPACE}   // Update deployment image\n                    kubectl rollout status deployment/${APP_NAME} -n ${DEPLOY_NAMESPACE}                                    // Check rollout status\n                    \"\"\"                                                                     // Execute rollout commands\n                }\n            }\n        }\n    }\n\n    post {\n        success {\n            mail to: 'notify-team@example.com',\n                subject: \"Build #${BUILD_NUMBER} Successful\",\n                body: \"Pipeline executed successfully for ENV: ${params.ENV}\"      // Notification after success\n        }\n        failure {\n            mail to: 'notify-team@example.com',\n                subject: \"Build #${BUILD_NUMBER} Failed\",\n                body: \"Pipeline failed at stage. Check Jenkins logs.\"              // Notification after failure\n        }\n    }\n}\n\n\n4\ufe0f\u20e3 Kubernetes Implementation (Manifest-Level Actions)\n\nDeployment YAML defines replicas, container image, ports, resources.\n\nService YAML creates ClusterIP/LoadBalancer for network access.\n\nConfigMaps used for environment variables.\n\nSecrets used for sensitive credentials (DB, tokens).\n\nRolling Update strategy ensures zero downtime.\n\nHealth probes (liveness/readiness) added for reliability.\n\n5\ufe0f\u20e3 AWS Integration Workflow\n\nAWS ECR\n\nPrivate registry for storing microservice images.\n\nVersioned image tagging strategy: service-name:build-123\n\nAWS EKS\n\nWorker nodes auto-scale via Cluster Autoscaler.\n\nManaged node groups reduce operational overhead.\n\nAWS IAM\n\nJenkins pipeline authenticated through IAM User/Role.\n\nLeast-privilege policy for ECR, EKS, and S3 access.\n\n6\ufe0f\u20e3 Infrastructure-as-Code (Terraform)\n\nTerraform used to provision:\n\nVPC (public + private subnets)\n\nInternet Gateway &amp; NAT Gateway\n\nSecurity Groups\n\nEKS Cluster + Node Groups\n\nIAM roles for nodes + cluster\n\nTerraform executed with remote backend (S3 + DynamoDB).\n\nChanges applied through terraform plan \u2192 terraform apply.\n\n7\ufe0f\u20e3 Monitoring &amp; Logging\n\nBasic logs visible via CloudWatch Container Insights.\n\nPrometheus scrapes metrics from pods.\n\nGrafana dashboards display request latency, CPU, memory, errors.\n\nAlerts configured for pod crash, high CPU, deployment failures.\n\n8\ufe0f\u20e3 Key Advanced Features (Optional but Strong for Interviews)\n\nCanary deployments using multiple replica sets.\n\nAutomated rollback on failed deployments.\n\nImage scanning before deployment (Trivy / ECR Scan).\n\nBlue-Green deployments via separate namespaces.\n\nHelm charts (if used later) for templating manifests.\n\n9\ufe0f\u20e3 Challenges &amp; Solutions\n\nChallenge: Managing environment-specific values.\nSolution: Externalized configs using ConfigMaps + Secrets + separate YAML overlays.\n\nChallenge: Jenkins authentication to EKS.\nSolution: Integrated kubeconfig &amp; IAM role for secure cluster access.\n\nChallenge: Build performance slow.\nSolution: Added Docker layer caching + Jenkins agent-level caching.",
+            "image_url": "https://res.cloudinary.com/dtzaicj6s/image/upload/v1766248467/portfolio_projects/nbnuntjmwgoo4rsdyr8a.png",
+            "technologies": [
+                "Jenkins",
+                "Docker",
+                "Kubernetes (EKS)",
+                "AWS ECR",
+                "Terraform",
+                "GitHub",
+                "CloudWatch"
+            ],
+            "key_outcomes": "\ud83c\udfc6 Key Outcomes\n\nDeployment cycle reduced from hours to minutes.\n\nFully automated, repeatable build and release process.\n\nStandardized microservice deployment workflow on EKS.\n\nImproved reliability with automated rollouts &amp; rollbacks.\n\nEliminated configuration drift across environments.",
+            "timestamp": "2025-12-20T16:34:27.859000"
+        },
+        {
+            "id": "aws-cloudwatch-grafana-monitoring",
+            "name": "AWS CloudWatch &amp; Grafana Monitoring Automation",
+            "summary": "\ud83d\udccc Summary\n\nAutomated end-to-end monitoring for EC2-based web servers using AWS CloudWatch.\n\nImplemented centralized logging and metrics visualization through Amazon CloudWatch + Grafana.\n\nDeployed CloudWatch agent configurations using SSM Parameter Store for consistent, secure updates.\n\n\n\ud83c\udfaf Objective\n\nBuild a fully automated, scalable, and secure monitoring system across production EC2 instances.\n\nReplace manual agent installation with one-click bootstrapping during EC2 launch.\n\nProvide real-time observability (logs + metrics) using Grafana dashboards.\n\n\n\ud83d\udc68\u200d\ud83d\udcbb Key Responsibilities\n\nDesigned IAM roles for secure write/read access between EC2, CloudWatch, and Grafana.\n\nCentralized CloudWatch Agent configuration in SSM Parameter Store.\n\nAutomated log + metric collection for Apache/Nginx web servers.\n\nConfigured Grafana to query CloudWatch metrics and logs.\n\nBuilt dashboards for memory, disk, CPU, request errors, and access logs.\n\nAutomated agent installation using EC2 User Data scripts.",
+            "details": "AWS CloudWatch &amp; Grafana Monitoring Automation\n\n1\ufe0f\u20e3 Architecture Overview\n\nProduction EC2 web servers run Apache/Nginx.\n\nCloudWatch Agent installed automatically via User Data.\n\nCentralized CloudWatch Agent config stored in SSM Parameter Store.\n\nLogs pushed to CloudWatch Logs.\n\nMetrics pushed to CloudWatch Metrics under CWAgent namespace.\n\nGrafana runs on a separate EC2 instance.\n\nGrafana queries CloudWatch using EC2 IAM role permissions.\n\nDashboards visualize server health + application logs.\n\n\n2\ufe0f\u20e3 IAM Role Setup (Security Foundation)\n\nA. Web Server Role \u2014 Write Access\n\nAttached to all monitored EC2 instances.\n\nPermissions:\n\nCloudWatchAgentServerPolicy\n\nAmazonSSMManagedInstanceCore\n\nPurpose:\n\nAllow instances to send logs/metrics\n\nAllow instances to fetch config from SSM\n\nB. Grafana Role \u2014 Read-Only Access\n\nCustom policy created (as per your notes).\n\nPermissions include:\n\nCloudWatch metrics read\n\nCloudWatch Logs read queries\n\nEC2 Describe permissions\n\nAttached to Grafana EC2 instance.\n\n\n3\ufe0f\u20e3 Centralized CloudWatch Agent Configuration (SSM Parameter Store)\n\nCreated Parameter Name: AmazonCloudWatch-Linux-WebServer\n\nContains JSON config with:\n\nLog collection paths:\n\n/var/log/httpd/access_log\n\n/var/log/httpd/error_log\n\nLog groups:\n\nWebServer-Prod-Logs\n\nMetrics collected:\n\nMemory usage\n\nDisk usage\n\nAutoScalingGroupName\n\nInstance metadata tags\n\nRetention: 90 days\n\nRole: Keep consistency across all EC2s.\n\nBenefits:\n\nZero config drift\n\nOne place to update log/metric settings\n\nAutomatically picked up by all new web servers\n\n\n4\ufe0f\u20e3 EC2 User Data for Web Server (Full Automation)\n\nExecuted every time a new production EC2 is launched:\n\nAutomates:\n\nOS update\n\nApache web server installation\n\nCloudWatch Agent installation\n\nLog directory permission configuration\n\nFetch CloudWatch config from SSM\n\nStart + enable CloudWatch Agent\n\nUser Data Highlights:\n\nAdds cwagent user to adm group\n\nSets strict log file permissions\n\nStarts both Apache and CloudWatch services\n\nEnsures CloudWatch Agent restarts on reboot\n\n\n\n\n5\ufe0f\u20e3 CloudWatch Logging &amp; Metrics Structure\n\nLog Streams:\n\naccess_log_{instance_id}\n\nerror_log_{instance_id}\n\nLog Group:\n\nWebServer-Prod-Logs\n\nMetrics:\n\nCPU utilization\n\nMemory usage\n\nDisk usage\n\nAutoScalingGroup dimensions\n\nHTTP access patterns\n\nThese appear in CloudWatch Metrics under CWAgent.\n\n\n6\ufe0f\u20e3 Grafana Deployment (Independent EC2 Server)\n\nGrafana Server User Data includes:\n\nSystem update\n\nInstall Grafana from official repository\n\nEnable Grafana service\n\nStart Grafana service\n\nGrafana Access:\n\nDefault port: 3000\n\nDefault credentials: admin/admin\n\nForced password reset on first login.\n\n\n7\ufe0f\u20e3 Grafana \u2192 CloudWatch Integration\n\nIn Grafana:\n\nSteps:\n\nGo to Connections \u2192 Add new data source\n\nSelect CloudWatch\n\nAuth Provider: AWS SDK Default (auto-uses instance IAM role)\n\nChoose default region (your EC2 region)\n\nSave &amp; Test (shows green success message)\n\nNow Grafana can fetch:\n\nCloudWatch Metrics\n\nCloudWatch Logs Insights queries\n\nDimensions from AutoScalingGroup and EC2 tags\n\n\n8\ufe0f\u20e3 Dashboard Creation (Based on Your Notes)\n\nCreated custom panels:\n\nA. System Metrics Panels\n\nCPUUtilization\n\nmem_used_percent\n\ndisk_used_percent\n\nAutoScalingGroupName filter\n\nB. Error Log Panels\n\nCloudWatch Logs Query:\n\nfields @timestamp, @message\n| filter @logStream like /error_log/\n| sort @timestamp desc\n| limit 250\n\nC. Access Log Panels\nfields @timestamp, @message\n| filter @logStream like /access_log/\n| sort @timestamp desc\n| limit 250\n\nD. Web Traffic Dashboard\n\nRequest count by instance\n\nHTTP 4xx/5xx errors\n\nLatency aggregates\n\nInstance-level comparison\n\n\n9\ufe0f\u20e3 Alerts &amp; Notifications\n\nConfigured in CloudWatch:\n\nCPU > 80% (5 minutes)\n\nDisk usage > 75%\n\nMemory usage > 80%\n\nHTTP 5xx spikes in logs\n\nNotification via SNS \u2192 Email/SMS.\n\nGrafana Alerts:\n\nDashboard-level alerts for spikes\n\nIntegrated with email alert channel\n\n\n\ud83d\udd1f Automation Benefits\n\nAll new EC2 servers become monitoring-ready automatically\n\nZero manual configuration\n\nCentralized control through SSM\n\nGranular log visibility\n\nLive dashboards for DevOps and on-call engineers\n\nFull audit trail of logs and metrics in CloudWatch\n\n\n1\ufe0f\u20e31\ufe0f\u20e3 Challenges &amp; Solutions\n\nChallenge: CloudWatch Agent failing to read Apache log files.\nSolution: Updated directory permissions and added cwagent to adm group.\n\nChallenge: Inconsistent agent configuration across servers.\nSolution: Moved all CloudWatch configs to SSM Parameter Store.\n\nChallenge: Grafana authentication to CloudWatch failing.\nSolution: Created dedicated Grafana IAM role with read-only CloudWatch access.",
+            "image_url": "https://res.cloudinary.com/dtzaicj6s/image/upload/v1766255375/portfolio_projects/qhxrs41nnkdlvmranbkd.png",
+            "technologies": [
+                "CloudWatch",
+                "SSM Parameter Store",
+                "IAM Roles",
+                "EC2",
+                "Grafana",
+                "Linux",
+                "User Data Scripts",
+                "CloudWatch Agent"
+            ],
+            "key_outcomes": "\ud83c\udfc6 Key Outcomes\n\nMonitoring setup time reduced from 45 minutes manual \u2192 2 minutes automated.\n\nAchieved centralized visibility for EC2 logs and web traffic metrics.\n\nImproved incident response with alert-based dashboards.\n\nEliminated configuration drift across production servers. ",
+            "timestamp": "2025-12-20T18:29:35.725000"
+        }
+    ]
+}
