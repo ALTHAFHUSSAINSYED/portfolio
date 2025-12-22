@@ -1,22 +1,100 @@
+import React, { useState, useEffect, useRef } from "react";
+import "./Chatbot.css";
 
-import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, X, Send, Loader2, Minimize2, Bot, User } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-
-export default function Chatbot() {
+const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      role: 'bot',
-      content: "Hello! I am **Allu Bot**, Althaf's AI Assistant. Ask me anything about his skills, projects, or experience!"
-    }
-  ]);
-  const [input, setInput] = useState('');
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [welcomeAnimation, setWelcomeAnimation] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasUnread, setHasUnread] = useState(true);
   const messagesEndRef = useRef(null);
 
+  // Initialize with welcome message
+  useEffect(() => {
+    if (isOpen && messages.length === 0) {
+      setMessages([{
+        sender: "bot",
+        text: "👋 Hi there! I'm Allu Bot. How can I assist you with tech questions or TechAssistant information today?"
+      }]);
+    }
+  }, [isOpen, messages.length]);
+
+  useEffect(() => {
+    const theme = document.documentElement.getAttribute("data-theme");
+    document.documentElement.style.setProperty(
+      "--chat-bg-color",
+      theme === "dark" ? "var(--chat-bg-color-dark)" : "var(--chat-bg-color-light)"
+    );
+    document.documentElement.style.setProperty(
+      "--chat-text-color",
+      theme === "dark" ? "var(--chat-text-color-dark)" : "var(--chat-text-color-light)"
+    );
+
+    // Trigger welcome animation on page load
+    const timer = setTimeout(() => setWelcomeAnimation(false), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const toggleChat = () => {
+    if (!isOpen) {
+      setHasUnread(false); // Clear unread indicator when opening chat
+    }
+    setIsOpen(!isOpen);
+  };
+
+  const handleInputChange = (e) => setInput(e.target.value);
+
+  // Scroll to bottom whenever messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+
+    const userMessage = { sender: "user", text: input };
+    setMessages((prev) => [...prev, userMessage]);
+    const userInput = input;
+    setInput("");
+    setIsLoading(true);
+
+    try {
+      // Use the new RAG backend endpoint
+      const response = await fetch('/api/ask-all-u-bot', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userInput })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const botMessage = {
+          sender: "bot",
+          text: data.reply || "Sorry, I couldn't process your request."
+        };
+        setMessages((prev) => [...prev, botMessage]);
+      } else {
+        const errorMessage = {
+          sender: "bot",
+          text: "I'm sorry, I'm having trouble connecting to my brain right now. Please try again in a moment."
+        };
+        setMessages((prev) => [...prev, errorMessage]);
+      }
+    } catch (error) {
+      console.error("Error communicating with Allu Bot:", error);
+      const errorMessage = {
+        sender: "bot",
+        text: "Sorry, there was an error connecting to the server. Please try again later."
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Common questions suggestions
   const suggestedQuestions = [
     "Show me his recent blogs",
     "What are Althaf's skills?",
@@ -25,214 +103,200 @@ export default function Chatbot() {
     "Contact information"
   ];
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const [selectedSuggestion, setSelectedSuggestion] = useState(null);
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, isOpen]);
-
-  const handleSend = async (text) => {
-    if (!text.trim() || isLoading) return;
-
-    const userMessage = text;
-    setInput('');
-    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
-    setIsLoading(true);
-
-    try {
-      // Use relative path for production (requires proxy in package.json for local dev)
-      const response = await fetch('/api/ask-all-u-bot', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessage })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessages(prev => [...prev, { role: 'bot', content: data.reply }]);
-      } else {
-        setMessages(prev => [...prev, { role: 'bot', content: "I encountered a server error. Please try again later." }]);
-      }
-    } catch (error) {
-      setMessages(prev => [...prev, { role: 'bot', content: "Network error. Is the backend server running?" }]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    handleSend(input);
+  const handleSuggestionClick = (question) => {
+    setInput(question);
+    setSelectedSuggestion(question);
+    // Auto submit after a slight delay for better UX
+    setTimeout(() => {
+      handleSubmit({ preventDefault: () => { } });
+      setSelectedSuggestion(null);
+    }, 300);
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end pointer-events-none">
-      <div className="pointer-events-auto">
-        <AnimatePresence>
-          {isOpen && !isMinimized && (
-            <motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.95 }}
-              transition={{ duration: 0.2 }}
-              className="mb-4 w-[350px] sm:w-[400px] h-[500px] bg-white/80 dark:bg-black/80 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
-            >
-              {/* Header */}
-              <div className="p-4 border-b border-gray-200/50 dark:border-gray-700/50 bg-white/50 dark:bg-black/50 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 bg-blue-600 rounded-lg">
-                    <Bot className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">Allu Bot</h3>
-                    <p className="text-xs text-green-500 font-medium flex items-center gap-1">
-                      <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                      Online
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => setIsMinimized(true)}
-                    className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                  >
-                    <Minimize2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => setIsOpen(false)}
-                    className="p-2 text-gray-500 hover:bg-red-100 hover:text-red-500 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
+    <div className={`chatbot-container ${welcomeAnimation ? "welcome-animation" : ""}`}>
 
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth">
-                {messages.map((msg, idx) => (
-                  <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`flex items-start gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
-                  >
-                    <div className={`p-2 rounded-full shrink-0 ${msg.role === 'user'
-                      ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
-                      : 'bg-blue-600 text-white'
-                      }`}>
-                      {msg.role === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
-                    </div>
-                    <div className={`max-w-[80%] rounded-2xl p-3 text-sm leading-relaxed shadow-sm ${msg.role === 'user'
-                      ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-tr-none'
-                      : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-100 dark:border-gray-700 rounded-tl-none'
-                      }`}>
-                      {msg.role === 'bot' ? (
-                        <ReactMarkdown
-                          className="prose dark:prose-invert prose-sm max-w-none"
-                          components={{
-                            code({ node, inline, className, children, ...props }) {
-                              return !inline ? (
-                                <div className="bg-gray-900 text-gray-100 rounded-md p-2 my-2 overflow-x-auto text-xs font-mono">
-                                  {children}
-                                </div>
-                              ) : (
-                                <code className="bg-gray-200 dark:bg-gray-700 px-1 py-0.5 rounded text-xs font-mono" {...props}>
-                                  {children}
-                                </code>
-                              )
-                            }
-                          }}
-                        >
-                          {msg.content}
-                        </ReactMarkdown>
-                      ) : (
-                        msg.content
-                      )}
-                    </div>
-                  </motion.div>
-                ))}
-
-                {isLoading && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="flex items-start gap-3"
-                  >
-                    <div className="p-2 bg-blue-600 rounded-full shrink-0 text-white">
-                      <Bot className="w-4 h-4" />
-                    </div>
-                    <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-3 rounded-2xl rounded-tl-none flex items-center gap-1">
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* Suggested Questions (only show if few messages or last was bot) */}
-                {!isLoading && messages.length === 1 && (
-                  <div className="flex flex-wrap gap-2 mt-4 px-2">
-                    {suggestedQuestions.map((q, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => handleSend(q)}
-                        className="text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 border border-blue-100 dark:border-blue-800 px-3 py-1.5 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors text-left"
-                      >
-                        {q}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                <div ref={messagesEndRef} />
-              </div>
-
-              {/* Input */}
-              <form onSubmit={handleSubmit} className="p-4 bg-white/50 dark:bg-black/50 border-t border-gray-200/50 dark:border-gray-700/50 backdrop-blur-md">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="Ask about Althaf's skills..."
-                    className="flex-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400"
-                  />
-                  <button
-                    type="submit"
-                    disabled={isLoading || !input.trim()}
-                    className="p-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg shadow-blue-500/20"
-                  >
-                    {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Toggle Button */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            setIsOpen(true);
-            setIsMinimized(false);
-          }}
-          className={`
-            p-4 rounded-2xl shadow-2xl transition-all duration-300 group relative
-            ${isOpen && !isMinimized
-              ? 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 opacity-0 pointer-events-none'
-              : 'bg-blue-600 text-white hover:bg-blue-700 opacity-100'
-            }
-          `}
+      {/* Chatbot Icon with Unread Badge and Avatar */}
+      <div style={{ position: 'relative', display: 'inline-block' }}>
+        <button
+          className="chatbot-toggle"
+          onClick={toggleChat}
+          aria-label={isOpen ? 'Close chat' : 'Open chat'}
         >
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-900" />
-          <MessageSquare className="w-6 h-6" />
-        </motion.button>
+          <div className="chat-icon-container">
+            <img
+              src="/profile-pic.jpg"
+              alt="Allu Bot"
+              className="chat-toggle-avatar"
+              onError={e => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+            {/* Fallback SVG if image fails */}
+            <svg
+              className="chat-toggle-fallback"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ display: 'none' }}
+            >
+              <circle cx="12" cy="12" r="10" fill="#3b82f6" />
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#fff" />
+            </svg>
+          </div>
+          {/* Red unread badge */}
+          {!isOpen && hasUnread && (
+            <span style={{
+              position: 'absolute',
+              top: '-6px',
+              right: '-6px',
+              background: 'red',
+              color: 'white',
+              borderRadius: '50%',
+              padding: '2px 6px',
+              fontSize: '14px',
+              fontWeight: 'bold',
+              boxShadow: '0 0 4px rgba(0,0,0,0.2)',
+              zIndex: 2
+            }}>
+              1
+            </span>
+          )}
+        </button>
       </div>
+
+      {isOpen && (
+        <div className="chatbot-window">
+          <div className="chatbot-header">
+            <div className="chatbot-avatar" aria-hidden="true">
+              <img
+                src="/profile-pic.jpg"
+                alt="Allu Bot"
+                onError={(e) => {
+                  e.target.style.display = "none";
+                  if (e.target.nextSibling) {
+                    e.target.nextSibling.style.display = "block";
+                  }
+                }}
+              />
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                style={{ display: "none" }}
+              >
+                <circle cx="12" cy="12" r="10" fill="#3b82f6" />
+                <path
+                  d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                  fill="#fff"
+                />
+              </svg>
+            </div>
+            <div className="chatbot-title-container">
+              <p className="chatbot-title">Allu Bot</p>
+              <p className="chatbot-subtitle">Portfolio & Tech Assistant</p>
+            </div>
+            <button className="close-button" onClick={toggleChat} aria-label="Close chat">×</button>
+          </div>
+
+          <div className="chatbot-messages custom-scrollbar">
+            {messages.map((msg, index) => (
+              <div
+                key={index}
+                className={`chatbot-message ${msg.sender}`}
+              >
+                {msg.sender === "bot" && (
+                  <div className="bot-avatar">
+                    <img
+                      src="/profile-pic.jpg"
+                      alt="Allu Bot"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'block';
+                      }}
+                    />
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      style={{ display: 'none' }}
+                    >
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" fill="currentColor" />
+                    </svg>
+                  </div>
+                )}
+                <div className="message-content">{msg.text}</div>
+                {msg.sender === "user" && (
+                  <div className="user-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentColor" />
+                    </svg>
+                  </div>
+                )}
+              </div>
+            ))}
+            {isLoading && (
+              <div className="chatbot-message bot">
+                <div className="bot-avatar">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" fill="currentColor" />
+                  </svg>
+                </div>
+                <div className="message-content typing-indicator">
+                  <span></span><span></span><span></span>
+                </div>
+              </div>
+            )}
+
+            {/* Suggested questions - inside messages area */}
+            {messages.length < 3 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
+                {suggestedQuestions.map((question, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleSuggestionClick(question)}
+                    className="suggestion-button"
+                  >
+                    {question}
+                  </button>
+                ))}
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          <form className="chatbot-form" onSubmit={handleSubmit}>
+            <input
+              type="text"
+              value={input}
+              onChange={handleInputChange}
+              placeholder="Type your message..."
+              className="chatbot-input"
+              aria-label="Message input"
+            />
+            <button type="submit" className="send-button" aria-label="Send message">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22 2L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          </form>
+
+          <div className="chatbot-footer">
+            <span>Powered by AI • <a href="#" onClick={(e) => {
+              e.preventDefault();
+              handleSuggestionClick("How does this chatbot work?");
+            }}>About this bot</a></span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+export default Chatbot;
