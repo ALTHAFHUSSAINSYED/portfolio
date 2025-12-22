@@ -243,14 +243,38 @@ def welcome():
 
 @api_router.get("/projects/{project_id}", response_model=Project)
 async def get_project_details(project_id: str):
-    """Fetch a single project by ID."""
+    """Fetch a single project by ID with safe defaults."""
     # 1. Try MongoDB
     if db is not None:
         try:
+            # Try finding by 'id' string field
             project = await db.projects.find_one({"id": project_id})
+            
+            # If not found, try 'slug' or '_id' if valid objectid
+            if not project:
+                try:
+                    from bson import ObjectId
+                    if ObjectId.is_valid(project_id):
+                        project = await db.projects.find_one({"_id": ObjectId(project_id)})
+                except:
+                    pass
+
             if project:
-                if "_id" in project: del project["_id"]
-                return project
+                # SAFE RETURN: Manually build dict to ensure no missing fields cause 500
+                return {
+                    "id": str(project.get("id", project_id)),
+                    "name": project.get("name", project.get("title", "Untitled")),
+                    "title": project.get("title", project.get("name", "Untitled")),
+                    "summary": project.get("summary", project.get("description", "")),
+                    "description": project.get("description", ""),
+                    "details": project.get("details", project.get("content", "")),
+                    "image_url": project.get("image_url", ""),
+                    "technologies": project.get("technologies", []),
+                    "key_outcomes": project.get("key_outcomes", ""),
+                    "github_url": project.get("github_url", ""),
+                    "live_url": project.get("live_url", ""),
+                    "timestamp": project.get("timestamp", datetime.utcnow())
+                }
         except Exception as e:
             logger.error(f"MongoDB error: {e}")
 
@@ -377,10 +401,7 @@ async def create_project(
         "timestamp": datetime.utcnow()
     }
     await db.projects.insert_one(project_data)
-    try:
-        subprocess.run([sys.executable, "backend/sync_projects.py"], capture_output=True, text=True)
-    except Exception:
-        pass
+    # Background sync removed to prevent OOM
     return project_data
 
 @api_router.post("/contact")
