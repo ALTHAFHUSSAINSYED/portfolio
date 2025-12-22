@@ -171,29 +171,45 @@ const Chatbot = () => {
       {isOpen && (
         <div className="chatbot-window">
           <div className="chatbot-header">
-            <div className="chatbot-avatar" aria-hidden="true">
-              <img
-                src="/profile-pic.jpg"
-                alt="Allu Bot"
-                onError={(e) => {
-                  e.target.style.display = "none";
-                  if (e.target.nextSibling) {
-                    e.target.nextSibling.style.display = "block";
-                  }
-                }}
-              />
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                style={{ display: "none" }}
-              >
-                <circle cx="12" cy="12" r="10" fill="#3b82f6" />
-                <path
-                  d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
-                  fill="#fff"
+            <div style={{ position: 'relative' }}>
+              <div className="chatbot-avatar" aria-hidden="true">
+                <img
+                  src="/profile-pic.jpg"
+                  alt="Allu Bot"
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                    if (e.target.nextSibling) {
+                      e.target.nextSibling.style.display = "block";
+                    }
+                  }}
                 />
-              </svg>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  style={{ display: "none" }}
+                >
+                  <circle cx="12" cy="12" r="10" fill="#3b82f6" />
+                  <path
+                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                    fill="#fff"
+                  />
+                </svg>
+              </div>
+              {/* Online indicator */}
+              <div style={{
+                position: 'absolute',
+                bottom: '2px',
+                right: '12px',
+                width: '10px',
+                height: '10px',
+                background: '#22c55e',
+                borderRadius: '50%',
+                border: '2px solid white',
+                boxShadow: '0 0 0 2px #4f46e5',
+                animation: 'pulse-green 2s infinite',
+                zIndex: 5
+              }}></div>
             </div>
             <div className="chatbot-title-container">
               <p className="chatbot-title">Allu Bot</p>
@@ -295,10 +311,10 @@ const Chatbot = () => {
           </form>
 
           <div className="chatbot-footer">
-            <span>Powered by AI • <a href="#" onClick={(e) => {
+            <span>Empowered by AI • <a href="#" onClick={(e) => {
               e.preventDefault();
               handleSuggestionClick("How does this chatbot work?");
-            }}>About this bot</a></span>
+            }}>About this chatbot</a></span>
           </div>
         </div>
       )}
