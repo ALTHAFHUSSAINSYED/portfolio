@@ -14,6 +14,7 @@ const HeroSection = () => {
   const leftVideoWrapperRef = useRef(null);
   const rightVideoWrapperRef = useRef(null);
   const [svgPaths, setSvgPaths] = useState({ left: "", right: "" });
+  const [isMounted, setIsMounted] = useState(false);
 
   const leftVideoRef = useRef(null);
   const rightVideoRef = useRef(null);
@@ -106,24 +107,28 @@ const HeroSection = () => {
   };
 
   useEffect(() => {
+    setIsMounted(true);
     window.addEventListener("scroll", handleVideoScroll);
     window.addEventListener("resize", updatePaths);
 
     // Initial calculation (delay slightly to ensure layout is stable)
-    const timer = setTimeout(updatePaths, 100);
+    if (isMounted) {
+      setTimeout(updatePaths, 100);
+    }
 
     return () => {
       window.removeEventListener("scroll", handleVideoScroll);
       window.removeEventListener("resize", updatePaths);
-      clearTimeout(timer);
     };
-  }, []);
+  }, [isMounted]);
 
   // Update paths when window loads
   useEffect(() => {
     // Force update after a short delay to account for layout shifts
-    setTimeout(updatePaths, 500);
-  }, []);
+    if (isMounted) {
+      setTimeout(updatePaths, 500);
+    }
+  }, [isMounted]);
 
 
   const downloadResume = () => {
@@ -146,34 +151,36 @@ const HeroSection = () => {
     <div className="relative w-full min-h-screen flex items-center justify-center bg-black overflow-hidden pt-20">
       {/* Dynamic Background SVG Container */}
       <div ref={containerRef} className="absolute inset-0 pointer-events-none z-10 w-full h-full">
-        <svg className="w-full h-full overflow-visible">
-          <defs>
-            <linearGradient id="lineGradientLeft" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#ec4899" />
-              <stop offset="100%" stopColor="#22d3ee" />
-            </linearGradient>
-            <linearGradient id="lineGradientRight" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#ec4899" />
-              <stop offset="100%" stopColor="#22d3ee" />
-            </linearGradient>
-          </defs>
-          <path
-            d={svgPaths.left}
-            fill="none"
-            stroke="url(#lineGradientLeft)"
-            strokeWidth="3"
-            strokeLinecap="round"
-            className="drop-shadow-[0_0_10px_rgba(236,72,153,0.5)] transition-all duration-300 ease-out"
-          />
-          <path
-            d={svgPaths.right}
-            fill="none"
-            stroke="url(#lineGradientRight)"
-            strokeWidth="3"
-            strokeLinecap="round"
-            className="drop-shadow-[0_0_10px_rgba(34,211,238,0.5)] transition-all duration-300 ease-out"
-          />
-        </svg>
+        {isMounted && (
+          <svg className="w-full h-full overflow-visible">
+            <defs>
+              <linearGradient id="lineGradientLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#ec4899" />
+                <stop offset="100%" stopColor="#22d3ee" />
+              </linearGradient>
+              <linearGradient id="lineGradientRight" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#ec4899" />
+                <stop offset="100%" stopColor="#22d3ee" />
+              </linearGradient>
+            </defs>
+            <path
+              d={svgPaths.left}
+              fill="none"
+              stroke="url(#lineGradientLeft)"
+              strokeWidth="3"
+              strokeLinecap="round"
+              className="drop-shadow-[0_0_10px_rgba(236,72,153,0.5)] transition-all duration-300 ease-out"
+            />
+            <path
+              d={svgPaths.right}
+              fill="none"
+              stroke="url(#lineGradientRight)"
+              strokeWidth="3"
+              strokeLinecap="round"
+              className="drop-shadow-[0_0_10px_rgba(34,211,238,0.5)] transition-all duration-300 ease-out"
+            />
+          </svg>
+        )}
       </div>
 
       <div className="relative z-20 container mx-auto px-4 lg:px-6">
