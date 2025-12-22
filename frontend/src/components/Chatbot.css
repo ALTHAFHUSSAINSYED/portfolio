@@ -26,8 +26,11 @@
   color: white;
   border: none;
   border-radius: 50%;
-  width: 60px;
-  height: 60px;
+  /* Circular */
+  width: 50px;
+  /* Reduced from 60px */
+  height: 50px;
+  /* Reduced from 60px */
   padding: 0;
   display: flex;
   align-items: center;
@@ -36,10 +39,30 @@
   font-size: 24px;
   font-weight: 600;
   position: relative;
-  z-index: 1001; /* Ensure the toggle button stays on top */
+  z-index: 1001;
   box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
-  transition: all 0.2s ease;
-  overflow: hidden; /* Ensure the image stays within bounds */
+  transition: all 0.3s ease;
+  overflow: visible;
+  /* Allow badge outside */
+  animation: pop-pulse 2s infinite;
+  /* Pop up animation */
+}
+
+@keyframes pop-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7);
+  }
+
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(37, 99, 235, 0);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+  }
 }
 
 .chat-icon-container {
@@ -48,24 +71,25 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 50%;
+  overflow: hidden;
+  /* Clip image to circle */
 }
 
 .chat-toggle-avatar {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 50%;
 }
 
 .chat-toggle-fallback {
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
   color: white;
 }
 
 .chatbot-toggle:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+  transform: translateY(-2px) scale(1.1);
 }
 
 .chatbot-window {
@@ -74,18 +98,21 @@
   border: none;
   border-radius: 16px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-  width: 300px; /* Reduced width for compact display */
-  max-width: 90vw;
-  height: 70dvh; /* 70% of dynamic viewport height to keep header visible */
+  width: 320px !important;
+  /* Fixed width */
+  height: 500px !important;
+  /* Fixed height - reduced significantly */
   display: flex;
   flex-direction: column;
   overflow: hidden;
   margin-bottom: 16px;
   position: absolute;
   right: 0;
-  bottom: 70px;
+  bottom: 60px;
+  /* Adjusted for smaller toggle */
   transition: all var(--chat-animation-duration) ease-out;
   animation: slideIn var(--chat-animation-duration) forwards;
+  z-index: 1000;
 }
 
 @keyframes slideIn {
@@ -93,6 +120,7 @@
     opacity: 0;
     transform: translateY(20px) scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -103,29 +131,31 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 12px;
+  padding: 10px 14px;
   border-bottom: 1px solid rgba(229, 231, 235, 0.5);
   background: linear-gradient(to right, var(--chat-primary-color), #4f46e5);
   color: white;
-  min-height: 56px;
+  min-height: 50px;
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .chatbot-avatar {
-  width: 42px;
-  height: 42px;
+  width: 38px !important;
+  height: 38px !important;
   border-radius: 50%;
   background-color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 12px;
-  margin-left: 4px;
-  box-shadow: 0 2px 8px rgba(37,99,235,0.12), 0 0 0 2px rgba(255, 255, 255, 0.35);
+  margin-right: 10px;
+  margin-left: 2px;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12), 0 0 0 2px rgba(255, 255, 255, 0.35);
   border: 1.5px solid rgba(255, 255, 255, 0.5);
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .chatbot-avatar img {
@@ -174,7 +204,7 @@
   height: 40px;
   object-fit: cover;
   border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(37,99,235,0.12), 0 0 0 2px #e5e7eb;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12), 0 0 0 2px #e5e7eb;
   border: 1.5px solid #e5e7eb;
   margin: 0 2px;
   transition: background-color 0.2s;
@@ -202,10 +232,13 @@
   display: flex;
   align-items: flex-start;
   position: relative;
-  margin-bottom: 0; /* Remove margin as we're using gap in parent */
+  margin-bottom: 0;
+  /* Remove margin as we're using gap in parent */
   animation: messageAppear 0.3s forwards;
-  overflow: visible; /* Prevent any internal scrolling */
-  width: 100%; /* Ensure message takes full width */
+  overflow: visible;
+  /* Prevent any internal scrolling */
+  width: 100%;
+  /* Ensure message takes full width */
 }
 
 @keyframes messageAppear {
@@ -213,14 +246,17 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-.bot-avatar, .user-avatar {
-  width: 38px; /* Increased size */
+.bot-avatar,
+.user-avatar {
+  width: 38px;
+  /* Increased size */
   height: 38px;
   border-radius: 50%;
   display: flex;
@@ -228,7 +264,8 @@
   justify-content: center;
   flex-shrink: 0;
   margin-right: 8px;
-  overflow: hidden; /* Ensure image stays within bounds */
+  overflow: hidden;
+  /* Ensure image stays within bounds */
 }
 
 .bot-avatar {
@@ -365,7 +402,7 @@
 
 .welcome-animation {
   animation: bounce-in 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
-             shake-hands 3s ease-in-out 1s;
+    shake-hands 3s ease-in-out 1s;
 }
 
 @keyframes bounce-in {
@@ -373,26 +410,40 @@
     opacity: 0;
     transform: scale(0.3) translateY(40px);
   }
+
   50% {
     opacity: 1;
     transform: scale(1.05) translateY(-10px);
   }
+
   70% {
     transform: scale(0.9) translateY(5px);
   }
+
   100% {
     transform: scale(1) translateY(0);
   }
 }
 
 @keyframes shake-hands {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: rotate(0deg);
   }
-  10%, 30%, 50%, 70%, 90% {
+
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
     transform: rotate(-5deg);
   }
-  20%, 40%, 60%, 80% {
+
+  20%,
+  40%,
+  60%,
+  80% {
     transform: rotate(5deg);
   }
 }
@@ -424,9 +475,13 @@
 }
 
 @keyframes bounce {
-  0%, 60%, 100% {
+
+  0%,
+  60%,
+  100% {
     transform: translateY(0);
   }
+
   30% {
     transform: translateY(-4px);
   }
@@ -512,12 +567,15 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #a1a1aa !important; /* Grey color - override pink */
-  background: #a1a1aa !important; /* Override any gradient */
+  background-color: #a1a1aa !important;
+  /* Grey color - override pink */
+  background: #a1a1aa !important;
+  /* Override any gradient */
   border-radius: 10px !important;
   border: 1px solid transparent !important;
   background-clip: content-box !important;
-  animation: none !important; /* Remove any glow animations */
+  animation: none !important;
+  /* Remove any glow animations */
   box-shadow: none !important;
 }
 
@@ -531,8 +589,10 @@
 }
 
 .chatbot-window ::-webkit-scrollbar-thumb {
-  background-color: #a1a1aa !important; /* Force Grey to override global Pink */
-  background: #a1a1aa !important; /* Override any gradient */
+  background-color: #a1a1aa !important;
+  /* Force Grey to override global Pink */
+  background: #a1a1aa !important;
+  /* Override any gradient */
   border-radius: 10px !important;
   border: 2px solid transparent !important;
   background-clip: padding-box !important;
@@ -541,7 +601,8 @@
 }
 
 .chatbot-window ::-webkit-scrollbar-thumb:hover {
-  background-color: #71717a !important; /* Darker grey on hover */
+  background-color: #71717a !important;
+  /* Darker grey on hover */
   background: #71717a !important;
   box-shadow: none !important;
 }
