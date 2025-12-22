@@ -1,0 +1,117 @@
+[DEBUG] GEMINI_API_KEY Loaded: True, Length: 39
+[DEBUG] Listing available models:
+ - models/embedding-gecko-001
+ - models/gemini-2.5-flash
+ - models/gemini-2.5-pro
+ - models/gemini-2.0-flash-exp
+ - models/gemini-2.0-flash
+ - models/gemini-2.0-flash-001
+ - models/gemini-2.0-flash-exp-image-generation
+ - models/gemini-2.0-flash-lite-001
+ - models/gemini-2.0-flash-lite
+ - models/gemini-2.0-flash-lite-preview-02-05
+ - models/gemini-2.0-flash-lite-preview
+ - models/gemini-exp-1206
+ - models/gemini-2.5-flash-preview-tts
+ - models/gemini-2.5-pro-preview-tts
+ - models/gemini-flash-latest
+ - models/gemini-flash-lite-latest
+ - models/gemini-pro-latest
+ - models/gemini-2.5-flash-lite
+ - models/gemini-2.5-flash-image-preview
+ - models/gemini-2.5-flash-image
+ - models/gemini-2.5-flash-preview-09-2025
+ - models/gemini-2.5-flash-lite-preview-09-2025
+ - models/gemini-3-pro-preview
+ - models/gemini-3-flash-preview
+ - models/gemini-3-pro-image-preview
+ - models/gemini-robotics-er-1.5-preview
+ - models/gemini-2.5-computer-use-preview-10-2025
+ - models/embedding-001
+ - models/text-embedding-004
+ - models/gemini-embedding-exp-03-07
+ - models/gemini-embedding-exp
+ - models/gemini-embedding-001
+ - models/gemini-2.5-flash-native-audio-latest
+ - models/gemini-2.5-flash-native-audio-preview-09-2025
+ - models/gemini-2.5-flash-native-audio-preview-12-2025
+
+--- Testing Allu Bot with Query: 'What are the six categories of technologies mentioned in the blogs?' ---
+[INFO] Connecting to Chroma: DB=Development
+[DEBUG] Getting collection object: portfolio...
+[INFO] Querying collection: portfolio (Limit: 20)
+[DEBUG] Query returned.
+   -> Found 20 docs in portfolio
+[DEBUG] Getting collection object: Blogs_data...
+[INFO] Querying collection: Blogs_data (Limit: 5)
+[DEBUG] Query returned.
+   -> Found 5 docs in Blogs_data
+[DEBUG] Getting collection object: Projects_data...
+[INFO] Querying collection: Projects_data (Limit: 3)
+[DEBUG] Query returned.
+   -> Found 3 docs in Projects_data
+
+[INFO] Context Retrieved (46549 chars). generating answer...
+[INFO] Using Primary Model: models/gemini-flash-latest
+
+--- BOT RESPONSE ---
+The detailed blog content available in Althaf’s portfolio covers three primary technological categories:
+
+1.  **Multi-Cloud Deployment Strategies:** Focusing on leveraging services across providers like AWS, Azure, and Google Cloud Platform (GCP) for resilience and optimization.
+2.  **Low-Code Integration Platforms:** Discussing technologies that enable rapid integration solutions using minimal coding, promoting enterprise agility and workflow automation.
+3.  **Zero Trust Architecture (ZTA):** Covering modern security philosophies based on "never trust, always verify" principles, emphasizing continuous validation of users and devices.
+--------------------
+
+==================================================
+
+
+--- Testing Allu Bot with Query: 'Tell me about the DevOps and AWS concepts discussed in the blogs.' ---
+[INFO] Connecting to Chroma: DB=Development
+[DEBUG] Getting collection object: portfolio...
+[INFO] Querying collection: portfolio (Limit: 20)
+[DEBUG] Query returned.
+   -> Found 20 docs in portfolio
+[DEBUG] Getting collection object: Blogs_data...
+[INFO] Querying collection: Blogs_data (Limit: 5)
+[DEBUG] Query returned.
+   -> Found 5 docs in Blogs_data
+[DEBUG] Getting collection object: Projects_data...
+[INFO] Querying collection: Projects_data (Limit: 3)
+[DEBUG] Query returned.
+   -> Found 3 docs in Projects_data
+
+[INFO] Context Retrieved (52109 chars). generating answer...
+[INFO] Using Primary Model: models/gemini-flash-latest
+
+--- BOT RESPONSE ---
+The blogs related to Althaf's professional interests focus on two major areas: GitOps for modern application management and Multi-Cloud deployment strategies.
+
+### 1. GitOps: The Single Source of Truth
+
+The blogs define **GitOps** as a declarative and version-controlled approach to managing infrastructure and application configurations, using Git as the single source of truth for the desired system state.
+
+**Key Principles:**
+
+*   **Declarative Configuration:** Infrastructure is defined in code (YAML/JSON).
+*   **Configuration Stored in Git:** All configurations are stored and version-controlled in a Git repository.
+*   **Automated Synchronization:** Automated operators (like Flux or Argo CD) continuously monitor the Git repository and automatically reconcile the actual state of the Kubernetes cluster with the desired state defined in Git.
+*   **Continuous Reconciliation:** The operator constantly monitors and reverts any manual changes made outside of Git to ensure the cluster matches the declared state.
+
+**Benefits:** Increased velocity, improved reliability, enhanced security (due to Git's audit trail), and simplified rollbacks (by reverting a Git commit). Tools like **Flux**, **Argo CD**, and **Jenkins X** are noted as popular options for implementing GitOps for Kubernetes.
+
+### 2. Multi-Cloud Deployment Strategies
+
+The blogs also discuss strategies for enterprise applications leveraging multiple cloud providers, including **AWS**, **Azure**, and **GCP**.
+
+**Core Concepts:**
+
+*   **Multi-Cloud Defined:** Utilizing services from two or more distinct cloud providers to avoid vendor lock-in, enhance resilience, and optimize performance.
+*   **Key Deployment Strategies:**
+    *   **Best-of-Breed:** Selecting the top services from each cloud provider for specific workloads.
+    *   **Active-Active:** Applications are deployed across multiple clouds and actively serving traffic simultaneously for maximum availability.
+    *   **Active-Passive:** One cloud acts as the primary deployment while another serves as a backup.
+*   **Management Practices:** Implementing a unified management platform, establishing consistent security policies, and automating deployment and operations using **IaC** (Infrastructure as Code) and **CI/CD** pipelines are essential for successful multi-cloud execution.
+--------------------
+
+==================================================
+

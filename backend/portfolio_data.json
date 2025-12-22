@@ -1,29 +1,205 @@
 {
-    "personalInfo": {
+    "personal_info": {
         "name": "Althaf Hussain Syed",
-        "title": "DevOps Engineer | Cloud & Infrastructure Specialist",
+        "title": "Analyst III Infrastructure Services | DevOps Engineer",
         "email": "allualthaf42@gmail.com",
-        "phone": "8184812249",
+        "phone": "+91 8184812249",
         "location": "Hyderabad, India",
-        "linkedin": "https://linkedin.com/in/althafhussainsyed",
-        "summary": "Certified DevOps Engineer with 3+ years of experience in cloud infrastructure, automation, and CI/CD pipeline engineering. Multi-cloud certified professional with expertise in AWS, GCP, Azure, and Oracle Cloud. Proven track record of reducing operational overhead by 40% and improving incident response time by 30%."
+        "linkedin": "https://www.linkedin.com/in/althafhussainsyed/",
+        "summary": "Motivated DevOps Engineer with 3.5 years of experience supporting AWS cloud environments, CI/CD pipelines, and container-based deployments. Skilled in building automation, deployment support, and environment monitoring using Terraform, Jenkins, Docker, and Kubernetes. Works effectively with cross-functional teams and follows ITIL and SDLC practices to maintain stable and compliant operations. Focused on reliability, task ownership, and continuous improvement within enterprise infrastructure."
     },
     "skills": {
-        "cloudPlatforms": [
-            {
-                "name": "AWS",
-                "level": "Expert",
-                "certifications": 3
-            }
+        "Cloud Platforms": [
+            "AWS",
+            "GCP",
+            "Azure"
+        ],
+        "Infrastructure as Code & Automation": [
+            "Terraform",
+            "Ansible",
+            "Bash scripting",
+            "Python"
+        ],
+        "CI/CD": [
+            "Jenkins",
+            "GitHub Actions",
+            "GitLab CI",
+            "AWS CodePipeline"
+        ],
+        "Build & Quality Management": [
+            "Maven",
+            "SDLC collaboration",
+            "Checkstyle",
+            "SonarQube",
+            "Qualitygates",
+            "Trivy"
+        ],
+        "Artifact Repositories": [
+            "Nexus",
+            "AWS CodeArtifact",
+            "ECR",
+            "Docker Hub"
+        ],
+        "Source Control Management": [
+            "GitHub",
+            "GitLab",
+            "Bitbucket"
+        ],
+        "Containerisation & Orchestration": [
+            "Docker",
+            "Kubernetes",
+            "ECS"
+        ],
+        "Monitoring & Logging": [
+            "CloudWatch",
+            "Prometheus",
+            "Grafana",
+            "Dynatrace"
+        ],
+        "Networking & Security": [
+            "VPC",
+            "subnets",
+            "security groups",
+            "IAM"
+        ],
+        "Linux Administration": [
+            "Package management",
+            "user management",
+            "service monitoring",
+            "troubleshooting"
+        ],
+        "Collaboration & Processes": [
+            "Agile/DevOps",
+            "SDLC",
+            "ITIL",
+            "cross-functional team coordination"
+        ],
+        "AI/ML": [
+            "Gen AI/ML basics",
+            "AWS AI services",
+            "Prompt Engineering basics"
+        ],
+        "Soft Skills": [
+            "Leadership",
+            "Communication",
+            "Teamwork",
+            "Problem Solving",
+            "Time Management",
+            "Documentation"
         ]
     },
     "experience": [
         {
             "company": "DXC Technology",
-            "position": "Analyst III Infrastructure Services / DevOps Engineer",
-            "duration": "Aug 2022 \u2013 Present",
+            "role": "Analyst III Infrastructure Services | DevOps Engineer",
+            "duration": "Aug 2022 – Present",
             "location": "Hyderabad, India",
-            "achievements": "["
+            "description": "Cloud Platform Automation & Delivery | AWS Managed Services. Supporting automation, deployment, and environment operations in an AWS Managed Services setup. Involved in CI/CD execution, environment monitoring, and change coordination aligned with ITIL and SDLC frameworks to ensure smooth delivery.",
+            "achievements": [
+                "Supporting automation, deployment, and environment operations in an AWS Managed Services setup.",
+                "Involved in CI/CD execution, environment monitoring, and change coordination aligned with ITIL and SDLC frameworks.",
+                "Attended daily stand-up meetings to share progress, discuss incident status, and coordinate upcoming deployment or change activities.",
+                "Worked on provisioning and managing AWS services based on approved change requests.",
+                "Used Terraform templates to standardise configurations and maintain production consistency.",
+                "Maintained Jenkins pipelines and GitHub Actions for build, test, and deployment.",
+                "Integrated Maven, SonarQube quality gates, and Docker image builds pushed to Amazon ECR.",
+                "Configured Slack notifications for build and deployment updates.",
+                "Implemented end-to-end CI/CD automation, improving delivery efficiency and reducing manual effort by ~70%.",
+                "Containerised applications using Docker and supported deployments in Kubernetes environments.",
+                "Monitored system health and logs using CloudWatch, Grafana, Prometheus and Dynatrace.",
+                "Managed incidents and change requests via ServiceNow.",
+                "Created and maintained Standard Operating Procedures (SOPs) and runbooks."
+            ]
+        }
+    ],
+    "education": [
+        {
+            "degree": "Master of Science (M.Sc.) in Computer Science",
+            "institution": "Acharya Nagarjuna University",
+            "year": "Dec 2022 - June 2024"
+        },
+        {
+            "degree": "Bachelor of Science (B.Sc.) in Computer Science",
+            "institution": "Acharya Nagarjuna University",
+            "year": "June 2019 - June 2022"
+        }
+    ],
+    "achievements": [
+        {
+            "title": "CI/CD Automation",
+            "description": "Implemented end-to-end CI/CD automation, reducing manual effort by 70% and improving delivery efficiency."
+        },
+        {
+            "title": "Operational Visibility",
+            "description": "Developed a custom ServiceNow dashboard for incident tracking and SLA breach reporting, improving operational transparency."
+        },
+        {
+            "title": "Quality Integration",
+            "description": "Integrated SonarQube quality gates, ECR management, and Slack notifications for improved collaboration and feedback."
+        },
+        {
+            "title": "DXC CHAMPS Award – FY24 Q1",
+            "description": "Recognised for consistent delivery, ownership of priority tasks, and reliable execution of infrastructure operations and production deployments."
+        },
+        {
+            "title": "DXC CHAMPS Award – FY26 H1",
+            "description": "Awarded for sustained performance, end-to-end accountability, and operational excellence in supporting critical infrastructure services."
+        }
+    ],
+    "certifications": [
+        {
+            "name": "AWS Certified Solutions Architect – Associate",
+            "issuer": "Amazon Web Services",
+            "year": "2024",
+            "category": "aws"
+        },
+        {
+            "name": "Google Cloud Professional Cloud Architect",
+            "issuer": "Google Cloud",
+            "year": "2024",
+            "category": "gcp"
+        },
+        {
+            "name": "Microsoft Azure Administrator Associate (AZ-104)",
+            "issuer": "Microsoft",
+            "year": "2024",
+            "category": "azure"
+        },
+        {
+            "name": "Oracle Cloud Infrastructure Architect Associate",
+            "issuer": "Oracle",
+            "year": "2024",
+            "category": "oracle"
+        },
+        {
+            "name": "AWS Certified AI Practitioner",
+            "issuer": "Amazon Web Services",
+            "year": "2024",
+            "category": "aws"
+        },
+        {
+            "name": "AWS Cloud Practitioner",
+            "issuer": "Amazon Web Services",
+            "year": "2023",
+            "category": "aws"
+        },
+        {
+            "name": "Azure Fundamentals (AZ-900)",
+            "issuer": "Microsoft",
+            "year": "2023",
+            "category": "azure"
+        },
+        {
+            "name": "GitHub Foundations",
+            "issuer": "GitHub",
+            "year": "2024",
+            "category": "devops"
+        },
+         {
+            "name": "Generative AI Certified",
+            "issuer": "Oracle",
+            "year": "2024",
+            "category": "ai"
         }
     ],
     "projects": [
@@ -87,56 +263,6 @@
             ],
             "key_outcomes": "\ud83c\udfc6 Key Outcomes\n\nMonitoring setup time reduced from 45 minutes manual \u2192 2 minutes automated.\n\nAchieved centralized visibility for EC2 logs and web traffic metrics.\n\nImproved incident response with alert-based dashboards.\n\nEliminated configuration drift across production servers. ",
             "timestamp": "2025-12-20T18:29:35.725000"
-        }
-    ],
-    "certifications": [
-        {
-            "name": "AWS Certified Solutions Architect \u2013 Associate",
-            "issuer": "Amazon Web Services",
-            "year": "2024",
-            "category": "aws"
-        },
-        {
-            "name": "Google Cloud Professional Cloud Architect",
-            "issuer": "Google Cloud",
-            "year": "2024",
-            "category": "gcp"
-        },
-        {
-            "name": "Microsoft Azure Administrator Associate (AZ-104)",
-            "issuer": "Microsoft",
-            "year": "2024",
-            "category": "azure"
-        },
-        {
-            "name": "Oracle Cloud Infrastructure Architect Associate",
-            "issuer": "Oracle",
-            "year": "2024",
-            "category": "oracle"
-        },
-        {
-            "name": "AWS Certified AI Practitioner",
-            "issuer": "Amazon Web Services",
-            "year": "2024",
-            "category": "aws"
-        },
-        {
-            "name": "AWS Cloud Practitioner",
-            "issuer": "Amazon Web Services",
-            "year": "2023",
-            "category": "aws"
-        },
-        {
-            "name": "Azure Fundamentals (AZ-900)",
-            "issuer": "Microsoft",
-            "year": "2023",
-            "category": "azure"
-        },
-        {
-            "name": "GitHub Foundations",
-            "issuer": "GitHub",
-            "year": "2024",
-            "category": "devops"
         }
     ]
 }

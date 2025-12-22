@@ -27,6 +27,9 @@ genai.configure(api_key=GOOGLE_API_KEY)
 
 # --- 2. GEMINI EMBEDDING CLASS ---
 class GeminiEmbeddingFunction(EmbeddingFunction):
+    def __init__(self):
+        pass
+
     def __call__(self, input: Documents) -> Embeddings:
         model = 'models/text-embedding-004'
         try:
@@ -102,7 +105,7 @@ def main():
                     content = safe_meta(blog.get('content'))
                     
                     # Store structured blog data
-                    text = f"Blog Title: {title}. Content: {content[:3000]}..." # Limit chunk size
+                    text = f"Blog Title: {title}. Content: {content[:15000]}..." # Limit chunk size
                     
                     blogs_col.add(
                         ids=[f"blog_{i}"], 
@@ -147,28 +150,42 @@ def main():
         print("[WARN] MONGO_URL not set. Skipping Project Sync.")
 
     # ==========================================
-    # 3. SYNC PORTFOLIO -> 'portfolio' (Resume, Skills, etc.)
+    # 3. SYNC PORTFOLIO -> 'portfolio' (Resume, Skills, Experience, etc.)
     # ==========================================
-    print("[SYNC] Syncing Skills, Education, and Resume to 'portfolio'...")
+    print("[SYNC] Syncing Complete Portfolio to 'portfolio'...")
 
-    # A. Sync Resume Details.txt
-    resume_path = "../Resume Details.txt" # Assuming script runs in backend/
-    if not os.path.exists(resume_path):
-        resume_path = "Resume Details.txt" # Try root
+    # A. Robust Resume Path Detection
+    # Look in current dir, parent dir, or specifically in backend/
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    possible_paths = [
+        os.path.join(current_dir, "Resume Details.txt"),       # Same dir as script
+        os.path.join(current_dir, "../Resume Details.txt"),    # Parent dir
+        "Resume Details.txt",                                  # CWD
+        "backend/Resume Details.txt"                           # From root
+    ]
     
-    if os.path.exists(resume_path):
-        with open(resume_path, 'r', encoding='utf-8') as f:
-            resume_content = f.read()
-            portfolio_col.add(
-                ids=["resume_full"],
-                documents=[clean_text(resume_content)],
-                metadatas=[{"type": "resume", "title": "Full Resume"}]
-            )
-            print("✅ Resume Details synced.")
-    else:
-        print("[WARN] Resume Details.txt not found.")
+    resume_found = False
+    for path in possible_paths:
+        if os.path.exists(path):
+            try:
+                with open(path, 'r', encoding='utf-8') as f:
+                    resume_content = f.read()
+                    if resume_content:
+                        portfolio_col.add(
+                            ids=["resume_full"],
+                            documents=[clean_text(resume_content)],
+                            metadatas=[{"type": "resume", "title": "Full Resume"}]
+                        )
+                        print(f"✅ Resume synced from: {path}")
+                        resume_found = True
+                        break
+            except Exception as e:
+                print(f"[WARN] Error reading resume at {path}: {e}")
 
-    # B. Sync Skills & Education from JSON (ignoring projects)
+    if not resume_found:
+        print("[WARN] ❌ Resume Details.txt NOT found in any expected location.")
+
+    # B. Sync ALL Sections from JSON
     json_path = 'portfolio_data.json'
     if not os.path.exists(json_path): json_path = 'backend/portfolio_data.json'
     
@@ -176,7 +193,23 @@ def main():
         with open(json_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
             
-            # Skills
+            # 1. Experience (CRITICAL MISSING PIECE)
+            if "experience" in data:
+                for i, exp in enumerate(data["experience"]):
+                    # Create a rich text description of the job
+                    text = f"Role: {exp.get('role')} at {exp.get('company')}. " \
+                           f"Duration: {exp.get('duration')}. " \
+                           f"Description: {exp.get('description')} " \
+                           f"Key Achievements: {', '.join(exp.get('achievements', []))}"
+                    
+                    portfolio_col.add(
+                        ids=[f"exp_{i}"],
+                        documents=[clean_text(text)],
+                        metadatas=[{"type": "experience", "company": safe_meta(exp.get('company'))}]
+                    )
+                print(f"✅ Synced {len(data['experience'])} Experience entries.")
+
+            # 2. Skills
             if "skills" in data:
                 for cat, skills in data["skills"].items():
                     skill_str = ", ".join([s['name'] if isinstance(s, dict) else s for s in skills])
@@ -186,8 +219,9 @@ def main():
                         documents=[clean_text(text)],
                         metadatas=[{"type": "skill", "category": cat}]
                     )
-            
-            # Education
+                print("✅ Synced Skills.")
+
+            # 3. Education
             if "education" in data:
                 for i, edu in enumerate(data["education"]):
                     text = f"Education: {edu.get('degree')} at {edu.get('institution')}. Year: {edu.get('year')}."
@@ -196,8 +230,9 @@ def main():
                         documents=[clean_text(text)],
                         metadatas=[{"type": "education"}]
                     )
+                print("✅ Synced Education.")
                     
-            # Certifications
+            # 4. Certifications
             if "certifications" in data:
                 for i, cert in enumerate(data["certifications"]):
                     text = f"Certification: {cert.get('name')} from {cert.get('issuer')}."
@@ -206,10 +241,46 @@ def main():
                         documents=[clean_text(text)],
                         metadatas=[{"type": "certification"}]
                     )
-                    
-            print("✅ Skills, Education, and Certifications synced.")
+                print("✅ Synced Certifications.")
 
-    print("🎉 [SUCCESS] All Data Synced Successfully!")
+            # 5. Achievements (MISSING)
+            if "achievements" in data:
+                for i, ach in enumerate(data["achievements"]):
+                    text = f"Achievement: {ach.get('title')}. Details: {ach.get('description')}"
+                    portfolio_col.add(
+                        ids=[f"ach_{i}"],
+                        documents=[clean_text(text)],
+                        metadatas=[{"type": "achievement"}]
+                    )
+                print("✅ Synced Achievements.")
+
+            # 6. Personal Info (MISSING)
+            if "personal_info" in data:
+                info = data["personal_info"]
+                text = f"Personal Profile: {info.get('name')}. Title: {info.get('title')}. " \
+                       f"Summary: {info.get('summary')}. Location: {info.get('location')}."
+                portfolio_col.add(
+                    ids=["personal_info"],
+                    documents=[clean_text(text)],
+                    metadatas=[{"type": "personal_info"}]
+                )
+                print("✅ Synced Personal Info.")
+
+                # 7. Contacts (Specific Request)
+                # Create a specialized document just for contact details for easy retrieval
+                contact_text = f"Email: {info.get('email')}. Phone: {info.get('phone')}. " \
+                               f"LinkedIn: {info.get('linkedin')}. Location: {info.get('location')}."
+                portfolio_col.add(
+                    ids=["contacts_info"],
+                    documents=[clean_text(contact_text)],
+                    metadatas=[{"type": "contacts", "email": safe_meta(info.get('email'))}]
+                )
+                print("✅ Synced Contacts.")
+
+    else:
+        print("[ERROR] ❌ portfolio_data.json not found.")
+
+    print("🎉 [SUCCESS] All Data (Projects, Blogs, FULL Portfolio) Synced Successfully!")
 
 if __name__ == "__main__":
     main()
