@@ -33,7 +33,7 @@ const Chatbot = () => {
     if (isOpen && messages.length === 0) {
       setMessages([{
         sender: "bot",
-        text: "👋 Hi there! I'm Allu Bot. How can I assist you with tech questions or TechAssistant information today?"
+        text: "🙋‍♂️ Hi there! I'm Allu Bot. How can I assist you with Althaf's Portfolio Info Today?"
       }]);
     }
   }, [isOpen, messages.length]);
@@ -309,7 +309,7 @@ const Chatbot = () => {
             </div>
             <div className="chatbot-title-container">
               <p className="chatbot-title">Allu Bot</p>
-              <p className="chatbot-subtitle">Portfolio & Tech Assistant</p>
+              <p className="chatbot-subtitle">Portfolio Assistant</p>
             </div>
             <button className="close-button" onClick={toggleChat} aria-label="Close chat">×</button>
           </div>
