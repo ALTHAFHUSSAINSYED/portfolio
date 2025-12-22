@@ -1,7 +1,7 @@
 // src/components/TechAssistant.js
 
 import React from 'react';
-import { portfolioData } from '../data/mock';
+import portfolioData from '../data/portfolio_data.json';
 import HeroSection from './HeroSection';
 import AboutSection from './AboutSection';
 import SkillsSection from './SkillsSection';
@@ -18,14 +18,14 @@ const TechAssistant = () => {
   return (
     // ✨ MODIFIED: Added "relative" to create a stable anchor for the page layout.
     <div className="min-h-screen bg-background relative">
-      <HeroSection personalInfo={portfolioData.personalInfo} />
-      <AboutSection personalInfo={portfolioData.personalInfo} achievements={portfolioData.achievements}/>
+      <HeroSection personalInfo={portfolioData.personal_info} />
+      <AboutSection personalInfo={portfolioData.personal_info} achievements={portfolioData.achievements} />
       <SkillsSection skills={portfolioData.skills} />
       <ExperienceSection experience={portfolioData.experience} />
       <CertificationsSection certifications={portfolioData.certifications} />
       <ProjectsSection />
       <BlogsSection />
-      <ContactSection personalInfo={portfolioData.personalInfo} />
+      <ContactSection personalInfo={portfolioData.personal_info} />
     </div>
   );
 };
