@@ -253,14 +253,15 @@ const Chatbot = () => {
               </div>
             )}
 
-            {/* Suggested questions - Pill Layout (Vertical) */}
+            {/* Suggested questions - Pill Layout (Vertical, Right Aligned) */}
             {messages.length === 1 && (
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '8px',
                 marginTop: '12px',
-                marginLeft: '42px' // Align with bot messages (avatar width + gap)
+                alignItems: 'flex-end', /* Align suggestions to the RIGHT */
+                paddingRight: '12px'
               }}>
                 {suggestedQuestions.map((question, index) => (
                   <button
