@@ -88,6 +88,9 @@ genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
 
 # --- EMBEDDING FUNCTION FOR SERVER ---
 class GeminiEmbeddingFunction(EmbeddingFunction):
+    def __init__(self):
+        pass
+
     def __call__(self, input: Documents) -> Embeddings:
         try:
             return [
@@ -101,7 +104,7 @@ class GeminiEmbeddingFunction(EmbeddingFunction):
         except Exception as e:
             logger.error(f"Embedding failed: {e}")
             return [[0.0] * 768 for _ in input]
-
+            
 # Scheduler Setup
 scheduler = AsyncIOScheduler()
 
@@ -191,7 +194,7 @@ class Project(BaseModel):
     details: str = ""
     image_url: str
     technologies: List[str] = []
-    key_outcomes: Optional[str] = ""
+    key_outcomes: Optional[str] = None
     github_url: Optional[str] = None
     live_url: Optional[str] = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
@@ -224,9 +227,24 @@ async def get_portfolio_context(query: str) -> str:
                     name=collection_name,
                     embedding_function=GeminiEmbeddingFunction()
                 )
-                results = collection.query(query_texts=[query], n_results=5)
+                
+                # Prioritization Rules (User Request):
+                # 1. Portfolio: Fetch ALL relevant items (Limit 20 covering skills, exp, basic info)
+                # 2. Projects: Fetch top 3
+                # 3. Blogs: Fetch top 5 for tech context
+                if collection_name == 'portfolio':
+                    limit = 20 
+                elif collection_name == 'Projects_data':
+                    limit = 3
+                else: 
+                    limit = 5
+                
+                results = collection.query(query_texts=[query], n_results=limit)
                 docs = results.get('documents', [[]])[0]
-                all_context.extend(docs)
+                
+                # Label the context with source for better LLM understanding
+                labeled_docs = [f"[Source: {collection_name}]\n{d}" for d in docs]
+                all_context.extend(labeled_docs)
             except Exception as e:
                 logger.warning(f"Skipping collection {collection_name}: {e}")
                 continue
@@ -520,13 +538,37 @@ async def ask_agent(query: dict):
     try:
         portfolio_context = await get_portfolio_context(message)
         genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
-        model = genai.GenerativeModel('models/gemma-3-27b-it')
         
-        system_instruction = f"""You are Allu Bot, the professional portfolio assistant for Althaf Hussain Syed.
-        Use this Context to answer: {portfolio_context}
-        If unknown, say you don't have that info."""
+        system_instruction = f"""You are 'Allu Bot', the AI portfolio assistant for Althaf Hussain Syed.
+        Your Persona:
+        - You are an assistant, NOT Althaf. Refer to him as "Althaf" or "He".
+        - You are professional, concise, and helpful.
         
-        response = model.generate_content(f"{system_instruction}\nUser: {message}")
+        Strict Rules:
+        1. **Intent Classification**: First, determine the user's intent.
+           - **Social/Conversational**: functionality (Greetings, Compliments, Small Talk, Frustration). -> **Action**: Respond naturally, intelligently, and empathetically. Do NOT use the refusal message. Be human-like.
+           - **Self-Query**: "Who are you?", "How do you work?" -> **Action**: Say "I am an AI assistant. My name is Allu bot. I am powered by Google Gemini and use RAG to search Althaf's portfolio to provide accurate answers."
+           - **Portfolio Information**: Questions about Skills, Projects, Experience, Contact. -> **Action**: Answer ONLY using the Context below.
+        
+        2. **Refusal Logic (Only for Irrelevant Information)**:
+           - IF the user asks for factual information NOT in the Context (e.g., "Capital of Mars", "Recipe for pizza"), AND it is NOT a social query:
+           - THEN say: "Sorry, the question asked is not related to the portfolio. I can't answer you that question. Try something else related to the portfolio."
+        
+        3. **Zero Hallucination**: Never invent skills or projects.
+        
+        Context: {portfolio_context}"""
+        
+        # Security: API Key is loaded via os.getenv above. No hardcoded keys.
+        
+        # Primary Model: Gemini Flash Latest (Best for Context)
+        try:
+            model = genai.GenerativeModel('models/gemini-flash-latest')
+            response = model.generate_content(f"{system_instruction}\nUser: {message}")
+        except Exception as e:
+            logger.warning(f"Primary model failed ({e}). Switching to Fallback: Gemma 12b")
+            # Fallback Model: Gemma 3 12b IT (User requested "Gamma")
+            model = genai.GenerativeModel('models/gemma-3-12b-it')
+            response = model.generate_content(f"{system_instruction}\nUser: {message}")
         
         return JSONResponse(status_code=200, content={"reply": response.text, "source": "Portfolio"})
     except Exception as e:
