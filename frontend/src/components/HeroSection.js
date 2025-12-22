@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Download, Mail, Volume2, VolumeX } from "lucide-react";
-import personalInfo from "../data/portfolio_data.json";
+import portfolioData from "../data/portfolio_data.json";
+const personalInfo = portfolioData.personal_info;
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
