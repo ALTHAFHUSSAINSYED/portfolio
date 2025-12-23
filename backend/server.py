@@ -270,23 +270,21 @@ async def get_portfolio_context(query: str) -> str:
         # Smart Collection Routing based on keywords
         collections_to_query = set()
         
-        # Always query portfolio (general info, skills, experience, contact)
-        collections_to_query.add('portfolio')
-        
-        # Query Projects_data if project-related keywords detected
-        project_keywords = ['project', 'projects', 'built', 'developed', 'app', 'application', 'work', 'portfolio']
+        # Query Projects_data ONLY if project-related keywords detected
+        project_keywords = ['project', 'projects', 'built', 'developed', 'app', 'application', 'created', 'made', 'portfolio work']
         if any(keyword in query_lower for keyword in project_keywords):
             collections_to_query.add('Projects_data')
         
-        # Query Blogs_data if blog-related keywords detected
-        blog_keywords = ['blog', 'blogs', 'article', 'articles', 'write', 'writing', 'post', 'recent']
+        # Query Blogs_data ONLY if blog-related keywords detected
+        blog_keywords = ['blog', 'blogs', 'article', 'articles', 'write', 'writing', 'post', 'wrote', 'published']
         if any(keyword in query_lower for keyword in blog_keywords):
             collections_to_query.add('Blogs_data')
         
-        # Fallback: If no specific keywords, query all collections lightly
-        if len(collections_to_query) == 1:  # Only portfolio
-            collections_to_query.add('Projects_data')
-            collections_to_query.add('Blogs_data')
+        # ALWAYS query portfolio for general info (skills, experience, contact, etc.)
+        # This is the primary source for most queries
+        collections_to_query.add('portfolio')
+        
+        logger.info(f"Querying collections: {collections_to_query}")
         
         for collection_name in collections_to_query:
             try:
