@@ -663,11 +663,11 @@ Now, respond to the user's message based on the above rules and context."""
 
         # Generate Response with Fallback
         try:
-            model = genai.GenerativeModel('models/gemini-1.5-flash')
+            model = genai.GenerativeModel('gemini-1.5-flash')
             response = model.generate_content(f"{system_instruction}\\nUser: {message}")
         except Exception as e:
-            logger.warning(f"Primary model failed ({e}). Using Gemini Flash Latest fallback")
-            model = genai.GenerativeModel('models/gemini-flash-latest')
+            logger.warning(f"Primary model failed ({e}). Using Gemma 12B fallback")
+            model = genai.GenerativeModel('gemma-3-12b-it')
             response = model.generate_content(f"{system_instruction}\\nUser: {message}")
         
         return JSONResponse(
