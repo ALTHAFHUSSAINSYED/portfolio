@@ -133,6 +133,12 @@ class ChatbotProvider:
         else:
             greeting_hint = " (Context: Ongoing conversation. Do NOT greet. Answer directly.)"
         
+        # TRUNCATE CONTEXT to fit OpenRouter models (max 4000 chars ≈ 1000 tokens)
+        # This prevents context length errors while keeping relevant information
+        max_context_chars = 4000
+        if len(context) > max_context_chars:
+            context = context[:max_context_chars] + "\n...(context truncated for length)"
+        
         # Add current query with context
         user_message = f"Portfolio Data:\n{context}\n\nUser Query: {query}{greeting_hint}"
         messages.append({"role": "user", "content": user_message})
