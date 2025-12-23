@@ -46,6 +46,8 @@ jobs:  # WHAT jobs to run
           RESEND_KEY=${{ secrets.RESEND_KEY }}
           RESEND_API_KEY=${{ secrets.RESEND_KEY }}
           TO_EMAIL=${{ secrets.TO_EMAIL }}
+          CHATBOT_KEY=${{ secrets.CHATBOT_KEY }}
+          CHATBOT=${{ secrets.CHATBOT }}
           EOF
           chmod 600 .env
 
@@ -58,6 +60,8 @@ jobs:  # WHAT jobs to run
           CHROMA_TENANT_ID=${{ secrets.CHROMA_TENANT }}
           CHROMA_DB_NAME=Development
           GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+          CHATBOT_KEY=${{ secrets.CHATBOT_KEY }}
+          CHATBOT=${{ secrets.CHATBOT }}
           EOF
 
           if git diff HEAD~1 HEAD --name-only | grep -E "(portfolio_data\.json|formatted_data\.json|fixed_data\.json)"; then
@@ -105,6 +109,8 @@ jobs:  # WHAT jobs to run
             echo "CHROMA_API_KEY=${{ secrets.CHROMA_API_KEY }}" >> .env
             echo "CHROMA_TENANT_ID=${{ secrets.CHROMA_TENANT }}" >> .env
             echo "CHROMA_DB_NAME=Development" >> .env
+            echo "CHATBOT_KEY=${{ secrets.CHATBOT_KEY }}" >> .env
+            echo "CHATBOT=${{ secrets.CHATBOT }}" >> .env
             cd ..
 
             # HARD CLEAN Docker & Disk Space (Aggressive)
