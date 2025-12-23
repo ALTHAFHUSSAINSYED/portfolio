@@ -107,10 +107,12 @@ jobs:  # WHAT jobs to run
             echo "CHROMA_DB_NAME=Development" >> .env
             cd ..
 
-            # HARD CLEAN Docker (important after crash loops)
+            # HARD CLEAN Docker & Disk Space (Aggressive)
             docker stop portfolio-backend || true
             docker rm portfolio-backend || true
-            docker image prune -f
+            docker system prune -af --volumes  # Remove all unused images, networks, build cache
+            sudo apt-get clean
+            sudo rm -rf /tmp/* /var/tmp/*
 
             # Rebuild & run
             docker build --no-cache -t portfolio-backend -f backend/Dockerfile .
