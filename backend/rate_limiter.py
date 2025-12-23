@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class RateLimiter:
     """Sliding window rate limiter for API requests"""
     
-    def __init__(self, max_requests_per_minute: int = 20):
+    def __init__(self, max_requests_per_minute: int = 100):
         """
         Initialize rate limiter
         
