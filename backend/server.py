@@ -237,7 +237,7 @@ async def get_portfolio_context(query: str) -> str:
     try:
         chroma_api_key = os.getenv('CHROMA_API_KEY')
         chroma_tenant = os.getenv('CHROMA_TENANT') or os.getenv('CHROMA_TENANT_ID')
-        chroma_database = os.getenv('CHROMA_DATABASE')
+        chroma_database = os.getenv('CHROMA_DATABASE') or os.getenv('CHROMA_DB_NAME')
         
         if not (chroma_api_key and chroma_tenant and chroma_database):
             logger.warning("ChromaDB credentials missing")
