@@ -10,7 +10,8 @@ COPY backend/requirements.txt /app/backend/requirements.txt
 RUN pip install --no-cache-dir -r /app/backend/requirements.txt \
     && apt-get remove -y build-essential curl \
     && apt-get autoremove -y \
-    && rm -rf /root/.cache/pip
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /root/.cache/pip /tmp/*
 
 COPY backend /app/backend
 
