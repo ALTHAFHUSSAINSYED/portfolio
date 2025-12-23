@@ -271,15 +271,15 @@ class ChatbotProvider:
         # Format messages
         messages = self._format_messages(query, context, history)
         
-        # Tier 1: OpenRouter - Gemini 2.0 Flash Exp
-        logger.info("Trying Tier 1: OpenRouter - Gemini 2.0 Flash Exp")
-        response = self._call_openrouter("models/gemini-2.0-flash-exp", messages, max_tokens)
+        # Tier 1: OpenRouter - Llama 3.1 8B Instruct
+        logger.info("Trying Tier 1: OpenRouter - Llama 3.1 8B Instruct")
+        response = self._call_openrouter("meta-llama/llama-3.1-8b-instruct", messages, max_tokens)
         if response:
             return response
         
-        # Tier 2: OpenRouter - DeepHermes 3 Mistral 24B
-        logger.info("Trying Tier 2: OpenRouter - DeepHermes 3 Mistral 24B")
-        response = self._call_openrouter("deephermes-3-mistral-24b", messages, max_tokens)
+        # Tier 2: OpenRouter - Mistral 7B Instruct
+        logger.info("Trying Tier 2: OpenRouter - Mistral 7B Instruct")
+        response = self._call_openrouter("mistralai/mistral-7b-instruct", messages, max_tokens)
         if response:
             return response
         
