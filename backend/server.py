@@ -34,6 +34,9 @@ try:
     from backend.notification_service import notification_service
     from backend.security_utils import sanitize_html
     from backend.models import ChatbotQuery
+    from backend.cache_manager import ResponseCache
+    from backend.rate_limiter import RateLimiter
+    from backend.chatbot_provider import ChatbotProvider
     HAS_AGENT_SERVICE = True
 except ImportError as e:
     HAS_AGENT_SERVICE = False
@@ -85,6 +88,20 @@ cloudinary.config(
 
 # Configure Gemini
 genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
+
+# Initialize Multi-Provider Chatbot Components
+try:
+    response_cache = ResponseCache(max_size=100, ttl_seconds=3600)
+    rate_limiter = RateLimiter(max_requests_per_minute=20)
+    chatbot_provider = ChatbotProvider()
+    conversation_sessions = {}  # {session_id: [messages]}
+    logger.info("Multi-provider chatbot components initialized")
+except Exception as e:
+    logger.error(f"Failed to initialize chatbot components: {e}")
+    response_cache = None
+    rate_limiter = None
+    chatbot_provider = None
+    conversation_sessions = {}
 
 # --- EMBEDDING FUNCTION FOR SERVER ---
 class GeminiEmbeddingFunction(EmbeddingFunction):
@@ -227,6 +244,7 @@ def is_greeting_or_conversational(text: str) -> tuple:
         return False, "frustrated"  # Still need database, but sentiment detected
         
     return False, "neutral"
+
 async def get_portfolio_context(query: str) -> str:
     """
     Smart RAG retrieval with keyword-based collection routing.
@@ -585,9 +603,10 @@ async def get_blogs():
 @api_router.post("/ask-all-u-bot")
 async def ask_agent(query: dict):
     """
-    Enterprise-grade chatbot endpoint with strict no-hallucination rules.
+    Multi-provider chatbot with intelligent routing and caching
     """
     message = query.get('message', '')
+    session_id = query.get('session_id', 'default')  # Optional session tracking
     
     if not message:
         return JSONResponse(
@@ -596,92 +615,72 @@ async def ask_agent(query: dict):
         )
     
     try:
-        # Detect if message is a greeting or conversational
+        # Rate limiting check
+        if not rate_limiter.check_limit():
+            wait_time = rate_limiter.get_wait_time()
+            logger.warning(f"Rate limit exceeded. Wait time: {wait_time:.1f}s")
+            return JSONResponse(
+                status_code=429,
+                content={
+                    "reply": f"Please wait {int(wait_time)} seconds before sending another message.",
+                    "wait_time": wait_time
+                }
+            )
+        
+        # Get conversation history
+        history = conversation_sessions.get(session_id, [])
+        
+        # Check cache first
+        cached_response = response_cache.get(message, history)
+        if cached_response:
+            logger.info("Returning cached response")
+            return JSONResponse(
+                status_code=200,
+                content={"reply": cached_response, "source": "Cache"}
+            )
+        
+        # Record request for rate limiting
+        rate_limiter.record_request()
+        
+        # Detect if greeting (skip RAG for simple greetings)
         is_greeting, sentiment = is_greeting_or_conversational(message)
         
         portfolio_context = ""
-        
-        # Skip database for simple greetings
         if not is_greeting:
             portfolio_context = await get_portfolio_context(message)
+            context_length = len(portfolio_context)
+            logger.info(f"Retrieved context length: {context_length} characters")
         
-        genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
+        # Generate response using multi-provider system
+        response_text = chatbot_provider.generate_response(
+            query=message,
+            context=portfolio_context,
+            history=history
+        )
         
-        # Enterprise-Grade System Prompt (Based on Flask Template)
-        system_instruction = f"""You are **Allu Bot**, a high-end enterprise AI assistant for **Althaf Hussain Syed**.
-
-### CORE IDENTITY:
-* **'He', 'Him', or 'The Developer'** ALWAYS refers to **Althaf Hussain Syed**.
-* You are an assistant, NOT Althaf. Speak about him in third person.
-
-### CONTEXT & KNOWLEDGE:
-{portfolio_context if portfolio_context else "No specific database info retrieved for this query. Handle as conversational turn or inform user you need portfolio-specific questions."}
-
-### USER SENTIMENT: {sentiment.upper()}
-* **If FRUSTRATED:** Be deeply empathetic and apologetic. Acknowledge the mistake and try to provide correct information.
-* **If NEUTRAL/HAPPY:** Be professional, energetic, and helpful.
-
-### STRICT RULES (NO EXCEPTIONS):
-
-1. **ZERO HALLUCINATION:**
-   - Answer ONLY from the 'CONTEXT & KNOWLEDGE' provided above
-   - If information is missing from context, say: "I don't have that specific detail in Althaf's portfolio database. Could you rephrase or ask something else?"
-   - NEVER invent skills, projects, certifications, or contact details
-
-2. **SPECIFIC ANSWERS:**
-   - For skills: List actual tools (Docker, Kubernetes, Terraform, Jenkins, etc.), NOT generic terms like "Cloud Computing"
-   - For projects: Give project names and tech stacks from context
-   - For certifications: Provide exact count and names (AWS, GCP, Azure certifications)
-   - For contact: Provide actual email, phone, LinkedIn from context
-
-3. **GREETING HANDLING:**
-   - For simple greetings (Hi, Hello): Respond warmly without needing database data
-   - Example: "Hello! I'm Allu Bot, Althaf's portfolio assistant. How can I help you learn about his DevOps experience and projects?"
-
-4. **CONVERSATIONAL CONTEXT:**
-   - "What are those?" "Tell me more" "Which ones?" → Infer from previous context in conversation
-   - If you cannot infer, ask user to clarify
-
-5. **REFUSAL LOGIC (ONLY for truly irrelevant questions):**
-   - Refuse ONLY if user asks completely unrelated factual questions (e.g., "Capital of Mars", "Recipe for pizza")
-   - DO NOT refuse valid portfolio questions like: resume, contact number, LinkedIn, certifications list, project details
-   - Refusal message: "Sorry, the question asked is not related to the portfolio. I can't answer that question. Try something portfolio-related."
-
-6. **FORMATTING:**
-   - Write in smooth, natural paragraphs
-   - NO word hyphenation at line ends
-   - Use bullet points for lists (skills, certifications, achievements)
-   - Keep responses professional but conversational
-
-7. **ROUTING:**
-   - Project questions → Focus on technical stack, implementation, outcomes
-   - Blog questions → Summarize writing topics and technical content
-   - Skills questions → Be specific with tools and technologies
-   - Experience questions → Highlight role, responsibilities, achievements
-
-Now, respond to the user's message based on the above rules and context."""
-
-        # Generate Response with Fallback
-        try:
-            model = genai.GenerativeModel('gemini-1.5-flash')
-            response = model.generate_content(f"{system_instruction}\\nUser: {message}")
-        except Exception as e:
-            logger.warning(f"Primary model failed ({e}). Using Gemma 12B fallback")
-            model = genai.GenerativeModel('gemma-3-12b-it')
-            response = model.generate_content(f"{system_instruction}\\nUser: {message}")
+        # Update conversation history (keep last 10 messages = 5 turns)
+        history.append({"role": "user", "content": message})
+        history.append({"role": "assistant", "content": response_text})
+        if len(history) > 10:
+            history = history[-10:]
+        conversation_sessions[session_id] = history
+        
+        # Cache successful response
+        response_cache.set(message, response_text, history)
         
         return JSONResponse(
             status_code=200,
-            content={"reply": response.text, "source": "Portfolio"}
+            content={"reply": response_text, "source": "Multi-Provider AI"}
         )
         
     except Exception as e:
         logger.error(f"Error in ask_agent: {str(e)}")
         return JSONResponse(
             status_code=500,
-            content={"reply": "I apologize, but I encountered a system error. Please try again.", "source": None}
+            content={"reply": "I'm having technical difficulties. Please try again in a moment."}
         )
 
+# Include router
 app.include_router(api_router)
 
 if __name__ == "__main__":

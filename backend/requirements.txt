@@ -10,7 +10,7 @@ pydantic>=2.6.4
 email-validator>=2.2.0
 pyjwt>=2.10.1
 passlib>=1.7.4
-tzdata>=2024.2
+tzdata>=2.4.2
 motor==3.3.1
 pytest>=8.0.0
 black>=24.1.1
@@ -26,7 +26,6 @@ aiohttp>=3.9.5
 pandas>=2.2.0
 numpy==1.26.4
 python-multipart>=0.0.9
-numpy==1.26.4
 jq>=1.6.0
 typer>=0.9.0
 gunicorn
@@ -38,3 +37,4 @@ feedparser==6.0.10
 bleach>=6.1.0
 APScheduler>=3.10.4
 nest_asyncio>=1.6.0
+gradio_client>=0.15.0
