@@ -112,7 +112,6 @@ The existing API endpoints continue to work with the new implementation:
 
 Required environment variables:
 - `GOOGLE_API_KEY` or `GEMINI_API_KEY`: For Gemini API access
-- `OPENAI_API_KEY`: (Optional) For fallback to OpenAI
 
 ## Next Steps
 

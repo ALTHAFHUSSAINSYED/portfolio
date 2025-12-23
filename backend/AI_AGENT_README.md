@@ -22,7 +22,6 @@ GEMINI_API_KEY="your_gemini_api_key"  # Get from https://makersuite.google.com/a
 SERPER_API_KEY="your_serper_dev_api_key"  # Get from https://serper.dev
 
 # Optional Fallbacks
-OPENAI_API_KEY="your_openai_api_key"  # Optional fallback
 NEWS_API_KEY="your_news_api_key"  # For enhanced news content
 ```
 
@@ -32,7 +31,6 @@ The system uses services in this order:
 
 1. **AI Services**: 
    - Gemini API (primary)
-   - OpenAI API (fallback)
 
 2. **Search Services**:
    - Serper.dev API (primary)
