@@ -11,6 +11,7 @@ const Chatbot = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [hasUnread, setHasUnread] = useState(true);
+  const [isMaximized, setIsMaximized] = useState(false);
   const messagesEndRef = useRef(null);
 
   // Conversation memory to track context - MOVED TO COMPONENT LEVEL
@@ -286,10 +287,13 @@ const Chatbot = () => {
         </button>
       </div>
 
+
+
       {isOpen && (
-        <div className="chatbot-window">
+        <div className={`chatbot-window ${isMaximized ? 'maximized' : ''}`}>
           <div className="chatbot-header">
             <div className="chatbot-avatar" aria-hidden="true">
+              {/* ... (avatar code) ... */}
               <img
                 src="/profile-pic.jpg"
                 alt="Allu Bot"
@@ -318,7 +322,39 @@ const Chatbot = () => {
               <p className="chatbot-title">Allu Bot</p>
               <p className="chatbot-subtitle">Portfolio Assistant</p>
             </div>
-            <button className="close-button" onClick={toggleChat} aria-label="Close chat">×</button>
+
+            {/* Minimize Button */}
+            <button
+              className="header-control-button minimize-button"
+              onClick={() => setIsOpen(false)}
+              aria-label="Minimize chat"
+            >
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+                <path d="M5 12H19" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
+              </svg>
+            </button>
+
+            {/* Maximize Button */}
+            <button
+              className="header-control-button maximize-button"
+              onClick={() => setIsMaximized(!isMaximized)}
+              aria-label="Maximize chat"
+            >
+              {isMaximized ? (
+                // Restore icon
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18">
+                  <path d="M15 3V9H21M9 21H3V15" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              ) : (
+                // Maximize icon (Square)
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18">
+                  <rect x="4" y="4" width="16" height="16" rx="2" stroke="white" strokeWidth="2.5" />
+                </svg>
+              )}
+            </button>
+
+            {/* Close Button */}
+            <button className="header-control-button close-button" onClick={toggleChat} aria-label="Close chat">×</button>
           </div>
 
           <div className="chatbot-messages custom-scrollbar">

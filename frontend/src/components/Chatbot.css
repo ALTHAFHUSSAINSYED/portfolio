@@ -209,7 +209,8 @@
   font-weight: 500;
 }
 
-.close-button {
+/* Shared style for all header buttons */
+.header-control-button {
   background: rgba(255, 255, 255, 0.2);
   border: none;
   font-size: 20px;
@@ -224,14 +225,25 @@
   border-radius: 50%;
   box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12), 0 0 0 2px #e5e7eb;
   border: 1.5px solid #e5e7eb;
-  margin: 0 2px;
+  margin: 0 4px;
   transition: background-color 0.2s;
-  margin-left: 8px;
   padding: 0;
 }
 
-.close-button:hover {
+.header-control-button:hover {
   background-color: rgba(255, 255, 255, 0.3);
+}
+
+.close-button {
+  /* Inherits from header-control-button */
+}
+
+/* Maximized state */
+.chatbot-window.maximized {
+  width: 600px !important;
+  height: 80vh !important;
+  max-width: 90vw;
+  max-height: 90vh;
 }
 
 .chatbot-messages {
