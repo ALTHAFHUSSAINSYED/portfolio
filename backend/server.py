@@ -203,14 +203,44 @@ class BlogPostRequest(BaseModel):
     topic: Optional[str] = None
 
 # --- HELPER FUNCTIONS ---
+
+def is_greeting_or_conversational(text: str) -> tuple:
+    """
+    Detect if message is a greeting or conversational (skip database for these).
+    Returns (is_greeting, sentiment)
+    """
+    text = text.lower().strip()
+    
+    # Greetings - simple short messages
+    greetings = ['hi', 'hello', 'hey', 'good morning', 'good evening', 'hola', 'greetings', 'namaste']
+    if any(text.startswith(g) for g in greetings) and len(text.split()) < 5:
+        return True, "neutral"
+    
+    # Conversational closings
+    closings = ['bye', 'goodbye', 'see you', 'thanks', 'thank you', 'ok', 'okay', 'good', 'great']
+    if any(text == c for c in closings):
+        return True, "neutral"
+        
+    # Frustration/negative sentiment
+    frustration = ['stupid', 'dumb', 'useless', 'bad', 'worst', 'hate', 'wrong', 'incorrect', 'hallucinating']
+    if any(w in text for w in frustration):
+        return False, "frustrated"  # Still need database, but sentiment detected
+        
+    return False, "neutral"
 async def get_portfolio_context(query: str) -> str:
+    """
+    Smart RAG retrieval with keyword-based collection routing.
+    """
     all_context = []
+    query_lower = query.lower()
+    
     try:
         chroma_api_key = os.getenv('CHROMA_API_KEY')
         chroma_tenant = os.getenv('CHROMA_TENANT') or os.getenv('CHROMA_TENANT_ID')
         chroma_database = os.getenv('CHROMA_DATABASE')
         
         if not (chroma_api_key and chroma_tenant and chroma_database):
+            logger.warning("ChromaDB credentials missing")
             return ""
             
         chroma_client = chromadb.CloudClient(
@@ -219,37 +249,57 @@ async def get_portfolio_context(query: str) -> str:
             database=chroma_database
         )
         
-        collection_names = ['portfolio', 'Blogs_data', 'Projects_data']
+        # Smart Collection Routing based on keywords
+        collections_to_query = set()
         
-        for collection_name in collection_names:
+        # Always query portfolio (general info, skills, experience, contact)
+        collections_to_query.add('portfolio')
+        
+        # Query Projects_data if project-related keywords detected
+        project_keywords = ['project', 'projects', 'built', 'developed', 'app', 'application', 'work', 'portfolio']
+        if any(keyword in query_lower for keyword in project_keywords):
+            collections_to_query.add('Projects_data')
+        
+        # Query Blogs_data if blog-related keywords detected
+        blog_keywords = ['blog', 'blogs', 'article', 'articles', 'write', 'writing', 'post', 'recent']
+        if any(keyword in query_lower for keyword in blog_keywords):
+            collections_to_query.add('Blogs_data')
+        
+        # Fallback: If no specific keywords, query all collections lightly
+        if len(collections_to_query) == 1:  # Only portfolio
+            collections_to_query.add('Projects_data')
+            collections_to_query.add('Blogs_data')
+        
+        for collection_name in collections_to_query:
             try:
                 collection = chroma_client.get_collection(
                     name=collection_name,
                     embedding_function=GeminiEmbeddingFunction()
                 )
                 
-                # Prioritization Rules (User Request):
-                # 1. Portfolio: Fetch ALL relevant items (Limit 20 covering skills, exp, basic info)
-                # 2. Projects: Fetch top 3
-                # 3. Blogs: Fetch top 5 for tech context
+                # Limit based on collection type
                 if collection_name == 'portfolio':
-                    limit = 20 
+                    limit = 15  # Comprehensive coverage
                 elif collection_name == 'Projects_data':
-                    limit = 3
-                else: 
-                    limit = 5
+                    limit = 3   # Top 3 projects
+                else:  # Blogs_data
+                    limit = 3   # Top 3 blogs
                 
                 results = collection.query(query_texts=[query], n_results=limit)
                 docs = results.get('documents', [[]])[0]
                 
-                # Label the context with source for better LLM understanding
-                labeled_docs = [f"[Source: {collection_name}]\n{d}" for d in docs]
-                all_context.extend(labeled_docs)
+                if docs:
+                    # Label context with source
+                    labeled_docs = [f"[Source: {collection_name}]\n{d}" for d in docs]
+                    all_context.extend(labeled_docs)
             except Exception as e:
                 logger.warning(f"Skipping collection {collection_name}: {e}")
                 continue
         
-        return '\n\n'.join(all_context)
+        context_text = '\n\n'.join(all_context)
+        logger.info(f"Retrieved context length: {len(context_text)} characters")
+        return context_text
+        
     except Exception as e:
         logger.error(f"ChromaDB Error: {e}")
         return ""
@@ -534,45 +584,103 @@ async def get_blogs():
 
 @api_router.post("/ask-all-u-bot")
 async def ask_agent(query: dict):
+    """
+    Enterprise-grade chatbot endpoint with strict no-hallucination rules.
+    """
     message = query.get('message', '')
+    
+    if not message:
+        return JSONResponse(
+            status_code=400,
+            content={"reply": "I'm listening. How can I help you with Althaf's portfolio?"}
+        )
+    
     try:
-        portfolio_context = await get_portfolio_context(message)
+        # Detect if message is a greeting or conversational
+        is_greeting, sentiment = is_greeting_or_conversational(message)
+        
+        portfolio_context = ""
+        
+        # Skip database for simple greetings
+        if not is_greeting:
+            portfolio_context = await get_portfolio_context(message)
+        
         genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
         
-        system_instruction = f"""You are 'Allu Bot', the AI portfolio assistant for Althaf Hussain Syed.
-        Your Persona:
-        - You are an assistant, NOT Althaf. Refer to him as "Althaf" or "He".
-        - You are professional, concise, and helpful.
-        
-        Strict Rules:
-        1. **Intent Classification**: First, determine the user's intent.
-           - **Social/Conversational**: functionality (Greetings, Compliments, Small Talk, Frustration). -> **Action**: Respond naturally, intelligently, and empathetically. Do NOT use the refusal message. Be human-like.
-           - **Self-Query**: "Who are you?", "How do you work?" -> **Action**: Say "I am an AI assistant. My name is Allu bot. I am powered by Google Gemini and use RAG to search Althaf's portfolio to provide accurate answers."
-           - **Portfolio Information**: Questions about Skills, Projects, Experience, Contact. -> **Action**: Answer ONLY using the Context below.
-        
-        2. **Refusal Logic (Only for Irrelevant Information)**:
-           - IF the user asks for factual information NOT in the Context (e.g., "Capital of Mars", "Recipe for pizza"), AND it is NOT a social query:
-           - THEN say: "Sorry, the question asked is not related to the portfolio. I can't answer you that question. Try something else related to the portfolio."
-        
-        3. **Zero Hallucination**: Never invent skills or projects.
-        
-        Context: {portfolio_context}"""
-        
-        # Security: API Key is loaded via os.getenv above. No hardcoded keys.
-        
-        # Primary Model: Gemini Flash Latest (Best for Context)
+        # Enterprise-Grade System Prompt (Based on Flask Template)
+        system_instruction = f"""You are **Allu Bot**, a high-end enterprise AI assistant for **Althaf Hussain Syed**.
+
+### CORE IDENTITY:
+* **'He', 'Him', or 'The Developer'** ALWAYS refers to **Althaf Hussain Syed**.
+* You are an assistant, NOT Althaf. Speak about him in third person.
+
+### CONTEXT & KNOWLEDGE:
+{portfolio_context if portfolio_context else "No specific database info retrieved for this query. Handle as conversational turn or inform user you need portfolio-specific questions."}
+
+### USER SENTIMENT: {sentiment.upper()}
+* **If FRUSTRATED:** Be deeply empathetic and apologetic. Acknowledge the mistake and try to provide correct information.
+* **If NEUTRAL/HAPPY:** Be professional, energetic, and helpful.
+
+### STRICT RULES (NO EXCEPTIONS):
+
+1. **ZERO HALLUCINATION:**
+   - Answer ONLY from the 'CONTEXT & KNOWLEDGE' provided above
+   - If information is missing from context, say: "I don't have that specific detail in Althaf's portfolio database. Could you rephrase or ask something else?"
+   - NEVER invent skills, projects, certifications, or contact details
+
+2. **SPECIFIC ANSWERS:**
+   - For skills: List actual tools (Docker, Kubernetes, Terraform, Jenkins, etc.), NOT generic terms like "Cloud Computing"
+   - For projects: Give project names and tech stacks from context
+   - For certifications: Provide exact count and names (AWS, GCP, Azure certifications)
+   - For contact: Provide actual email, phone, LinkedIn from context
+
+3. **GREETING HANDLING:**
+   - For simple greetings (Hi, Hello): Respond warmly without needing database data
+   - Example: "Hello! I'm Allu Bot, Althaf's portfolio assistant. How can I help you learn about his DevOps experience and projects?"
+
+4. **CONVERSATIONAL CONTEXT:**
+   - "What are those?" "Tell me more" "Which ones?" → Infer from previous context in conversation
+   - If you cannot infer, ask user to clarify
+
+5. **REFUSAL LOGIC (ONLY for truly irrelevant questions):**
+   - Refuse ONLY if user asks completely unrelated factual questions (e.g., "Capital of Mars", "Recipe for pizza")
+   - DO NOT refuse valid portfolio questions like: resume, contact number, LinkedIn, certifications list, project details
+   - Refusal message: "Sorry, the question asked is not related to the portfolio. I can't answer that question. Try something portfolio-related."
+
+6. **FORMATTING:**
+   - Write in smooth, natural paragraphs
+   - NO word hyphenation at line ends
+   - Use bullet points for lists (skills, certifications, achievements)
+   - Keep responses professional but conversational
+
+7. **ROUTING:**
+   - Project questions → Focus on technical stack, implementation, outcomes
+   - Blog questions → Summarize writing topics and technical content
+   - Skills questions → Be specific with tools and technologies
+   - Experience questions → Highlight role, responsibilities, achievements
+
+Now, respond to the user's message based on the above rules and context."""
+
+        # Generate Response with Fallback
         try:
-            model = genai.GenerativeModel('models/gemini-flash-latest')
-            response = model.generate_content(f"{system_instruction}\nUser: {message}")
+            model = genai.GenerativeModel('models/gemini-1.5-flash')
+            response = model.generate_content(f"{system_instruction}\\nUser: {message}")
         except Exception as e:
-            logger.warning(f"Primary model failed ({e}). Switching to Fallback: Gemma 12b")
-            # Fallback Model: Gemma 3 12b IT (User requested "Gamma")
-            model = genai.GenerativeModel('models/gemma-3-12b-it')
-            response = model.generate_content(f"{system_instruction}\nUser: {message}")
+            logger.warning(f"Primary model failed ({e}). Using Gemini Flash Latest fallback")
+            model = genai.GenerativeModel('models/gemini-flash-latest')
+            response = model.generate_content(f"{system_instruction}\\nUser: {message}")
         
-        return JSONResponse(status_code=200, content={"reply": response.text, "source": "Portfolio"})
+        return JSONResponse(
+            status_code=200,
+            content={"reply": response.text, "source": "Portfolio"}
+        )
+        
     except Exception as e:
-        return JSONResponse(status_code=500, content={"reply": f"Error: {str(e)}", "source": None})
+        logger.error(f"Error in ask_agent: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"reply": "I apologize, but I encountered a system error. Please try again.", "source": None}
+        )
 
 app.include_router(api_router)
 
