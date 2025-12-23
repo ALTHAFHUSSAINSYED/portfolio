@@ -329,7 +329,7 @@ const Chatbot = () => {
               onClick={() => setIsOpen(false)}
               aria-label="Minimize chat"
             >
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
                 <path d="M5 12H19" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
               </svg>
             </button>
@@ -342,12 +342,12 @@ const Chatbot = () => {
             >
               {isMaximized ? (
                 // Restore icon
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="14" height="14">
                   <path d="M15 3V9H21M9 21H3V15" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               ) : (
                 // Maximize icon (Square)
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="14" height="14">
                   <rect x="4" y="4" width="16" height="16" rx="2" stroke="white" strokeWidth="2.5" />
                 </svg>
               )}

@@ -213,19 +213,19 @@
 .header-control-button {
   background: rgba(255, 255, 255, 0.2);
   border: none;
-  font-size: 20px;
+  font-size: 18px;
   cursor: pointer;
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   object-fit: cover;
   border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12), 0 0 0 2px #e5e7eb;
-  border: 1.5px solid #e5e7eb;
-  margin: 0 4px;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12), 0 0 0 1.5px #e5e7eb;
+  border: 1px solid #e5e7eb;
+  margin: 0 2px;
   transition: background-color 0.2s;
   padding: 0;
 }
