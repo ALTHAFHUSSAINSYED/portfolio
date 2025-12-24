@@ -1,172 +1,188 @@
 """
-Blog Writer Module
-Generates 2500-word technical blogs using Multi-Tier AI models (Gemini Priority)
+Auto-Blogger Writer Module (Agentic Architecture)
+Orchestrates the multi-agent generation pipeline:
+1. Research Context -> Outliner (Llama 405B) -> Blog Outline
+2. Outline Sections -> Drafter (Llama 8B) -> Full Content (Section by Section)
 """
 
-import os
 import logging
+import os
 import json
+import re
 import time
-import google.generativeai as genai
-from typing import Dict, Any, Optional
-from dotenv import load_dotenv
-from .models.model_config import MODELS_CONFIG, BLOG_SPECS
+from typing import Dict, List, Optional
+from openai import OpenAI
+from backend.auto_blogger.models.model_config import AGENT_ROLES, BLOG_SPECS
 
-# Configure logging
+# Configure Logging
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("BlogWriter")
+logger = logging.getLogger("BlogWriterAgent")
 
 class BlogWriter:
     def __init__(self):
-        # Load env vars
-        load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), '.env'))
+        self.api_key = os.getenv("CHATBOT_KEY") or os.getenv("OPENROUTER_API_KEY")
+        if not self.api_key:
+            logger.error("Create CHATBOT_KEY env var for OpenRouter access.")
+            raise ValueError("Missing OpenRouter API Key")
         
-        # Setup Gemini
-        self.gemini_key = os.getenv("GEMINI_BLOG_API_KEY") or os.getenv("GEMINI_API_KEY")
-        if self.gemini_key:
-            genai.configure(api_key=self.gemini_key)
-        else:
-            logger.error("No Gemini API Key found!")
-
-        # Load Template
-        self.template_path = os.path.join(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
-            "BLOG_GENERATION_TEMPLATE.md"
+        self.client = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=self.api_key,
+            default_headers={
+                "HTTP-Referer": "https://portfolio-site.com",
+                "X-Title": "Auto-Blogger Agent"
+            }
         )
-        self.template_content = self._load_template()
 
-    def _load_template(self) -> str:
-        """Load the blog generation template"""
-        try:
-            with open(self.template_path, 'r', encoding='utf-8') as f:
-                return f.read()
-        except Exception as e:
-            logger.error(f"Failed to load template: {e}")
-            return ""
+    def generate_blog(self, category: str, research_data: Dict) -> str:
+        """
+        Main entry point for the Agentic Pipeline.
+        Phase 1: Outline Generation
+        Phase 2: Section-by-Section Drafting
+        Phase 3: Assembly
+        """
+        logger.info(f"🚀 Starting Agentic Generation for: {category}")
+        
+        # Step 1: Generate Outline
+        outline = self._agent_outliner(category, research_data)
+        if not outline:
+            raise RuntimeError("Agent 1 (Outliner) failed to produce a valid outline.")
+        
+        logger.info("✅ Outline Generated. Starting Section Drafting Loop (Agent 2)...")
 
-    def _call_gemini(self, model_id: str, prompt: str) -> Optional[str]:
-        """Call Gemini API"""
-        try:
-            logger.info(f"Calling Gemini model: {model_id}")
-            model = genai.GenerativeModel(model_id)
-            
-            generation_config = genai.types.GenerationConfig(
-                max_output_tokens=8192,
-                temperature=0.7,
-            )
-            
-            response = model.generate_content(prompt, generation_config=generation_config)
-            return response.text
-        except Exception as e:
-            logger.error(f"Gemini call failed for {model_id}: {e}")
-            return None
+        # Step 2: Loop through sections and draft content
+        full_content = self._agent_drafter_loop(category, outline, research_data)
+        
+        logger.info(f"🎉 Blog Generation Complete! Length: {len(full_content)} chars")
+        return full_content
 
-    def _call_openrouter(self, model_id: str, prompt: str) -> Optional[str]:
-        """Call OpenRouter API via OpenAI client"""
-        try:
-            from openai import OpenAI
-            api_key = os.getenv("CHATBOT_KEY")
-            if not api_key:
-                logger.error("CHATBOT_KEY not found for OpenRouter fallback")
-                return None
-
-            client = OpenAI(
-                base_url="https://openrouter.ai/api/v1",
-                api_key=api_key
-            )
-            
-            logger.info(f"Calling OpenRouter model: {model_id}")
-            response = client.chat.completions.create(
-                model=model_id,
-                messages=[
-                    {"role": "system", "content": "You are an elite technical blog writer."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=4000
-            )
-            return response.choices[0].message.content
-        except Exception as e:
-            logger.error(f"OpenRouter call failed for {model_id}: {e}")
-            return None
-
-    def generate_blog(self, research_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Generate a complete blog post draft"""
-        category = research_data.get("category", "Technology")
-        logger.info(f"Starting blog generation for: {category}")
-
-        # [Prompt construction omitted for brevity, keeping existing prompt]
+    def _agent_outliner(self, category: str, research_data: Dict) -> List[str]:
+        """
+        Agent 1: The Architect
+        Uses Llama 405B to create a structured outline based on research.
+        Returns a list of section headings.
+        """
+        model_cfg = AGENT_ROLES["orchestrator"]
+        model_id = model_cfg["primary"]
+        
         prompt = f"""
-        YOU ARE AN ELITE TECHNICAL BLOG WRITER.
+        You are an elite technical blog architect.
+        Topic: {category}
         
-        TASK: Write a 2500-word blog post for the category: {category}
-        
-        RESEARCH DATA (Use this for content/trends):
+        RESEARCH SUMMARY:
         {json.dumps(research_data, indent=2)}
-        
-        STRICT REQUIREMENTS:
-        1. **Word Count:** Target {BLOG_SPECS['target_word_count']} words. Minimum {BLOG_SPECS['min_word_count']}.
-        2. **Framework:** Use the "Change-Cost Integration Model (CCIM)" framework explicitly.
-        3. **Tone:** Authoritative, "Elite-Tier", opinionated. Define reality, don't just explain it.
-        4. **Structure:** Follow the template below EXACTLY.
-        5. **No Fluff:** Every sentence must add value. Include code snippets, real-world examples, and "knife sentences" (quotable/sharp).
-        
-        BLOG TEMPLATE STRUCTURE:
-        {self.template_content}
-        
+
+        TASK:
+        Create a detailed structural outline for a 2500-word technical blog.
+        The outline must follow this specific flow:
+        1. Title
+        2. Introduction (Hook + Problem Statement)
+        3. Core Concept Deep Dive
+        4. Technical Implementation / How-To (Code heavy)
+        5. Real-World Use Cases
+        6. Best Practices / Challenges
+        7. Future Trends
+        8. Conclusion
+
         OUTPUT FORMAT:
-        Return ONLY the raw Markdown text. Do not include "Here is the blog" or JSON wrapping.
-        start with title (h1).
+        Return ONLY a JSON list of section headers.
+        Example: ["Title: ...", "Introduction", "Section 1: ...", "Conclusion"]
+        Do not write the blog. Just the headers.
         """
 
-        # Iterate through tiers
-        draft_content = None
-        used_model = None
-
-        for model_cfg in MODELS_CONFIG:
-            logger.info(f"Trying Tier {model_cfg['tier']}: {model_cfg['name']}")
+        try:
+            logger.info(f"🤖 Output Agent calling {model_id}...")
+            response = self.client.chat.completions.create(
+                model=model_id,
+                messages=[
+                    {"role": "system", "content": "You are a JSON-only output assistant."},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=2000,
+                temperature=model_cfg["temperature"]
+            )
+            content = response.choices[0].message.content
             
-            if model_cfg['provider'] == 'gemini':
-                draft_content = self._call_gemini(model_cfg['model_id'], prompt)
-            elif model_cfg['provider'] == 'openrouter':
-                draft_content = self._call_openrouter(model_cfg['model_id'], prompt)
-            
-            if draft_content and len(draft_content) > 1000:
-                used_model = model_cfg['name']
-                logger.info(f"Successfully generated draft using {used_model}")
-                break
+            # Extract JSON list
+            match = re.search(r'\[.*\]', content, re.DOTALL)
+            if match:
+                outline = json.loads(match.group(0))
+                logger.info(f"📋 Outline created with {len(outline)} sections.")
+                return outline
             else:
-                logger.warning(f"Tier {model_cfg['tier']} failed or produced empty output.")
+                logger.error("Failed to parse JSON outline from model output.")
+                # Fallback simple split if JSON structure failed but text exists
+                return [line.strip() for line in content.split('\n') if line.strip() and (line[0].isdigit() or line.startswith('-'))]
 
-        if not draft_content:
-            raise Exception("All model tiers failed to generate blog draft.")
+        except Exception as e:
+            logger.error(f"❌ Outliner Agent Failed: {e}")
+            return []
 
-        # Construct Draft Object
-        draft = {
-            "title": self._extract_title(draft_content),
-            "content": draft_content,
-            "category": category,
-            "research_used": research_data,
-            "generated_at": time.time(),
-            "model_used": used_model,
-            "status": "draft"
-        }
+    def _agent_drafter_loop(self, category: str, outline: List[str], research_data: Dict) -> str:
+        """
+        Agent 2: The Builder (Loop)
+        Uses Llama 8B to write each section individually to maintain context and depth.
+        """
+        model_cfg = AGENT_ROLES["drafter"]
+        model_id = model_cfg["primary"]
         
-        return draft
+        full_draft = []
+        
+        for index, section in enumerate(outline):
+            logger.info(f"✍️ Drafting Section {index + 1}/{len(outline)}: {section}")
+            
+            # Context Chunking: Send strict context to avoid 8k limit
+            # Send: Research summary + Current Section Goal + Previous 200 words (for flow)
+            prev_context = full_draft[-1][-500:] if full_draft else "Start of blog."
+            
+            prompt = f"""
+            You are a technical writer drafting ONE section of a blog.
+            Blog Topic: {category}
+            Current Section: "{section}"
+            
+            Global Context (Research):
+            {json.dumps(research_data)[:3000]} # Truncated to save tokens
+            
+            Previous Paragraph (Connect to this):
+            "...{prev_context}"
+            
+            TASK:
+            Write the full content for the section "{section}".
+            - Length: Approx 300-400 words.
+            - Style: Authoritative, technical, engaging.
+            - If this is a code section, provide valid code snippets.
+            - Don't write "Here is the section". Just write the content.
+            """
 
-    def _extract_title(self, content: str) -> str:
-        """Extract H1 title from markdown"""
-        for line in content.split('\n'):
-            if line.startswith('# '):
-                return line.replace('# ', '').strip()
-        return "Untitled Blog Post"
+            try_count = 0
+            success = False
+            while try_count < 2 and not success:
+                try:
+                    response = self.client.chat.completions.create(
+                        model=model_id,
+                        messages=[{"role": "user", "content": prompt}],
+                        max_tokens=model_cfg["max_tokens"],
+                        temperature=model_cfg["temperature"]
+                    )
+                    content = response.choices[0].message.content.strip()
+                    
+                    # Formatting: Add Markdown Header
+                    if not content.startswith("#"):
+                        formatted_section = f"\n\n## {section}\n\n{content}"
+                    else:
+                        formatted_section = f"\n\n{content}"
+                        
+                    full_draft.append(formatted_section)
+                    success = True
+                    time.sleep(2) # Rate limit politeness
+                    
+                except Exception as e:
+                    logger.warning(f"⚠️ Draft Agent retry {try_count+1} for section '{section}': {e}")
+                    try_count += 1
+                    time.sleep(5) # Backoff
+            
+            if not success:
+                 logger.error(f"❌ Failed to draft section: {section}. Skipping.")
+                 full_draft.append(f"\n\n## {section}\n\n[Content Generation Failed for this section]")
 
-if __name__ == "__main__":
-    # Test
-    from .researcher import BlogResearcher
-    researcher = BlogResearcher()
-    res_data = researcher.get_fallback_research("DevOps")
-    
-    writer = BlogWriter()
-    draft = writer.generate_blog(res_data)
-    print(f"Generated Draft Title: {draft['title']}")
-    print(f"Length: {len(draft['content'])} chars")
+        return "".join(full_draft)

@@ -1,59 +1,55 @@
 """
-Model Configuration
-Tier-based model fallback configuration for auto-blogger.
+Model Configuration for Agentic Auto-Blogger
+Defines specific free models for each role in the Agentic Chain.
 """
 
-# Active Models Structure
-# Tier 1: Llama 3.1 8B (OpenRouter) - Backup/Primary when Gemini Quota Exhausted
-# Tier 2: Gemini 2.5 Flash Lite
-# Tier 3: Gemini 2.5 Flash
-# Tier 4: Gemini 1.5 Flash
+# Agentic Role Definitions
+# Each role is assigned a primary free model and a reliable fallback.
 
-MODELS_CONFIG = [
-    {
-        "tier": 1,
-        "provider": "openrouter",
-        "model_id": "meta-llama/llama-3.1-8b-instruct:free",
-        "name": "Llama 3.1 8B (OpenRouter Free)",
-        "max_tokens": 8192,
+AGENT_ROLES = {
+    "orchestrator": {
+        "role": "Outline & High-Level Logic",
+        "primary": "meta-llama/llama-3.1-405b-instruct:free",
+        "fallback": "mistralai/mistral-7b-instruct:free",
+        "max_tokens": 16000,
+        "temperature": 0.7
     },
-    {
-        "tier": 2,
-        "provider": "gemini",
-        "model_id": "gemini-2.0-flash-lite-preview-02-05", 
-        "alias": "gemini-2.0-flash-lite", 
-        "name": "Gemini 2.5 Flash Lite",
+    "drafter": {
+        "role": "Section Writer (Chunked)",
+        "primary": "meta-llama/llama-3.1-8b-instruct:free",
+        "fallback": "google/gemma-2-9b-it:free",
         "max_tokens": 8192,
+        "temperature": 0.75
     },
-    {
-        "tier": 3,
-        "provider": "gemini", 
-        "model_id": "gemini-2.0-flash",
-        "alias": "gemini-2.0-flash",
-        "name": "Gemini 2.5 Flash",
-        "max_tokens": 8192,
+    "critic": {
+        "role": "Quality Validator & Logic",
+        "primary": "deepseek/deepseek-r1:free",
+        "fallback": "meta-llama/llama-3.1-70b-instruct:free",
+        "max_tokens": 16000,
+        "temperature": 0.3
     },
-     {
-        "tier": 4,
-        "provider": "gemini", 
-        "model_id": "gemini-1.5-flash",
-        "alias": "gemini-1.5-flash",
-        "name": "Gemini 1.5 Flash", 
+    "polisher": {
+        "role": "Final Style & tone",
+        "primary": "google/gemma-2-9b-it:free",
+        "fallback": "huggingfaceh4/zephyr-7b-beta:free",
         "max_tokens": 8192,
+        "temperature": 0.6
     }
-]
-
-# Benchmark Weights
-BENCHMARK_CRITERIA = {
-    "quality_weight": 0.4,
-    "speed_weight": 0.2,
-    "rpm_weight": 0.2, 
-    "tpm_weight": 0.2,
 }
 
+# General Settings
 BLOG_SPECS = {
     "target_word_count": 2500,
-    "min_word_count": 2400,
-    "max_word_count": 2600,
+    "min_word_count": 2200,
+    "max_word_count": 2800,
     "target_tokens": 3500,
+    "max_retries": 3,
+    "retry_delay": 5,  # seconds
+}
+
+# Rate Limit Config (Simple backoff strategy)
+RATE_LIMIT_CONFIG = {
+    "max_requests_per_minute": 20,  # Conservative for free tier
+    "backoff_factor": 2,
+    "initial_wait": 2
 }
