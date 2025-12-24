@@ -144,8 +144,9 @@ async def lifespan(app: FastAPI):
             
             try:
                 scheduler_instance = BlogScheduler()
-                # Start with run_now=True to trigger immediate test execution
-                scheduler_instance.start(run_now=True)
+                # Production mode: use scheduled times only (6AM, 7AM, 10AM IST)
+                # Set run_now=True only for testing
+                scheduler_instance.start(run_now=False)
             except Exception as e:
                 print(f"❌ Scheduler thread error: {e}")
             finally:
