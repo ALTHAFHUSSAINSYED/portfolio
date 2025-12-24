@@ -125,43 +125,50 @@ class GeminiEmbeddingFunction(EmbeddingFunction):
 # Scheduler Setup
 scheduler = AsyncIOScheduler()
 
-# --- SCHEDULED BLOG GENERATION ---
-async def scheduled_blog_generation():
-    try:
-        logger.info("Starting scheduled blog generation")
-        topic = "Latest Trends in AI and Machine Learning"
-        content = gemini_service.generate_blog_post(topic)
-        
-        if content:
-            blog_data = {
-                "title": content["title"],
-                "content": content["content"],
-                "author": "Allu Bot",
-                "createdAt": datetime.now(timezone.utc),
-                "tags": content.get("tags", ["AI", "Technology"]),
-                "_id": "auto-" + datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
-            }
-            await notification_service.send_blog_notification(True, blog_data)
-            logger.info("✅ Blog posted successfully!")
-        else:
-            logger.error("❌ Blog generation failed - no content")
-    except Exception as e:
-        logger.error(f"Error in blog generation: {e}")
+
 
 # --- LIFESPAN MANAGER ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("🚀 Starting Scheduler...")
-    production_cron = CronTrigger(hour=1, minute=0, timezone=timezone.utc)
-    scheduler.add_job(scheduled_blog_generation, production_cron)
-    scheduler.start()
-    
-    if HAS_AGENT_SERVICE:
-        threading.Thread(target=agent_service.initialize_agent, daemon=True).start()
+    # Initialize & Start New Auto-Blogger Scheduler
+    print("🚀 Starting Auto-Blogger Scheduler...")
+    try:
+        from backend.auto_blogger.scheduler import BlogScheduler
+        blog_scheduler = BlogScheduler()
+        # Run scheduler in a separate thread loop or ensure it hooks into asyncio
+        # BlogScheduler.start() uses blocking asyncio.run(), so we should running its jobs differently
+        # actually BlogScheduler.start() creates its own AsyncIOScheduler.
+        # We can just start it directly if it doesn't block.
+        # Looking at scheduler.py implementation: start() calls run_forever(). This blocks!
+        # output of scheduler.py:
+        # scheduler = AsyncIOScheduler()
+        # ...
+        # scheduler.start()
+        # try: asyncio.get_event_loop().run_forever() ...
+        
+        # We need to NOT call start() which blocks. We should probably extract the scheduler setup
+        # or run it in a background thread.
+        # Let's import the class and use it non-blocking here if possible, 
+        # OR just run it in a thread. Thread is safer for now.
+        
+        def run_scheduler_thread():
+            # Create new event loop for this thread
+            import asyncio
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            
+            scheduler_instance = BlogScheduler()
+            scheduler_instance.start() # This blocks
+        
+        scheduler_thread = threading.Thread(target=run_scheduler_thread, daemon=True)
+        scheduler_thread.start()
+        logger.info("✅ Auto-Blogger Scheduler started in background thread")
+
+    except Exception as e:
+        logger.error(f"❌ Failed to start Auto-Blogger Scheduler: {e}")
     
     yield
-    print("🛑 Shutting down Scheduler...")
-    scheduler.shutdown()
+    print("🛑 Shutting down Server...")
 
 # --- APP INSTANCE ---
 app = FastAPI(title="Portfolio API", version="1.0.0", lifespan=lifespan)
