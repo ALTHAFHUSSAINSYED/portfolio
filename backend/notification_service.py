@@ -110,5 +110,26 @@ class NotificationService:
             logger.error(f"Resend Error: {e}")
             raise Exception(f"Failed to send email via Resend provider: {e}")
 
+    async def send_email(self, to_email: str, subject: str, body: str):
+        """Generic method to send an email"""
+        if not self.resend_api_key:
+            logger.error("Resend API key missing. Cannot send email.")
+            return
+
+        try:
+            params = {
+                "from": "Portfolio System <contact@althafportfolio.site>",
+                "to": [to_email],
+                "subject": subject,
+                "html": body
+            }
+            
+            response = resend.Emails.send(params)
+            logger.info(f"Generic email sent: {subject}")
+            return response
+        except Exception as e:
+            logger.error(f"Failed to send generic email: {e}")
+            raise e
+
 # Initialize global notification service
 notification_service = NotificationService()
