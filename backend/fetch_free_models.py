@@ -55,27 +55,28 @@ def list_free_models():
             if not model_id:
                 continue
 
-            # logic: ID ends with ":free" OR pricing is zero
-            is_free_id = ":free" in model_id.lower()
+            # STRICT SAFEGUARD: User requires BOTH suffix and confirmed zero pricing
+            is_free_suffix = ":free" in model_id.lower()
             
             pricing = model.get("pricing", {})
-            p_prompt = pricing.get("prompt")
-            p_comp = pricing.get("completion")
-            
-            # Check if pricing is explicitly '0' or 0 (some API return strings, some numbers)
-            # Safe check: convert to float if possible
             try:
-                is_zero_price = (float(p_prompt) == 0.0 and float(p_comp) == 0.0)
+                p_prompt = float(pricing.get("prompt", -1))
+                p_comp = float(pricing.get("completion", -1))
+                is_zero_price = (p_prompt == 0.0 and p_comp == 0.0)
             except (ValueError, TypeError):
                 is_zero_price = False
 
-            if is_free_id or is_zero_price:
+            # Logic: MUST match both criteria
+            if is_free_suffix and is_zero_price:
                 free_models.append({
                     "id": model_id,
                     "name": model.get("name", model_id),
                     "context_length": model.get("context_length", "Unknown"),
-                    "description": model.get("description", "")
+                    "description": model.get("description", ""),
+                    "pricing": f"In: ${p_prompt} / Out: ${p_comp}"
                 })
+            elif is_free_suffix and not is_zero_price:
+                print(f"⚠️ WARNING: Model {model_id} has ':free' suffix but non-zero price! (In: {p_prompt}, Out: {p_comp}) - SKIPPING")
 
         # Sort by context length (descending)
         def get_ctx(m):
