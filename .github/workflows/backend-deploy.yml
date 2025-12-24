@@ -48,6 +48,7 @@ jobs:  # WHAT jobs to run
           TO_EMAIL=${{ secrets.TO_EMAIL }}
           CHATBOT_KEY=${{ secrets.CHATBOT_KEY }}
           CHATBOT=${{ secrets.CHATBOT }}
+          GEMINI_BLOG_API_KEY=${{ secrets.GEMINI_BLOG_API_KEY }}
           EOF
           chmod 600 .env
 
@@ -111,6 +112,8 @@ jobs:  # WHAT jobs to run
             echo "CHROMA_DB_NAME=Development" >> .env
             echo "CHATBOT_KEY=${{ secrets.CHATBOT_KEY }}" >> .env
             echo "CHATBOT=${{ secrets.CHATBOT }}" >> .env
+            echo "GEMINI_BLOG_API_KEY=${{ secrets.GEMINI_BLOG_API_KEY }}" >> .env
+            echo "SERPER_API_KEY=${{ secrets.SERPER_API_KEY }}" >> .env
             cd ..
 
             # HARD CLEAN Docker & Disk Space (Aggressive)
