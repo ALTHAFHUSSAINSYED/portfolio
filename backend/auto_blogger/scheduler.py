@@ -149,16 +149,15 @@ class BlogScheduler:
             logger.error(f"Publishing failed: {e}")
             await self.notifier.send_failure(str(e), "Publishing Job")
 
-    def start(self):
-        """Start the scheduler"""
-        scheduler = AsyncIOScheduler()
+    def start(self, run_now: bool = False):
+        """Start the scheduler with proper event loop handling"""
+        # Get the event loop that was set for this thread by server.py
+        loop = asyncio.get_event_loop()
         
-        # Schedule Jobs (IST is +5:30)
-        # Assuming server time matches, or we use timezone
-        # If server is EC2 (UTC usually), 6 AM IST = 00:30 UTC. 7 AM IST = 01:30 UTC. 10 AM IST = 04:30 UTC.
-        # User said "6am or 7am" local time. Let's assume server configured or use UTC offsets.
-        # Just creating triggers for now.
+        # Create scheduler with the correct event loop
+        scheduler = AsyncIOScheduler(event_loop=loop)
         
+        # Schedule Production Jobs (IST timezone)
         # 6:00 AM IST -> Cleanup
         scheduler.add_job(self.run_cleanup_job, CronTrigger(hour=6, minute=0, timezone='Asia/Kolkata'))
         
@@ -168,11 +167,17 @@ class BlogScheduler:
         # 10:00 AM IST -> Publish
         scheduler.add_job(self.run_publishing_job, CronTrigger(hour=10, minute=0, timezone='Asia/Kolkata'))
         
-        logger.info("Scheduler started. Press Ctrl+C to exit.")
+        # Optional: Run immediately for testing
+        if run_now:
+            logger.info("🧪 TEST MODE: Running generation pipeline immediately...")
+            scheduler.add_job(self.run_generation_pipeline, 'date', run_date=datetime.now() + timedelta(seconds=10))
+            scheduler.add_job(self.run_publishing_job, 'date', run_date=datetime.now() + timedelta(seconds=120))
+        
+        logger.info("✅ BlogScheduler started with jobs: Cleanup@6AM, Generate@7AM, Publish@10AM IST")
         scheduler.start()
         
         try:
-            asyncio.get_event_loop().run_forever()
+            loop.run_forever()
         except (KeyboardInterrupt, SystemExit):
             pass
 
