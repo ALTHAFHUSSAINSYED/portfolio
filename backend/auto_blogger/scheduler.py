@@ -96,16 +96,20 @@ class BlogScheduler:
             research_data = self.researcher.analyze_trends(category)
             
             # 3. Write Draft
-            draft = self.writer.generate_blog(research_data)
+            draft = self.writer.generate_blog(category, research_data)
             
             # 4. Critique Loop (Max 3 retries)
             passed = False
             for i in range(3):
-                review = self.critic.evaluate(draft)
+                passed, review_json = self.critic.evaluate(draft, category)
+                try:
+                    review = json.loads(review_json)
+                except:
+                    review = {"score": 0, "verdict": "FAIL"}
+                
                 logger.info(f"Critique Iteration {i+1}: Score {review.get('score')}")
                 
-                if review.get('passed', False):
-                    passed = True
+                if passed:
                     break
                 
                 # If failed, revise based on feedback (Not implemented fully in writer yet, simple regeneration logic here)
