@@ -48,10 +48,8 @@ class BlogWriter:
         """Call Gemini API"""
         try:
             logger.info(f"Calling Gemini model: {model_id}")
-            # Map generic IDs to specific ones if needed, or use as is
             model = genai.GenerativeModel(model_id)
             
-            # Configure for long output
             generation_config = genai.types.GenerationConfig(
                 max_output_tokens=8192,
                 temperature=0.7,
@@ -63,12 +61,40 @@ class BlogWriter:
             logger.error(f"Gemini call failed for {model_id}: {e}")
             return None
 
+    def _call_openrouter(self, model_id: str, prompt: str) -> Optional[str]:
+        """Call OpenRouter API via OpenAI client"""
+        try:
+            from openai import OpenAI
+            api_key = os.getenv("CHATBOT_KEY")
+            if not api_key:
+                logger.error("CHATBOT_KEY not found for OpenRouter fallback")
+                return None
+
+            client = OpenAI(
+                base_url="https://openrouter.ai/api/v1",
+                api_key=api_key
+            )
+            
+            logger.info(f"Calling OpenRouter model: {model_id}")
+            response = client.chat.completions.create(
+                model=model_id,
+                messages=[
+                    {"role": "system", "content": "You are an elite technical blog writer."},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=4000
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            logger.error(f"OpenRouter call failed for {model_id}: {e}")
+            return None
+
     def generate_blog(self, research_data: Dict[str, Any]) -> Dict[str, Any]:
         """Generate a complete blog post draft"""
         category = research_data.get("category", "Technology")
         logger.info(f"Starting blog generation for: {category}")
 
-        # Construct Prompt
+        # [Prompt construction omitted for brevity, keeping existing prompt]
         prompt = f"""
         YOU ARE AN ELITE TECHNICAL BLOG WRITER.
         
@@ -101,6 +127,8 @@ class BlogWriter:
             
             if model_cfg['provider'] == 'gemini':
                 draft_content = self._call_gemini(model_cfg['model_id'], prompt)
+            elif model_cfg['provider'] == 'openrouter':
+                draft_content = self._call_openrouter(model_cfg['model_id'], prompt)
             
             if draft_content and len(draft_content) > 1000:
                 used_model = model_cfg['name']

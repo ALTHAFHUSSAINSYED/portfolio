@@ -86,9 +86,44 @@ class BlogCritic:
             return result
             
         except Exception as e:
-            logger.error(f"Evaluation failed: {e}")
-            # Fail-safe return
-            return {"score": 0, "passed": False, "error": str(e)}
+            logger.warning(f"Gemini evaluation failed: {e}. Trying OpenRouter fallback...")
+            return self._evaluate_openrouter(prompt)
+
+    def _evaluate_openrouter(self, prompt: str) -> Dict[str, Any]:
+        """Fallback evaluation using OpenRouter"""
+        try:
+            from openai import OpenAI
+            api_key = os.getenv("CHATBOT_KEY")
+            if not api_key:
+                raise Exception("CHATBOT_KEY not found")
+
+            client = OpenAI(
+                base_url="https://openrouter.ai/api/v1",
+                api_key=api_key
+            )
+            
+            response = client.chat.completions.create(
+                model="meta-llama/llama-3.1-8b-instruct",
+                messages=[
+                    {"role": "system", "content": "You are an elite blog critic. Output valid JSON only."},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=2000,
+                response_format={"type": "json_object"}
+            )
+            
+            content = response.choices[0].message.content
+            # Clean potential backticks
+            if "```json" in content:
+                content = content.replace("```json", "").replace("```", "")
+            elif "```" in content:
+                content = content.replace("```", "")
+                
+            return json.loads(content)
+            
+        except Exception as e:
+            logger.error(f"OpenRouter fallback failed: {e}")
+            return {"score": 0, "passed": False, "error": f"All critics failed: {str(e)}"}
 
 if __name__ == "__main__":
     # Test
