@@ -133,34 +133,25 @@ async def lifespan(app: FastAPI):
     # Initialize & Start New Auto-Blogger Scheduler
     print("🚀 Starting Auto-Blogger Scheduler...")
     try:
-        from backend.auto_blogger.scheduler import BlogScheduler
-        blog_scheduler = BlogScheduler()
-        # Run scheduler in a separate thread loop or ensure it hooks into asyncio
-        # BlogScheduler.start() uses blocking asyncio.run(), so we should running its jobs differently
-        # actually BlogScheduler.start() creates its own AsyncIOScheduler.
-        # We can just start it directly if it doesn't block.
-        # Looking at scheduler.py implementation: start() calls run_forever(). This blocks!
-        # output of scheduler.py:
-        # scheduler = AsyncIOScheduler()
-        # ...
-        # scheduler.start()
-        # try: asyncio.get_event_loop().run_forever() ...
-        
-        # We need to NOT call start() which blocks. We should probably extract the scheduler setup
-        # or run it in a background thread.
-        # Let's import the class and use it non-blocking here if possible, 
-        # OR just run it in a thread. Thread is safer for now.
-        
         def run_scheduler_thread():
-            # Create new event loop for this thread
+            """Run the BlogScheduler in a dedicated thread with its own event loop"""
             import asyncio
+            from backend.auto_blogger.scheduler import BlogScheduler
+            
+            # Create and set a new event loop for this thread
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             
-            scheduler_instance = BlogScheduler()
-            scheduler_instance.start() # This blocks
+            try:
+                scheduler_instance = BlogScheduler()
+                # Start with run_now=True to trigger immediate test execution
+                scheduler_instance.start(run_now=True)
+            except Exception as e:
+                print(f"❌ Scheduler thread error: {e}")
+            finally:
+                loop.close()
         
-        scheduler_thread = threading.Thread(target=run_scheduler_thread, daemon=True)
+        scheduler_thread = threading.Thread(target=run_scheduler_thread, daemon=True, name="AutoBloggerScheduler")
         scheduler_thread.start()
         logger.info("✅ Auto-Blogger Scheduler started in background thread")
 
