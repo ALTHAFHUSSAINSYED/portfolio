@@ -13,8 +13,8 @@ MODELS_CONFIG = [
     {
         "tier": 1,
         "provider": "openrouter",
-        "model_id": "meta-llama/llama-3.1-8b-instruct",
-        "name": "Llama 3.1 8B (OpenRouter)",
+        "model_id": "meta-llama/llama-3.1-8b-instruct:free",
+        "name": "Llama 3.1 8B (OpenRouter Free)",
         "max_tokens": 8192,
     },
     {
