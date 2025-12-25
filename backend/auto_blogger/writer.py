@@ -185,4 +185,41 @@ class BlogWriter:
                  logger.error(f"❌ Failed to draft section: {section}. Skipping.")
                  full_draft.append(f"\n\n## {section}\n\n[Content Generation Failed for this section]")
 
-        return "".join(full_draft)
+    
+    def revise_blog(self, draft: str, feedback: Dict) -> str:
+        """
+        Refines the draft based on Critic's specific feedback.
+        """
+        logger.info("🔧 Writer Agent: Revising draft based on feedback...")
+        
+        model_cfg = AGENT_ROLES["drafter"]
+        model_id = model_cfg["primary"]
+        
+        prompt = f"""
+        You are a technical editor refining a blog post.
+        
+        CRITIC FEEDBACK (WEAKNESSES TO FIX):
+        {json.dumps(feedback.get('weaknesses', []), indent=2)}
+        
+        CURRENT DRAFT:
+        {draft[:6000]} # Truncated
+        
+        TASK:
+        Rewrite the blog to address the weaknesses.
+        - Improve clarity and depth.
+        - Fix any mentioned structural issues.
+        - Maintain the original markdown formatting.
+        """
+        
+        try:
+            response = self.client.chat.completions.create(
+                model=model_id,
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=2000, # Revision limit
+                temperature=model_cfg["temperature"]
+            )
+            revised_content = response.choices[0].message.content.strip()
+            return revised_content
+        except Exception as e:
+            logger.error(f"❌ Revision failed: {e}")
+            return draft # Return original if revision fails

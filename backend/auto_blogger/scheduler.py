@@ -119,9 +119,9 @@ class BlogScheduler:
                 # To simplify without complex revision prompts, we might accept if > 85 on last try or just fail.
                 
                 if i < 2:
-                    logger.info("Score below gate. Regenerating...")
-                    # Ideally writer.revise(draft, feedback). For simplicity, we regenerate fresh.
-                    draft = self.writer.generate_blog(research_data)
+                    logger.info("Score below gate. Revising based on feedback...")
+                    # Smart Revision Loop
+                    draft = self.writer.revise_blog(draft, review)
             
             if not passed and review.get('score', 0) < 90:
                  # Strict fail
