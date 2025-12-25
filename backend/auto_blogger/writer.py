@@ -107,6 +107,10 @@ class BlogWriter:
             match = re.search(r'\[.*\]', content, re.DOTALL)
             if match:
                 outline = json.loads(match.group(0))
+                if outline is None:
+                    logger.error("JSON parsed to None.")
+                    return []
+                    
                 logger.info(f"📋 Outline created with {len(outline)} sections.")
                 return outline
             else:
