@@ -38,7 +38,7 @@ class BlogResearcher:
         }
         
         try:
-            response = requests.post(url, headers=headers, data=payload)
+            response = requests.post(url, headers=headers, data=payload, timeout=30)
             response.raise_for_status()
             return response.json()
         except Exception as e:
