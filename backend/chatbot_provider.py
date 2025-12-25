@@ -271,15 +271,15 @@ class ChatbotProvider:
         # Format messages
         messages = self._format_messages(query, context, history)
         
-        # Tier 1: OpenRouter - Llama 3.1 8B Instruct (Free)
-        logger.info("Trying Tier 1: OpenRouter - Llama 3.1 8B Instruct (Free)")
-        response = self._call_openrouter("meta-llama/llama-3.1-8b-instruct:free", messages, max_tokens)
+        # Tier 1: Mistral 7B Instruct (Free) - Fast & Reliable
+        logger.info("Trying Tier 1: Mistral 7B Instruct (Free)")
+        response = self._call_openrouter("mistralai/mistral-7b-instruct:free", messages, max_tokens)
         if response:
             return response
         
-        # Tier 2: OpenRouter - Mistral 7B Instruct (Free)
-        logger.info("Trying Tier 2: OpenRouter - Mistral 7B Instruct (Free)")
-        response = self._call_openrouter("mistralai/mistral-7b-instruct:free", messages, max_tokens)
+        # Tier 2: Llama 3.1 405B Instruct (Free) - Intelligent Fallback
+        logger.info("Trying Tier 2: Llama 3.1 405B Instruct (Free)")
+        response = self._call_openrouter("meta-llama/llama-3.1-405b-instruct:free", messages, max_tokens)
         if response:
             return response
         
