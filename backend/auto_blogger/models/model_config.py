@@ -16,8 +16,8 @@ AGENT_ROLES = {
     },
     "drafter": {
         "role": "Section Writer (Chunked)",
-        "primary": "meta-llama/llama-3.1-8b-instruct:free",
-        "fallback": "google/gemma-2-9b-it:free",
+        "primary": "mistralai/mistral-7b-instruct:free",
+        "fallback": "meta-llama/llama-3.1-8b-instruct:free",
         "max_tokens": 8192,
         "temperature": 0.75
     },
