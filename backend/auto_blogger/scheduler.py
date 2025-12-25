@@ -98,6 +98,14 @@ class BlogScheduler:
             # 3. Write Draft
             draft = self.writer.generate_blog(category, research_data)
             
+            # Safety Check: Ensure draft is valid
+            if not draft or len(draft) < 100:
+                error_msg = f"Draft generation failed or produced insufficient content (length: {len(draft) if draft else 0})"
+                logger.error(error_msg)
+                await self.notifier.send_failure(error_msg, f"Generation - {category}")
+                self.pending_draft = None
+                return
+            
             # 4. Critique Loop (Max 3 retries)
             passed = False
             for i in range(3):
