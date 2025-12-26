@@ -7,6 +7,7 @@ This document explains how to configure and use the AI agent service for your po
 The AI agent service powers two main features:
 1. **Automatic blog generation** - Creates daily blog posts on technology topics
 2. **Interactive chat agent** - Answers questions about your portfolio and related topics
+3. **Interactive chat agent** - Answers questions about your portfolio and related topics
 
 ## Configuration
 
