@@ -266,21 +266,41 @@ async def get_portfolio_context(query: str) -> str:
             database=chroma_database
         )
         
-        # Smart Collection Routing based on keywords
-        collections_to_query = set()
+    def detect_intent(q: str) -> str:
+        """
+        Classify user query intent to optimize RAG retrieval scope.
+        Returns: 'projects', 'aws_projects', 'blogs', or 'profile'
+        """
+        q = q.lower()
         
-        # Query Projects_data ONLY if project-related keywords detected
-        project_keywords = ['project', 'projects', 'built', 'developed', 'app', 'application', 'created', 'made', 'portfolio work']
-        if any(keyword in query_lower for keyword in project_keywords):
-            collections_to_query.add('Projects_data')
-        
-        # Query Blogs_data ONLY if blog-related keywords detected
-        blog_keywords = ['blog', 'blogs', 'article', 'articles', 'write', 'writing', 'post', 'wrote', 'published']
-        if any(keyword in query_lower for keyword in blog_keywords):
-            collections_to_query.add('Blogs_data')
-        
-        # ALWAYS query portfolio for general info (skills, experience, contact, etc.)
-        # This is the primary source for most queries
+        # 1. AWS / Cloud Projects (Specific Subset)
+        if any(k in q for k in ["aws", "cloud", "terraform", "infrastructure", "devops", "deploy"]):
+            return "aws_projects"
+            
+        # 2. General Projects
+        if any(k in q for k in ["project", "projects", "built", "worked on", "developed", "portfolio", "showcase"]):
+            return "projects"
+            
+        # 3. Blogs / Writing
+        if any(k in q for k in ["blog", "article", "write-up", "post", "writing", "published"]):
+            return "blogs"
+            
+        # 4. Default: Profile / Personal Info
+        return "profile"
+
+    # --- INTENT-BASED ROUTING ---
+    intent = detect_intent(query)
+    logger.info(f"🧠 Detected Intent: {intent.upper()}")
+    
+    collections_to_query = set()
+    
+    if intent == "aws_projects":
+        collections_to_query.add('Projects_data') # Will be filtered for AWS later (Task 2)
+    elif intent == "projects":
+        collections_to_query.add('Projects_data')
+    elif intent == "blogs":
+        collections_to_query.add('Blogs_data')
+    else: # limit to portfolio only for profile queries
         collections_to_query.add('portfolio')
         
         logger.info(f"Querying collections: {collections_to_query}")
