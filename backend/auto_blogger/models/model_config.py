@@ -9,30 +9,30 @@ Defines specific free models for each role in the Agentic Chain.
 AGENT_ROLES = {
     "orchestrator": {
         "role": "Outline & High-Level Logic",
-        "primary": "meta-llama/llama-3.1-405b-instruct:free",
-        "fallback": "mistralai/mistral-7b-instruct:free",
-        "max_tokens": 16000,
+        "primary": "mistralai/mistral-7b-instruct:free",  # Changed from 405B - more stable on free tier
+        "fallback": "google/gemma-2-9b-it:free",
+        "max_tokens": 1000,  # Reduced to stay within free tier limits
         "temperature": 0.7
     },
     "drafter": {
         "role": "Section Writer (Chunked)",
         "primary": "mistralai/mistral-7b-instruct:free",
         "fallback": "google/gemma-2-9b-it:free",
-        "max_tokens": 8192,
+        "max_tokens": 600,  # Reduced to avoid rate limit soft caps (~500-1000)
         "temperature": 0.75
     },
     "critic": {
         "role": "Quality Validator & Logic",
-        "primary": "deepseek/deepseek-r1:free",
-        "fallback": "meta-llama/llama-3.1-70b-instruct:free",
-        "max_tokens": 16000,
+        "primary": "mistralai/mistral-7b-instruct:free",  # Changed from DeepSeek - more reliable
+        "fallback": "google/gemma-2-9b-it:free",
+        "max_tokens": 800,  # Reduced for stability
         "temperature": 0.3
     },
     "polisher": {
         "role": "Final Style & tone",
         "primary": "google/gemma-2-9b-it:free",
-        "fallback": "huggingfaceh4/zephyr-7b-beta:free",
-        "max_tokens": 8192,
+        "fallback": "mistralai/mistral-7b-instruct:free",
+        "max_tokens": 600,
         "temperature": 0.6
     }
 }

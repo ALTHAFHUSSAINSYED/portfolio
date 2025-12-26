@@ -170,6 +170,13 @@ class BlogWriter:
                     )
                     content = response.choices[0].message.content.strip()
                     
+                    # Validate content is not empty
+                    if not content or len(content) < 50:
+                        logger.warning(f"Short/empty content received for section '{section}'. Retrying...")
+                        try_count += 1
+                        time.sleep(5)
+                        continue
+                    
                     # Formatting: Add Markdown Header
                     if not content.startswith("#"):
                         formatted_section = f"\n\n## {section}\n\n{content}"
@@ -178,7 +185,7 @@ class BlogWriter:
                         
                     full_draft.append(formatted_section)
                     success = True
-                    time.sleep(2) # Rate limit politeness
+                    time.sleep(5) # Increased delay for free tier (~5-6 RPM limit)
                     
                 except Exception as e:
                     logger.warning(f"⚠️ Draft Agent retry {try_count+1} for section '{section}': {e}")
@@ -188,6 +195,11 @@ class BlogWriter:
             if not success:
                  logger.error(f"❌ Failed to draft section: {section}. Skipping.")
                  full_draft.append(f"\n\n## {section}\n\n[Content Generation Failed for this section]")
+        
+        # Assemble and return the complete blog
+        complete_blog = "\n".join(full_draft)
+        logger.info(f"✅ Blog assembly complete: {len(complete_blog)} characters")
+        return complete_blog
 
     
     def revise_blog(self, draft: str, feedback: Dict) -> str:
