@@ -687,11 +687,18 @@ async def ask_agent(query: dict):
             logger.info(f"Retrieved context length: {context_length} characters")
         
         # Generate response using multi-provider system
+        start_time = datetime.now()
         response_text = chatbot_provider.generate_response(
             query=message,
             context=portfolio_context,
             history=history
         )
+        duration = (datetime.now() - start_time).total_seconds()
+        
+        # Task 7: Telemetry Logging
+        est_input_tok = (len(message) + len(portfolio_context)) / 4
+        est_output_tok = len(response_text) / 4
+        logger.info(f"📊 TELEMETRY: Intent={intent} | Context={len(portfolio_context)}c | In~{int(est_input_tok)}T | Out~{int(est_output_tok)}T | {duration:.2f}s")
         
         # Update conversation history (keep last 4 messages = 2 turns)
         history.append({"role": "user", "content": message})
