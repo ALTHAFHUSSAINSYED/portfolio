@@ -3,16 +3,21 @@
 Manual Blog Generation Test - Simplified
 Generates and publishes a blog WITHOUT critic validation
 """
-import sys
 import logging
-sys.path.insert(0, "/app")
+import sys
+import os
 
-# Configure logging
+# Configure logging to stdout explicitly
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s - [%(levelname)s] - %(message)s"
+    format="%(asctime)s - [%(name)s] - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)]
 )
 logger = logging.getLogger(__name__)
+
+# Force other loggers to info
+logging.getLogger("BlogWriterAgent").setLevel(logging.INFO)
+logging.getLogger("BlogWriterAgent").addHandler(logging.StreamHandler(sys.stdout))
 
 def main():
     logger.info("=" * 60)
