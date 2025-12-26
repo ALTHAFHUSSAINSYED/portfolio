@@ -234,11 +234,15 @@ class ChatbotProvider:
             return None
         
         try:
-            # Extract user message for simple prompt
-            user_msg = messages[-1]['content']
+            # Extract user message and PREPEND system prompt for Gemini
+            # Gemini Flash doesn't support 'system' role in this library version easily, so we sandwich.
+            system_instruction = messages[0]['content']
+            user_msg_content = messages[-1]['content']
+            
+            combined_prompt = f"{system_instruction}\n\n{user_msg_content}"
             
             model = genai.GenerativeModel('models/gemini-2.5-flash')
-            response = model.generate_content(user_msg)
+            response = model.generate_content(combined_prompt)
             
             logger.info(f"Gemini fallback success: {len(response.text)} chars")
             return response.text
