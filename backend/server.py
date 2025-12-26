@@ -333,9 +333,18 @@ async def get_portfolio_context(query: str) -> str:
                 docs = results.get('documents', [[]])[0]
                 
                 if docs:
-                    # Label context with source
-                    labeled_docs = [f"[Source: {collection_name}]\n{d}" for d in docs]
-                    all_context.extend(labeled_docs)
+                    # Pre-Summarization Layer (Task 3)
+                    summarized_docs = []
+                    for d in docs:
+                        if chatbot_provider:
+                            # Compress raw doc into bullet points
+                            summary = chatbot_provider.summarize_content(d)
+                            summarized_docs.append(f"[Source: {collection_name}]\n{summary}")
+                        else:
+                            # Fallback if provider unavailable
+                            summarized_docs.append(f"[Source: {collection_name}]\n{d[:800]}...")
+                            
+                    all_context.extend(summarized_docs)
             except Exception as e:
                 logger.warning(f"Skipping collection {collection_name}: {e}")
                 continue
