@@ -102,18 +102,21 @@ jobs:  # WHAT jobs to run
 
             # Update environment file
             cd backend
-            echo "MONGO_URL=${{ secrets.MONGO_URL }}" > .env
-            echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> .env
-            echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> .env
-            echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> .env
-            echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
-            echo "CHROMA_API_KEY=${{ secrets.CHROMA_API_KEY }}" >> .env
-            echo "CHROMA_TENANT_ID=${{ secrets.CHROMA_TENANT }}" >> .env
-            echo "CHROMA_DB_NAME=Development" >> .env
-            echo "CHATBOT_KEY=${{ secrets.CHATBOT_KEY }}" >> .env
-            echo "CHATBOT=${{ secrets.CHATBOT }}" >> .env
-            echo "GEMINI_BLOG_API_KEY=${{ secrets.GEMINI_BLOG_API_KEY }}" >> .env
-            echo "SERPER_API_KEY=${{ secrets.SERPER_API_KEY }}" >> .env
+            echo "MONGO_URL=${{ secrets.MONGO_URL }}" > .env.local
+            echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> .env.local
+            echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> .env.local
+            echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> .env.local
+            echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env.local
+            echo "CHROMA_API_KEY=${{ secrets.CHROMA_API_KEY }}" >> .env.local
+            echo "CHROMA_TENANT_ID=${{ secrets.CHROMA_TENANT }}" >> .env.local
+            echo "CHROMA_DB_NAME=Development" >> .env.local
+            echo "CHATBOT_KEY=${{ secrets.CHATBOT_KEY }}" >> .env.local
+            echo "CHATBOT_NEW_KEY=${{ secrets.CHATBOT_NEW_KEY }}" >> .env.local
+            echo "CHATBOT=${{ secrets.CHATBOT }}" >> .env.local
+            echo "GEMINI_BLOG_API_KEY=${{ secrets.GEMINI_BLOG_API_KEY }}" >> .env.local
+            echo "SERPER_API_KEY=${{ secrets.SERPER_API_KEY }}" >> .env.local
+            echo "RESEND_KEY=${{ secrets.RESEND_KEY }}" >> .env.local
+            echo "EMAIL_ADDRESS=${{ secrets.TO_EMAIL }}" >> .env.local
             cd ..
 
             # HARD CLEAN Docker & Disk Space (Aggressive)
@@ -123,14 +126,14 @@ jobs:  # WHAT jobs to run
             sudo apt-get clean
             sudo rm -rf /tmp/* /var/tmp/*
 
-            # Rebuild & run
-            docker build --no-cache -t portfolio-backend -f backend/Dockerfile .
+            # Rebuild & run (Using backend directory as context)
+            docker build --no-cache -t portfolio-backend backend
             docker run -d \
               --memory=5g \
               --name portfolio-backend \
               --restart always \
               -p 8000:8000 \
-              --env-file backend/.env \
+              --env-file backend/.env.local \
               portfolio-backend
 
       - name: Wait for container to start
