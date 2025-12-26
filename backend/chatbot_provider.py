@@ -121,9 +121,9 @@ class ChatbotProvider:
         current_date = datetime.now().strftime("%B %d, %Y")
         identity_context = f"MY IDENTITY: I am Allu Bot, Althaf's dedicated portfolio assistant. Today is {current_date}. The text below is my internal knowledge about Althaf."
         
-        # TRUNCATE CONTEXT (Increased to 6000 chars to include multiple projects)
-        # Most free models (Mistral/Gemini) support 8k+ tokens, so 6000 chars (~1500 tokens) is safe and necessary.
-        max_context_chars = 6000
+        # TRUNCATE CONTEXT (Increased to 12000 chars based on logs showing ~8800 chars retrieved)
+        # Safe for Mistral (8k tokens) and Gemini (1M tokens). 12000 chars ~= 3000 tokens.
+        max_context_chars = 12000
         if len(context) > max_context_chars:
             context = context[:max_context_chars] + "..."
             
