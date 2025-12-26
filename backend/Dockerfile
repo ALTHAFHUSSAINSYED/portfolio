@@ -13,7 +13,11 @@ RUN pip install --no-cache-dir -r requirements.txt \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /root/.cache/pip /tmp/*
 
-COPY . .
+COPY . backend/
+
+ENV PYTHONPATH=/app
+
+WORKDIR /app/backend
 
 EXPOSE 8000
 
