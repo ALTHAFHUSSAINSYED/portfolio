@@ -693,11 +693,11 @@ async def ask_agent(query: dict):
             history=history
         )
         
-        # Update conversation history (keep last 10 messages = 5 turns)
+        # Update conversation history (keep last 4 messages = 2 turns)
         history.append({"role": "user", "content": message})
         history.append({"role": "assistant", "content": response_text})
-        if len(history) > 10:
-            history = history[-10:]
+        if len(history) > 4:
+            history = history[-4:]
         conversation_sessions[session_id] = history
         
         # Cache successful response
