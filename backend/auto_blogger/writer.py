@@ -33,6 +33,7 @@ class BlogWriter:
                 "X-Title": "Auto-Blogger Agent"
             }
         )
+        print(f"DEBUG: Initialized Writer with Key: {self.api_key[:10]}...")
 
     def generate_blog(self, category: str, research_data: Dict) -> str:
         """
@@ -125,6 +126,9 @@ class BlogWriter:
                 
         except Exception as e:
             logger.error(f"Writer Agent Error: {e}")
+            print(f"DEBUG: WRITER EXCEPTION: {e}")
+            import traceback
+            traceback.print_exc()
             return None
 
     def _agent_drafter_loop(self, category: str, outline: List[str], research_data: Dict) -> str:
