@@ -58,8 +58,8 @@ class ChatbotProvider:
     
     def __init__(self):
         """Initialize all API clients"""
-        # OpenRouter
-        self.openrouter_key = os.getenv('CHATBOT_KEY')
+        # OpenRouter - Dedicated key for chatbot (isolated from auto-blogger)
+        self.openrouter_key = os.getenv('CHATBOT_NEW_KEY')
         self.openrouter_url = "https://openrouter.ai/api/v1/chat/completions"
         
         # Hugging Face
@@ -277,9 +277,9 @@ class ChatbotProvider:
         if response:
             return response
         
-        # Tier 2: Llama 3.1 405B Instruct (Free) - Intelligent Fallback
-        logger.info("Trying Tier 2: Llama 3.1 405B Instruct (Free)")
-        response = self._call_openrouter("meta-llama/llama-3.1-405b-instruct:free", messages, max_tokens)
+        # Tier 2: Gemma 2 9B (Free) - Stable Fallback
+        logger.info("Trying Tier 2: Gemma 2 9B (Free)")
+        response = self._call_openrouter("google/gemma-2-9b-it:free", messages, max_tokens)
         if response:
             return response
         
