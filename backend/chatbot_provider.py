@@ -290,6 +290,19 @@ class ChatbotProvider:
         # Format messages
         messages = self._format_messages(query, context, history)
         
+        # Runtime Guard: Input Token Budget Check (Task 5)
+        # Estimate: 4 chars ~= 1 token
+        estimated_input_chars = sum(len(m.get('content', '')) for m in messages)
+        estimated_input_tokens = estimated_input_chars / 4
+        
+        MAX_INPUT_TOKENS = 3800
+        if estimated_input_tokens > MAX_INPUT_TOKENS:
+            logger.warning(f"⚠️ Input budget exceeded ({int(estimated_input_tokens)} > {MAX_INPUT_TOKENS}). Truncating context.")
+            # Emergency truncate of the last user message (which contains the context)
+            last_msg = messages[-1]['content']
+            safe_length = int(MAX_INPUT_TOKENS * 3.5) # Safe char count
+            messages[-1]['content'] = last_msg[:safe_length] + "\n...[Context Truncated for Safety]"
+            
         # Tier 1: Mistral 7B Instruct (Free) - Fast & Reliable
         logger.info("Trying Tier 1: Mistral 7B Instruct (Free)")
         response = self._call_openrouter("mistralai/mistral-7b-instruct:free", messages, max_tokens)
