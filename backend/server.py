@@ -312,15 +312,24 @@ async def get_portfolio_context(query: str) -> str:
                     embedding_function=GeminiEmbeddingFunction()
                 )
                 
-                # Limit based on collection type
-                if collection_name == 'portfolio':
-                    limit = 15  # Comprehensive coverage
-                elif collection_name == 'Projects_data':
-                    limit = 3   # Top 3 projects
-                else:  # Blogs_data
-                    limit = 3   # Top 3 blogs
+                # Intent-Specific Retrieval Parameters (Task 2)
+                limit = 2
+                search_query = query
                 
-                results = collection.query(query_texts=[query], n_results=limit)
+                if intent == "aws_projects":
+                    limit = 2
+                    # Boost relevance for AWS queries
+                    search_query = f"AWS Cloud Infrastructure {query}"
+                elif intent == "projects":
+                    limit = 3
+                elif intent == "blogs":
+                    limit = 2
+                elif intent == "profile":
+                    limit = 2  # Focus on key bio/skills ONLY
+                
+                logger.info(f"Querying {collection_name} | Limit: {limit} | Query: {search_query}")
+                
+                results = collection.query(query_texts=[search_query], n_results=limit)
                 docs = results.get('documents', [[]])[0]
                 
                 if docs:
