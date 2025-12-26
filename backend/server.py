@@ -251,21 +251,7 @@ async def get_portfolio_context(query: str) -> str:
     all_context = []
     query_lower = query.lower()
     
-    try:
-        chroma_api_key = os.getenv('CHROMA_API_KEY')
-        chroma_tenant = os.getenv('CHROMA_TENANT') or os.getenv('CHROMA_TENANT_ID')
-        chroma_database = os.getenv('CHROMA_DATABASE') or os.getenv('CHROMA_DB_NAME')
-        
-        if not (chroma_api_key and chroma_tenant and chroma_database):
-            logger.warning("ChromaDB credentials missing")
-            return ""
-            
-        chroma_client = chromadb.CloudClient(
-            api_key=chroma_api_key,
-            tenant=chroma_tenant,
-            database=chroma_database
-        )
-        
+    # Intent Classifier (Helper)
     def detect_intent(q: str) -> str:
         """
         Classify user query intent to optimize RAG retrieval scope.
@@ -288,20 +274,36 @@ async def get_portfolio_context(query: str) -> str:
         # 4. Default: Profile / Personal Info
         return "profile"
 
-    # --- INTENT-BASED ROUTING ---
-    intent = detect_intent(query)
-    logger.info(f"🧠 Detected Intent: {intent.upper()}")
-    
-    collections_to_query = set()
-    
-    if intent == "aws_projects":
-        collections_to_query.add('Projects_data') # Will be filtered for AWS later (Task 2)
-    elif intent == "projects":
-        collections_to_query.add('Projects_data')
-    elif intent == "blogs":
-        collections_to_query.add('Blogs_data')
-    else: # limit to portfolio only for profile queries
-        collections_to_query.add('portfolio')
+    try:
+        chroma_api_key = os.getenv('CHROMA_API_KEY')
+        chroma_tenant = os.getenv('CHROMA_TENANT') or os.getenv('CHROMA_TENANT_ID')
+        chroma_database = os.getenv('CHROMA_DATABASE') or os.getenv('CHROMA_DB_NAME')
+        
+        if not (chroma_api_key and chroma_tenant and chroma_database):
+            logger.warning("ChromaDB credentials missing")
+            return ""
+            
+        chroma_client = chromadb.CloudClient(
+            api_key=chroma_api_key,
+            tenant=chroma_tenant,
+            database=chroma_database
+        )
+
+
+        # --- INTENT-BASED ROUTING ---
+        intent = detect_intent(query)
+        logger.info(f"🧠 Detected Intent: {intent.upper()}")
+        
+        collections_to_query = set()
+        
+        if intent == "aws_projects":
+            collections_to_query.add('Projects_data') # Will be filtered for AWS later (Task 2)
+        elif intent == "projects":
+            collections_to_query.add('Projects_data')
+        elif intent == "blogs":
+            collections_to_query.add('Blogs_data')
+        else: # limit to portfolio only for profile queries
+            collections_to_query.add('portfolio')
         
         logger.info(f"Querying collections: {collections_to_query}")
         

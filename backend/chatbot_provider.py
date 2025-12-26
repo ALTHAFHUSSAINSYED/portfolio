@@ -74,8 +74,13 @@ class ChatbotProvider:
         logger.info("ChatbotProvider initialized with all providers")
     
     def _detect_query_complexity(self, query: str) -> int:
-    
-    # ... (lines skipped) ...
+        """
+        Estimate tokens needed for response.
+        Simple heuristic: longer questions might need longer answers.
+        """
+        if len(query) > 200 or "explain" in query.lower() or "detail" in query.lower():
+            return 800
+        return 400
 
     def summarize_content(self, text: str) -> str:
         """
