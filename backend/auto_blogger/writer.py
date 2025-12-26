@@ -95,19 +95,36 @@ class BlogWriter:
             response = self.client.chat.completions.create(
                 model=model_id,
                 messages=[
-                    {"role": "system", "content": "You are a JSON-only output assistant."},
+                    {"role": "system", "content": "You are a JSON-only output assistant. Output ONLY a valid JSON list of strings."},
                     {"role": "user", "content": prompt}
                 ],
                 max_tokens=2000,
                 temperature=model_cfg["temperature"]
             )
             content = response.choices[0].message.content
+            logger.info(f"Raw Output: {content[:200]}...")
+
+            # Clean formatting
+            content = content.replace("```json", "").replace("```", "").strip()
             
-            # Extract JSON list
+            # Extract JSON list if embedded in text
             match = re.search(r'\[.*\]', content, re.DOTALL)
             if match:
-                outline = json.loads(match.group(0))
-                if outline is None:
+                content = match.group(0)
+
+            try:
+                outline = json.loads(content)
+                if isinstance(outline, list) and len(outline) > 0:
+                    return outline
+            except json.JSONDecodeError:
+                pass
+                
+            logger.error(f"Failed to parse outline JSON. Content: {content}")
+            return None
+                
+        except Exception as e:
+            logger.error(f"Writer Agent Error: {e}")
+            return None
                     logger.error("JSON parsed to None.")
                     return []
                     
