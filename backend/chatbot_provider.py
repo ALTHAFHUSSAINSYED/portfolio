@@ -239,21 +239,38 @@ class ChatbotProvider:
             return None
         
         try:
-            # Extract user message and PREPEND system prompt for Gemini
-            # Gemini Flash doesn't support 'system' role in this library version easily, so we sandwich.
+            # Extract user message and PREPEND system prompt for Gemini/Gemma
+            # We sandwich consistency across all models in the chain
             system_instruction = messages[0]['content']
             user_msg_content = messages[-1]['content']
-            
             combined_prompt = f"{system_instruction}\n\n{user_msg_content}"
             
-            model = genai.GenerativeModel('models/gemini-2.5-flash')
-            response = model.generate_content(combined_prompt)
+            # Fallback Chain: Try models in order until one works
+            # Different models often have separate rate limit buckets
+            models_to_try = [
+                "models/gemini-2.5-flash",  # Primary Flash
+                "models/gemma-3-12b-it",    # User Requested Backup (High Quality)
+                "models/gemini-1.5-flash"   # Legacy Flash (Reliable)
+            ]
             
-            logger.info(f"Gemini fallback success: {len(response.text)} chars")
-            return response.text
+            for model_id in models_to_try:
+                try:
+                    logger.info(f"Trying Gemini Fallback Model: {model_id}")
+                    model = genai.GenerativeModel(model_id)
+                    response = model.generate_content(combined_prompt)
+                    
+                    if response and response.text:
+                        logger.info(f"Gemini fallback success ({model_id}): {len(response.text)} chars")
+                        return response.text
+                except Exception as inner_e:
+                    logger.warning(f"Failed {model_id}: {inner_e}")
+                    continue
+            
+            logger.error("All Google GenAI models failed in chain")
+            return None
             
         except Exception as e:
-            logger.error(f"Gemini fallback error: {str(e)}")
+            logger.error(f"Gemini fallback major error: {str(e)}")
             return None
     
     def generate_response(self, query: str, context: str, history: List[Dict] = None) -> str:
