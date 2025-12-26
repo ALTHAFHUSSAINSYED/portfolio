@@ -8,6 +8,7 @@ import logging
 from typing import List, Dict, Optional
 import google.generativeai as genai
 from gradio_client import Client
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -116,11 +117,13 @@ class ChatbotProvider:
         else:
             greeting_hint = " (Context: Ongoing conversation. Do NOT greet. Answer directly.)"
         
-        # Custom Identity Injection
-        identity_context = "MY IDENTITY: I am Allu Bot, a specialized portfolio assistant. The text below is my internal knowledge about Althaf."
+        # Custom Identity Injection with DATE AWARENESS
+        current_date = datetime.now().strftime("%B %d, %Y")
+        identity_context = f"MY IDENTITY: I am Allu Bot, Althaf's dedicated portfolio assistant. Today is {current_date}. The text below is my internal knowledge about Althaf."
         
-        # TRUNCATE CONTEXT (keep it safe for free models)
-        max_context_chars = 3800
+        # TRUNCATE CONTEXT (Increased to 6000 chars to include multiple projects)
+        # Most free models (Mistral/Gemini) support 8k+ tokens, so 6000 chars (~1500 tokens) is safe and necessary.
+        max_context_chars = 6000
         if len(context) > max_context_chars:
             context = context[:max_context_chars] + "..."
             
