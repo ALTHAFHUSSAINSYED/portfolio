@@ -59,7 +59,7 @@ class BlogWriter:
     def _agent_outliner(self, category: str, research_data: Dict) -> List[str]:
         """
         Agent 1: The Architect
-        Uses Llama 405B to create a structured outline based on research.
+        Uses a robust model to create a structured outline based on research.
         Returns a list of section headings.
         """
         model_cfg = AGENT_ROLES["orchestrator"]
@@ -115,6 +115,7 @@ class BlogWriter:
             try:
                 outline = json.loads(content)
                 if isinstance(outline, list) and len(outline) > 0:
+                    logger.info(f"📋 Outline created with {len(outline)} sections.")
                     return outline
             except json.JSONDecodeError:
                 pass
@@ -125,19 +126,6 @@ class BlogWriter:
         except Exception as e:
             logger.error(f"Writer Agent Error: {e}")
             return None
-                    logger.error("JSON parsed to None.")
-                    return []
-                    
-                logger.info(f"📋 Outline created with {len(outline)} sections.")
-                return outline
-            else:
-                logger.error("Failed to parse JSON outline from model output.")
-                # Fallback simple split if JSON structure failed but text exists
-                return [line.strip() for line in content.split('\n') if line.strip() and (line[0].isdigit() or line.startswith('-'))]
-
-        except Exception as e:
-            logger.error(f"❌ Outliner Agent Failed: {e}")
-            return []
 
     def _agent_drafter_loop(self, category: str, outline: List[str], research_data: Dict) -> str:
         """
