@@ -9,6 +9,12 @@
     overflow: hidden;
     font-family: inherit;
     transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.linkedin-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
 }
 
 /* ========================================= */
@@ -27,6 +33,11 @@
     font-weight: 600;
     display: inline-flex;
     align-items: center;
+    transition: transform 0.3s ease;
+}
+
+.linkedin-logo:hover {
+    transform: scale(1.05);
 }
 
 .linkedin-logo span {
@@ -36,6 +47,12 @@
     border-radius: 4px;
     margin-left: 2px;
     font-size: 18px;
+    transition: all 0.3s ease;
+}
+
+.linkedin-logo:hover span {
+    background: #004182;
+    transform: scale(1.1);
 }
 
 /* ========================================= */
@@ -54,6 +71,12 @@
     object-fit: cover;
     margin-bottom: 16px;
     display: block;
+    transition: all 0.3s ease;
+}
+
+.linkedin-avatar:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(10, 102, 194, 0.5);
 }
 
 /* TEXT */
@@ -62,12 +85,36 @@
     font-weight: 700;
     margin: 0 0 12px 0;
     line-height: 1.2;
+    position: relative;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.linkedin-name::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background-color: #0a66c2;
+    transition: width 0.3s ease;
+}
+
+.linkedin-name:hover::after {
+    width: 100%;
 }
 
 .linkedin-role {
     font-size: 14px;
     line-height: 1.5;
     margin: 0 0 12px 0;
+    transition: all 0.3s ease;
+}
+
+.linkedin-role:hover {
+    transform: translateX(4px);
+    opacity: 1;
 }
 
 .linkedin-org {
@@ -75,6 +122,12 @@
     opacity: 0.85;
     margin: 0 0 20px 0;
     line-height: 1.4;
+    transition: all 0.3s ease;
+}
+
+.linkedin-org:hover {
+    transform: translateX(4px);
+    opacity: 1;
 }
 
 /* BUTTON */
@@ -90,7 +143,8 @@
 }
 
 .linkedin-button:hover {
-    transform: scale(1.02);
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 4px 12px rgba(10, 102, 194, 0.3);
 }
 
 /* ========================================= */
