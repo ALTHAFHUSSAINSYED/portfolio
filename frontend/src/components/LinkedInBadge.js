@@ -9,7 +9,6 @@ export default function LinkedInBadge({ theme }) {
         setShouldRender(false);
 
         // Then remount with new theme after brief delay
-        // This forces LinkedIn script to see a fresh element
         const timeout = setTimeout(() => {
             setShouldRender(true);
         }, 100);
@@ -19,7 +18,7 @@ export default function LinkedInBadge({ theme }) {
 
     return (
         <Card className="p-4 neon-card w-full flex justify-center items-center overflow-hidden transition-all hover:scale-[1.02]">
-            <div className="linkedin-badge-wrapper" style={{ width: '100%', maxWidth: '600px' }}>
+            <div className="linkedin-badge-wrapper">
                 {shouldRender && (
                     <div
                         className="badge-base LI-profile-badge"
@@ -29,7 +28,15 @@ export default function LinkedInBadge({ theme }) {
                         data-type="HORIZONTAL"
                         data-vanity="althafhussainsyed"
                         data-version="v1"
-                    />
+                    >
+                        {/* Official LinkedIn badge structure with anchor tag as primary content */}
+                        <a
+                            className="badge-base__link LI-simple-link"
+                            href="https://in.linkedin.com/in/althafhussainsyed?trk=profile-badge"
+                        >
+                            ALTHAF HUSSAIN SYED
+                        </a>
+                    </div>
                 )}
             </div>
         </Card>
