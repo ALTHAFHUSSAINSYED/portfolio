@@ -5,11 +5,13 @@ export default function CustomLinkedInCard({ theme }) {
 
     return (
         <div className={`linkedin-card ${isDark ? 'dark' : 'light'}`}>
-            <div className="linkedin-left">
+            {/* Header - LinkedIn logo */}
+            <div className="linkedin-header">
                 <span className="linkedin-logo">Linked<span>in</span></span>
             </div>
 
-            <div className="linkedin-right">
+            {/* Body - Profile content */}
+            <div className="linkedin-body">
                 <img
                     src="/profile-pic.jpg"
                     alt="Althaf Hussain Syed"
