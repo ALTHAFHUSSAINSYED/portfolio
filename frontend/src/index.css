@@ -1992,7 +1992,7 @@ html.dark {
   position: relative !important;
 }
 
-/* Badge element - scaled wider to match contact cards */
+/* Badge element - 2x width to match WhatsApp card */
 .badge-base.LI-profile-badge {
   display: block !important;
   width: 100% !important;
@@ -2000,7 +2000,7 @@ html.dark {
   height: auto !important;
   margin: 0 !important;
   overflow: hidden !important;
-  transform: scaleX(1.3) !important;
+  transform: scale(2, 1.1) !important;
   transform-origin: left center !important;
 }
 
