@@ -1,16 +1,18 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#000000" />
-        <title>Althaf Hussain | Portfolio App</title>
-        <link rel="icon" type="image/jpeg" href="profile-pic.jpg" />
-    </head>
-    <body>
-        <noscript>You need to enable JavaScript to run this app.</noscript>
-        <div id="root"></div>
-        <!--
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <title>Althaf Hussain | Portfolio App</title>
+    <link rel="icon" type="image/jpeg" href="profile-pic.jpg" />
+</head>
+
+<body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
 
@@ -20,12 +22,12 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
-        
-        <script>
-            !(function (t, e) {
-                var o, n, p, r;
-                e.__SV ||
-                    ((window.posthog = e),
+
+    <script>
+        !(function (t, e) {
+            var o, n, p, r;
+            e.__SV ||
+                ((window.posthog = e),
                     (e._i = []),
                     (e.init = function (i, s, a) {
                         function g(t, e) {
@@ -58,23 +60,23 @@
                         var u = e;
                         for (
                             void 0 !== a ? (u = e[a] = []) : (a = "posthog"),
-                                u.people = u.people || [],
-                                u.toString = function (t) {
-                                    var e = "posthog";
-                                    return (
-                                        "posthog" !== a && (e += "." + a),
-                                        t || (e += " (stub)"),
-                                        e
-                                    );
-                                },
-                                u.people.toString = function () {
-                                    return u.toString(1) + ".people (stub)";
-                                },
-                                o =
-                                    "init me ws ys ps bs capture je Di ks register register_once register_for_session unregister unregister_for_session Ps getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey canRenderSurveyAsync identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty Es $s createPersonProfile Is opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing Ss debug xs getPageViewId captureTraceFeedback captureTraceMetric".split(
-                                        " ",
-                                    ),
-                                n = 0;
+                            u.people = u.people || [],
+                            u.toString = function (t) {
+                                var e = "posthog";
+                                return (
+                                    "posthog" !== a && (e += "." + a),
+                                    t || (e += " (stub)"),
+                                    e
+                                );
+                            },
+                            u.people.toString = function () {
+                                return u.toString(1) + ".people (stub)";
+                            },
+                            o =
+                            "init me ws ys ps bs capture je Di ks register register_once register_for_session unregister unregister_for_session Ps getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey canRenderSurveyAsync identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty Es $s createPersonProfile Is opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing Ss debug xs getPageViewId captureTraceFeedback captureTraceMetric".split(
+                                " ",
+                            ),
+                            n = 0;
                             n < o.length;
                             n++
                         )
@@ -82,18 +84,29 @@
                         e._i.push([i, s, a]);
                     }),
                     (e.__SV = 1));
-            })(document, window.posthog || []);
+        })(document, window.posthog || []);
 
-            // Initialize your PostHog project
-            posthog.init("phc_cUq6UGuKd9rTjuQQ5nKPz9m5siu6y2wuxeKbTn0V2Kw", {
-                api_host: "https://us.i.posthog.com",
-                person_profiles: "identified_only" // keep as is or change to 'always' if needed
-            });
-        </script>
-        
-        <!-- LinkedIn Profile Badge Script -->
-        <script src="https://platform.linkedin.com/badges/js/profile.js" async defer></script>
-    </body>
+        // Initialize your PostHog project
+        posthog.init("phc_cUq6UGuKd9rTjuQQ5nKPz9m5siu6y2wuxeKbTn0V2Kw", {
+            api_host: "https://us.i.posthog.com",
+            person_profiles: "identified_only",
+            autocapture: false, // Prevent infinite loops from automatic event capture
+            disable_session_recording: true, // Prevent recording loops
+            capture_pageview: true, // Still capture page views manually
+            capture_pageleave: false, // Disable to prevent excessive events
+            sanitize_properties: null, // Don't sanitize to avoid recursion
+            opt_out_capturing_by_default: false,
+            loaded: function (posthog) {
+                // Safely loaded callback
+                if (window.location.hostname === 'localhost') {
+                    posthog.opt_out_capturing(); // Disable on localhost
+                }
+            }
+        });
+    </script>
+
+    <!-- LinkedIn Profile Badge Script -->
+    <script src="https://platform.linkedin.com/badges/js/profile.js" async defer></script>
+</body>
+
 </html>
-
-            

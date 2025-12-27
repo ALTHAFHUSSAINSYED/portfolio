@@ -25,9 +25,6 @@ const IntroductionVideo = () => {
         return () => observer.disconnect();
     }, [isLoaded]);
 
-    // Custom thumbnail image with absolute URL
-    const thumbnailUrl = `${window.location.origin}/video-thumbnail.png`;
-
     const handlePlay = () => {
         setIsPlaying(true);
     };
@@ -60,7 +57,7 @@ const IntroductionVideo = () => {
                             left: 0,
                             width: '100%',
                             height: '100%',
-                            background: `url(${thumbnailUrl}) center/cover no-repeat`,
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                             borderRadius: '8px',
                             cursor: 'pointer',
                             zIndex: 2,
@@ -109,7 +106,6 @@ const IntroductionVideo = () => {
                             zIndex: 1
                         }}
                         allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-                        allowFullScreen
                         frameBorder="0"
                         scrolling="no"
                         title="Introduction Video"
