@@ -1461,11 +1461,19 @@ code {
 .light .certifications-section .section-title,
 .light [data-section="CertificationsSection"] .section-title,
 .light #certifications h2,
-.light .certifications-section h2,
+.certifications-section h2,
 .light [data-section="CertificationsSection"] h2,
 .light #certifications .gradient-text,
 .light .certifications-section .gradient-text {
   background-image: linear-gradient(90deg, #06b6d4 0%, #f472b6 50%, #22c55e 100%);
+}
+
+/* Brighter certification names in light theme */
+.light .light-mode-bright {
+  color: #0f172a !important;
+  /* Deep slate color for maximum readability */
+  font-weight: 700 !important;
+  /* Slightly bolder */
 }
 
 /* Projects */
