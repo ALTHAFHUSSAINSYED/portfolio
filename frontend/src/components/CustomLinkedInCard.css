@@ -1,25 +1,28 @@
 /* ========================================= */
-/* LINKEDIN CARD - VERTICAL LAYOUT */
+/* LINKEDIN CARD - TWO COLUMN GRID LAYOUT */
 /* ========================================= */
 
 .linkedin-card {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    /* Left branding | Right content */
     width: 100%;
     max-width: 100%;
-    border-radius: 14px;
+    border-radius: 16px;
     overflow: hidden;
     font-family: inherit;
     transition: all 0.3s ease;
 }
 
 /* ========================================= */
-/* HEADER - Full width horizontal bar at top */
+/* LEFT COLUMN - LinkedIn branding */
 /* ========================================= */
 
-.linkedin-header {
-    width: 100%;
-    padding: 18px 20px;
+.linkedin-left {
     display: flex;
     align-items: center;
+    justify-content: center;
+    padding: 20px 12px;
 }
 
 .linkedin-logo {
@@ -27,6 +30,7 @@
     font-weight: 600;
     display: inline-flex;
     align-items: center;
+    writing-mode: horizontal-tb;
 }
 
 .linkedin-logo span {
@@ -39,48 +43,60 @@
 }
 
 /* ========================================= */
-/* BODY - Profile content with spacing */
+/* RIGHT COLUMN - Profile content */
 /* ========================================= */
 
-.linkedin-body {
-    padding: 30px 24px 24px 24px;
+.linkedin-right {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
 }
+
+/* 🔹 HORIZONTAL HEADER SPACER - creates top gap */
+.linkedin-right-header {
+    height: 32px;
+    margin-bottom: 8px;
+}
+
+/* ========================================= */
+/* PROFILE CONTENT - No resizing */
+/* ========================================= */
 
 /* AVATAR */
 .linkedin-avatar {
-    width: 80px;
-    height: 80px;
+    width: 72px;
+    height: 72px;
     border-radius: 50%;
     object-fit: cover;
-    margin-bottom: 18px;
-    display: block;
+    margin-bottom: 12px;
 }
 
 /* TEXT */
 .linkedin-name {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
-    margin: 0 0 12px 0;
+    margin: 0 0 8px 0;
     line-height: 1.2;
 }
 
 .linkedin-role {
     font-size: 14px;
     line-height: 1.5;
-    margin: 0 0 14px 0;
+    margin: 0 0 10px 0;
 }
 
 .linkedin-org {
     font-size: 13px;
-    opacity: 0.75;
-    margin: 0 0 22px 0;
+    opacity: 0.85;
+    margin: 0 0 18px 0;
     line-height: 1.4;
 }
 
 /* BUTTON */
 .linkedin-button {
+    align-self: flex-start;
     display: inline-block;
-    padding: 11px 22px;
+    padding: 10px 22px;
     border-radius: 999px;
     font-size: 15px;
     font-weight: 600;
@@ -103,12 +119,12 @@
     border: 1px solid #e5e7eb;
 }
 
-.linkedin-card.light .linkedin-header {
+.linkedin-card.light .linkedin-left {
     background: #f3f2ef;
     color: #000000;
 }
 
-.linkedin-card.light .linkedin-body {
+.linkedin-card.light .linkedin-right {
     background: #ffffff;
 }
 
@@ -135,12 +151,12 @@
     color: #ffffff;
 }
 
-.linkedin-card.dark .linkedin-header {
-    background: #4a5568;
+.linkedin-card.dark .linkedin-left {
+    background: #4b5563;
     color: #ffffff;
 }
 
-.linkedin-card.dark .linkedin-body {
+.linkedin-card.dark .linkedin-right {
     background: #000000;
 }
 
