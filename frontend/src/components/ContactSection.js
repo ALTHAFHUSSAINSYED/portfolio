@@ -4,8 +4,9 @@ import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
-import { Mail, Phone, Send, MessageCircle, MessageSquare } from 'lucide-react'; 
+import { Mail, Phone, Send, MessageCircle, MessageSquare } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
+import LinkedInBadge from './LinkedInBadge';
 
 const ContactSection = ({ personalInfo }) => {
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
@@ -52,14 +53,14 @@ const ContactSection = ({ personalInfo }) => {
 
     try {
       const apiUrl = `${process.env.REACT_APP_API_URL || 'https://althaf-portfolio.onrender.com'}/api/contact`;
-      
+
       const response = await axios.post(apiUrl, payload);
-      
+
       toast({
         title: "Message Sent Successfully!",
         description: "Thank you for reaching out. I'll get back to you soon.",
       });
-      
+
       setFormData({ name: '', email: '', subject: '', message: '' });
 
     } catch (error) {
@@ -73,14 +74,14 @@ const ContactSection = ({ personalInfo }) => {
       setIsSubmitting(false);
     }
   };
-  
+
   const phoneNumber = personalInfo.phone.replace(/\D/g, '');
   const prefilledMessage = "Hello Althaf, I saw your portfolio and would like to connect!";
   const whatsappUrl = `https://wa.me/91${phoneNumber}?text=${encodeURIComponent(prefilledMessage)}`;
 
   return (
     <section id="contact" className="py-20 bg-background relative overflow-hidden" ref={sectionRef}>
-       <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden">
         <div className="bg-orb bg-orb-1"></div>
         <div className="bg-orb bg-orb-2"></div>
         <div className="bg-orb bg-orb-3"></div>
@@ -107,25 +108,29 @@ const ContactSection = ({ personalInfo }) => {
                 </div>
               </Card>
               <Card className={`p-4 neon-card transition-all ${isVisible ? 'scale-in stagger-4' : ''}`}>
-                 <div className="flex items-center space-x-4">
-                   <div className="w-12 h-12 bg-green-400/10 rounded-lg flex items-center justify-center border border-green-400/30"><Phone className="w-6 h-6 text-green-soft" /></div>
-                   <div>
-                     <h4 className="font-semibold text-foreground">Phone</h4>
-                     <a href={`tel:${personalInfo.phone}`} className="text-green-soft hover:underline">{personalInfo.phone}</a>
-                   </div>
-                 </div>
-               </Card>
-              <Card className={`p-4 neon-card transition-all ${isVisible ? 'scale-in stagger-5' : ''}`}>
-                 <div className="flex items-center space-x-4">
-                   <div className="w-12 h-12 bg-purple-400/10 rounded-lg flex items-center justify-center border border-purple-400/30">
-                     <MessageSquare className="w-6 h-6 text-purple-soft" />
-                   </div>
-                   <div>
-                     <h4 className="font-semibold text-foreground">WhatsApp</h4>
-                     <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="text-purple-soft hover:underline">Chat with me</a>
-                   </div>
-                 </div>
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-green-400/10 rounded-lg flex items-center justify-center border border-green-400/30"><Phone className="w-6 h-6 text-green-soft" /></div>
+                  <div>
+                    <h4 className="font-semibold text-foreground">Phone</h4>
+                    <a href={`tel:${personalInfo.phone}`} className="text-green-soft hover:underline">{personalInfo.phone}</a>
+                  </div>
+                </div>
               </Card>
+              <Card className={`p-4 neon-card transition-all ${isVisible ? 'scale-in stagger-5' : ''}`}>
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-purple-400/10 rounded-lg flex items-center justify-center border border-purple-400/30">
+                    <MessageSquare className="w-6 h-6 text-purple-soft" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-foreground">WhatsApp</h4>
+                    <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="text-purple-soft hover:underline">Chat with me</a>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            <div className="mt-8">
+              <LinkedInBadge />
             </div>
           </div>
           <Card className={`p-8 neon-card ${isVisible ? 'fade-in-right stagger-8' : ''}`}>
@@ -137,20 +142,20 @@ const ContactSection = ({ personalInfo }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-muted-foreground mb-2">Your Name</label>
-                  <Input id="name" name="name" type="text" autoComplete="name" value={formData.name} onChange={handleInputChange} placeholder="Enter your full name" required className="form-input"/>
+                  <Input id="name" name="name" type="text" autoComplete="name" value={formData.name} onChange={handleInputChange} placeholder="Enter your full name" required className="form-input" />
                 </div>
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-muted-foreground mb-2">Email Address</label>
-                  <Input id="email" name="email" type="email" autoComplete="email" value={formData.email} onChange={handleInputChange} placeholder="your.email@example.com" required className="form-input"/>
+                  <Input id="email" name="email" type="email" autoComplete="email" value={formData.email} onChange={handleInputChange} placeholder="your.email@example.com" required className="form-input" />
                 </div>
               </div>
               <div>
                 <label htmlFor="subject" className="block text-sm font-medium text-muted-foreground mb-2">Subject</label>
-                <Input id="subject" name="subject" type="text" value={formData.subject} onChange={handleInputChange} placeholder="What's this about?" className="form-input"/>
+                <Input id="subject" name="subject" type="text" value={formData.subject} onChange={handleInputChange} placeholder="What's this about?" className="form-input" />
               </div>
               <div>
                 <label htmlFor="message" className="block text-sm font-medium text-muted-foreground mb-2">Message</label>
-                <Textarea id="message" name="message" value={formData.message} onChange={handleInputChange} placeholder="Tell me about your project..." rows={6} required className="form-input"/>
+                <Textarea id="message" name="message" value={formData.message} onChange={handleInputChange} placeholder="Tell me about your project..." rows={6} required className="form-input" />
               </div>
               <Button type="submit" disabled={isSubmitting} className="w-full neon-button bg-gradient-to-r from-cyan-500 to-pink-500 text-black py-3 text-lg font-bold disabled:opacity-50">
                 {isSubmitting ? 'Sending...' : <><Send className="w-5 h-5 mr-3" />Send Message</>}
