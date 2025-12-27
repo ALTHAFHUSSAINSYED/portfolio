@@ -27,19 +27,19 @@ const IntroductionVideo = () => {
     return (
         <div
             ref={containerRef}
-            className="intro-video-container mt-12 mb-8"
+            className="intro-video-container mt-6 mb-6"
         >
             {isLoaded ? (
                 <iframe
                     src="https://player.cloudinary.com/embed/?cloud_name=dtzaicj6s&public_id=introduction_video_aew8f4&profile=cld-default"
                     width="100%"
-                    height="405"
+                    height="225"
                     style={{
-                        maxWidth: '720px',
+                        maxWidth: '400px',
                         margin: '0 auto',
                         display: 'block',
-                        borderRadius: '12px',
-                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)'
+                        borderRadius: '8px',
+                        boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)'
                     }}
                     allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
                     allowFullScreen
@@ -49,16 +49,16 @@ const IntroductionVideo = () => {
             ) : (
                 <div
                     style={{
-                        maxWidth: '720px',
-                        height: '405px',
+                        maxWidth: '400px',
+                        height: '225px',
                         margin: '0 auto',
                         background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(168, 85, 247, 0.1))',
-                        borderRadius: '12px',
+                        borderRadius: '8px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         color: 'var(--foreground)',
-                        fontSize: '18px',
+                        fontSize: '16px',
                         fontWeight: '500'
                     }}
                 >
