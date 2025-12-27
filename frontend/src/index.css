@@ -1981,40 +1981,38 @@ html.dark {
 /* LINKEDIN BADGE STYLING - Full-width responsive badge */
 /* ================================================================= */
 
-/* Container should fill available space */
+/* Container fills available space without scrollbars */
 .linkedin-badge-wrapper {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
+  display: block !important;
   width: 100% !important;
   max-width: 100% !important;
   min-height: 250px !important;
   overflow: visible !important;
 }
 
-/* Badge element fills container horizontally */
+/* Badge element stretches to fill container */
 .badge-base.LI-profile-badge {
   display: block !important;
   width: 100% !important;
   max-width: 100% !important;
   height: auto !important;
-  min-height: 0 !important;
-  margin: 0 auto !important;
-  overflow: hidden !important;
+  margin: 0 !important;
+  overflow: visible !important;
 }
 
-/* Anchor tag (light theme content) fills space */
+/* Anchor tag fills width */
 .badge-base__link.LI-simple-link {
   display: block !important;
   width: 100% !important;
   text-decoration: none !important;
 }
 
-/* LinkedIn's injected content fills the space */
+/* LinkedIn's injected iframe fills space without scrollbars */
 .LI-profile-badge iframe,
 .LI-profile-badge>div {
   width: 100% !important;
   max-width: 100% !important;
   height: auto !important;
   overflow: hidden !important;
+  border: none !important;
 }

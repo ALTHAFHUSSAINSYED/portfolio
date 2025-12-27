@@ -3,25 +3,31 @@ import { Card } from './ui/card';
 
 export default function LinkedInBadge({ theme }) {
     useEffect(() => {
-        // Force LinkedIn to parse the badge after component mounts
-        // Small delay to ensure DOM is ready
-        const timer = setTimeout(() => {
-            if (window.IN && window.IN.parse) {
-                window.IN.parse();
-            }
-        }, 500);
+        // Only trigger parse in dark theme
+        if (theme === 'dark') {
+            const timer = setTimeout(() => {
+                if (window.IN && window.IN.parse) {
+                    window.IN.parse();
+                }
+            }, 500);
 
-        return () => clearTimeout(timer);
-    }, []); // Only run once on mount, not on theme change
+            return () => clearTimeout(timer);
+        }
+    }, [theme]);
+
+    // Only render badge in dark theme
+    if (theme !== 'dark') {
+        return null;
+    }
 
     return (
-        <Card className="p-4 neon-card w-full flex justify-center items-center overflow-visible transition-all hover:scale-[1.02]">
+        <Card className="p-4 neon-card w-full flex justify-center items-center transition-all hover:scale-[1.02]">
             <div className="linkedin-badge-wrapper">
                 <div
                     className="badge-base LI-profile-badge"
                     data-locale="en_US"
                     data-size="large"
-                    data-theme={theme}
+                    data-theme="dark"
                     data-type="HORIZONTAL"
                     data-vanity="althafhussainsyed"
                     data-version="v1"
