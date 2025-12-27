@@ -1978,16 +1978,12 @@ html.dark {
 }
 
 /* ================================================================= */
-/* LINKEDIN BADGE STYLING - Hide scrollbar, header, expand width */
+/* LINKEDIN BADGE STYLING - Natural size, no scrollbars */
 /* ================================================================= */
 
-/* Container - compact height, full width */
+/* Container wrapper */
 .linkedin-badge-wrapper {
   display: block !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  min-height: 220px !important;
-  max-height: 220px !important;
   overflow: hidden !important;
   position: relative !important;
 }
@@ -1995,10 +1991,6 @@ html.dark {
 /* Badge element - natural size, no scaling */
 .badge-base.LI-profile-badge {
   display: block !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  height: auto !important;
-  margin: 0 !important;
   overflow: hidden !important;
 }
 
@@ -2007,23 +1999,31 @@ html.dark {
   display: none !important;
 }
 
-/* LinkedIn iframe - natural size, no stretching */
+/* LinkedIn iframe - hide all scrollbars */
 .LI-profile-badge iframe {
-  height: auto !important;
   overflow: hidden !important;
   border: none !important;
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
 }
 
-/* Hide scrollbar in iframe */
+/* Hide scrollbar in iframe - webkit */
 .LI-profile-badge iframe::-webkit-scrollbar {
   display: none !important;
   width: 0 !important;
   height: 0 !important;
 }
 
-/* Hide LinkedIn header bar inside iframe */
-.LI-profile-badge iframe body {
-  overflow: hidden !important;
+/* Global scrollbar hiding for LinkedIn badge containers */
+.badge-base.LI-profile-badge,
+.badge-base.LI-profile-badge * {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.badge-base.LI-profile-badge::-webkit-scrollbar,
+.badge-base.LI-profile-badge *::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
