@@ -1,66 +1,75 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useTheme } from '../context/ThemeContext';
+import { useEffect, useState } from "react";
 import { Card } from './ui/card';
 
-const LinkedInBadge = () => {
-    const { theme } = useTheme();
-    const containerRef = useRef(null);
-    // Force a re-render/remount on theme change
-    const badgeTheme = theme === 'dark' ? 'dark' : 'light';
+const LINKEDIN_SCRIPT_URL = "https://platform.linkedin.com/badges/js/profile.js";
+
+function loadLinkedInScript(callback) {
+    if (window.IN && window.IN.Badge) {
+        return callback();
+    }
+    const existing = document.querySelector(`script[src="${LINKEDIN_SCRIPT_URL}"]`);
+    if (existing) {
+        existing.addEventListener("load", callback);
+    } else {
+        const script = document.createElement("script");
+        script.src = LINKEDIN_SCRIPT_URL;
+        script.async = true;
+        script.defer = true;
+        script.onload = callback;
+        document.body.appendChild(script);
+    }
+}
+
+export default function LinkedInBadge({ theme }) {
+    const [renderKey, setRenderKey] = useState(Date.now());
 
     useEffect(() => {
-        if (containerRef.current) {
-            // Clear previous content
-            containerRef.current.innerHTML = '';
+        // Force re-render on theme change to rebuild DOM
+        setRenderKey(Date.now());
+    }, [theme]);
 
-            // Create the badge element structure
-            const badgeDiv = document.createElement('div');
-            badgeDiv.className = 'badge-base LI-profile-badge';
-            badgeDiv.setAttribute('data-locale', 'en_US');
-            badgeDiv.setAttribute('data-size', 'medium');
-            badgeDiv.setAttribute('data-theme', badgeTheme);
-            badgeDiv.setAttribute('data-type', 'HORIZONTAL');
-            badgeDiv.setAttribute('data-vanity', 'althafhussainsyed');
-            badgeDiv.setAttribute('data-version', 'v1');
+    useEffect(() => {
+        let timeout;
 
-            containerRef.current.appendChild(badgeDiv);
+        function tryRender() {
+            // Remove any preexisting badge container
+            const badges = document.querySelectorAll(".LI-profile-badge");
+            badges.forEach(badge => badge.remove());
 
-            // Robust parsing with retry mechanism
-            const parseBadge = () => {
-                if (window.LI && window.LI.Sync) {
-                    window.LI.Sync.parse(containerRef.current);
-                    return true;
+            loadLinkedInScript(() => {
+                // LinkedIn script exposes a global "IN" object
+                if (window.IN && window.IN.parse) {
+                    // Parse only this container
+                    window.IN.parse();
                 }
-                return false;
-            };
+            });
+        }
 
-            // Try immediately
-            if (!parseBadge()) {
-                // If not ready, poll for it
-                let retryCount = 0;
-                const maxRetries = 50; // 5 seconds max
-                const intervalId = setInterval(() => {
-                    retryCount++;
-                    if (parseBadge() || retryCount >= maxRetries) {
-                        clearInterval(intervalId);
-                    }
-                }, 100);
-
-                // Cleanup interval on unmount or re-effect
-                return () => clearInterval(intervalId);
+        // Wait up to 5 seconds for script to be ready
+        const start = Date.now();
+        function poll() {
+            if (window.IN && window.IN.parse) {
+                tryRender();
+            } else if (Date.now() - start < 5000) {
+                timeout = setTimeout(poll, 200);
             }
         }
-    }, [badgeTheme]);
+
+        poll();
+        return () => clearTimeout(timeout);
+    }, [renderKey]);
 
     return (
         <Card className="p-4 neon-card w-full flex justify-center items-center overflow-hidden transition-all hover:scale-[1.02]">
-            <div
-                key={badgeTheme} // Forces fresh DOM node on theme change
-                ref={containerRef}
-                style={{ width: '100%', display: 'flex', justifyContent: 'center', minHeight: '240px' }}
-            />
+            <div id="linkedin-badge-wrapper" key={renderKey} style={{ width: '100%', display: 'flex', justifyContent: 'center', minHeight: '240px' }}>
+                <div className="badge-base LI-profile-badge"
+                    data-locale="en_US"
+                    data-size="medium"
+                    data-theme={theme}
+                    data-type="HORIZONTAL"
+                    data-vanity="althafhussainsyed"
+                    data-version="v1"></div>
+            </div>
         </Card>
     );
-};
-
-export default LinkedInBadge;
+}

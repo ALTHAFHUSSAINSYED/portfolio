@@ -7,6 +7,7 @@ import { Textarea } from './ui/textarea';
 import { Mail, Phone, Send, MessageCircle, MessageSquare } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
 import LinkedInBadge from './LinkedInBadge';
+import { useTheme } from '../context/ThemeContext';
 
 const ContactSection = ({ personalInfo }) => {
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
@@ -14,6 +15,7 @@ const ContactSection = ({ personalInfo }) => {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
   const { toast } = useToast();
+  const { theme } = useTheme();
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
@@ -130,7 +132,7 @@ const ContactSection = ({ personalInfo }) => {
             </div>
 
             <div className="mt-8">
-              <LinkedInBadge />
+              <LinkedInBadge theme={theme} />
             </div>
           </div>
           <Card className={`p-8 neon-card ${isVisible ? 'fade-in-right stagger-8' : ''}`}>
