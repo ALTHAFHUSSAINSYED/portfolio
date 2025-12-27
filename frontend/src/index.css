@@ -1981,17 +1981,18 @@ html.dark {
 /* LINKEDIN BADGE STYLING - Hide scrollbar, header, expand width */
 /* ================================================================= */
 
-/* Container - larger and no scrollbars */
+/* Container - compact height, full width */
 .linkedin-badge-wrapper {
   display: block !important;
   width: 100% !important;
   max-width: 100% !important;
-  min-height: 300px !important;
+  min-height: 220px !important;
+  max-height: 220px !important;
   overflow: hidden !important;
   position: relative !important;
 }
 
-/* Badge element - full width */
+/* Badge element - scaled for better fill */
 .badge-base.LI-profile-badge {
   display: block !important;
   width: 100% !important;
@@ -1999,8 +2000,8 @@ html.dark {
   height: auto !important;
   margin: 0 !important;
   overflow: hidden !important;
-  transform: scale(1.1) !important;
-  transform-origin: left center !important;
+  transform: scale(1.2) !important;
+  transform-origin: top left !important;
 }
 
 /* Hide anchor tag (duplicate name) */
@@ -2008,11 +2009,12 @@ html.dark {
   display: none !important;
 }
 
-/* LinkedIn iframe - no scrollbars, expanded */
+/* LinkedIn iframe - wider and shorter */
 .LI-profile-badge iframe {
-  width: 120% !important;
-  min-width: 120% !important;
-  height: 350px !important;
+  width: 140% !important;
+  min-width: 140% !important;
+  height: 250px !important;
+  max-height: 250px !important;
   overflow: hidden !important;
   border: none !important;
   scrollbar-width: none !important;
