@@ -101,8 +101,8 @@ const CertificationsSection = ({ certifications }) => {
               size="sm"
               // ✨ MODIFIED: Unselected state is now theme-aware
               className={`transition-all duration-300 hover-shine sparkle-text ${selectedCategory === key
-                  ? 'neon-button bg-gradient-to-r from-pink-500 to-green-500 text-white font-bold shadow-lg'
-                  : 'border-border/50 text-muted-foreground bg-background/50 hover:bg-secondary/50 hover-glow'
+                ? 'neon-button bg-gradient-to-r from-pink-500 to-green-500 dark:from-cyan-500 dark:to-pink-500 text-white font-bold shadow-lg'
+                : 'border-border/50 text-muted-foreground bg-background/50 hover:bg-secondary/50 hover-glow'
                 } ${isVisible ? `scale-in stagger-${index + 3}` : ''}`}
             >
               <Filter className="w-4 h-4 mr-2" />
