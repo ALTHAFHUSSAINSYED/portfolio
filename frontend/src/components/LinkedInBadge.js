@@ -1,23 +1,19 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { Card } from './ui/card';
 
 const LinkedInBadge = () => {
     const { theme } = useTheme();
     const containerRef = useRef(null);
-
-    // Use a derived state or just the value for the key to force re-mount
-    const ptheme = theme === 'dark' ? 'dark' : 'light';
+    // Force a re-render/remount on theme change
+    const badgeTheme = theme === 'dark' ? 'dark' : 'light';
 
     useEffect(() => {
-        // Determine the theme to use. LinkedIn only supports 'light' and 'dark'.
-        const badgeTheme = theme === 'dark' ? 'dark' : 'light';
-
         if (containerRef.current) {
-            // Clear previous content strictly (though key prop change handles parent)
+            // Clear previous content
             containerRef.current.innerHTML = '';
 
-            // Create the badge element
+            // Create the badge element structure
             const badgeDiv = document.createElement('div');
             badgeDiv.className = 'badge-base LI-profile-badge';
             badgeDiv.setAttribute('data-locale', 'en_US');
@@ -29,27 +25,39 @@ const LinkedInBadge = () => {
 
             containerRef.current.appendChild(badgeDiv);
 
-            // Force re-parsing. 
-            // We wrap in a small timeout to let the DOM settle if needed, ensuring the key-remount is done.
-            setTimeout(() => {
+            // Robust parsing with retry mechanism
+            const parseBadge = () => {
                 if (window.LI && window.LI.Sync) {
                     window.LI.Sync.parse(containerRef.current);
+                    return true;
                 }
-            }, 50);
-        }
-    }, [theme]);
+                return false;
+            };
 
-    // Styling:
-    // - neon-card: Reusing the existing glow effect class
-    // - w-full: Full width to match parent containers
-    // - key={ptheme}: CRITICAL. Forces React to destroy and recreate this DOM node when theme changes.
-    //   This ensures the LinkedIn script sees a "fresh" element to parse, avoiding update glitches.
+            // Try immediately
+            if (!parseBadge()) {
+                // If not ready, poll for it
+                let retryCount = 0;
+                const maxRetries = 50; // 5 seconds max
+                const intervalId = setInterval(() => {
+                    retryCount++;
+                    if (parseBadge() || retryCount >= maxRetries) {
+                        clearInterval(intervalId);
+                    }
+                }, 100);
+
+                // Cleanup interval on unmount or re-effect
+                return () => clearInterval(intervalId);
+            }
+        }
+    }, [badgeTheme]);
+
     return (
         <Card className="p-4 neon-card w-full flex justify-center items-center overflow-hidden transition-all hover:scale-[1.02]">
             <div
-                key={ptheme}
+                key={badgeTheme} // Forces fresh DOM node on theme change
                 ref={containerRef}
-                style={{ width: '100%', display: 'flex', justifyContent: 'center', minHeight: '200px' }}
+                style={{ width: '100%', display: 'flex', justifyContent: 'center', minHeight: '240px' }}
             />
         </Card>
     );
