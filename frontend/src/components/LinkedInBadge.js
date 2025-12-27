@@ -2,29 +2,22 @@ import { useEffect } from 'react';
 
 export default function LinkedInBadge({ theme }) {
     useEffect(() => {
-        // Only trigger parse in dark theme
-        if (theme === 'dark') {
-            const timer = setTimeout(() => {
-                if (window.IN && window.IN.parse) {
-                    window.IN.parse();
-                }
-            }, 500);
+        // Trigger parse for light theme badge
+        const timer = setTimeout(() => {
+            if (window.IN && window.IN.parse) {
+                window.IN.parse();
+            }
+        }, 500);
 
-            return () => clearTimeout(timer);
-        }
+        return () => clearTimeout(timer);
     }, [theme]);
-
-    // Only render badge in dark theme
-    if (theme !== 'dark') {
-        return null;
-    }
 
     return (
         <div
             className="badge-base LI-profile-badge"
             data-locale="en_US"
             data-size="large"
-            data-theme="dark"
+            data-theme="light"
             data-type="VERTICAL"
             data-vanity="althafhussainsyed"
             data-version="v1"
