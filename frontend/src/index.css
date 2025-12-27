@@ -1992,7 +1992,7 @@ html.dark {
   position: relative !important;
 }
 
-/* Badge element - 1.85x width to fill gap and match WhatsApp card */
+/* Badge element - natural size, no scaling */
 .badge-base.LI-profile-badge {
   display: block !important;
   width: 100% !important;
@@ -2000,8 +2000,6 @@ html.dark {
   height: auto !important;
   margin: 0 !important;
   overflow: hidden !important;
-  transform: scale(1.85, 1.1) !important;
-  transform-origin: left center !important;
 }
 
 /* Hide anchor tag (duplicate name) */
@@ -2009,13 +2007,9 @@ html.dark {
   display: none !important;
 }
 
-/* LinkedIn iframe - full width, no scrollbars */
+/* LinkedIn iframe - natural size, no stretching */
 .LI-profile-badge iframe {
-  width: 100% !important;
-  min-width: 100% !important;
-  max-width: 100% !important;
   height: auto !important;
-  min-height: 400px !important;
   overflow: hidden !important;
   border: none !important;
   scrollbar-width: none !important;
