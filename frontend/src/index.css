@@ -239,7 +239,17 @@ code {
 /* Enhanced Black Theme with Shining Effects */
 @layer components {
 
-  /* Glassmorphic Navigation Button */
+  /* ========================================================= */
+  /* GLASSMORPHIC NAVIGATION BUTTON STYLING                    */
+  /* ========================================================= */
+  /* Theme-specific gradient backgrounds for navigation buttons:
+   * - Light Theme: Pink (#ec4899) → Green (#22c55e) gradient
+   * - Dark Theme:  Pink (#ec4899) → Cyan (#22d3ee) gradient
+   * 
+   * These gradients provide visual distinction between themes
+   * while maintaining the glassmorphic aesthetic with backdrop
+   * blur effects and semi-transparent backgrounds.
+   */
   .glassmorphic-nav-btn {
     display: flex;
     align-items: center;
