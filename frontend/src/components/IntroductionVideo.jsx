@@ -97,7 +97,7 @@ const IntroductionVideo = () => {
                 {/* Video iframe - loads when clicked */}
                 {isLoaded && isPlaying && (
                     <iframe
-                        src={`https://player.cloudinary.com/embed/?cloud_name=dtzaicj6s&public_id=introduction_video_aew8f4&profile=cld-default&autoplay=true`}
+                        src="https://player.cloudinary.com/embed/?cloud_name=dtzaicj6s&public_id=introduction_video_lxy7av&profile=introduction%20video3&autoplay=true"
                         style={{
                             position: 'absolute',
                             top: 0,
