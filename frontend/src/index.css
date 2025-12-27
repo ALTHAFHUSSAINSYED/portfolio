@@ -248,7 +248,8 @@ code {
     padding: 0.4rem 0.8rem;
     border-radius: 9999px;
     backdrop-filter: blur(12px);
-    background: linear-gradient(to right, rgba(236, 72, 153, 0.3), rgba(34, 211, 238, 0.3));
+    /* LIGHT THEME: Pink to Green gradient */
+    background: linear-gradient(to right, rgba(236, 72, 153, 0.3), rgba(34, 197, 94, 0.3));
     border: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow: 0 4px 6px -1px rgba(236, 72, 153, 0.1);
     transition: all 0.3s ease;
@@ -259,19 +260,20 @@ code {
   }
 
   .glassmorphic-nav-btn:hover {
-    background: linear-gradient(to right, rgba(236, 72, 153, 0.5), rgba(34, 211, 238, 0.5));
+    background: linear-gradient(to right, rgba(236, 72, 153, 0.5), rgba(34, 197, 94, 0.5));
     border: 1px solid rgba(255, 255, 255, 0.3);
     transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 10px 15px -3px rgba(34, 211, 238, 0.2);
+    box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.2);
   }
 
   .glassmorphic-nav-btn.active {
-    background: linear-gradient(to right, rgba(236, 72, 153, 0.7), rgba(34, 211, 238, 0.7));
+    background: linear-gradient(to right, rgba(236, 72, 153, 0.7), rgba(34, 197, 94, 0.7));
     border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 10px 15px -3px rgba(34, 211, 238, 0.3);
+    box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.3);
   }
 
   /* Dark theme adjustments for glassmorphic buttons */
+  /* DARK THEME: Pink to Cyan gradient */
   .dark .glassmorphic-nav-btn {
     background: linear-gradient(to right, rgba(236, 72, 153, 0.4), rgba(34, 211, 238, 0.4));
     border: 1px solid rgba(255, 255, 255, 0.25);
