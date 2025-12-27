@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 const IntroductionVideo = () => {
     const [isLoaded, setIsLoaded] = useState(false);
+    const [isPlaying, setIsPlaying] = useState(false);
     const containerRef = useRef(null);
 
     useEffect(() => {
@@ -24,8 +25,12 @@ const IntroductionVideo = () => {
         return () => observer.disconnect();
     }, [isLoaded]);
 
-    // Custom thumbnail image
-    const thumbnailUrl = "/video-thumbnail.png";
+    // Custom thumbnail image with absolute URL
+    const thumbnailUrl = `${window.location.origin}/video-thumbnail.png`;
+
+    const handlePlay = () => {
+        setIsPlaying(true);
+    };
 
     return (
         <div
@@ -39,15 +44,60 @@ const IntroductionVideo = () => {
                 backgroundColor: '#000'
             }}
         >
-            {isLoaded ? (
-                <div style={{
-                    position: 'relative',
-                    paddingBottom: '56.25%', // 16:9 aspect ratio
-                    height: 0,
-                    overflow: 'hidden'
-                }}>
+            <div style={{
+                position: 'relative',
+                paddingBottom: '56.25%', // 16:9 aspect ratio
+                height: 0,
+                overflow: 'hidden'
+            }}>
+                {/* Thumbnail overlay - always visible until video plays */}
+                {!isPlaying && (
+                    <div
+                        onClick={handlePlay}
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            background: `url(${thumbnailUrl}) center/cover no-repeat`,
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            zIndex: 2,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}
+                    >
+                        <div style={{
+                            width: '80px',
+                            height: '80px',
+                            borderRadius: '50%',
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'transform 0.2s',
+                        }}
+                            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                        >
+                            <div style={{
+                                width: 0,
+                                height: 0,
+                                borderLeft: '25px solid white',
+                                borderTop: '15px solid transparent',
+                                borderBottom: '15px solid transparent',
+                                marginLeft: '8px'
+                            }} />
+                        </div>
+                    </div>
+                )}
+
+                {/* Video iframe - loads when clicked */}
+                {isLoaded && isPlaying && (
                     <iframe
-                        src={`https://player.cloudinary.com/embed/?cloud_name=dtzaicj6s&public_id=introduction_video_aew8f4&profile=cld-default&poster=${encodeURIComponent(thumbnailUrl)}`}
+                        src={`https://player.cloudinary.com/embed/?cloud_name=dtzaicj6s&public_id=introduction_video_aew8f4&profile=cld-default&autoplay=true`}
                         style={{
                             position: 'absolute',
                             top: 0,
@@ -55,7 +105,8 @@ const IntroductionVideo = () => {
                             width: '100%',
                             height: '100%',
                             border: 'none',
-                            overflow: 'hidden'
+                            overflow: 'hidden',
+                            zIndex: 1
                         }}
                         allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
                         allowFullScreen
@@ -63,34 +114,8 @@ const IntroductionVideo = () => {
                         scrolling="no"
                         title="Introduction Video"
                     />
-                </div>
-            ) : (
-                <div
-                    style={{
-                        width: '100%',
-                        paddingBottom: '56.25%', // 16:9 aspect ratio
-                        position: 'relative',
-                        background: `url(${thumbnailUrl}) center/cover no-repeat`,
-                        borderRadius: '8px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}
-                >
-                    <div style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        color: '#fff',
-                        fontSize: '16px',
-                        fontWeight: '500',
-                        textShadow: '0 2px 4px rgba(0,0,0,0.5)'
-                    }}>
-                        Loading video...
-                    </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 };
