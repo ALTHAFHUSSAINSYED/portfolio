@@ -24,8 +24,8 @@ const IntroductionVideo = () => {
         return () => observer.disconnect();
     }, [isLoaded]);
 
-    // Cloudinary thumbnail URL (auto-generated from video)
-    const thumbnailUrl = "https://res.cloudinary.com/dtzaicj6s/video/upload/so_0/introduction_video_aew8f4.jpg";
+    // Custom thumbnail image
+    const thumbnailUrl = "/video-thumbnail.png";
 
     return (
         <div
