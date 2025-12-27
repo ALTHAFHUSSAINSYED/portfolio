@@ -1978,41 +1978,55 @@ html.dark {
 }
 
 /* ================================================================= */
-/* LINKEDIN BADGE STYLING - Full-width responsive badge */
+/* LINKEDIN BADGE STYLING - Hide scrollbar, header, expand width */
 /* ================================================================= */
 
-/* Container fills available space without scrollbars */
+/* Container - larger and no scrollbars */
 .linkedin-badge-wrapper {
   display: block !important;
   width: 100% !important;
   max-width: 100% !important;
-  min-height: 250px !important;
-  overflow: visible !important;
+  min-height: 300px !important;
+  overflow: hidden !important;
+  position: relative !important;
 }
 
-/* Badge element stretches to fill container */
+/* Badge element - full width */
 .badge-base.LI-profile-badge {
   display: block !important;
   width: 100% !important;
   max-width: 100% !important;
   height: auto !important;
   margin: 0 !important;
-  overflow: visible !important;
+  overflow: hidden !important;
+  transform: scale(1.1) !important;
+  transform-origin: left center !important;
 }
 
-/* Anchor tag fills width */
+/* Hide anchor tag (duplicate name) */
 .badge-base__link.LI-simple-link {
-  display: block !important;
-  width: 100% !important;
-  text-decoration: none !important;
+  display: none !important;
 }
 
-/* LinkedIn's injected iframe fills space without scrollbars */
-.LI-profile-badge iframe,
-.LI-profile-badge>div {
-  width: 100% !important;
-  max-width: 100% !important;
-  height: auto !important;
+/* LinkedIn iframe - no scrollbars, expanded */
+.LI-profile-badge iframe {
+  width: 120% !important;
+  min-width: 120% !important;
+  height: 350px !important;
   overflow: hidden !important;
   border: none !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+/* Hide scrollbar in iframe */
+.LI-profile-badge iframe::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Hide LinkedIn header bar inside iframe */
+.LI-profile-badge iframe body {
+  overflow: hidden !important;
 }
