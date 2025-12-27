@@ -1988,8 +1988,8 @@ html.dark {
   align-items: center !important;
   width: 100% !important;
   max-width: 100% !important;
-  min-height: 0 !important;
-  overflow: hidden !important;
+  min-height: 250px !important;
+  overflow: visible !important;
 }
 
 /* Badge element fills container horizontally */
