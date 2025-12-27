@@ -1,18 +1,22 @@
 .linkedin-card {
     width: 100%;
-    /* Matches WhatsApp / Phone width */
+    max-width: 100%;
     border-radius: 14px;
     overflow: hidden;
     font-family: inherit;
-    /* Uses your existing global font */
     transition: all 0.3s ease;
 }
 
-/* HEADER */
+/* HEADER - Full width top bar */
 .linkedin-header {
-    padding: 14px 20px;
+    width: 100%;
+    padding: 16px 20px;
     font-weight: 600;
     font-size: 18px;
+}
+
+.linkedin-logo {
+    display: inline-block;
 }
 
 .linkedin-logo span {
@@ -25,41 +29,42 @@
 
 /* BODY */
 .linkedin-body {
-    padding: 22px;
+    padding: 24px;
 }
 
 /* AVATAR */
 .linkedin-avatar {
-    width: 64px;
-    height: 64px;
+    width: 72px;
+    height: 72px;
     border-radius: 50%;
     object-fit: cover;
-    margin-bottom: 14px;
+    margin-bottom: 16px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
 }
 
 /* TEXT */
 .linkedin-name {
     font-size: 18px;
     font-weight: 700;
-    margin-bottom: 8px;
+    margin: 0 0 10px 0;
 }
 
 .linkedin-role {
     font-size: 14px;
     line-height: 1.5;
-    margin-bottom: 10px;
+    margin: 0 0 12px 0;
 }
 
 .linkedin-org {
     font-size: 13px;
-    opacity: 0.8;
-    margin-bottom: 18px;
+    opacity: 0.75;
+    margin: 0 0 20px 0;
 }
 
 /* BUTTON */
 .linkedin-button {
     display: inline-block;
-    padding: 8px 18px;
+    padding: 10px 20px;
     border-radius: 999px;
     font-size: 14px;
     font-weight: 600;
@@ -72,19 +77,27 @@
     transform: scale(1.02);
 }
 
+/* ========================================= */
 /* LIGHT THEME */
+/* ========================================= */
 .linkedin-card.light {
     background: #ffffff;
-    color: #000;
+    color: #000000;
     border: 1px solid #e5e7eb;
 }
 
 .linkedin-card.light .linkedin-header {
     background: #f3f2ef;
+    color: #000000;
+}
+
+.linkedin-card.light .linkedin-body {
+    background: #ffffff;
 }
 
 .linkedin-card.light .linkedin-button {
     color: #0a66c2;
+    border-color: #0a66c2;
 }
 
 .linkedin-card.light .linkedin-button:hover {
@@ -92,18 +105,30 @@
     color: #ffffff;
 }
 
+/* ========================================= */
 /* DARK THEME */
+/* ========================================= */
 .linkedin-card.dark {
     background: #000000;
     color: #ffffff;
 }
 
 .linkedin-card.dark .linkedin-header {
-    background: #3a424c;
+    background: #4a5568;
+    color: #ffffff;
+}
+
+.linkedin-card.dark .linkedin-body {
+    background: #000000;
+}
+
+.linkedin-card.dark .linkedin-avatar {
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .linkedin-card.dark .linkedin-button {
     color: #ffffff;
+    border-color: #ffffff;
 }
 
 .linkedin-card.dark .linkedin-button:hover {
