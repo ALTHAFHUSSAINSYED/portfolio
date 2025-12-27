@@ -1978,32 +1978,43 @@ html.dark {
 }
 
 /* ================================================================= */
-/* LINKEDIN BADGE STYLING - Auto-size and fill container properly */
+/* LINKEDIN BADGE STYLING - Full-width responsive badge */
 /* ================================================================= */
 
-/* Container should adapt to badge content size */
+/* Container should fill available space */
 .linkedin-badge-wrapper {
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
   width: 100% !important;
+  max-width: 100% !important;
   min-height: 0 !important;
+  overflow: hidden !important;
 }
 
-/* Badge element should auto-size to its content */
+/* Badge element fills container horizontally */
 .badge-base.LI-profile-badge {
   display: block !important;
   width: 100% !important;
   max-width: 100% !important;
   height: auto !important;
   min-height: 0 !important;
-  margin: 0 !important;
+  margin: 0 auto !important;
+  overflow: hidden !important;
 }
 
-/* Ensure LinkedIn's injected content fills the space */
+/* Anchor tag (light theme content) fills space */
+.badge-base__link.LI-simple-link {
+  display: block !important;
+  width: 100% !important;
+  text-decoration: none !important;
+}
+
+/* LinkedIn's injected content fills the space */
 .LI-profile-badge iframe,
 .LI-profile-badge>div {
   width: 100% !important;
   max-width: 100% !important;
   height: auto !important;
+  overflow: hidden !important;
 }
