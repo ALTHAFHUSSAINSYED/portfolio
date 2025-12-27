@@ -1,4 +1,11 @@
+/* ========================================= */
+/* LINKEDIN CARD - TWO COLUMN GRID LAYOUT */
+/* ========================================= */
+
 .linkedin-card {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    /* Left branding | Right content */
     width: 100%;
     max-width: 100%;
     border-radius: 14px;
@@ -7,15 +14,19 @@
     transition: all 0.3s ease;
 }
 
-/* HEADER - Full width top bar */
-.linkedin-header {
-    width: 100%;
-    padding: 16px 20px;
-    font-weight: 600;
-    font-size: 18px;
+/* ========================================= */
+/* LEFT BRANDING COLUMN */
+/* ========================================= */
+
+.linkedin-left {
+    display: flex;
+    align-items: flex-start;
+    padding: 16px;
 }
 
 .linkedin-logo {
+    font-size: 18px;
+    font-weight: 600;
     display: inline-block;
 }
 
@@ -27,9 +38,12 @@
     margin-left: 2px;
 }
 
-/* BODY */
-.linkedin-body {
-    padding: 24px;
+/* ========================================= */
+/* RIGHT CONTENT COLUMN */
+/* ========================================= */
+
+.linkedin-right {
+    padding: 22px;
 }
 
 /* AVATAR */
@@ -39,7 +53,6 @@
     border-radius: 50%;
     object-fit: cover;
     margin-bottom: 16px;
-    border: 2px solid rgba(0, 0, 0, 0.1);
 }
 
 /* TEXT */
@@ -80,19 +93,24 @@
 /* ========================================= */
 /* LIGHT THEME */
 /* ========================================= */
+
 .linkedin-card.light {
     background: #ffffff;
     color: #000000;
     border: 1px solid #e5e7eb;
 }
 
-.linkedin-card.light .linkedin-header {
+.linkedin-card.light .linkedin-left {
     background: #f3f2ef;
     color: #000000;
 }
 
-.linkedin-card.light .linkedin-body {
+.linkedin-card.light .linkedin-right {
     background: #ffffff;
+}
+
+.linkedin-card.light .linkedin-avatar {
+    border: 2px solid rgba(0, 0, 0, 0.1);
 }
 
 .linkedin-card.light .linkedin-button {
@@ -108,22 +126,23 @@
 /* ========================================= */
 /* DARK THEME */
 /* ========================================= */
+
 .linkedin-card.dark {
     background: #000000;
     color: #ffffff;
 }
 
-.linkedin-card.dark .linkedin-header {
-    background: #4a5568;
+.linkedin-card.dark .linkedin-left {
+    background: #3a424c;
     color: #ffffff;
 }
 
-.linkedin-card.dark .linkedin-body {
+.linkedin-card.dark .linkedin-right {
     background: #000000;
 }
 
 .linkedin-card.dark .linkedin-avatar {
-    border-color: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 .linkedin-card.dark .linkedin-button {
