@@ -103,7 +103,7 @@ const Header = ({ personalInfo }) => {
             {/* ========================================================= */}
             <div className="relative group">
               {/* 1. The Container: Carries the main 'glassmorphic' style so it looks unified */}
-              <div className="glassmorphic-nav-btn flex items-center p-0 gap-0 overflow-hidden border border-white/10">
+              <div className={`glassmorphic-nav-btn flex items-center p-0 gap-0 overflow-hidden border border-white/10 ${theme === 'light' ? 'nav-blink-gradient' : ''}`}>
 
                 {/* A. Main Link (Left Side) */}
                 {/* This Blogs button navigates to the Blogs section with theme-aware glassmorphic styling */}
