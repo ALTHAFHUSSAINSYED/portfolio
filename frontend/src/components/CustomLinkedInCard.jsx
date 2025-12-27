@@ -5,24 +5,19 @@ export default function CustomLinkedInCard({ theme }) {
 
     return (
         <div className={`linkedin-card ${isDark ? 'dark' : 'light'}`}>
-            {/* LEFT COLUMN - LinkedIn branding */}
-            <div className="linkedin-left">
+            {/* HORIZONTAL HEADER - Full width at top */}
+            <div className="linkedin-header">
                 <span className="linkedin-logo">Linked<span>in</span></span>
             </div>
 
-            {/* RIGHT COLUMN - Profile content */}
-            <div className="linkedin-right">
-                {/* 🔹 HORIZONTAL HEADER SPACER - pushes content down */}
-                <div className="linkedin-right-header"></div>
-
-                {/* Profile image */}
+            {/* CONTENT AREA - Profile information */}
+            <div className="linkedin-body">
                 <img
                     src="/profile-pic.jpg"
                     alt="Althaf Hussain Syed"
                     className="linkedin-avatar"
                 />
 
-                {/* Text content */}
                 <h3 className="linkedin-name">ALTHAF HUSSAIN SYED</h3>
 
                 <p className="linkedin-role">
@@ -34,7 +29,6 @@ export default function CustomLinkedInCard({ theme }) {
                     DXC Technology | Acharya Nagarjuna University
                 </p>
 
-                {/* Button */}
                 <a
                     href="https://www.linkedin.com/in/althafhussainsyed"
                     target="_blank"
