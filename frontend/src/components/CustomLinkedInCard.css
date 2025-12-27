@@ -1,5 +1,5 @@
 /* ========================================= */
-/* LINKEDIN CARD - SINGLE COLUMN VERTICAL */
+/* LINKEDIN CARD - SINGLE COLUMN WITH TOP HEADER */
 /* ========================================= */
 
 .linkedin-card {
@@ -10,6 +10,9 @@
     font-family: inherit;
     transition: all 0.3s ease;
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    /* Stack header and body vertically */
 }
 
 .linkedin-card:hover {
@@ -18,21 +21,25 @@
 }
 
 /* ========================================= */
-/* HORIZONTAL HEADER - Full width at top */
+/* HORIZONTAL HEADER - Full width top bar */
 /* ========================================= */
 
 .linkedin-header {
     width: 100%;
-    padding: 18px 24px;
+    padding: 12px 20px;
     display: flex;
     align-items: center;
+    justify-content: flex-start;
+    /* Align logo to left */
 }
 
 .linkedin-logo {
-    font-size: 20px;
-    font-weight: 600;
+    font-size: 24px;
+    font-weight: 700;
     display: inline-flex;
     align-items: center;
+    gap: 2px;
+    /* Small gap between "Linked" and "in" */
     transition: transform 0.3s ease;
 }
 
@@ -43,10 +50,10 @@
 .linkedin-logo span {
     background: #0a66c2;
     color: #fff;
-    padding: 3px 7px;
-    border-radius: 4px;
-    margin-left: 2px;
-    font-size: 18px;
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 22px;
+    font-weight: 700;
     transition: all 0.3s ease;
 }
 
@@ -159,7 +166,13 @@
 
 .linkedin-card.light .linkedin-header {
     background: #f3f2ef;
+    /* LinkedIn beige */
     color: #000000;
+}
+
+.linkedin-card.light .linkedin-logo {
+    color: #0a66c2;
+    /* LinkedIn blue for "Linked" text */
 }
 
 .linkedin-card.light .linkedin-body {
