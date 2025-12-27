@@ -24,50 +24,71 @@ const IntroductionVideo = () => {
         return () => observer.disconnect();
     }, [isLoaded]);
 
+    // Cloudinary thumbnail URL (auto-generated from video)
+    const thumbnailUrl = "https://res.cloudinary.com/dtzaicj6s/video/upload/so_0/introduction_video_aew8f4.jpg";
+
     return (
         <div
             ref={containerRef}
             className="intro-video-container mt-6 mb-6"
-            style={{ overflow: 'hidden', width: '100%' }}
+            style={{
+                overflow: 'hidden',
+                width: '100%',
+                position: 'relative',
+                borderRadius: '8px',
+                backgroundColor: '#000'
+            }}
         >
             {isLoaded ? (
-                <iframe
-                    src="https://player.cloudinary.com/embed/?cloud_name=dtzaicj6s&public_id=introduction_video_aew8f4&profile=cld-default"
-                    width="100%"
-                    height="280"
-                    style={{
-                        width: '100%',
-                        margin: '0',
-                        display: 'block',
-                        borderRadius: '8px',
-                        boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
-                        border: 'none',
-                        overflow: 'hidden'
-                    }}
-                    allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-                    allowFullScreen
-                    frameBorder="0"
-                    scrolling="no"
-                    title="Introduction Video"
-                />
+                <div style={{
+                    position: 'relative',
+                    paddingBottom: '56.25%', // 16:9 aspect ratio
+                    height: 0,
+                    overflow: 'hidden'
+                }}>
+                    <iframe
+                        src={`https://player.cloudinary.com/embed/?cloud_name=dtzaicj6s&public_id=introduction_video_aew8f4&profile=cld-default&poster=${encodeURIComponent(thumbnailUrl)}`}
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            border: 'none',
+                            overflow: 'hidden'
+                        }}
+                        allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                        allowFullScreen
+                        frameBorder="0"
+                        scrolling="no"
+                        title="Introduction Video"
+                    />
+                </div>
             ) : (
                 <div
                     style={{
                         width: '100%',
-                        height: '280px',
-                        margin: '0',
-                        background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(168, 85, 247, 0.1))',
+                        paddingBottom: '56.25%', // 16:9 aspect ratio
+                        position: 'relative',
+                        background: `url(${thumbnailUrl}) center/cover no-repeat`,
                         borderRadius: '8px',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'var(--foreground)',
-                        fontSize: '16px',
-                        fontWeight: '500',
-                        overflow: 'hidden'
+                        justifyContent: 'center'
                     }}
                 >
-                    Loading video...
+                    <div style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        color: '#fff',
+                        fontSize: '16px',
+                        fontWeight: '500',
+                        textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+                    }}>
+                        Loading video...
+                    </div>
                 </div>
             )}
         </div>
