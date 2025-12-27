@@ -1992,16 +1992,16 @@ html.dark {
   position: relative !important;
 }
 
-/* Badge element - scaled for better fill */
+/* Badge element - vertical compact */
 .badge-base.LI-profile-badge {
   display: block !important;
   width: 100% !important;
-  max-width: 100% !important;
+  max-width: 300px !important;
   height: auto !important;
-  margin: 0 !important;
+  margin: 0 auto !important;
   overflow: hidden !important;
-  transform: scale(1.2) !important;
-  transform-origin: top left !important;
+  transform: scale(0.9) !important;
+  transform-origin: top center !important;
 }
 
 /* Hide anchor tag (duplicate name) */
@@ -2009,12 +2009,13 @@ html.dark {
   display: none !important;
 }
 
-/* LinkedIn iframe - wider and shorter */
+/* LinkedIn iframe - vertical compact, no scrollbars */
 .LI-profile-badge iframe {
-  width: 140% !important;
-  min-width: 140% !important;
-  height: 250px !important;
-  max-height: 250px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 350px !important;
+  max-height: 450px !important;
   overflow: hidden !important;
   border: none !important;
   scrollbar-width: none !important;
