@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Download, Mail, Volume2, VolumeX } from 'lucide-react';
-import LinkedInBadge from './LinkedInBadge';
 
 // A simple custom hook for media queries
 const useMediaQuery = (query) => {
@@ -199,9 +198,7 @@ const HeroSection = ({ personalInfo }) => {
                 </Button>
               </div>
 
-              <div className="mt-12 max-w-md mx-auto">
-                <LinkedInBadge />
-              </div>
+
             </div>
 
             <div className="relative z-30 order-3 lg:order-3 lg:col-span-1 flex justify-center lg:justify-end pt-4">
