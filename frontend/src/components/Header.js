@@ -3,10 +3,10 @@ import { Button } from './ui/button';
 import { Card } from './ui/card'; // This was in your original file, so I've kept it.
 import { useTheme } from '../context/ThemeContext'; // ✨ NEW: Import useTheme hook
 // ✨ MODIFIED: Added icons for navigation items
-import { 
+import {
   Download, Mail, Phone, MapPin, Linkedin, Menu, X, Sun, Moon,
   User, Sparkles, Briefcase, Award, BookOpen, ChevronDown, Filter
-} from 'lucide-react'; 
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Header = ({ personalInfo }) => {
@@ -21,11 +21,11 @@ const Header = ({ personalInfo }) => {
       link.href = `${process.env.PUBLIC_URL || ''}/AlthafResume.pdf`;
       link.download = 'AlthafResume.pdf';
       link.style.display = 'none';
-      
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       console.log('Resume download initiated from header');
     } catch (error) {
       console.error('Download error:', error);
@@ -42,7 +42,7 @@ const Header = ({ personalInfo }) => {
         // Get header height for proper scroll positioning
         const headerHeight = document.querySelector('header').offsetHeight;
         const targetPosition = element.getBoundingClientRect().top + window.pageYOffset - headerHeight;
-      
+
         // Use enhanced smooth scrolling with better positioning
         window.scrollTo({
           top: targetPosition,
@@ -70,28 +70,28 @@ const Header = ({ personalInfo }) => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-4"> {/* Reduced space between nav buttons */}
-            <button 
+            <button
               onClick={() => scrollToSection('about')}
               className="glassmorphic-nav-btn font-medium nav-blink-gradient"
             >
               <User className="w-4 h-4 mr-2" />
               About
             </button>
-            <button 
+            <button
               onClick={() => scrollToSection('skills')}
               className="glassmorphic-nav-btn font-medium nav-blink-gradient"
             >
               <Sparkles className="w-4 h-4 mr-2" />
               Skills
             </button>
-            <button 
+            <button
               onClick={() => scrollToSection('experience')}
               className="glassmorphic-nav-btn font-medium nav-blink-gradient"
             >
               <Briefcase className="w-4 h-4 mr-2" />
               Experience
             </button>
-            <button 
+            <button
               onClick={() => scrollToSection('certifications')}
               className="glassmorphic-nav-btn font-medium nav-blink-gradient"
             >
@@ -104,9 +104,10 @@ const Header = ({ personalInfo }) => {
             <div className="relative group">
               {/* 1. The Container: Carries the main 'glassmorphic' style so it looks unified */}
               <div className="glassmorphic-nav-btn flex items-center p-0 gap-0 overflow-hidden border border-white/10">
-                
+
                 {/* A. Main Link (Left Side) */}
-                <button 
+                {/* This Blogs button navigates to the Blogs section with theme-aware glassmorphic styling */}
+                <button
                   onClick={() => scrollToSection('blogs')}
                   className="px-4 py-2 font-medium flex items-center h-full hover:bg-white/5 transition-colors focus:outline-none"
                   title="Go to Blogs Section"
@@ -119,7 +120,7 @@ const Header = ({ personalInfo }) => {
                 <div className="w-[1px] h-5 bg-white/20 dark:bg-white/10 mx-0"></div>
 
                 {/* C. Toggle Arrow (Right Side) */}
-                <button 
+                <button
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowBlogCategories(!showBlogCategories);
@@ -130,7 +131,7 @@ const Header = ({ personalInfo }) => {
                   <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${showBlogCategories ? 'rotate-180' : ''}`} />
                 </button>
               </div>
-              
+
               {/* ========================================================= */}
               {/* DROPDOWN MENU (Compact & Shifted Right)                   */}
               {/* ========================================================= */}
@@ -138,16 +139,16 @@ const Header = ({ personalInfo }) => {
                 <div className="absolute top-full right-[-60px] mt-2 w-56 bg-background/95 backdrop-blur-md border border-cyan-400/30 rounded-xl shadow-2xl shadow-cyan-900/20 py-2 z-50 fade-in-up origin-top-right">
                   <div className="px-4 py-2 border-b border-border/50 bg-secondary/30">
                     <p className="text-xs font-semibold text-foreground flex items-center">
-                      <Filter className="w-3 h-3 mr-2 text-cyan-soft" /> 
+                      <Filter className="w-3 h-3 mr-2 text-cyan-soft" />
                       Filter by Topic
                     </p>
                   </div>
                   <div className="max-h-64 overflow-y-auto py-2 custom-scrollbar">
                     {[
-                      'Cloud Computing', 
-                      'DevOps', 
-                      'AI and ML', 
-                      'Cybersecurity', 
+                      'Cloud Computing',
+                      'DevOps',
+                      'AI and ML',
+                      'Cybersecurity',
                       'Software Development'
                     ].map((category) => (
                       <button
@@ -209,7 +210,7 @@ const Header = ({ personalInfo }) => {
             >
               {theme === 'dark' ? <Sun className="w-8 h-8 animate-pulse" /> : <Moon className="w-8 h-8 animate-pulse" />}
             </Button>
-             {/* Mobile Menu Button */}
+            {/* Mobile Menu Button */}
             <Button
               variant="ghost"
               size="sm"
@@ -222,19 +223,18 @@ const Header = ({ personalInfo }) => {
         </div>
 
         {/* Mobile Menu with Slide Animation */}
-        <div className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${
-          isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-        }`}>
+        <div className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+          }`}>
           <div className="pb-4 border-t border-cyan-400/20 mt-4">
             <div className="flex flex-col space-y-3 pt-4">
               {[
-                {section: 'about', icon: <User className="w-4 h-4 mr-2" />},
-                {section: 'skills', icon: <Sparkles className="w-4 h-4 mr-2" />},
-                {section: 'experience', icon: <Briefcase className="w-4 h-4 mr-2" />},
-                {section: 'certifications', icon: <Award className="w-4 h-4 mr-2" />},
-                {section: 'blogs', icon: <BookOpen className="w-4 h-4 mr-2" />}
-              ].map(({section, icon}, index) => (
-                <button 
+                { section: 'about', icon: <User className="w-4 h-4 mr-2" /> },
+                { section: 'skills', icon: <Sparkles className="w-4 h-4 mr-2" /> },
+                { section: 'experience', icon: <Briefcase className="w-4 h-4 mr-2" /> },
+                { section: 'certifications', icon: <Award className="w-4 h-4 mr-2" /> },
+                { section: 'blogs', icon: <BookOpen className="w-4 h-4 mr-2" /> }
+              ].map(({ section, icon }, index) => (
+                <button
                   key={section}
                   onClick={() => scrollToSection(section)}
                   className={`text-left text-foreground hover:text-cyan-soft font-medium transition-all duration-300 py-2 capitalize fade-in-right stagger-${index + 1} flex items-center`}
