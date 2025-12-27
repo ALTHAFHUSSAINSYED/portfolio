@@ -3,6 +3,7 @@ import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Progress } from './ui/progress';
 import { Cloud, Settings, Code, Database, Award } from 'lucide-react';
+import IntroductionVideo from './IntroductionVideo';
 
 const SkillsSection = ({ skills }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -154,6 +155,9 @@ const SkillsSection = ({ skills }) => {
             Comprehensive expertise across cloud platforms, DevOps tools, and modern infrastructure technologies
           </p>
         </div>
+
+        {/* Introduction Video */}
+        <IntroductionVideo />
 
         <div className="grid lg:grid-cols-2 gap-8">
           {skillCategories.map((category, categoryIndex) => {
