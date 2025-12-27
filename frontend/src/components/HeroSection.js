@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Download, Mail, Volume2, VolumeX } from 'lucide-react';
+import IntroductionVideo from './IntroductionVideo';
 
 // A simple custom hook for media queries
 const useMediaQuery = (query) => {
@@ -198,6 +199,8 @@ const HeroSection = ({ personalInfo }) => {
                 </Button>
               </div>
 
+              {/* Introduction Video */}
+              <IntroductionVideo />
 
             </div>
 
