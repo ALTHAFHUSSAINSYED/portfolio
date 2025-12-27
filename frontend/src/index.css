@@ -1470,8 +1470,8 @@ code {
 
 /* Brighter certification names in light theme */
 .light .light-mode-bright {
-  color: #0f172a !important;
-  /* Deep slate color for maximum readability */
+  color: #020617 !important;
+  /* Darker slate-950 for maximum readability */
   font-weight: 700 !important;
   /* Slightly bolder */
 }
@@ -1774,14 +1774,14 @@ html.dark::-webkit-scrollbar {
   box-shadow: 0 0 16px #ff3fb4, 0 0 24px #3dff8c;
   border-radius: 50%;
   filter: drop-shadow(0 0 8px #ff3fb4) drop-shadow(0 0 12px #3dff8c);
-  animation: toggleBlink 2.5s infinite;
+  animation: toggleBlink 4s infinite;
 }
 
 /* Blinking, gradient nav button for header */
 .nav-blink-gradient {
   background: linear-gradient(90deg, #ff3fb4, #3dff8c);
   color: #111827;
-  animation: toggleBlink 2.5s infinite;
+  animation: toggleBlink 4s infinite;
   border-radius: 9999px;
   font-weight: 600;
 }

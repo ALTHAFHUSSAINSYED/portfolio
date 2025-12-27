@@ -3,8 +3,10 @@ import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Award, Calendar, Filter } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 const CertificationsSection = ({ certifications }) => {
+  const { theme } = useTheme();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
@@ -100,8 +102,8 @@ const CertificationsSection = ({ certifications }) => {
               variant={selectedCategory === key ? 'default' : 'outline'}
               size="sm"
               // ✨ MODIFIED: Unselected state is now theme-aware
-              className={`transition-all duration-300 hover-shine sparkle-text ${selectedCategory === key
-                ? 'neon-button bg-gradient-to-r from-pink-500 to-green-500 dark:from-cyan-500 dark:to-pink-500 text-white font-bold shadow-lg'
+              className={`transition-all duration-300 hover-shine sparkle-text mr-2 ${selectedCategory === key
+                ? `neon-button ${theme === 'light' ? 'bg-gradient-to-r from-pink-500 to-green-500' : 'bg-gradient-to-r from-cyan-500 to-pink-500'}  text-white font-bold shadow-lg`
                 : 'border-border/50 text-muted-foreground bg-background/50 hover:bg-secondary/50 hover-glow'
                 } ${isVisible ? `scale-in stagger-${index + 3}` : ''}`}
             >
