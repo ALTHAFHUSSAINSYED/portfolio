@@ -1978,14 +1978,17 @@ html.dark {
 }
 
 /* ================================================================= */
-/* LINKEDIN BADGE STYLING - Natural size, no scrollbars */
+/* LINKEDIN BADGE STYLING - Container-based layout */
 /* ================================================================= */
 
-/* Container wrapper */
-.linkedin-badge-wrapper {
-  display: block !important;
-  overflow: hidden !important;
-  position: relative !important;
+/* Outer card - controls width, matches Phone/WhatsApp cards */
+.linkedin-card {
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+  display: flex;
+  justify-content: flex-start;
+  overflow: hidden;
 }
 
 /* Badge element - natural size, no scaling */
@@ -1999,8 +2002,11 @@ html.dark {
   display: none !important;
 }
 
-/* LinkedIn iframe - hide all scrollbars */
+/* LinkedIn iframe - keep natural size, hide scrollbars */
+.linkedin-card iframe,
 .LI-profile-badge iframe {
+  width: 340px !important;
+  min-width: 340px !important;
   overflow: hidden !important;
   border: none !important;
   scrollbar-width: none !important;
@@ -2008,6 +2014,7 @@ html.dark {
 }
 
 /* Hide scrollbar in iframe - webkit */
+.linkedin-card iframe::-webkit-scrollbar,
 .LI-profile-badge iframe::-webkit-scrollbar {
   display: none !important;
   width: 0 !important;
