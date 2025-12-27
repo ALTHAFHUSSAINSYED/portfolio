@@ -4,7 +4,7 @@ export default function CustomLinkedInCard({ theme }) {
     const isDark = theme === 'dark';
 
     return (
-        <div className={`linkedin-card ${isDark ? 'dark' : 'light'}`}>
+        <div className={`linkedin-card neon-card ${isDark ? 'dark' : 'light'}`}>
             {/* HORIZONTAL HEADER - Full width at top */}
             <div className="linkedin-header">
                 <span className="linkedin-logo">Linked<span>in</span></span>
