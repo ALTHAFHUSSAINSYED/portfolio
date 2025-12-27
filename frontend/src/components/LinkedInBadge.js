@@ -21,14 +21,14 @@ export default function LinkedInBadge({ theme }) {
 
     return (
         <div
-            className="badge-base LI-profile-badge linkedin-vertical-badge"
+            className="badge-base LI-profile-badge"
             data-locale="en_US"
             data-size="large"
             data-theme="dark"
             data-type="VERTICAL"
             data-vanity="althafhussainsyed"
             data-version="v1"
-            style={{ overflow: 'hidden', maxWidth: '300px', margin: '0 auto' }}
+            style={{ overflow: 'hidden', width: '100%' }}
         >
             <a
                 className="badge-base__link LI-simple-link"
