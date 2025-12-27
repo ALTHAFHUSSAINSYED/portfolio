@@ -224,3 +224,12 @@
     background: #ffffff;
     color: #000000;
 }
+
+/* ===================================== */
+/* LIGHT THEME - LinkedIn Card Hover */
+/* ===================================== */
+
+.linkedin-card.light:hover {
+    box-shadow: 0 12px 24px rgba(0, 119, 255, 0.15);
+    border-color: rgba(0, 119, 255, 0.3);
+}

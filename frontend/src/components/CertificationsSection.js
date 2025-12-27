@@ -24,9 +24,9 @@ const CertificationsSection = ({ certifications }) => {
     }
 
     return () => {
-        if (sectionRef.current) {
-            observer.unobserve(sectionRef.current);
-        }
+      if (sectionRef.current) {
+        observer.unobserve(sectionRef.current);
+      }
     };
   }, []);
 
@@ -41,13 +41,13 @@ const CertificationsSection = ({ certifications }) => {
     github: { name: 'GitHub', color: 'text-gray-700 dark:text-gray-300', bg: 'bg-gray-200 dark:bg-gray-500/20' }
   };
 
-  const filteredCertifications = selectedCategory === 'all' 
-    ? certifications 
-    : certifications.filter(cert => 
-        Array.isArray(cert.category) 
-          ? cert.category.includes(selectedCategory)
-          : cert.category === selectedCategory
-      );
+  const filteredCertifications = selectedCategory === 'all'
+    ? certifications
+    : certifications.filter(cert =>
+      Array.isArray(cert.category)
+        ? cert.category.includes(selectedCategory)
+        : cert.category === selectedCategory
+    );
 
   const getMainCategory = (category) => {
     return Array.isArray(category) ? category[0] : category;
@@ -73,7 +73,7 @@ const CertificationsSection = ({ certifications }) => {
         <div className="bg-orb bg-orb-1"></div>
         <div className="bg-orb bg-orb-2"></div>
         <div className="bg-orb bg-orb-3"></div>
-        
+
         {/* Floating certification icons */}
         <div className="absolute top-1/4 left-1/5 w-6 h-6 bg-orange-400/20 rounded-full floating opacity-20"></div>
         <div className="absolute top-2/3 right-1/5 w-4 h-4 bg-blue-400/20 rounded-full floating-reverse opacity-25"></div>
@@ -100,11 +100,10 @@ const CertificationsSection = ({ certifications }) => {
               variant={selectedCategory === key ? 'default' : 'outline'}
               size="sm"
               // ✨ MODIFIED: Unselected state is now theme-aware
-              className={`transition-all duration-300 hover-shine sparkle-text ${
-                selectedCategory === key 
-                  ? 'neon-button bg-gradient-to-r from-cyan-500/80 to-pink-500/80 text-black font-bold' 
+              className={`transition-all duration-300 hover-shine sparkle-text ${selectedCategory === key
+                  ? 'neon-button bg-gradient-to-r from-pink-500 to-green-500 text-white font-bold shadow-lg'
                   : 'border-border/50 text-muted-foreground bg-background/50 hover:bg-secondary/50 hover-glow'
-              } ${isVisible ? `scale-in stagger-${index + 3}` : ''}`}
+                } ${isVisible ? `scale-in stagger-${index + 3}` : ''}`}
             >
               <Filter className="w-4 h-4 mr-2" />
               {category.name}
@@ -114,8 +113,8 @@ const CertificationsSection = ({ certifications }) => {
 
         {/* Certifications Count */}
         <div className={`text-center mb-8 ${isVisible ? 'fade-in-up stagger-3' : ''}`}>
-          <Badge 
-            variant="outline" 
+          <Badge
+            variant="outline"
             // ✨ MODIFIED: Changed bg-black/50 to bg-background/50
             className="border-cyan-400/50 text-cyan-soft bg-background/50 px-6 py-3 text-lg sparkle-text hover-glow transition-all duration-300"
           >
@@ -128,11 +127,10 @@ const CertificationsSection = ({ certifications }) => {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCertifications.map((cert, index) => (
             // ✨ MODIFIED: Removed redundant/conflicting color classes to let neon-card work
-            <Card 
-              key={index} 
-              className={`p-6 transition-all duration-500 backdrop-blur-sm neon-card hover-lift hover-shine group ${
-                isVisible ? `rotate-in stagger-${index + 4}` : ''
-              }`}
+            <Card
+              key={index}
+              className={`p-6 transition-all duration-500 backdrop-blur-sm neon-card hover-lift hover-shine group ${isVisible ? `rotate-in stagger-${index + 4}` : ''
+                }`}
             >
               <div className="flex items-start space-x-4">
                 {/* ✨ MODIFIED: Changed border to be theme-aware */}
@@ -141,9 +139,9 @@ const CertificationsSection = ({ certifications }) => {
                     {getCertificationIcon(cert.category)}
                   </div>
                 </div>
-                
+
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-gray-900 dark:text-foreground mb-2 leading-tight group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-all duration-300 shine-text-slow">
+                  <h3 className="font-semibold text-gray-900 dark:text-foreground mb-2 leading-tight group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-all duration-300 shine-text-slow light-mode-bright">
                     {cert.name}
                   </h3>
                   {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
@@ -157,11 +155,11 @@ const CertificationsSection = ({ certifications }) => {
                   </div>
                 </div>
               </div>
-              
+
               {/* ✨ MODIFIED: Changed border to be theme-aware */}
               <div className="mt-4 pt-4 border-t border-border/30">
-                <Badge 
-                  variant="outline" 
+                <Badge
+                  variant="outline"
                   className={`${getCertificationBg(cert.category)} ${getCertificationColor(cert.category)} border-current text-xs px-3 py-1 hover-scale transition-all duration-300 sparkle-text`}
                 >
                   {selectedCategory !== 'all' && Array.isArray(cert.category) && cert.category.includes(selectedCategory)
@@ -175,9 +173,8 @@ const CertificationsSection = ({ certifications }) => {
 
         {/* Certification Summary Stats */}
         {/* ✨ MODIFIED: Removed redundant/conflicting color classes to let neon-card work */}
-        <div className={`mt-16 rounded-xl p-8 shadow-sm backdrop-blur-sm neon-card hover-lift ${
-          isVisible ? 'slide-in-bottom stagger-8' : ''
-        }`}>
+        <div className={`mt-16 rounded-xl p-8 shadow-sm backdrop-blur-sm neon-card hover-lift ${isVisible ? 'slide-in-bottom stagger-8' : ''
+          }`}>
           <h3 className="text-2xl font-bold text-center mb-8 shine-text">
             Certification Portfolio Overview
           </h3>
