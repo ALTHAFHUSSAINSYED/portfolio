@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Award, TrendingUp, Shield, Zap } from 'lucide-react';
+import IntroductionVideo from './IntroductionVideo';
 
 const AboutSection = ({ personalInfo, achievements }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -72,7 +73,7 @@ const AboutSection = ({ personalInfo, achievements }) => {
             <p className="text-muted-foreground leading-relaxed text-lg">
               {personalInfo.summary}
             </p>
-            
+
             <div className="space-y-4">
               {/* ✨ MODIFIED: Changed text-white to text-foreground */}
               <h4 className="text-lg font-semibold text-foreground">Key Expertise Areas:</h4>
@@ -89,15 +90,19 @@ const AboutSection = ({ personalInfo, achievements }) => {
                     key={skill.name}
                     onMouseEnter={() => setHoveredSkill(skill.name)}
                     onMouseLeave={() => setHoveredSkill(null)}
-                    className={`border px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 backdrop-blur-sm cursor-default ${
-                      hoveredSkill === skill.name 
-                        ? `border-${skill.color}-400/50 text-${skill.color}-soft bg-${skill.color}-400/10 scale-105`
-                        : 'border-border/30 text-muted-foreground bg-background/50'
-                    } ${isVisible ? `fade-in-up stagger-${index + 3}` : ''}`}
+                    className={`border px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 backdrop-blur-sm cursor-default ${hoveredSkill === skill.name
+                      ? `border-${skill.color}-400/50 text-${skill.color}-soft bg-${skill.color}-400/10 scale-105`
+                      : 'border-border/30 text-muted-foreground bg-background/50'
+                      } ${isVisible ? `fade-in-up stagger-${index + 3}` : ''}`}
                   >
                     {skill.name}
                   </div>
                 ))}
+              </div>
+
+              {/* Introduction Video */}
+              <div className="mt-6">
+                <IntroductionVideo />
               </div>
             </div>
           </div>
@@ -113,14 +118,13 @@ const AboutSection = ({ personalInfo, achievements }) => {
                 const iconColor = iconColors[achievement.title] || 'text-cyan-soft';
                 return (
                   // ✨ MODIFIED: Removed redundant/conflicting color classes to let neon-card work
-                  <Card 
-                    key={index} 
-                    className={`p-6 transition-all duration-300 group backdrop-blur-sm neon-card hover-lift ${
-                      isVisible ? `fade-in-up stagger-${index + 4}` : ''
-                    }`}
+                  <Card
+                    key={index}
+                    className={`p-6 transition-all duration-300 group backdrop-blur-sm neon-card hover-lift ${isVisible ? `fade-in-up stagger-${index + 4}` : ''
+                      }`}
                   >
                     <div className="flex items-start space-x-4">
-                       {/* ✨ MODIFIED: Changed background and border to be theme-aware */}
+                      {/* ✨ MODIFIED: Changed background and border to be theme-aware */}
                       <div className={`flex-shrink-0 w-12 h-12 bg-secondary/50 rounded-lg flex items-center justify-center group-hover:bg-secondary/80 transition-all duration-300 border border-border/20 hover-rotate`}>
                         <IconComponent className={`w-6 h-6 ${iconColor}`} />
                       </div>
@@ -129,7 +133,7 @@ const AboutSection = ({ personalInfo, achievements }) => {
                         <h4 className="font-semibold text-foreground mb-2 group-hover:text-cyan-soft transition-colors duration-300">
                           {achievement.title}
                         </h4>
-                         {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
+                        {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
                         <p className="text-muted-foreground leading-relaxed">
                           {achievement.description}
                         </p>
@@ -144,18 +148,17 @@ const AboutSection = ({ personalInfo, achievements }) => {
 
         {/* Personal Touch */}
         {/* ✨ MODIFIED: Removed redundant/conflicting color classes to let neon-card work */}
-        <div className={`mt-16 text-center rounded-xl p-8 backdrop-blur-sm neon-card hover-lift transition-all duration-300 ${
-          isVisible ? 'slide-in-bottom stagger-6' : ''
-        }`}>
+        <div className={`mt-16 text-center rounded-xl p-8 backdrop-blur-sm neon-card hover-lift transition-all duration-300 ${isVisible ? 'slide-in-bottom stagger-6' : ''
+          }`}>
           {/* ✨ MODIFIED: Changed text-white to text-foreground */}
           <h3 className="text-xl font-semibold text-foreground mb-4">
             <span className="text-green-soft">Why I Love</span> <span className="text-blue-soft">DevOps</span>
           </h3>
           {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
           <p className="text-muted-foreground max-w-3xl mx-auto text-lg leading-relaxed">
-            I'm passionate about bridging the gap between development and operations, creating robust, 
-            scalable systems that enable teams to deliver value faster and more reliably. Every 
-            automation script, every pipeline optimization, and every infrastructure improvement 
+            I'm passionate about bridging the gap between development and operations, creating robust,
+            scalable systems that enable teams to deliver value faster and more reliably. Every
+            automation script, every pipeline optimization, and every infrastructure improvement
             is an opportunity to make technology work better for people.
           </p>
         </div>
