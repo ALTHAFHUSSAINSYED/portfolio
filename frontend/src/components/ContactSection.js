@@ -6,7 +6,7 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Mail, Phone, Send, MessageCircle, MessageSquare } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
-import LinkedInBadge from './LinkedInBadge';
+import CustomLinkedInCard from './CustomLinkedInCard';
 import { useTheme } from '../context/ThemeContext';
 
 const ContactSection = ({ personalInfo }) => {
@@ -132,7 +132,7 @@ const ContactSection = ({ personalInfo }) => {
             </div>
 
             <div className="mt-8">
-              <LinkedInBadge theme={theme} />
+              <CustomLinkedInCard theme={theme} />
             </div>
           </div>
           <Card className={`p-8 neon-card ${isVisible ? 'fade-in-right stagger-8' : ''}`}>
