@@ -1,40 +1,52 @@
 import React, { useEffect, useRef } from 'react';
 import { useTheme } from '../context/ThemeContext';
+import { Card } from './ui/card';
 
 const LinkedInBadge = () => {
     const { theme } = useTheme();
     const containerRef = useRef(null);
 
     useEffect(() => {
-        if (containerRef.current) {
-            containerRef.current.innerHTML = `
-        <div class="badge-base LI-profile-badge"
-             data-locale="en_US"
-             data-size="medium"
-             data-theme="${theme === 'dark' ? 'dark' : 'light'}"
-             data-type="HORIZONTAL"
-             data-vanity="althafhussainsyed"
-             data-version="v1">
-        </div>`;
+        // Determine the theme to use. LinkedIn only supports 'light' and 'dark'.
+        // Default to 'light' if theme is undefined or not 'dark'.
+        const badgeTheme = theme === 'dark' ? 'dark' : 'light';
 
-            // Re-trigger LinkedIn script to parse the new badge
+        if (containerRef.current) {
+            // Clear previous content strictly
+            containerRef.current.innerHTML = '';
+
+            // Create the badge element
+            const badgeDiv = document.createElement('div');
+            badgeDiv.className = 'badge-base LI-profile-badge';
+            badgeDiv.setAttribute('data-locale', 'en_US');
+            badgeDiv.setAttribute('data-size', 'medium');
+            badgeDiv.setAttribute('data-theme', badgeTheme);
+            badgeDiv.setAttribute('data-type', 'HORIZONTAL');
+            badgeDiv.setAttribute('data-vanity', 'althafhussainsyed');
+            badgeDiv.setAttribute('data-version', 'v1');
+
+            containerRef.current.appendChild(badgeDiv);
+
+            // Force re-parsing. 
+            // If window.LI doesn't exist yet, the script in index.html will handle the initial load.
+            // If it DOES exist, we need to tell it to look again.
             if (window.LI && window.LI.Sync) {
                 window.LI.Sync.parse(containerRef.current);
             }
         }
     }, [theme]);
 
+    // Styling:
+    // - neon-card: Reusing the existing glow effect class
+    // - w-full: Full width to match parent containers (like the WhatsApp card)
+    // - overflow-hidden: Keeps the glow/border contained
     return (
-        <div
-            className="linkedin-badge-container"
-            style={{
-                textAlign: 'center',
-                margin: '1.25rem auto',
-                maxWidth: '340px'
-            }}
-        >
-            <div id="linkedin-badge" ref={containerRef}></div>
-        </div>
+        <Card className="p-4 neon-card w-full flex justify-center items-center overflow-hidden transition-all hover:scale-[1.02]">
+            <div
+                ref={containerRef}
+                style={{ width: '100%', display: 'flex', justifyContent: 'center' }}
+            />
+        </Card>
     );
 };
 
