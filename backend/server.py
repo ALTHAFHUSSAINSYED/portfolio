@@ -603,7 +603,64 @@ async def create_project(
     # Background sync removed to prevent OOM
     return project_data
 
-# --- PUT (UPDATE) PROJECT ---
+# --- GET /api/blogs (Merge Static + Auto-Generated) ---
+@api_router.get("/blogs")
+async def get_blogs():
+    """
+    Merge static blogs from frontend/public/data/blogs.json 
+    with auto-generated blogs from backend/generated_blogs/
+    Returns combined list sorted by creation date (newest first)
+    """
+    all_blogs = []
+    
+    # 1. Load static blogs from frontend
+    try:
+        static_blogs_path = ROOT_DIR.parent / 'frontend' / 'public' / 'data' / 'blogs.json'
+        if not static_blogs_path.exists():
+            # Fallback if running from different directory
+            static_blogs_path = Path('frontend/public/data/blogs.json')
+        
+        if static_blogs_path.exists():
+            with open(static_blogs_path, 'r', encoding='utf-8') as f:
+                static_data = json.load(f)
+                # Handle both {blogs: [...]} and [...] formats
+                static_blogs = static_data.get('blogs', []) if isinstance(static_data, dict) else static_data
+                all_blogs.extend(static_blogs)
+                logger.info(f"Loaded {len(static_blogs)} static blogs from frontend")
+    except Exception as e:
+        logger.error(f"Error loading static blogs: {e}")
+    
+    # 2. Load auto-generated blogs from backend
+    try:
+        generated_blogs_dir = ROOT_DIR / 'generated_blogs'
+        if generated_blogs_dir.exists() and generated_blogs_dir.is_dir():
+            generated_count = 0
+            for blog_file in generated_blogs_dir.glob('*.json'):
+                try:
+                    with open(blog_file, 'r', encoding='utf-8') as f:
+                        blog_data = json.load(f)
+                        all_blogs.append(blog_data)
+                        generated_count += 1
+                except Exception as e:
+                    logger.error(f"Error loading {blog_file.name}: {e}")
+            logger.info(f"Loaded {generated_count} auto-generated blogs from backend")
+    except Exception as e:
+        logger.error(f"Error loading generated blogs: {e}")
+    
+    # 3. Sort by creation date (newest first)
+    try:
+        all_blogs.sort(
+            key=lambda b: datetime.fromisoformat(b.get('created_at', '1970-01-01T00:00:00')) 
+            if isinstance(b.get('created_at'), str) else b.get('created_at', datetime.min),
+            reverse=True
+        )
+    except Exception as e:
+        logger.error(f"Error sorting blogs: {e}")
+    
+    logger.info(f"Returning {len(all_blogs)} total blogs")
+    return {"blogs": all_blogs}
+
+
 @api_router.put("/projects/{project_id}", response_model=Project)
 async def update_project(
     project_id: str,

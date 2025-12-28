@@ -47,7 +47,7 @@ class BlogPublisher:
             chroma_api_key = os.getenv("CHROMA_API_KEY")
             chroma_host = "api.trychroma.com" # Or from env
             chroma_tenant = os.getenv("CHROMA_TENANT_ID")
-            chroma_db = os.getenv("CHROMA_DATABASE")
+            chroma_db = os.getenv("CHROMA_DB_NAME")  # Fixed: Match live container env var
             
             if chroma_api_key:
                 logger.info("Connecting to ChromaDB Cloud...")
