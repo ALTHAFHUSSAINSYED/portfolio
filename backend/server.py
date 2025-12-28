@@ -233,11 +233,11 @@ def is_greeting_or_conversational(text: str) -> tuple:
         return True, "neutral"
     
     # Conversational closings & Dismissals (SKIP RAG)
-    closings = ['bye', 'goodbye', 'see you', 'thanks', 'thank you', 'ok', 'okay', 'good', 'great', 'cool']
+    closings = ['bye', 'goodbye', 'see you', 'thanks', 'thank you', 'ok', 'okay', 'good', 'great', 'cool', 'oh', 'ah', 'wow', 'hmm']
     dismissals = ['nothing', 'nothin', 'no', 'nope', 'nah', 'not really', 'none', 'stop', 'cancel']
     
     # Check exact match or startswith for short inputs
-    if any(text == c or text.startswith(c + " ") for c in closings + dismissals):
+    if any(text == c or text.startswith(c + " ") or text.startswith(c + ",") for c in closings + dismissals):
         return True, "neutral"
         
     # Specific fix for "not relevant" / "irrelevant" (including misspellings like 'relavnet')
