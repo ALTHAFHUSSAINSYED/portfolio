@@ -64,15 +64,40 @@ class BlogNotifier:
             logger.error("NotificationService not available")
             return
         
+        
         meta_html = ""
         if metadata:
+            # Convert UTC timestamps to IST
+            from datetime import datetime
+            import pytz
+            
+            start_time_str = metadata.get('start_time', 'N/A')
+            end_time_str = metadata.get('end_time', 'N/A')
+            
+            # Convert to IST if timestamps are datetime objects
+            if start_time_str != 'N/A':
+                try:
+                    if isinstance(start_time_str, datetime):
+                        ist = pytz.timezone('Asia/Kolkata')
+                        start_time_str = start_time_str.astimezone(ist).strftime('%Y-%m-%d %H:%M:%S IST')
+                except:
+                    pass
+            
+            if end_time_str != 'N/A':
+                try:
+                    if isinstance(end_time_str, datetime):
+                        ist = pytz.timezone('Asia/Kolkata')
+                        end_time_str = end_time_str.astimezone(ist).strftime('%Y-%m-%d %H:%M:%S IST')
+                except:
+                    pass
+            
             meta_html = f"""
             <h3>Failure Details</h3>
             <ul>
                 <li><strong>Category:</strong> {metadata.get('category', 'Unknown')}</li>
                 <li><strong>Draft Title:</strong> {metadata.get('pending_title', 'N/A')}</li>
-                <li><strong>Started:</strong> {metadata.get('start_time', 'N/A')}</li>
-                <li><strong>Failed:</strong> {metadata.get('end_time', 'N/A')}</li>
+                <li><strong>Started:</strong> {start_time_str}</li>
+                <li><strong>Failed:</strong> {end_time_str}</li>
             </ul>
             """
 
