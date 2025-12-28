@@ -8,15 +8,91 @@ import json
 import logging
 import time
 import uuid
+import boto3
 import google.generativeai as genai
 import chromadb
-from typing import Dict, Any
+from typing import Dict, Any, List
 from datetime import datetime
 from dotenv import load_dotenv
+from botocore.exceptions import ClientError
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("BlogPublisher")
+
+# ═══════════════════════════════════════════════════════════
+# S3 BLOG STORAGE HELPER
+# ═══════════════════════════════════════════════════════════
+
+class S3BlogStorage:
+    """Handles persistent blog storage in S3 (Phase A: Fix data loss)"""
+    
+    def __init__(self, bucket_name: str = "althaf-blogs-storage"):
+        self.bucket = bucket_name
+        self.s3 = boto3.client("s3")  # Auto-uses IAM role credentials
+        self.index_key = "blogs/index.json"
+        self.posts_prefix = "blogs/posts/"
+        logger.info(f"S3BlogStorage initialized: s3://{bucket_name}")
+    
+    def read_index(self) -> Dict[str, List]:
+        """Read blogs/index.json from S3, return {blogs: [...]}"""
+        try:
+            response = self.s3.get_object(Bucket=self.bucket, Key=self.index_key)
+            content = response['Body'].read().decode('utf-8')
+            return json.loads(content)
+        except ClientError as e:
+            if e.response['Error']['Code'] == 'NoSuchKey':
+                logger.warning("index.json not found, returning empty")
+                return {"blogs": []}
+            raise
+    
+    def write_index(self, data: Dict[str, List]):
+        """Write blogs/index.json to S3"""
+        content = json.dumps(data, indent=2)
+        self.s3.put_object(
+            Bucket=self.bucket,
+            Key=self.index_key,
+            Body=content.encode('utf-8'),
+            ContentType='application/json'
+        )
+        logger.info(f"✅ Updated S3: {self.index_key}")
+    
+    def upload_post(self, blog_id: str, blog_data: Dict):
+        """Upload individual blog to blogs/posts/{id}.json"""
+        key = f"{self.posts_prefix}{blog_id}.json"
+        content = json.dumps(blog_data, indent=2)
+        self.s3.put_object(
+            Bucket=self.bucket,
+            Key=key,
+            Body=content.encode('utf-8'),
+            ContentType='application/json'
+        )
+        logger.info(f"✅ Uploaded full post: {key}")
+    
+    def add_blog_to_index(self, blog: Dict):
+        """Insert new blog at top of index.json (newest first)"""
+        index_data = self.read_index()
+        
+        # Prepare metadata entry (lightweight)
+        metadata = {
+            "id": blog['id'],
+            "title": blog['title'],
+            "category": blog['category'],
+            "slug": blog.get('slug', blog['id']),
+            "created_at": blog['created_at'],
+            "excerpt": blog['content'][:200] + "..." if len(blog['content']) > 200 else blog['content'],
+            "tags": blog.get('tags', []),
+            "author": blog.get('author', 'Althaf Hussain Syed'),
+            "author_title": blog.get('author_title', 'Solutions Architect')
+        }
+        
+        # Insert at position 0 (top of list)
+        index_data['blogs'].insert(0, metadata)
+        
+        self.write_index(index_data)
+        logger.info(f"✅ Added {blog['id']} to index (total: {len(index_data['blogs'])})")
+
+# ═══════════════════════════════════════════════════════════
 
 class BlogPublisher:
     def __init__(self):
@@ -30,7 +106,11 @@ class BlogPublisher:
         # Setup ChromaDB
         self.chroma_client = self._setup_chroma()
         
-        # Storage Path
+        # Setup S3 Storage (Phase A: Persistent storage)
+        s3_bucket = os.getenv("S3_BLOG_BUCKET", "althaf-blogs-storage")
+        self.s3_storage = S3BlogStorage(bucket_name=s3_bucket)
+        
+        # Local Storage Path (kept for backwards compatibility)
         self.storage_dir = os.path.join(
             os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
             "generated_blogs"
@@ -91,16 +171,28 @@ class BlogPublisher:
         blog['published'] = True
         blog['created_at'] = datetime.now().isoformat()
         
-        # 2. Save JSON File
+        # 2. Save to S3 (Phase A: Persistent Storage)
+        try:
+            # Upload full post to S3 posts/
+            self.s3_storage.upload_post(blog_id, blog)
+            
+            # Add metadata to index.json
+            self.s3_storage.add_blog_to_index(blog)
+            
+            logger.info(f"✅ Saved to S3: {blog_id}")
+        except Exception as e:
+            logger.error(f"S3 save failed: {e}")
+            raise Exception(f"Failed to save to S3: {e}")
+        
+        # 2b. Also save locally (optional backup, ephemeral)
         filename = f"{blog_id}.json"
         filepath = os.path.join(self.storage_dir, filename)
-        
         try:
             with open(filepath, 'w', encoding='utf-8') as f:
                 json.dump(blog, f, indent=2)
-            logger.info(f"Saved JSON to {filepath}")
+            logger.info(f"Saved local backup: {filepath}")
         except Exception as e:
-            raise Exception(f"Failed to save JSON: {e}")
+            logger.warning(f"Local save failed (non-critical): {e}")
 
         # 3. Save to ChromaDB
         if self.chroma_client:
