@@ -194,12 +194,12 @@ class BlogWriter:
                         
                     full_draft.append(formatted_section)
                     success = True
-                    time.sleep(5) # Increased delay for free tier (~5-6 RPM limit)
+                    time.sleep(15) # Increased delay for free tier safety
                     
                 except Exception as e:
                     logger.warning(f"⚠️ Draft Agent retry {try_count+1} for section '{section}': {e}")
                     try_count += 1
-                    time.sleep(5) # Backoff
+                    time.sleep(15) # Backoff
             
             if not success:
                  logger.error(f"❌ Failed to draft section: {section}. Skipping.")

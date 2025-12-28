@@ -12,6 +12,10 @@ from typing import Dict, Any, Optional
 from datetime import datetime, timedelta
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
+from dotenv import load_dotenv
+
+# Load Env Vars (Critical for standalone execution)
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env'))
 
 # Import Modules
 from .researcher import BlogResearcher
@@ -139,8 +143,22 @@ class BlogScheduler:
                  return
 
             # Store for Publishing
-            self.pending_draft = draft
-            logger.info("Draft ready for publishing.")
+            # FIX: Convert string draft to dictionary structure expected by Publisher
+            title = f"Data-Driven Blog: {category}"
+            # Attempt to extract title from markdown
+            for line in draft.split('\n')[:10]:
+                if line.strip().startswith("# "):
+                    title = line.strip().replace("#", "").strip()
+                    break
+            
+            self.pending_draft = {
+                "title": title,
+                "category": category,
+                "content": draft,
+                "tags": [category, "Tech", "Auto-Generated"],
+                "created_at": datetime.now().isoformat()
+            }
+            logger.info(f"Draft ready for publishing: '{title}'")
             
         except Exception as e:
             logger.error(f"Pipeline failed: {e}")
