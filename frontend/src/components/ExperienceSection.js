@@ -115,9 +115,6 @@ const ExperienceSection = ({ experience }) => {
 
                 {/* Technologies Used */}
                 <div>
-                  <h5 className="text-lg font-semibold mb-4 shine-text">
-                    Technologies & Tools
-                  </h5>
                   <div className="flex flex-wrap gap-2">
                     {(job.technologies || []).map((tech, techIndex) => (
                       <Badge
