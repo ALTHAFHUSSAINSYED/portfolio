@@ -231,6 +231,8 @@ class ChatbotProvider:
             if response.status_code == 200:
                 data = response.json()
                 text = data['choices'][0]['message']['content']
+                # Clean up potential raw tokens
+                text = text.replace("<s>", "").replace("</s>", "").strip()
                 logger.info(f"OpenRouter success ({model}): {len(text)} chars")
                 return text
             else:
