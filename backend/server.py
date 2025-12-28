@@ -220,54 +220,70 @@ class BlogPostRequest(BaseModel):
 
 # --- HELPER FUNCTIONS ---
 
+import re  # Ensure re is available
+
 def detect_intent_priority(text: str) -> Tuple[str, str]:
     """
-    MASTER INTENT ROUTER (Strict Hierarchy)
-    1. Conversational/Dismissive (Early Exit)
-    2. Domain Specific (AWS, Projects, Blogs)
-    3. Fallback (Profile)
+    CONFIDENCE-BASED INTENT ROUTER
+    Normalize -> Score -> Decide (Thresholding)
+    Prevents guessing on ambiguous inputs.
     Returns: (intent_key, sentiment)
     """
+    # 1. NORMALIZE
     text = text.lower().strip()
+    text = re.sub(r'[^a-z0-9\s]', '', text)  # Remove punctuation
+    text = re.sub(r'\s+', ' ', text)         # Collapse spaces
     
-    # --- LEVEL 1: NORMALIZE & CONVERSATIONAL CHECK ---
-    # Dismissals & Closings
-    dismissals = ['nothing', 'nothin', 'no', 'nope', 'nah', 'not really', 'none', 'stop', 'cancel', 
-                  'bye', 'goodbye', 'see you', 'thanks', 'thank you', 'ok', 'okay', 'good', 'great', 
-                  'cool', 'oh', 'ah', 'wow', 'hmm']
+    scores = {
+        "conversation": 0,
+        "aws_projects": 0,
+        "projects": 0,
+        "blogs": 0,
+        "profile": 0
+    }
     
-    # Check exact match or startswith short phrase
-    if any(text == d or text.startswith(d + " ") or text.startswith(d + ",") for d in dismissals):
-        return "conversation", "neutral"
-
-    # Greetings
-    greetings = ['hi', 'hello', 'hey', 'good morning', 'good evening', 'hola', 'greetings', 'namaste']
-    if any(text.startswith(g) for g in greetings) and len(text.split()) < 5:
-        return "conversation", "neutral"
+    # 2. SCORING RULES
+    
+    # Conversation / Dismissal (Strong Signals)
+    conversational_triggers = [
+        'hi', 'hello', 'hey', 'good morning', 'hola', 'greetings',      # Greetings
+        'bye', 'goodbye', 'thanks', 'ok', 'okay', 'cool', 'good',       # Closings
+        'oh', 'ah', 'wow', 'hmm', 'right', 'got it',                    # Fillers
+        'nothing', 'nothin', 'no', 'nope', 'nah', 'stop', 'cancel'      # Dismissals
+    ]
+    if any(t == text or text.startswith(t + " ") for t in conversational_triggers):
+        scores["conversation"] += 3
         
-    # Feedback / Negative (Non-RAG)
+    # Feedback detection
     if "relev" in text or "relav" in text:
+        scores["conversation"] += 3
         return "conversation", "frustrated"
 
-    frustration = ['stupid', 'dumb', 'useless', 'bad', 'worst', 'hate', 'wrong', 'incorrect', 'hallucinating']
-    if any(w in text for w in frustration):
-        return "conversation", "frustrated"
-
-    # --- LEVEL 2: SEMANTIC DOMAIN INTENT ---
-    # 1. AWS / Cloud
-    if any(k in text for k in ["aws", "cloud", "terraform", "infrastructure", "devops", "deploy"]):
-        return "aws_projects", "neutral"
+    # Profile / About (General)
+    if any(k in text for k in ["who", "about", "bio", "background", "resume", "experience", "skill", "contact", "email"]):
+        scores["profile"] += 2
         
-    # 2. General Projects
-    if any(k in text for k in ["project", "projects", "built", "worked on", "developed", "portfolio", "showcase"]):
-        return "projects", "neutral"
+    # Projects (General)
+    if any(k in text for k in ["project", "built", "work", "develop", "portfolio", "app", "website"]):
+        scores["projects"] += 2
         
-    # 3. Blogs / Writing
-    if any(k in text for k in ["blog", "article", "write-up", "post", "writing", "published"]):
-        return "blogs", "neutral"
+    # AWS / Cloud (Specific)
+    if any(k in text for k in ["aws", "cloud", "terraform", "deploy", "infrastructure", "pipeline", "ci/cd"]):
+        scores["aws_projects"] += 3  # Specific > General
+        
+    # Blogs
+    if any(k in text for k in ["blog", "article", "write", "post", "read"]):
+        scores["blogs"] += 2
 
-    # --- LEVEL 3: FALLBACK ---
-    return "profile", "neutral"
+    # 3. DECISION & THRESHOLD
+    # Get highest scoring intent
+    best_intent, score = max(scores.items(), key=lambda x: x[1])
+    
+    # LOGIC: If we aren't confident (score < 2), stay safe -> Conversation
+    if score < 2:
+        return "conversation", "neutral"
+        
+    return best_intent, "neutral"
 
 async def get_portfolio_context(query: str, intent: str) -> str:
     """
