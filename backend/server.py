@@ -603,47 +603,39 @@ async def create_project(
     # Background sync removed to prevent OOM
     return project_data
 
-# --- GET /api/blogs (Auto-Generated Blogs Only) ---
+# --- GET /api/blogs (Phase B2: Serve from S3) ---
 @api_router.get("/blogs")
 async def get_blogs():
     """
-    Serve auto-generated blogs from backend/generated_blogs/
+    Serve ALL blogs from S3 (static + auto-generated)
     Returns list sorted by creation date (newest first)
     
-    Note: Static blogs are served directly by frontend from /data/blogs.json
-    This endpoint only returns NEW auto-generated blogs for API consumers
+    Phase B2: Now reads from S3 persistent storage
     """
-    all_blogs = []
-    
-    # Load auto-generated blogs from backend
     try:
-        generated_blogs_dir = ROOT_DIR / 'generated_blogs'
-        if generated_blogs_dir.exists() and generated_blogs_dir.is_dir():
-            generated_count = 0
-            for blog_file in generated_blogs_dir.glob('*.json'):
-                try:
-                    with open(blog_file, 'r', encoding='utf-8') as f:
-                        blog_data = json.load(f)
-                        all_blogs.append(blog_data)
-                        generated_count += 1
-                except Exception as e:
-                    logger.error(f"Error loading {blog_file.name}: {e}")
-            logger.info(f"Loaded {generated_count} auto-generated blogs")
+        # Import S3BlogStorage dynamically to avoid circular imports
+        import sys
+        from pathlib import Path
+        sys.path.insert(0, str(Path(__file__).parent))
+        from auto_blogger.publisher import S3BlogStorage
+        
+        # Initialize S3 storage
+        s3_bucket = os.getenv("S3_BLOG_BUCKET", "althaf-blogs-storage")
+        storage = S3BlogStorage(bucket_name=s3_bucket)
+        
+        # Read index.json from S3
+        index_data = storage.read_index()
+        all_blogs = index_data.get('blogs', [])
+        
+        logger.info(f"Loaded {len(all_blogs)} blogs from S3")
+        
+        # Already sorted by creation date in S3 (newest first)
+        return {"blogs": all_blogs}
+        
     except Exception as e:
-        logger.error(f"Error loading generated blogs: {e}")
-    
-    # Sort by creation date (newest first)
-    try:
-        all_blogs.sort(
-            key=lambda b: datetime.fromisoformat(b.get('created_at', '1970-01-01T00:00:00')) 
-            if isinstance(b.get('created_at'), str) else b.get('created_at', datetime.min),
-            reverse=True
-        )
-    except Exception as e:
-        logger.error(f"Error sorting blogs: {e}")
-    
-    logger.info(f"Returning {len(all_blogs)} total blogs")
-    return {"blogs": all_blogs}
+        logger.error(f"Error loading blogs from S3: {e}")
+        # Fallback: return empty to avoid 500 error
+        return {"blogs": []}
 
 
 @api_router.put("/projects/{project_id}", response_model=Project)

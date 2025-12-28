@@ -18,7 +18,7 @@ const BlogsSection = () => {
   const [visibleCount, setVisibleCount] = useState(3);
   const sectionRef = useRef(null);
   const location = useLocation();
-  
+
   // ONLY THESE 6 CATEGORIES ALLOWED - ALL OTHERS PERMANENTLY REMOVED
   const allowedCategories = [
     'Low-Code/No-Code',
@@ -32,18 +32,18 @@ const BlogsSection = () => {
   useEffect(() => {
     fetchBlogs();
   }, []);
-  
+
   // Check URL for category parameter
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const categoryParam = searchParams.get('category');
-    
+
     if (categoryParam && allowedCategories.includes(categoryParam)) {
       setSelectedCategory(categoryParam);
       setVisibleCount(3);
     }
   }, [location.search]);
-  
+
   // Reset visible count when filters change
   useEffect(() => {
     setVisibleCount(3);
@@ -52,30 +52,36 @@ const BlogsSection = () => {
   const fetchBlogs = async () => {
     setLoading(true);
     try {
-      // FAST: Load from local JSON immediately for instant performance
-      const localRes = await fetch('/data/blogs.json');
-      if (localRes.ok) {
-        const data = await localRes.json();
-        // Extract blogs array from the response (handle both {blogs: [...]} and [...] formats)
-        const blogsArray = Array.isArray(data) ? data : (data.blogs || []);
-        // Filter to ONLY show allowed categories
-        const filteredData = blogsArray.filter(blog => 
-          blog.category && allowedCategories.includes(blog.category)
-        );
-        // Sort by date (newest first)
-        const sortedBlogs = [...filteredData].sort((a, b) => {
-          const dateA = new Date(a.created_at || a.date || 0);
-          const dateB = new Date(b.created_at || b.date || 0);
-          return dateB - dateA;
-        });
-        setBlogs(sortedBlogs);
-        setAllBlogs(sortedBlogs);
-        setError(null);
-      } else {
-        throw new Error('Failed to load blogs');
+      // Phase C: Fetch ALL blogs from backend API (reads from S3)
+      const apiRes = await fetch(`${API_BASE_URL}/api/blogs`);
+
+      if (!apiRes.ok) {
+        throw new Error(`API returned ${apiRes.status}`);
       }
+
+      const apiData = await apiRes.json();
+      const allBlogs = apiData.blogs || [];
+
+      console.log(`✅ Loaded ${allBlogs.length} blogs from backend API (S3)`);
+
+      // Filter to ONLY show allowed categories
+      const filteredData = allBlogs.filter(blog =>
+        blog.category && allowedCategories.includes(blog.category)
+      );
+
+      // Sort by date (newest first) - should already be sorted from API but ensure
+      const sortedBlogs = [...filteredData].sort((a, b) => {
+        const dateA = new Date(a.created_at || a.date || 0);
+        const dateB = new Date(b.created_at || b.date || 0);
+        return dateB - dateA;
+      });
+
+      setBlogs(sortedBlogs);
+      setAllBlogs(sortedBlogs);
+      setError(null);
+      console.log(`📊 Total blogs displayed: ${sortedBlogs.length}`);
     } catch (err) {
-      console.error('Error loading blogs:', err);
+      console.error('❌ Error loading blogs:', err);
       setError(err.message);
       setBlogs([]);
       setAllBlogs([]);
@@ -88,21 +94,21 @@ const BlogsSection = () => {
   const handleSearch = (query) => {
     setSearchQuery(query);
     const lowerQuery = query.toLowerCase().trim();
-    
+
     if (!lowerQuery) {
       setBlogs(allBlogs);
       return;
     }
-    
+
     const filtered = allBlogs.filter(blog => {
       const titleMatch = blog.title?.toLowerCase().includes(lowerQuery);
       const summaryMatch = blog.summary?.toLowerCase().includes(lowerQuery);
       const categoryMatch = blog.category?.toLowerCase().includes(lowerQuery);
       const tagsMatch = blog.tags?.some(tag => tag.toLowerCase().includes(lowerQuery));
-      
+
       return titleMatch || summaryMatch || categoryMatch || tagsMatch;
     });
-    
+
     setBlogs(filtered);
   };
 
@@ -116,7 +122,7 @@ const BlogsSection = () => {
   };
 
   // Get filtered blogs for display
-  const displayBlogs = selectedCategory 
+  const displayBlogs = selectedCategory
     ? blogs.filter(blog => blog.category === selectedCategory)
     : blogs;
 
@@ -128,9 +134,9 @@ const BlogsSection = () => {
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
             Explore my latest blog posts and AI-generated articles.
           </p>
-          
+
           <div className="mt-6 flex flex-wrap justify-center gap-4">
-            <Button 
+            <Button
               onClick={() => fetchBlogs()}
               className="flex items-center gap-2"
               variant="outline"
@@ -138,7 +144,7 @@ const BlogsSection = () => {
               <RefreshCw className="w-4 h-4" />
               Refresh
             </Button>
-            <Button 
+            <Button
               onClick={() => setShowCategoryFilter(!showCategoryFilter)}
               className="flex items-center gap-2"
               variant="secondary"
@@ -159,9 +165,9 @@ const BlogsSection = () => {
             />
             {/* Clear All Filters - LEFT SIDE */}
             {(searchQuery || selectedCategory) && (
-              <Button 
+              <Button
                 onClick={clearAllFilters}
-                variant="outline" 
+                variant="outline"
                 className="flex items-center gap-2 border-red-500 text-red-500 hover:bg-red-500/10"
               >
                 <X className="w-4 h-4" />
@@ -169,14 +175,14 @@ const BlogsSection = () => {
               </Button>
             )}
           </div>
-          
+
           {/* Category Filter - VISIBLE BY DEFAULT */}
           {showCategoryFilter && (
             <div className="mt-6">
               <h3 className="text-lg font-semibold mb-3">Filter by Category:</h3>
               <div className="flex flex-wrap gap-3 justify-center">
                 {allowedCategories.map((category) => (
-                  <Badge 
+                  <Badge
                     key={category}
                     onClick={() => {
                       if (selectedCategory === category) {
@@ -185,11 +191,10 @@ const BlogsSection = () => {
                         setSelectedCategory(category);
                       }
                     }}
-                    className={`text-sm px-3 py-1 cursor-pointer hover:opacity-90 ${
-                      category === selectedCategory 
-                        ? 'bg-primary text-primary-foreground' 
-                        : 'bg-secondary text-secondary-foreground'
-                    }`}
+                    className={`text-sm px-3 py-1 cursor-pointer hover:opacity-90 ${category === selectedCategory
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-secondary text-secondary-foreground'
+                      }`}
                   >
                     {category}
                   </Badge>
@@ -198,7 +203,7 @@ const BlogsSection = () => {
             </div>
           )}
         </div>
-        
+
         {loading ? (
           <div className="flex justify-center items-center py-12">
             {/* FIXED: Spinner visible in light mode (Cyan) */}
@@ -207,7 +212,7 @@ const BlogsSection = () => {
         ) : error ? (
           <div className="mt-4 p-4 bg-red-100 dark:bg-red-900/20 rounded-lg text-center">
             <p className="font-semibold text-red-500 dark:text-red-400">{error}</p>
-            <Button 
+            <Button
               onClick={() => fetchBlogs()}
               className="mt-2"
               variant="outline"
@@ -219,8 +224,8 @@ const BlogsSection = () => {
         ) : displayBlogs.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-muted-foreground mb-4">
-              {searchQuery || selectedCategory 
-                ? 'No blogs found matching your filters.' 
+              {searchQuery || selectedCategory
+                ? 'No blogs found matching your filters.'
                 : 'No blogs available yet.'}
             </p>
           </div>
@@ -246,8 +251,8 @@ const BlogsSection = () => {
               {displayBlogs
                 .slice(0, visibleCount)
                 .map((blog, idx) => (
-                  <Card 
-                    key={blog.id || blog._id || idx} 
+                  <Card
+                    key={blog.id || blog._id || idx}
                     className="flex flex-col overflow-hidden neon-card hover-lift group h-auto"
                   >
                     {/* Compact Header with Badge and Date */}
@@ -257,7 +262,7 @@ const BlogsSection = () => {
                           {blog.category}
                         </Badge>
                         <span className="text-[10px] text-muted-foreground flex items-center bg-secondary/50 px-2 py-1 rounded-full">
-                          <Calendar className="w-3 h-3 mr-1" /> 
+                          <Calendar className="w-3 h-3 mr-1" />
                           {blog.created_at && new Date(blog.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </span>
                       </div>
@@ -281,7 +286,7 @@ const BlogsSection = () => {
                         to={`/blogs/${blog.id || blog._id}`}
                         className="text-sm font-bold text-cyan-600 dark:text-cyan-400 hover:text-cyan-800 dark:hover:text-cyan-300 transition-colors flex items-center"
                       >
-                        Read Article 
+                        Read Article
                         <Bookmark className="w-4 h-4 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
                       </Link>
                     </div>
