@@ -110,7 +110,7 @@ jobs:  # WHAT jobs to run
             echo "CHROMA_API_KEY=${{ secrets.CHROMA_API_KEY }}" >> .env.local
             echo "CHROMA_TENANT_ID=${{ secrets.CHROMA_TENANT }}" >> .env.local
             echo "CHROMA_DB_NAME=Development" >> .env.local
-            echo "CHATBOT_KEY=${{ secrets.CHATBOT_KEY }}" >> .env.local
+            echo "BLOG_KEY=${{ secrets.BLOG_KEY }}" >> .env.local
             echo "CHATBOT_NEW_KEY=${{ secrets.CHATBOT_NEW_KEY }}" >> .env.local
             echo "CHATBOT=${{ secrets.CHATBOT }}" >> .env.local
             echo "GEMINI_BLOG_API_KEY=${{ secrets.GEMINI_BLOG_API_KEY }}" >> .env.local

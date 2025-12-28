@@ -1,37 +1,40 @@
 """
 Model Configuration for Agentic Auto-Blogger
-Defines specific free models for each role in the Agentic Chain.
+Defines specific free, stable models for each role in the Agentic Chain.
+Strict adherence to "Free Tier Safe" policy.
 """
 
 # Agentic Role Definitions
-# Each role is assigned a primary free model and a reliable fallback.
+# Usage Strategy:
+# 1. Primary: Stable, high-performance free models
+# 2. Fallback: Smaller, predictable models (No frontier/huge models)
 
 AGENT_ROLES = {
     "orchestrator": {
         "role": "Outline & High-Level Logic",
-        "primary": "tngtech/deepseek-r1t2-chimera:free",
-        "fallback": "meta-llama/llama-3.1-8b-instruct:free",
+        "primary": "deepseek/deepseek-r1:free", # R1 0528 equivalent
+        "fallback": "thudm/glm-4-9b-chat:free", # GLM 4.5 Air equivalent
         "max_tokens": 2000, 
         "temperature": 0.6
     },
     "drafter": {
         "role": "Section Writer (Chunked)",
-        "primary": "meta-llama/llama-3.3-70b-instruct:free",
-        "fallback": "mistralai/mistral-7b-instruct:free",
-        "max_tokens": 1500,  # Increased for richer content
+        "primary": "mistralai/mistral-7b-instruct:free", # Proven workhorse
+        "fallback": "mistralai/mistral-small-24b-instruct-2501:free", # Stable small model
+        "max_tokens": 1500,
         "temperature": 0.7
     },
     "critic": {
         "role": "Quality Validator & Logic",
-        "primary": "deepseek/deepseek-r1-0528:free",
-        "fallback": "mistralai/mistral-7b-instruct:free",
+        "primary": "deepseek/deepseek-r1:free", # Strong logic
+        "fallback": "tngtech/deepseek-r1t2-chimera:free", # R1T Chimera
         "max_tokens": 1000, 
         "temperature": 0.3
     },
     "polisher": {
         "role": "Final Style & tone",
-        "primary": "nousresearch/hermes-3-llama-3.1-405b:free",
-        "fallback": "meta-llama/llama-3.1-8b-instruct:free",
+        "primary": "cognitivecomputations/dolphin-mixtral-8x7b:free", # Best proxy for Dolphin 24B
+        "fallback": "mistralai/mistral-small-24b-instruct-2501:free",
         "max_tokens": 1000,
         "temperature": 0.6
     }
@@ -49,7 +52,7 @@ BLOG_SPECS = {
 
 # Rate Limit Config (Simple backoff strategy)
 RATE_LIMIT_CONFIG = {
-    "max_requests_per_minute": 20,  # Conservative for free tier
+    "max_requests_per_minute": 10,  # Conservative for free tier
     "backoff_factor": 2,
-    "initial_wait": 2
+    "initial_wait": 3
 }

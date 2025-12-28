@@ -22,7 +22,7 @@ class ModelBenchmarker:
         # Load environment variables
         load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), '.env'))
         
-        self.openrouter_key = os.getenv("OPENROUTER_API_KEY") or os.getenv("CHATBOT_KEY")
+        self.openrouter_key = os.getenv("OPENROUTER_API_KEY") or os.getenv("BLOG_KEY")
         self.gemini_key = os.getenv("GEMINI_BLOG_API_KEY")
         
         if not self.openrouter_key:

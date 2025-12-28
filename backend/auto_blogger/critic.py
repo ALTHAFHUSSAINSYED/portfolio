@@ -18,7 +18,7 @@ logger = logging.getLogger("BlogCriticAgent")
 
 class BlogCritic:
     def __init__(self):
-        self.api_key = os.getenv("CHATBOT_KEY") or os.getenv("OPENROUTER_API_KEY")
+        self.api_key = os.getenv("BLOG_KEY") or os.getenv("OPENROUTER_API_KEY")
         if not self.api_key:
             raise ValueError("Missing OpenRouter API Key for Critic Agent")
         

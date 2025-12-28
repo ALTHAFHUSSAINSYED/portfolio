@@ -10,7 +10,7 @@
 ┌──────────────────────┐         ┌──────────────────────┐
 │   CHATBOT SYSTEM     │         │  AUTO-BLOGGER SYSTEM │
 │                      │         │                      │
-│  API: CHATBOT_NEW_KEY│         │  API: CHATBOT_KEY    │
+│  API: CHATBOT_NEW_KEY│         │  API: BLOG_KEY        │
 │  Provider: OpenRouter│         │  Provider: OpenRouter│
 └──────────────────────┘         └──────────────────────┘
          │                                  │
@@ -91,7 +91,7 @@ Error message to user
 ### API Configuration
 | Variable | Value | Purpose |
 |----------|-------|---------|
-| `CHATBOT_KEY` | `sk-or-v1-fb2f9e65...` | **Original** OpenRouter key for auto-blogger |
+| `BLOG_KEY` | `sk-or-v1-fb2f9e65...` | **Original** OpenRouter key for auto-blogger |
 | `SERPER_API_KEY` | Serper.dev key | Web research (Google Search API) |
 
 ### Agent System (4 Agents)
@@ -101,32 +101,30 @@ Error message to user
 - **Primary Model**: `mistralai/mistral-7b-instruct:free`
 #### **Agent 1 - Orchestrator (The Architect)**
 - **Role**: High-level planning, SEO strategy, and outline creation
-- **Primary Model**: `tngtech/deepseek-r1t2-chimera:free` (Reasoning Specialist)
-- **Fallback Model**: `mistralai/mistral-7b-instruct:free`
+- **Primary Model**: `deepseek/deepseek-r1:free` (Reasoning Specialist)
+- **Fallback Model**: `thudm/glm-4-9b-chat:free`
 
 ---
 
 #### **Agent 2 - Drafter (Section Writer)**
 - **Role**: Writes each section (section-by-section loop)
-- **Primary Model**: `meta-llama/llama-3.3-70b-instruct:free` (Best Writer)
-- **Fallback Model**: `mistralai/mistral-7b-instruct:free`
+- **Primary Model**: `mistralai/mistral-7b-instruct:free` (Proven Workhorse)
+- **Fallback Model**: `mistralai/mistral-small-24b-instruct-2501:free`
 
 ---
 
 #### **Agent 3 - Critic (Quality Validator)**
 - **Role**: Evaluates blog quality, provides feedback
-- **Primary Model**: `deepseek/deepseek-r1-0528:free` (Strict Logic)
-- **Fallback Model**: `mistralai/mistral-7b-instruct:free`
+- **Primary Model**: `deepseek/deepseek-r1:free` (Strict Reasoning)
+- **Fallback Model**: `tngtech/deepseek-r1t2-chimera:free`
 
 ---
 
 #### **Agent 4 - Polisher (Style & Tone)**
 - **Role**: Final refinement of writing style
-- **Primary Model**: `nousresearch/hermes-3-llama-3.1-405b:free` (Frontier Nuance)
-- **Fallback Model**: `meta-llama/llama-3.1-8b-instruct:free`
-- **Provider**: OpenRouter (via `CHATBOT_KEY`)
-- **Max Tokens**: 600
-- **Temperature**: 0.6
+- **Primary Model**: `cognitivecomputations/dolphin-mixtral-8x7b:free` (Human Tone)
+- **Fallback Model**: `mistralai/mistral-small-24b-instruct-2501:free`
+- **Max Tokens**: 1000
 - **Status**: Active ✅
 
 #### **Agent 5 - Researcher (No LLM)**
@@ -179,7 +177,7 @@ GEMINI_API_KEY=<Google_API_Key>
 
 ### Auto-Blogger-Specific
 ```bash
-CHATBOT_KEY=sk-or-v1-fb2f9e6527b47e7ec99a75a47e57a44ec1aff515a2705373a58a0d3a5844e
+BLOG_KEY=sk-or-v1-fb2f9e6527b47e7ec99a75a47e57a44ec1aff515a2705373a58a0d3a5844e
 SERPER_API_KEY=4ad9b14287491f1b8e03c3e0f2bc11a7ecb5e99a
 ```
 
@@ -238,7 +236,7 @@ CHROMA_DATABASE=<Database_Name>
 - **Usage**: Bursty, short requests
 - **Priority**: HIGH (user-facing)
 
-### Auto-Blogger (CHATBOT_KEY)
+### Auto-Blogger (BLOG_KEY)
 - **RPM**: ~5-6 requests/min
 - **TPM**: ~5,000-10,000 tokens/min  
 - **Usage**: Sustained, long generation
@@ -249,7 +247,7 @@ CHROMA_DATABASE=<Database_Name>
 ## 📝 Quick Reference
 
 **Chatbot Primary**: Mistral 7B (`CHATBOT_NEW_KEY`)  
-**Auto-Blogger Primary**: Mistral 7B (`CHATBOT_KEY`)  
+**Auto-Blogger Primary**: Mistral 7B (`BLOG_KEY`)  
 **Research**: SERPER API (no LLM)  
 **Isolation**: ✅ Complete (separate keys)  
 **Status**: ✅ Production ready

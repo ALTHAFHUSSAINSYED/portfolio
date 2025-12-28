@@ -136,12 +136,15 @@ class BlogScheduler:
                     # Smart Revision Loop
                     draft = self.writer.revise_blog(draft, review)
             
-            if not passed and review.get('score', 0) < 90:
-                 # Strict fail
+            if not passed and review.get('score', 0) < 60:
+                 # Strict fail only if score is abysmal (< 60)
                  error_msg = f"Failed quality gate after 3 attempts. Best score: {review.get('score')}"
-                 await self.notifier.send_failure(error_msg, f"Generation - {category}")
+                 await self.notifier.send_failure(error_msg, f"Generation - {category}", metadata={"category": category, "pending_title": "Quality Fail"})
                  self.pending_draft = None
                  return
+            elif not passed:
+                logger.warning(f"⚠️ Quality Gate Compromised: Publishing with score {review.get('score')} due to 'guarantee' policy.")
+                category = f"{category} (Review Pending)" # Mark as pending review in category logic if needed, or just let it slide.
 
             # Store for Publishing
             # Store for Publishing

@@ -8,35 +8,35 @@ Your portfolio uses **OpenRouter API** for all LLM interactions with a **multi-t
 
 ## 🤖 AUTO-BLOGGER Models
 
-**API Key Used**: `CHATBOT_KEY` (OpenRouter)  
+**API Key Used**: `BLOG_KEY` (OpenRouter)  
 **Purpose**: Generate 2,500-word technical blog posts
 
 ### Agent 1: Orchestrator (Blog Outliner)
 **Role**: Creates blog structure and outline  
-**Primary Model**: `mistralai/mistral-7b-instruct:free`  
-**Fallback Model**: `google/gemma-2-9b-it:free`  
-**Max Tokens**: 1,000  
-**Temperature**: 0.7
+**Primary Model**: `deepseek/deepseek-r1:free` (Reasoning Specialist)  
+**Fallback Model**: `thudm/glm-4-9b-chat:free`  
+**Max Tokens**: 2000  
+**Temperature**: 0.6
 
 ### Agent 2: Drafter (Section Writer)
 **Role**: Writes each section of the blog (section by section)  
-**Primary Model**: `mistralai/mistral-7b-instruct:free`  
-**Fallback Model**: `google/gemma-2-9b-it:free`  
-**Max Tokens**: 600  
-**Temperature**: 0.75
+**Primary Model**: `mistralai/mistral-7b-instruct:free` (Proven Stability)  
+**Fallback Model**: `mistralai/mistral-small-24b-instruct-2501:free`  
+**Max Tokens**: 1500  
+**Temperature**: 0.7
 
 ### Agent 3: Critic (Quality Validator)
 **Role**: Evaluates blog quality and provides feedback  
-**Primary Model**: `mistralai/mistral-7b-instruct:free`  
-**Fallback Model**: `google/gemma-2-9b-it:free`  
-**Max Tokens**: 800  
+**Primary Model**: `deepseek/deepseek-r1:free` (Strict Logic)  
+**Fallback Model**: `tngtech/deepseek-r1t2-chimera:free`  
+**Max Tokens**: 1000  
 **Temperature**: 0.3
 
 ### Agent 4: Polisher (Style & Tone)
 **Role**: Final refinement of writing style  
-**Primary Model**: `google/gemma-2-9b-it:free`  
-**Fallback Model**: `mistralai/mistral-7b-instruct:free`  
-**Max Tokens**: 600  
+**Primary Model**: `cognitivecomputations/dolphin-mixtral-8x7b:free` (Human Tone)  
+**Fallback Model**: `mistralai/mistral-small-24b-instruct-2501:free`  
+**Max Tokens**: 1000  
 **Temperature**: 0.6
 
 ### Agent 5: Researcher (No LLM)
@@ -99,7 +99,7 @@ Your portfolio uses **OpenRouter API** for all LLM interactions with a **multi-t
 
 | Environment Variable | Service | Used By | Status |
 |---------------------|---------|---------|--------|
-| `CHATBOT_KEY` | OpenRouter | Auto-blogger + Chatbot | ✅ SET |
+| `BLOG_KEY` | OpenRouter | Auto-blogger + Chatbot | ✅ SET |
 | `SERPER_API_KEY` | Serper.dev (Google) | Auto-blogger Research | ✅ SET |
 | `CHATBOT` | Hugging Face | Chatbot Tier 3 | ✅ SET |
 | `GEMINI_API_KEY` | Google Gemini | Chatbot Tier 4 | ✅ SET |

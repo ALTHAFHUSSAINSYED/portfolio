@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 KEYS = {
-    "Auto-Blogger (CHATBOT_KEY)": os.getenv("CHATBOT_KEY"),
+    "Auto-Blogger (BLOG_KEY)": os.getenv("BLOG_KEY"),
     "Chatbot (CHATBOT_NEW_KEY)": os.getenv("CHATBOT_NEW_KEY")
 }
 

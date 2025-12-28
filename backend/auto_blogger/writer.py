@@ -20,7 +20,7 @@ logger = logging.getLogger("BlogWriterAgent")
 
 class BlogWriter:
     def __init__(self):
-        self.api_key = os.getenv("CHATBOT_KEY") or os.getenv("OPENROUTER_API_KEY")
+        self.api_key = os.getenv("BLOG_KEY") or os.getenv("OPENROUTER_API_KEY")
         if not self.api_key:
             logger.error("Create CHATBOT_KEY env var for OpenRouter access.")
             raise ValueError("Missing OpenRouter API Key")
