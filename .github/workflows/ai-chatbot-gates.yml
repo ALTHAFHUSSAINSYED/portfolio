@@ -1,0 +1,62 @@
+
+name: AI Chatbot CI/CD Gates
+
+on:
+  pull_request:
+    branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+
+jobs:
+  ai-chatbot-gates:
+    name: Enforce AI Safety & Token Gates
+    runs-on: ubuntu-latest
+    env:
+      PYTHON_VERSION: "3.10"
+
+    steps:
+      # --------------------------------------------------
+      # SETUP
+      # --------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
+          pip install pytest
+
+      # --------------------------------------------------
+      # GATE 0 — Code Integrity (Syntax)
+      # --------------------------------------------------
+      - name: Python syntax check
+        run: |
+          python -m py_compile backend/server.py
+          python -m py_compile backend/chatbot_provider.py
+
+      # --------------------------------------------------
+      # RUN ALL GATES (via Pytest)
+      # Includes:
+      # - GATE 1: Intent Routing Safety
+      # - GATE 2: RAG Retrieval Discipline
+      # - GATE 5: Token Guards
+      # - GATE 6: Telemetry presence (implied)
+      # - CODE INTEGRITY: Secret scanning (regex)
+      # --------------------------------------------------
+      - name: Run AI Safety Test Suite
+        run: |
+          python -m pytest tests/
+
+      # --------------------------------------------------
+      # FINAL STATUS
+      # --------------------------------------------------
+      - name: CI Gate Status
+        if: success()
+        run: |
+          echo "✅ All AI Chatbot Gates Passed — Safe to Deploy"
