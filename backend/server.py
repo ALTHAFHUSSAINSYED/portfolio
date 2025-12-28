@@ -6,7 +6,7 @@ import json
 import threading
 from pathlib import Path
 from datetime import datetime, timezone
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Tuple
 
 # Third-party imports
 from fastapi import FastAPI, APIRouter, UploadFile, File, Form, HTTPException, status, BackgroundTasks
@@ -244,9 +244,10 @@ def is_greeting_or_conversational(text: str) -> tuple:
         
     return False, "neutral"
 
-async def get_portfolio_context(query: str) -> str:
+async def get_portfolio_context(query: str) -> Tuple[str, str]:
     """
     Smart RAG retrieval with keyword-based collection routing.
+    Returns: (context_string, intent_detected)
     """
     all_context = []
     query_lower = query.lower()
@@ -281,14 +282,13 @@ async def get_portfolio_context(query: str) -> str:
         
         if not (chroma_api_key and chroma_tenant and chroma_database):
             logger.warning("ChromaDB credentials missing")
-            return ""
+            return "", "error"
             
         chroma_client = chromadb.CloudClient(
             api_key=chroma_api_key,
             tenant=chroma_tenant,
             database=chroma_database
         )
-
 
         # --- INTENT-BASED ROUTING ---
         intent = detect_intent(query)
@@ -353,11 +353,11 @@ async def get_portfolio_context(query: str) -> str:
         
         context_text = '\n\n'.join(all_context)
         logger.info(f"Retrieved context length: {len(context_text)} characters")
-        return context_text
+        return context_text, intent
         
     except Exception as e:
         logger.error(f"ChromaDB Error: {e}")
-        return ""
+        return "", "error"
 
 # --- ENDPOINTS ---
 
@@ -683,8 +683,9 @@ async def ask_agent(query: dict):
         is_greeting, sentiment = is_greeting_or_conversational(message)
         
         portfolio_context = ""
+        intent = "GREETING"
         if not is_greeting:
-            portfolio_context = await get_portfolio_context(message)
+            portfolio_context, intent = await get_portfolio_context(message)
             context_length = len(portfolio_context)
             logger.info(f"Retrieved context length: {context_length} characters")
         
