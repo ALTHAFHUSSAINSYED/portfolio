@@ -220,68 +220,62 @@ class BlogPostRequest(BaseModel):
 
 # --- HELPER FUNCTIONS ---
 
-def is_greeting_or_conversational(text: str) -> tuple:
+def detect_intent_priority(text: str) -> Tuple[str, str]:
     """
-    Detect if message is a greeting or conversational (skip database for these).
-    Returns (is_greeting, sentiment)
+    MASTER INTENT ROUTER (Strict Hierarchy)
+    1. Conversational/Dismissive (Early Exit)
+    2. Domain Specific (AWS, Projects, Blogs)
+    3. Fallback (Profile)
+    Returns: (intent_key, sentiment)
     """
     text = text.lower().strip()
     
-    # Greetings - simple short messages
+    # --- LEVEL 1: NORMALIZE & CONVERSATIONAL CHECK ---
+    # Dismissals & Closings
+    dismissals = ['nothing', 'nothin', 'no', 'nope', 'nah', 'not really', 'none', 'stop', 'cancel', 
+                  'bye', 'goodbye', 'see you', 'thanks', 'thank you', 'ok', 'okay', 'good', 'great', 
+                  'cool', 'oh', 'ah', 'wow', 'hmm']
+    
+    # Check exact match or startswith short phrase
+    if any(text == d or text.startswith(d + " ") or text.startswith(d + ",") for d in dismissals):
+        return "conversation", "neutral"
+
+    # Greetings
     greetings = ['hi', 'hello', 'hey', 'good morning', 'good evening', 'hola', 'greetings', 'namaste']
     if any(text.startswith(g) for g in greetings) and len(text.split()) < 5:
-        return True, "neutral"
-    
-    # Conversational closings & Dismissals (SKIP RAG)
-    closings = ['bye', 'goodbye', 'see you', 'thanks', 'thank you', 'ok', 'okay', 'good', 'great', 'cool', 'oh', 'ah', 'wow', 'hmm']
-    dismissals = ['nothing', 'nothin', 'no', 'nope', 'nah', 'not really', 'none', 'stop', 'cancel']
-    
-    # Check exact match or startswith for short inputs
-    if any(text == c or text.startswith(c + " ") or text.startswith(c + ",") for c in closings + dismissals):
-        return True, "neutral"
+        return "conversation", "neutral"
         
-    # Specific fix for "not relevant" / "irrelevant" (including misspellings like 'relavnet')
+    # Feedback / Negative (Non-RAG)
     if "relev" in text or "relav" in text:
-        return True, "frustrated"
+        return "conversation", "frustrated"
 
-    # Frustration/negative sentiment
-    frustration = ['stupid', 'dumb', 'useless', 'bad', 'worst', 'hate', 'wrong', 'incorrect', 'hallucinating', 'irrelevant']
+    frustration = ['stupid', 'dumb', 'useless', 'bad', 'worst', 'hate', 'wrong', 'incorrect', 'hallucinating']
     if any(w in text for w in frustration):
-        return False, "frustrated"  # Still need database, but sentiment detected
-        
-    return False, "neutral"
+        return "conversation", "frustrated"
 
-async def get_portfolio_context(query: str) -> Tuple[str, str]:
+    # --- LEVEL 2: SEMANTIC DOMAIN INTENT ---
+    # 1. AWS / Cloud
+    if any(k in text for k in ["aws", "cloud", "terraform", "infrastructure", "devops", "deploy"]):
+        return "aws_projects", "neutral"
+        
+    # 2. General Projects
+    if any(k in text for k in ["project", "projects", "built", "worked on", "developed", "portfolio", "showcase"]):
+        return "projects", "neutral"
+        
+    # 3. Blogs / Writing
+    if any(k in text for k in ["blog", "article", "write-up", "post", "writing", "published"]):
+        return "blogs", "neutral"
+
+    # --- LEVEL 3: FALLBACK ---
+    return "profile", "neutral"
+
+async def get_portfolio_context(query: str, intent: str) -> str:
     """
-    Smart RAG retrieval with keyword-based collection routing.
-    Returns: (context_string, intent_detected)
+    Smart RAG retrieval executed based on PRE-CALCULATED intent.
+    Returns: context_string
     """
     all_context = []
-    query_lower = query.lower()
     
-    # Intent Classifier (Helper)
-    def detect_intent(q: str) -> str:
-        """
-        Classify user query intent to optimize RAG retrieval scope.
-        Returns: 'projects', 'aws_projects', 'blogs', or 'profile'
-        """
-        q = q.lower()
-        
-        # 1. AWS / Cloud Projects (Specific Subset)
-        if any(k in q for k in ["aws", "cloud", "terraform", "infrastructure", "devops", "deploy"]):
-            return "aws_projects"
-            
-        # 2. General Projects
-        if any(k in q for k in ["project", "projects", "built", "worked on", "developed", "portfolio", "showcase"]):
-            return "projects"
-            
-        # 3. Blogs / Writing
-        if any(k in q for k in ["blog", "article", "write-up", "post", "writing", "published"]):
-            return "blogs"
-            
-        # 4. Default: Profile / Personal Info
-        return "profile"
-
     try:
         chroma_api_key = os.getenv('CHROMA_API_KEY')
         chroma_tenant = os.getenv('CHROMA_TENANT') or os.getenv('CHROMA_TENANT_ID')
@@ -289,7 +283,7 @@ async def get_portfolio_context(query: str) -> Tuple[str, str]:
         
         if not (chroma_api_key and chroma_tenant and chroma_database):
             logger.warning("ChromaDB credentials missing")
-            return "", "error"
+            return ""
             
         chroma_client = chromadb.CloudClient(
             api_key=chroma_api_key,
@@ -297,9 +291,9 @@ async def get_portfolio_context(query: str) -> Tuple[str, str]:
             database=chroma_database
         )
 
-        # --- INTENT-BASED ROUTING ---
-        intent = detect_intent(query)
-        logger.info(f"🧠 Detected Intent: {intent.upper()}")
+        # --- EXECUTING RAG ROUTING ---
+        # Use passed intent
+        logger.info(f"🧠 Routing Intent: {str(intent).upper()}")
         
         collections_to_query = set()
         
@@ -363,8 +357,8 @@ async def get_portfolio_context(query: str) -> Tuple[str, str]:
         return context_text, intent
         
     except Exception as e:
-        logger.error(f"ChromaDB Error: {e}")
-        return "", "error"
+        logger.error(f"RAG Error: {e}")
+        return ""
 
 # --- ENDPOINTS ---
 
@@ -686,13 +680,14 @@ async def ask_agent(query: dict):
         # Record request for rate limiting
         rate_limiter.record_request()
         
-        # Detect if greeting (skip RAG for simple greetings)
-        is_greeting, sentiment = is_greeting_or_conversational(message)
+        # 1. NEW INTENT DETECTION (HIERARCHICAL)
+        intent, sentiment = detect_intent_priority(message)
+        logger.info(f"Detected Intent: {intent} | Sentiment: {sentiment}")
         
         portfolio_context = ""
-        intent = "GREETING"
-        if not is_greeting:
-            portfolio_context, intent = await get_portfolio_context(message)
+        # 2. RAG EXECUTION (Only if non-conversational)
+        if intent != "conversation":
+            portfolio_context = await get_portfolio_context(message, intent)
             context_length = len(portfolio_context)
             logger.info(f"Retrieved context length: {context_length} characters")
         
