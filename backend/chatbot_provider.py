@@ -143,7 +143,7 @@ class ChatbotProvider:
         
         return 450 if is_complex else 150
     
-    def _format_messages(self, query: str, context: str, history: List[Dict]) -> List[Dict]:
+    def _format_messages(self, query: str, context: str, history: List[Dict], sentiment: str = "neutral") -> List[Dict]:
         """
         Format messages for API call with SANDWICH TECHNIQUE
         Reinforces core instructions in both system AND user messages for better compliance
@@ -152,6 +152,7 @@ class ChatbotProvider:
             query: User query
             context: RAG context from ChromaDB
             history: Conversation history
+            sentiment: Detected intent sentiment (neutral, closing, frustrated)
             
         Returns:
             Formatted messages list
@@ -183,9 +184,16 @@ class ChatbotProvider:
         # SANDWICH TECHNIQUE: Psychological framing for the model
         final_context_block = f"{identity_context}\n\n[MY INTERNAL KNOWLEDGE_BASE]:\n{context}"
         
+        # Behavioral Directives (UX Polish)
+        behavior_instruction = ""
+        if sentiment == "closing":
+            behavior_instruction = " [IMPORTANT: User is exiting. Reply with ONE short closing phrase (e.g. 'Understood. Have a great day.'). Do NOT ask follow-up questions. STOP.]"
+        else:
+            behavior_instruction = " [INSTRUCTION: Answer directly. Avoid robotic fillers like 'Got it', 'Understood'. Be concise.]"
+
         # Add current query with reinforced instructions
         user_message = f"""
-[SYSTEM INSTRUCTION: You are Allu Bot. Do NOT say 'Based on the context' or 'The text says'. Answer as if you know this personally.]
+[SYSTEM INSTRUCTION: You are Allu Bot. Do NOT say 'Based on the context' or 'The text says'. Answer as if you know this personally.{behavior_instruction}]
 
 {final_context_block}
 
@@ -326,7 +334,7 @@ class ChatbotProvider:
             logger.error(f"Gemini fallback major error: {str(e)}")
             return None
     
-    def generate_response(self, query: str, context: str, history: List[Dict] = None) -> str:
+    def generate_response(self, query: str, context: str, history: List[Dict] = None, sentiment: str = "neutral") -> str:
         """
         Generate response with tiered provider fallback
         
@@ -346,7 +354,7 @@ class ChatbotProvider:
         logger.info(f"Query complexity: {max_tokens} tokens")
         
         # Format messages
-        messages = self._format_messages(query, context, history)
+        messages = self._format_messages(query, context, history, sentiment)
         
         # Runtime Guard: Input Token Budget Check (Task 5)
         # Estimate: 4 chars ~= 1 token

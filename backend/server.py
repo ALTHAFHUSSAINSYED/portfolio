@@ -245,14 +245,17 @@ def detect_intent_priority(text: str) -> Tuple[str, str]:
     # 2. SCORING RULES
     
     # Conversation / Dismissal (Strong Signals)
-    conversational_triggers = [
-        'hi', 'hello', 'hey', 'good morning', 'hola', 'greetings',      # Greetings
-        'bye', 'goodbye', 'thanks', 'ok', 'okay', 'cool', 'good',       # Closings
-        'oh', 'ah', 'wow', 'hmm', 'right', 'got it',                    # Fillers
-        'nothing', 'nothin', 'no', 'nope', 'nah', 'stop', 'cancel'      # Dismissals
-    ]
-    if any(t == text or text.startswith(t + " ") for t in conversational_triggers):
+    # Conversation / Dismissal (Strong Signals)
+    greetings = ['hi', 'hello', 'hey', 'good morning', 'hola', 'greetings', 'right', 'got it', 'cool']
+    closings = ['bye', 'goodbye', 'thanks', 'ok', 'okay', 'good', 'oh', 'ah', 'wow', 'hmm', 
+                'nothing', 'nothin', 'no', 'nope', 'nah', 'stop', 'cancel']
+                
+    if any(t == text or text.startswith(t + " ") for t in greetings):
         scores["conversation"] += 3
+        
+    if any(t == text or text.startswith(t + " ") for t in closings):
+        scores["conversation"] += 3
+        return "conversation", "closing" # Swift exit signal
         
     # Feedback detection
     if "relev" in text or "relav" in text:
@@ -712,7 +715,8 @@ async def ask_agent(query: dict):
         response_text = chatbot_provider.generate_response(
             query=message,
             context=portfolio_context,
-            history=history
+            history=history,
+            sentiment=sentiment
         )
         duration = (datetime.now() - start_time).total_seconds()
         
