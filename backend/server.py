@@ -232,13 +232,20 @@ def is_greeting_or_conversational(text: str) -> tuple:
     if any(text.startswith(g) for g in greetings) and len(text.split()) < 5:
         return True, "neutral"
     
-    # Conversational closings
-    closings = ['bye', 'goodbye', 'see you', 'thanks', 'thank you', 'ok', 'okay', 'good', 'great']
-    if any(text == c for c in closings):
+    # Conversational closings & Dismissals (SKIP RAG)
+    closings = ['bye', 'goodbye', 'see you', 'thanks', 'thank you', 'ok', 'okay', 'good', 'great', 'cool']
+    dismissals = ['nothing', 'nothin', 'no', 'nope', 'nah', 'not really', 'none', 'stop', 'cancel']
+    
+    # Check exact match or startswith for short inputs
+    if any(text == c or text.startswith(c + " ") for c in closings + dismissals):
         return True, "neutral"
         
+    # Specific fix for "not relevant" / "irrelevant" (including misspellings like 'relavnet')
+    if "relev" in text or "relav" in text:
+        return True, "frustrated"
+
     # Frustration/negative sentiment
-    frustration = ['stupid', 'dumb', 'useless', 'bad', 'worst', 'hate', 'wrong', 'incorrect', 'hallucinating']
+    frustration = ['stupid', 'dumb', 'useless', 'bad', 'worst', 'hate', 'wrong', 'incorrect', 'hallucinating', 'irrelevant']
     if any(w in text for w in frustration):
         return False, "frustrated"  # Still need database, but sentiment detected
         
