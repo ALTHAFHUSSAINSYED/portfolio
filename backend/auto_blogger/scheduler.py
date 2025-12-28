@@ -143,14 +143,27 @@ class BlogScheduler:
                  return
 
             # Store for Publishing
-            # FIX: Convert string draft to dictionary structure expected by Publisher
-            title = f"Data-Driven Blog: {category}"
+            # Store for Publishing
+            title = None
             # Attempt to extract title from markdown
-            for line in draft.split('\n')[:10]:
-                if line.strip().startswith("# "):
-                    title = line.strip().replace("#", "").strip()
+            for line in draft.split('\n')[:15]: # Checked first 15 lines
+                # Match # Title or **Title** or Title:
+                clean_line = line.strip()
+                if clean_line.startswith("# "):
+                    title = clean_line.replace("#", "").strip()
+                    break
+                elif clean_line.startswith("Title:"):
+                    title = clean_line.replace("Title:", "").strip()
                     break
             
+            if not title:
+                # CRITICAL FIX: Do not publish fallback titles. Fail the pipeline.
+                error_msg = f"Failed to extract valid title from draft. Aborting publication to prevent 'Data-Driven Blog' errors."
+                logger.error(error_msg)
+                await self.notifier.send_failure(error_msg, f"Generation - {category} (Title Extraction Failed)")
+                self.pending_draft = None
+                return
+
             self.pending_draft = {
                 "title": title,
                 "category": category,

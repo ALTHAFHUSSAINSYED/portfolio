@@ -99,35 +99,31 @@ Error message to user
 #### **Agent 1 - Orchestrator (Blog Outliner)**
 - **Role**: Creates blog structure and outline
 - **Primary Model**: `mistralai/mistral-7b-instruct:free`
-- **Fallback Model**: `google/gemma-2-9b-it:free`
-- **Provider**: OpenRouter (via `CHATBOT_KEY`)
-- **Max Tokens**: 1,000
-- **Temperature**: 0.7
-- **Status**: Active ✅
+#### **Agent 1 - Orchestrator (The Architect)**
+- **Role**: High-level planning, SEO strategy, and outline creation
+- **Primary Model**: `tngtech/deepseek-r1t2-chimera:free` (Reasoning Specialist)
+- **Fallback Model**: `mistralai/mistral-7b-instruct:free`
+
+---
 
 #### **Agent 2 - Drafter (Section Writer)**
 - **Role**: Writes each section (section-by-section loop)
-- **Primary Model**: `mistralai/mistral-7b-instruct:free`
-- **Fallback Model**: `google/gemma-2-9b-it:free`
-- **Provider**: OpenRouter (via `CHATBOT_KEY`)
-- **Max Tokens**: 600
-- **Temperature**: 0.75
-- **Delay**: 5 seconds between sections (rate limit compliance)
-- **Status**: Active ✅
+- **Primary Model**: `meta-llama/llama-3.3-70b-instruct:free` (Best Writer)
+- **Fallback Model**: `mistralai/mistral-7b-instruct:free`
+
+---
 
 #### **Agent 3 - Critic (Quality Validator)**
 - **Role**: Evaluates blog quality, provides feedback
-- **Primary Model**: `mistralai/mistral-7b-instruct:free`
-- **Fallback Model**: `google/gemma-2-9b-it:free`
-- **Provider**: OpenRouter (via `CHATBOT_KEY`)
-- **Max Tokens**: 800
-- **Temperature**: 0.3 (more precise)
-- **Status**: Active ✅
+- **Primary Model**: `deepseek/deepseek-r1-0528:free` (Strict Logic)
+- **Fallback Model**: `mistralai/mistral-7b-instruct:free`
+
+---
 
 #### **Agent 4 - Polisher (Style & Tone)**
 - **Role**: Final refinement of writing style
-- **Primary Model**: `google/gemma-2-9b-it:free`
-- **Fallback Model**: `mistralai/mistral-7b-instruct:free`
+- **Primary Model**: `nousresearch/hermes-3-llama-3.1-405b:free` (Frontier Nuance)
+- **Fallback Model**: `meta-llama/llama-3.1-8b-instruct:free`
 - **Provider**: OpenRouter (via `CHATBOT_KEY`)
 - **Max Tokens**: 600
 - **Temperature**: 0.6
@@ -200,12 +196,13 @@ CHROMA_DATABASE=<Database_Name>
 
 ## 📊 Model Summary Table
 
-| Model | Size | Context | Chatbot | Auto-Blogger | Provider | API Key |
-|-------|------|---------|---------|--------------|----------|---------|
-| **Mistral 7B Instruct** | 7B | 8K | Tier 1 ✅ | Agents 1-3 ✅ | OpenRouter | Split keys |
-| **Gemma 2 9B IT** | 9B | 8K | Tier 2 ✅ | Agent 4 + Fallback ✅ | OpenRouter | Both keys |
-| **Llama 3.2 3B** | 3B | 8K | Tier 3 ✅ | ❌ | Hugging Face | `CHATBOT` |
-| **Gemini 2.5 Flash** | N/A | 1M | Tier 4 ✅ | ❌ | Google | `GEMINI_API_KEY` |
+| Model | Size | Strengths | Auto-Blogger Role |
+|-------|------|-----------|-------------------|
+| **DeepSeek R1T2** | 671B (MoE) | Reasoning | Orchestrator (Primary) |
+| **DeepSeek R1-0528** | 671B (MoE) | Logic | Critic (Primary) |
+| **Llama 3.3 70B** | 70B | Prose/Writing | Drafter (Primary) |
+| **Hermes 3 405B** | 405B | Nuance/Tone | Polisher (Primary) |
+| **Mistral 7B** | 7B | Reliability | Universal Fallback |
 
 ---
 

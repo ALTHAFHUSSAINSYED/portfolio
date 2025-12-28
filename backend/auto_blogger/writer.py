@@ -55,6 +55,11 @@ class BlogWriter:
         full_content = self._agent_drafter_loop(category, outline, research_data)
         
         logger.info(f"🎉 Blog Generation Complete! Length: {len(full_content)} chars")
+        
+        # Clean Model Artifacts (BOS/EOS tokens)
+        full_content = full_content.replace("<s>", "").replace("</s>", "")
+        # Ensure it starts with # Title if possible (best effort)
+        
         return full_content
 
     def _agent_outliner(self, category: str, research_data: Dict) -> List[str]:
@@ -92,17 +97,29 @@ class BlogWriter:
         """
 
         try:
-            logger.info(f"🤖 Output Agent calling {model_id}...")
-            response = self.client.chat.completions.create(
-                model=model_id,
-                messages=[
-                    {"role": "system", "content": "You are a JSON-only output assistant. Output ONLY a valid JSON list of strings."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=2000,
-                temperature=model_cfg["temperature"]
-            )
-            content = response.choices[0].message.content
+            models_to_try = [model_cfg["primary"], model_cfg["fallback"]]
+            
+            for model_id in models_to_try:
+                try:
+                    logger.info(f"🤖 Output Agent calling {model_id}...")
+                    response = self.client.chat.completions.create(
+                        model=model_id,
+                        messages=[
+                            {"role": "system", "content": "You are a JSON-only output assistant. Output ONLY a valid JSON list of strings."},
+                            {"role": "user", "content": prompt}
+                        ],
+                        max_tokens=2000,
+                        temperature=model_cfg["temperature"]
+                    )
+                    content = response.choices[0].message.content
+                    break # Success
+                except Exception as e:
+                    logger.warning(f"⚠️ Model {model_id} failed: {e}")
+                    if model_id == models_to_try[-1]:
+                        logger.error("❌ All models failed for Outliner.")
+                        return None
+                    time.sleep(2)
+                    continue
             logger.info(f"Raw Output: {content[:200]}...")
 
             # Clean formatting
@@ -167,39 +184,45 @@ class BlogWriter:
             - Don't write "Here is the section". Just write the content.
             """
 
+            models_to_try = [model_cfg["primary"], model_cfg["fallback"]]
+            
             try_count = 0
             success = False
-            while try_count < 2 and not success:
-                try:
-                    response = self.client.chat.completions.create(
-                        model=model_id,
-                        messages=[{"role": "user", "content": prompt}],
-                        max_tokens=model_cfg["max_tokens"],
-                        temperature=model_cfg["temperature"]
-                    )
-                    content = response.choices[0].message.content.strip()
-                    
-                    # Validate content is not empty
-                    if not content or len(content) < 50:
-                        logger.warning(f"Short/empty content received for section '{section}'. Retrying...")
-                        try_count += 1
-                        time.sleep(5)
-                        continue
-                    
-                    # Formatting: Add Markdown Header
-                    if not content.startswith("#"):
-                        formatted_section = f"\n\n## {section}\n\n{content}"
-                    else:
-                        formatted_section = f"\n\n{content}"
+            
+            while try_count < 2 and not success:  # Retry loop (logic error here in original, fixing to iterate models)
+                 # Better logic: Try Primary (2 attempts) -> Fallback (2 attempts)
+                 # Creating unified list of attempts: [Primary, Primary, Fallback, Fallback]
+                 attempt_queue = [models_to_try[0], models_to_try[0], models_to_try[1], models_to_try[1]]
+                 
+                 for attempt_model in attempt_queue:
+                    try:
+                        logger.info(f"Trying model: {attempt_model}")
+                        response = self.client.chat.completions.create(
+                            model=attempt_model,
+                            messages=[{"role": "user", "content": prompt}],
+                            max_tokens=model_cfg["max_tokens"],
+                            temperature=model_cfg["temperature"]
+                        )
+                        content = response.choices[0].message.content.strip()
                         
-                    full_draft.append(formatted_section)
-                    success = True
-                    time.sleep(15) # Increased delay for free tier safety
-                    
-                except Exception as e:
-                    logger.warning(f"⚠️ Draft Agent retry {try_count+1} for section '{section}': {e}")
-                    try_count += 1
-                    time.sleep(15) # Backoff
+                        if content and len(content) > 50:
+                            # Success! Format and Append
+                            if not content.startswith("#"):
+                                formatted_section = f"\n\n## {section}\n\n{content}"
+                            else:
+                                formatted_section = f"\n\n{content}"
+                                
+                            full_draft.append(formatted_section)
+                            success = True
+                            time.sleep(15)
+                            break
+                            
+                    except Exception as e:
+                         logger.warning(f"Drafting error ({attempt_model}): {e}")
+                         time.sleep(5)
+                 
+                 if success: break
+                 try_count = 2 # Force exit if queue exhausted (failed all models)
             
             if not success:
                  logger.error(f"❌ Failed to draft section: {section}. Skipping.")
