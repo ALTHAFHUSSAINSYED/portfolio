@@ -261,19 +261,19 @@ def detect_intent_priority(text: str) -> Tuple[str, str]:
 
     # Profile / About (General)
     if any(k in text for k in ["who", "about", "bio", "background", "resume", "experience", "skill", "contact", "email"]):
-        scores["profile"] += 2
+        scores["profile"] += 5
         
     # Projects (General)
     if any(k in text for k in ["project", "built", "work", "develop", "portfolio", "app", "website"]):
-        scores["projects"] += 2
+        scores["projects"] += 10
         
     # AWS / Cloud (Specific)
     if any(k in text for k in ["aws", "cloud", "terraform", "deploy", "infrastructure", "pipeline", "ci/cd"]):
-        scores["aws_projects"] += 3  # Specific > General
+        scores["aws_projects"] += 10  # Critical Signal
         
     # Blogs
     if any(k in text for k in ["blog", "article", "write", "post", "read"]):
-        scores["blogs"] += 2
+        scores["blogs"] += 10
 
     # 3. DECISION & THRESHOLD
     # Get highest scoring intent
