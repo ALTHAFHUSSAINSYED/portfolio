@@ -603,34 +603,19 @@ async def create_project(
     # Background sync removed to prevent OOM
     return project_data
 
-# --- GET /api/blogs (Merge Static + Auto-Generated) ---
+# --- GET /api/blogs (Auto-Generated Blogs Only) ---
 @api_router.get("/blogs")
 async def get_blogs():
     """
-    Merge static blogs from frontend/public/data/blogs.json 
-    with auto-generated blogs from backend/generated_blogs/
-    Returns combined list sorted by creation date (newest first)
+    Serve auto-generated blogs from backend/generated_blogs/
+    Returns list sorted by creation date (newest first)
+    
+    Note: Static blogs are served directly by frontend from /data/blogs.json
+    This endpoint only returns NEW auto-generated blogs for API consumers
     """
     all_blogs = []
     
-    # 1. Load static blogs from frontend
-    try:
-        static_blogs_path = ROOT_DIR.parent / 'frontend' / 'public' / 'data' / 'blogs.json'
-        if not static_blogs_path.exists():
-            # Fallback if running from different directory
-            static_blogs_path = Path('frontend/public/data/blogs.json')
-        
-        if static_blogs_path.exists():
-            with open(static_blogs_path, 'r', encoding='utf-8') as f:
-                static_data = json.load(f)
-                # Handle both {blogs: [...]} and [...] formats
-                static_blogs = static_data.get('blogs', []) if isinstance(static_data, dict) else static_data
-                all_blogs.extend(static_blogs)
-                logger.info(f"Loaded {len(static_blogs)} static blogs from frontend")
-    except Exception as e:
-        logger.error(f"Error loading static blogs: {e}")
-    
-    # 2. Load auto-generated blogs from backend
+    # Load auto-generated blogs from backend
     try:
         generated_blogs_dir = ROOT_DIR / 'generated_blogs'
         if generated_blogs_dir.exists() and generated_blogs_dir.is_dir():
@@ -643,11 +628,11 @@ async def get_blogs():
                         generated_count += 1
                 except Exception as e:
                     logger.error(f"Error loading {blog_file.name}: {e}")
-            logger.info(f"Loaded {generated_count} auto-generated blogs from backend")
+            logger.info(f"Loaded {generated_count} auto-generated blogs")
     except Exception as e:
         logger.error(f"Error loading generated blogs: {e}")
     
-    # 3. Sort by creation date (newest first)
+    # Sort by creation date (newest first)
     try:
         all_blogs.sort(
             key=lambda b: datetime.fromisoformat(b.get('created_at', '1970-01-01T00:00:00')) 
