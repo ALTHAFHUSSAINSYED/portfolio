@@ -57,10 +57,14 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 # Configure Logging
+log_file_path = ROOT_DIR / 'telemetry.log'
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[logging.StreamHandler(sys.stdout)]
+    handlers=[
+        logging.StreamHandler(sys.stdout),
+        logging.FileHandler(str(log_file_path), encoding='utf-8')
+    ]
 )
 logger = logging.getLogger('PortfolioBackend')
 
@@ -222,7 +226,7 @@ class BlogPostRequest(BaseModel):
 
 import re  # Ensure re is available
 
-def detect_intent_priority(text: str) -> Tuple[str, str]:
+def detect_intent_priority(text: str) -> Tuple[str, str, dict]:
     """
     CONFIDENCE-BASED INTENT ROUTER
     Normalize -> Score -> Decide (Thresholding)
@@ -255,12 +259,12 @@ def detect_intent_priority(text: str) -> Tuple[str, str]:
         
     if any(t == text or text.startswith(t + " ") for t in closings):
         scores["conversation"] += 3
-        return "conversation", "closing" # Swift exit signal
+        return "conversation", "closing", scores # Swift exit signal
         
     # Feedback detection
     if "relev" in text or "relav" in text:
         scores["conversation"] += 3
-        return "conversation", "frustrated"
+        return "conversation", "frustrated", scores
 
     # Profile / About (General)
     if any(k in text for k in ["who", "about", "bio", "background", "resume", "experience", "skill", "contact", "email"]):
@@ -284,9 +288,9 @@ def detect_intent_priority(text: str) -> Tuple[str, str]:
     
     # LOGIC: If we aren't confident (score < 2), stay safe -> Conversation
     if score < 2:
-        return "conversation", "neutral"
+        return "conversation", "neutral", scores
         
-    return best_intent, "neutral"
+    return best_intent, "neutral", scores
 
 async def get_portfolio_context(query: str, intent: str) -> str:
     """
@@ -699,33 +703,69 @@ async def ask_agent(query: dict):
         # Record request for rate limiting
         rate_limiter.record_request()
         
-        # 1. NEW INTENT DETECTION (HIERARCHICAL)
-        intent, sentiment = detect_intent_priority(message)
-        logger.info(f"Detected Intent: {intent} | Sentiment: {sentiment}")
-        
+        # --- STATE MACHINE & INTENT LOGIC ---
+        final_state = "CONVERSATION"
+        intent = "conversation"
+        sentiment = "neutral"
+        intent_scores = {}
         portfolio_context = ""
-        # 2. RAG EXECUTION (Only if non-conversational)
-        if intent != "conversation":
-            portfolio_context = await get_portfolio_context(message, intent)
-            context_length = len(portfolio_context)
-            logger.info(f"Retrieved context length: {context_length} characters")
         
-        # Generate response using multi-provider system
+        # 1. DETECT START STATE
+        if not history:
+            final_state = "START"
+            intent = "conversation"
+            logger.info(f"State Transition: -> {final_state}")
+            
+        else:
+            # 2. RUN INTENT ROUTER
+            intent, sentiment, intent_scores = detect_intent_priority(message)
+            
+            # 3. DETERMINE STATE
+            if sentiment == "closing":
+                final_state = "EXIT"
+            elif intent == "conversation":
+                final_state = "CONVERSATION"
+            else:
+                final_state = "DOMAIN_RAG"
+                
+            logger.info(f"State Transition: -> {final_state} | Intent: {intent} | Sentiment: {sentiment}")
+        
+        # 4. EXECUTE RAG (If Domain State)
+        if final_state == "DOMAIN_RAG":
+            portfolio_context = await get_portfolio_context(message, intent)
+            
+        # 5. GENERATE RESPONSE & UPDATE HISTORY
         start_time = datetime.now()
+        
+        # Pass state/sentiment to provider for Prompt adjustments
         response_text = chatbot_provider.generate_response(
             query=message,
             context=portfolio_context,
             history=history,
-            sentiment=sentiment
+            sentiment=sentiment, 
+            # state=final_state # Future optimization: Pass explicit state if provider needs it
         )
         duration = (datetime.now() - start_time).total_seconds()
         
-        # Task 7: Telemetry Logging
+        # 6. STRUCTURED TELEMETRY (THE LEARNING LOOP)
         est_input_tok = (len(message) + len(portfolio_context)) / 4
         est_output_tok = len(response_text) / 4
-        logger.info(f"📊 TELEMETRY: Intent={intent} | Context={len(portfolio_context)}c | In~{int(est_input_tok)}T | Out~{int(est_output_tok)}T | {duration:.2f}s")
         
-        # Update conversation history (keep last 4 messages = 2 turns)
+        telemetry_log = {
+            "session_id": session_id,
+            "timestamp": datetime.utcnow().isoformat(),
+            "normalized_input": message.lower().strip()[:50], # Log first 50 chars for privacy/brevity
+            "intent_scores": intent_scores,
+            "final_state": final_state,
+            "rag_used": final_state == "DOMAIN_RAG",
+            "model_used": "multi-tier-chain", # Detailed model info currently internal to provider
+            "input_tokens": int(est_input_tok),
+            "output_tokens": int(est_output_tok),
+            "latency_ms": int(duration * 1000)
+        }
+        logger.info(json.dumps(telemetry_log))
+        
+        # Update conversations
         history.append({"role": "user", "content": message})
         history.append({"role": "assistant", "content": response_text})
         if len(history) > 4:
