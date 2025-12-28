@@ -12,7 +12,7 @@ Strict adherence to "Free Tier Safe" policy.
 AGENT_ROLES = {
     "orchestrator": {
         "role": "Outline & High-Level Logic",
-        "primary": "deepseek/deepseek-r1:free", # R1 0528 equivalent
+        "primary": "deepseek/deepseek-chat:free", # DeepSeek Chat (valid model)
         "fallback": "thudm/glm-4-9b-chat:free", # GLM 4.5 Air equivalent
         "max_tokens": 2000, 
         "temperature": 0.6
@@ -26,7 +26,7 @@ AGENT_ROLES = {
     },
     "critic": {
         "role": "Quality Validator & Logic",
-        "primary": "deepseek/deepseek-r1:free", # Strong logic
+        "primary": "deepseek/deepseek-chat:free", # Strong logic
         "fallback": "tngtech/deepseek-r1t2-chimera:free", # R1T Chimera
         "max_tokens": 1000, 
         "temperature": 0.3
