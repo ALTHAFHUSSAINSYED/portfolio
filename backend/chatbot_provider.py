@@ -188,6 +188,10 @@ class ChatbotProvider:
         behavior_instruction = ""
         if sentiment == "closing":
             behavior_instruction = " [IMPORTANT: User is exiting. Reply with ONE short closing phrase (e.g. 'Understood. Have a great day.'). Do NOT ask follow-up questions. STOP.]"
+        elif sentiment == "ambiguous_hold":
+            behavior_instruction = " [INSTRUCTION: User input is ambiguous/holding (e.g. 'ok', 'right'). Reply with a neutral holding phrase like 'Got it. Let me know if you'd like more details or want to explore something else.' Do NOT explain yourself. Do NOT exit.]"
+        elif sentiment == "greeting":
+            behavior_instruction = " [INSTRUCTION: Greet the user warmly as Allu Bot. Ask how you can help with Althaf's portfolio.]"
         else:
             behavior_instruction = " [INSTRUCTION: Answer directly. Avoid robotic fillers like 'Got it', 'Understood'. Be concise.]"
 

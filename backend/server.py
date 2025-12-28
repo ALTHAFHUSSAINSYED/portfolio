@@ -98,7 +98,9 @@ try:
     response_cache = ResponseCache(max_size=100, ttl_seconds=3600)
     rate_limiter = RateLimiter(max_requests_per_minute=20)
     chatbot_provider = ChatbotProvider()
+    chatbot_provider = ChatbotProvider()
     conversation_sessions = {}  # {session_id: [messages]}
+    session_metadata = {}       # {session_id: {"state": "START", "disengagement_count": 0}}
     logger.info("Multi-provider chatbot components initialized")
 except Exception as e:
     logger.error(f"Failed to initialize chatbot components: {e}")
@@ -106,6 +108,45 @@ except Exception as e:
     rate_limiter = None
     chatbot_provider = None
     conversation_sessions = {}
+    session_metadata = {}
+
+def determine_next_state(current_state: str, scores: dict, disengagement_count: int) -> str:
+    """
+    Finite-State Machine Transition Logic
+    """
+    # HARD EXIT — terminal
+    if scores.get("exit", 0) >= 3:
+        return "EXIT"
+
+    # Repeated disengagement escalates to EXIT
+    if disengagement_count >= 2 and scores.get("conversation", 0) > 0:
+        return "EXIT"
+
+    # START → first interpretation
+    if current_state == "START":
+        if scores.get("info", 0) >= 2:
+            return "INFO"
+        return "AMBIGUOUS" # Default to Hold/Ambiguous instead of Conversational
+
+    # AMBIGUOUS → wait or escalate
+    if current_state == "AMBIGUOUS":
+        if scores.get("info", 0) >= 2:
+            return "INFO"
+        return "AMBIGUOUS" # Loop until specific
+
+    # INFO → continue, soften, or exit
+    if current_state == "INFO":
+        if scores.get("info", 0) >= 2:
+            return "INFO"
+        if scores.get("conversation", 0) >= 1:
+            return "AMBIGUOUS" # Fallback to hold
+
+    # EXIT is terminal (unless reset implicitly by new session which handles START)
+    if current_state == "EXIT":
+        return "EXIT"
+
+    # Fallback safety (Treat as Ambiguous/Conversation)
+    return "AMBIGUOUS"
 
 # --- EMBEDDING FUNCTION FOR SERVER ---
 class GeminiEmbeddingFunction(EmbeddingFunction):
@@ -239,7 +280,10 @@ def detect_intent_priority(text: str) -> Tuple[str, str, dict]:
     text = re.sub(r'\s+', ' ', text)         # Collapse spaces
     
     scores = {
-        "conversation": 0,
+        "conversation": 0, # Covers Ambiguous/Start
+        "info": 0,         # Aggregates Projects/Blogs/AWS/Profile
+        "exit": 0,
+        # Keep specific intents for downstream routing if INFO wins
         "aws_projects": 0,
         "projects": 0,
         "blogs": 0,
@@ -248,18 +292,21 @@ def detect_intent_priority(text: str) -> Tuple[str, str, dict]:
     
     # 2. SCORING RULES
     
-    # Conversation / Dismissal (Strong Signals)
-    # Conversation / Dismissal (Strong Signals)
-    greetings = ['hi', 'hello', 'hey', 'good morning', 'hola', 'greetings', 'right', 'got it', 'cool']
-    closings = ['bye', 'goodbye', 'thanks', 'ok', 'okay', 'good', 'oh', 'ah', 'wow', 'hmm', 
-                'nothing', 'nothin', 'no', 'nope', 'nah', 'stop', 'cancel']
-                
-    if any(t == text or text.startswith(t + " ") for t in greetings):
-        scores["conversation"] += 3
-        
-    if any(t == text or text.startswith(t + " ") for t in closings):
-        scores["conversation"] += 3
-        return "conversation", "closing", scores # Swift exit signal
+    # Conversational / Ambiguous / Fillers
+    ambiguous_triggers = ["ok", "fine", "hmm", "is it", "are you sure", "oh", "ah", "got it", "right", "good"]
+    if any(t == text or text.startswith(t + " ") for t in ambiguous_triggers):
+        scores["conversation"] += 2
+
+    # Strong Exit Triggers (Terminal)
+    # "nothing much" falls here too
+    exit_triggers = ["bye", "goodbye", "stop", "end", "nothing else", "done", "thank you bye", "cancel"]
+    if any(t == text or text.startswith(t + " ") for t in exit_triggers):
+        scores["exit"] += 3
+
+    # Repeated/Weak Disengagement
+    if text in ["nothing", "no", "nope", "nah"]:
+        scores["exit"] += 1
+        scores["conversation"] += 1 # Serves as ambiguous filler too until threshold met
         
     # Feedback detection
     if "relev" in text or "relav" in text:
@@ -269,18 +316,22 @@ def detect_intent_priority(text: str) -> Tuple[str, str, dict]:
     # Profile / About (General)
     if any(k in text for k in ["who", "about", "bio", "background", "resume", "experience", "skill", "contact", "email"]):
         scores["profile"] += 5
+        scores["info"] += 3
         
     # Projects (General)
     if any(k in text for k in ["project", "built", "work", "develop", "portfolio", "app", "website"]):
         scores["projects"] += 10
+        scores["info"] += 3
         
     # AWS / Cloud (Specific)
     if any(k in text for k in ["aws", "cloud", "terraform", "deploy", "infrastructure", "pipeline", "ci/cd"]):
-        scores["aws_projects"] += 10  # Critical Signal
+        scores["aws_projects"] += 10 
+        scores["info"] += 3
         
     # Blogs
     if any(k in text for k in ["blog", "article", "write", "post", "read"]):
         scores["blogs"] += 10
+        scores["info"] += 3
 
     # 3. DECISION & THRESHOLD
     # Get highest scoring intent
@@ -703,62 +754,97 @@ async def ask_agent(query: dict):
         # Record request for rate limiting
         rate_limiter.record_request()
         
-        # --- STATE MACHINE & INTENT LOGIC ---
-        final_state = "CONVERSATION"
-        intent = "conversation"
-        sentiment = "neutral"
-        intent_scores = {}
-        portfolio_context = ""
+        # Record request for rate limiting
+        rate_limiter.record_request()
         
-        # 1. DETECT START STATE
-        if not history:
-            final_state = "START"
-            intent = "conversation"
-            logger.info(f"State Transition: -> {final_state}")
+        # --- STATE MACHINE RECOVERY ---
+        if session_id not in session_metadata:
+            session_metadata[session_id] = {"state": "START", "disengagement_count": 0}
             
+        current_state = session_metadata[session_id]["state"]
+        disengagement_count = session_metadata[session_id]["disengagement_count"]
+        
+        # 1. INTENT & SCORING
+        intent, sentiment, intent_scores = detect_intent_priority(message)
+        
+        # 2. UPDATE DISENGAGEMENT COUNTER
+        # Track consecutive "nothing/no" to allow gentle exit escalation
+        if message.lower().strip() in ["nothing", "no", "nope", "nah"]:
+            disengagement_count += 1
         else:
-            # 2. RUN INTENT ROUTER
-            intent, sentiment, intent_scores = detect_intent_priority(message)
+            disengagement_count = 0 # Reset on engagement
+
+        # 3. DETERMINE NEXT STATE
+        # If history is empty, force START logic evaluation
+        if not history: 
+            current_state = "START"
             
-            # 3. DETERMINE STATE
-            if sentiment == "closing":
-                final_state = "EXIT"
-            elif intent == "conversation":
-                final_state = "CONVERSATION"
-            else:
-                final_state = "DOMAIN_RAG"
-                
-            logger.info(f"State Transition: -> {final_state} | Intent: {intent} | Sentiment: {sentiment}")
+        next_state = determine_next_state(current_state, intent_scores, disengagement_count)
         
-        # 4. EXECUTE RAG (If Domain State)
-        if final_state == "DOMAIN_RAG":
-            portfolio_context = await get_portfolio_context(message, intent)
+        logger.info(f"State Transition: {current_state} -> {next_state} | Scores: {intent_scores} | Disengagement: {disengagement_count}")
+        
+        # 4. EXECUTE RAG (Strict Gate: Only INFO state)
+        portfolio_context = ""
+        if next_state == "INFO":
+            # Map state to specific intent for RAG retrieval
+            rag_intent = intent
+            if rag_intent == "conversation": 
+                 # Fallback if INFO state triggered by generic keywords but intent classifier was weak
+                 rag_intent = "projects" if intent_scores.get("projects", 0) > 0 else "profile"
+                 
+            portfolio_context = await get_portfolio_context(message, rag_intent)
             
         # 5. GENERATE RESPONSE & UPDATE HISTORY
         start_time = datetime.now()
         
-        # Pass state/sentiment to provider for Prompt adjustments
-        response_text = chatbot_provider.generate_response(
-            query=message,
-            context=portfolio_context,
-            history=history,
-            sentiment=sentiment, 
-            # state=final_state # Future optimization: Pass explicit state if provider needs it
-        )
+        # Response Policy Logic
+        response_text = ""
+        
+        # Static/Strict Responses for certain states
+        if next_state == "EXIT":
+            response_text = "Understood. Have a great day."
+            # Clear session to reset for next time (optional, or keep dead until restart)
+            # session_metadata.pop(session_id, None) 
+            # conversation_sessions.pop(session_id, None)
+            
+        elif next_state == "AMBIGUOUS" and not history:
+             # Rare edge case: Start -> Ambiguous
+             response_text = "Hello! I'm Allu Bot, Althaf's portfolio assistant. How can I help?"
+             
+        else:
+            # Dynamic Generation for INFO / AMBIGUOUS / START
+            # Pass strict behavior instruction
+            behavior_instruction = "neutral"
+            if next_state == "AMBIGUOUS":
+                behavior_instruction = "ambiguous_hold" # Tell provider to be neutral/passive
+            elif next_state == "START":
+                behavior_instruction = "greeting"
+            
+            response_text = chatbot_provider.generate_response(
+                query=message,
+                context=portfolio_context,
+                history=history,
+                sentiment=behavior_instruction
+            )
+
         duration = (datetime.now() - start_time).total_seconds()
         
-        # 6. STRUCTURED TELEMETRY (THE LEARNING LOOP)
+        # 6. UPDATE STATE PERSISTENCE
+        session_metadata[session_id]["state"] = next_state
+        session_metadata[session_id]["disengagement_count"] = disengagement_count
+        
+        # 7. TELEMETRY LOGGING
         est_input_tok = (len(message) + len(portfolio_context)) / 4
         est_output_tok = len(response_text) / 4
         
         telemetry_log = {
             "session_id": session_id,
             "timestamp": datetime.utcnow().isoformat(),
-            "normalized_input": message.lower().strip()[:50], # Log first 50 chars for privacy/brevity
+            "normalized_input": message.lower().strip()[:50],
             "intent_scores": intent_scores,
-            "final_state": final_state,
-            "rag_used": final_state == "DOMAIN_RAG",
-            "model_used": "multi-tier-chain", # Detailed model info currently internal to provider
+            "final_state": next_state,
+            "rag_used": next_state == "INFO",
+            "model_used": "multi-tier-chain",
             "input_tokens": int(est_input_tok),
             "output_tokens": int(est_output_tok),
             "latency_ms": int(duration * 1000)
@@ -766,14 +852,15 @@ async def ask_agent(query: dict):
         logger.info(json.dumps(telemetry_log))
         
         # Update conversations
-        history.append({"role": "user", "content": message})
-        history.append({"role": "assistant", "content": response_text})
-        if len(history) > 4:
-            history = history[-4:]
-        conversation_sessions[session_id] = history
-        
-        # Cache successful response
-        response_cache.set(message, response_text, history)
+        if next_state != "EXIT": # Don't optimize history for exit commands, just reply and stop
+            history.append({"role": "user", "content": message})
+            history.append({"role": "assistant", "content": response_text})
+            if len(history) > 4:
+                history = history[-4:]
+            conversation_sessions[session_id] = history
+            # Cache active interactions
+            if next_state == "INFO":
+                response_cache.set(message, response_text, history)
         
         return JSONResponse(
             status_code=200,
