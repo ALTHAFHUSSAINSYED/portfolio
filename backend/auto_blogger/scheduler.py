@@ -92,6 +92,7 @@ class BlogScheduler:
     async def run_generation_pipeline(self):
         """Job: 7:00 AM Generation"""
         logger.info("Running scheduled generation pipeline...")
+        start_time = datetime.now()
         try:
             # 1. Select Category
             category = self.select_next_category()
@@ -160,7 +161,14 @@ class BlogScheduler:
                 # CRITICAL FIX: Do not publish fallback titles. Fail the pipeline.
                 error_msg = f"Failed to extract valid title from draft. Aborting publication to prevent 'Data-Driven Blog' errors."
                 logger.error(error_msg)
-                await self.notifier.send_failure(error_msg, f"Generation - {category} (Title Extraction Failed)")
+                
+                meta = {
+                    "start_time": start_time.strftime("%Y-%m-%d %H:%M:%S"),
+                    "end_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "category": category,
+                    "pending_title": "Extraction Failed"
+                }
+                await self.notifier.send_failure(error_msg, f"Generation - {category} (Title Extraction Failed)", metadata=meta)
                 self.pending_draft = None
                 return
 
@@ -175,7 +183,13 @@ class BlogScheduler:
             
         except Exception as e:
             logger.error(f"Pipeline failed: {e}")
-            await self.notifier.send_failure(str(e), "Generation Pipeline")
+            meta = {
+                "start_time": start_time.strftime("%Y-%m-%d %H:%M:%S") if 'start_time' in locals() else "Unknown",
+                "end_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "category": category if 'category' in locals() else "Unknown",
+                "pending_title": "Detailed generation failed"
+            }
+            await self.notifier.send_failure(str(e), "Generation Pipeline", metadata=meta)
 
     async def run_publishing_job(self):
         """Job: 10:00 AM Publishing"""

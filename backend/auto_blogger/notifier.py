@@ -55,20 +55,38 @@ class BlogNotifier:
         except Exception as e:
             logger.error(f"Failed to send success email: {e}")
 
-    async def send_failure(self, error: str, context: str):
-        """Send failure email"""
+    async def send_failure(self, error: str, context: str, metadata: Dict[str, Any] = None):
+        """
+        Send failure email with detailed context.
+        Metadata keys: start_time, end_time, category, pending_title
+        """
         if not self.notification_service:
             logger.error("NotificationService not available")
             return
+        
+        meta_html = ""
+        if metadata:
+            meta_html = f"""
+            <h3>Failure Details</h3>
+            <ul>
+                <li><strong>Category:</strong> {metadata.get('category', 'Unknown')}</li>
+                <li><strong>Draft Title:</strong> {metadata.get('pending_title', 'N/A')}</li>
+                <li><strong>Started:</strong> {metadata.get('start_time', 'N/A')}</li>
+                <li><strong>Failed:</strong> {metadata.get('end_time', 'N/A')}</li>
+            </ul>
+            """
 
-        subject = f"❌ Auto-Blogger FAILED: {context}"
+        subject = f"❌ Auto-Blogger FAILED: {context} ({metadata.get('category', 'General') if metadata else 'General'})"
         body = f"""
         <h1>Auto-Blogger Failure</h1>
         <p><strong>Context:</strong> {context}</p>
-        <p><strong>Error:</strong></p>
-        <pre>{error}</pre>
+        
+        {meta_html}
+        
+        <p><strong>Error Trace:</strong></p>
+        <pre style="background-color: #f8d7da; padding: 10px; border: 1px solid #f5c6cb;">{error}</pre>
         <hr>
-        <p>Please check the server logs.</p>
+        <p>Please check the server logs for the full stack trace.</p>
         """
         
         try:
@@ -77,7 +95,7 @@ class BlogNotifier:
                 subject=subject,
                 body=body
             )
-            logger.info("Failure email sent")
+            logger.info(f"Failure email sent for {context}")
         except Exception as e:
             logger.error(f"Failed to send failure email: {e}")
 

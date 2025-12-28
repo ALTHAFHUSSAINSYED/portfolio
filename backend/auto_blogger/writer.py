@@ -112,7 +112,30 @@ class BlogWriter:
                         temperature=model_cfg["temperature"]
                     )
                     content = response.choices[0].message.content
-                    break # Success
+                    
+                    # 1. Strip DeepSeek <think> tags
+                    content = re.sub(r'<think>.*?</think>', '', content, flags=re.DOTALL)
+                    
+                    # 2. Clean formatting
+                    clean_content = content.replace("```json", "").replace("```", "").strip()
+                    match = re.search(r'\[.*\]', clean_content, re.DOTALL)
+                    if match:
+                        clean_content = match.group(0)
+
+                    # 3. Validate JSON immediately
+                    try:
+                        outline = json.loads(clean_content)
+                        if isinstance(outline, list) and len(outline) > 0:
+                            logger.info(f"📋 Outline created with {len(outline)} sections.")
+                            return outline # SUCCESS - Return immediately
+                    except json.JSONDecodeError:
+                        logger.warning(f"⚠️ Model {model_id} returned invalid JSON. Content: {content[:100]}...")
+                        # Fall through to 'except' or continue loop
+                        
+                    # If we got here, JSON was invalid but no exception raised yet. 
+                    # We need to trigger retry.
+                    raise ValueError("Invalid JSON format")
+
                 except Exception as e:
                     logger.warning(f"⚠️ Model {model_id} failed: {e}")
                     if model_id == models_to_try[-1]:
@@ -120,26 +143,8 @@ class BlogWriter:
                         return None
                     time.sleep(2)
                     continue
-            logger.info(f"Raw Output: {content[:200]}...")
-
-            # Clean formatting
-            content = content.replace("```json", "").replace("```", "").strip()
             
-            # Extract JSON list if embedded in text
-            match = re.search(r'\[.*\]', content, re.DOTALL)
-            if match:
-                content = match.group(0)
-
-            try:
-                outline = json.loads(content)
-                if isinstance(outline, list) and len(outline) > 0:
-                    logger.info(f"📋 Outline created with {len(outline)} sections.")
-                    return outline
-            except json.JSONDecodeError:
-                pass
-                
-            logger.error(f"Failed to parse outline JSON. Content: {content}")
-            return None
+            return None # Should be unreachable if logic is correct, but safe fallback
                 
         except Exception as e:
             logger.error(f"Writer Agent Error: {e}")

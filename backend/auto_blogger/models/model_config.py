@@ -10,7 +10,7 @@ AGENT_ROLES = {
     "orchestrator": {
         "role": "Outline & High-Level Logic",
         "primary": "tngtech/deepseek-r1t2-chimera:free",
-        "fallback": "mistralai/mistral-7b-instruct:free",
+        "fallback": "meta-llama/llama-3.1-8b-instruct:free",
         "max_tokens": 2000, 
         "temperature": 0.6
     },
