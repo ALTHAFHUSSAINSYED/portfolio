@@ -61,7 +61,9 @@ Elite writers always have enemies:
 You don't attack people. You attack bad ideas.
 
 **Example:**
-"The idea that low-code reduces risk is one of the most expensive misunderstandings in modern IT."
+"The idea that [POPULAR BELIEF] reduces risk is one of the most expensive misunderstandings in modern IT."
+
+(Adapt this pattern to your specific topic)
 
 #### Shift #3: Compress Wisdom Into Sharp Lines
 Elite content produces **quotable knives**.
