@@ -69,10 +69,14 @@ def sync_blogs_from_s3(chroma_client, embed_function):
             response = s3.get_object(Bucket=bucket, Key='blogs/index.json')
             index_data = json.loads(response['Body'].read().decode('utf-8'))
             
-            # Handle both single blog object and list of blogs
+            # Handle nested structure: {"blogs": [...]}
             if isinstance(index_data, dict):
-                # Single blog object - wrap in list
-                index_data = [index_data]
+                if 'blogs' in index_data:
+                    # Extract blogs array from wrapper
+                    index_data = index_data['blogs']
+                else:
+                    # Single blog object - wrap in list
+                    index_data = [index_data]
             
             print(f"✅ Found {len(index_data)} blogs in S3 index.json")
         except Exception as e:
