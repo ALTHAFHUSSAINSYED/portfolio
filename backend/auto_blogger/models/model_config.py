@@ -2,6 +2,7 @@
 Model Configuration for Agentic Auto-Blogger
 Defines specific free, stable models for each role in the Agentic Chain.
 Strict adherence to "Free Tier Safe" policy.
+Uses only validated OpenRouter model IDs.
 """
 
 # Agentic Role Definitions
@@ -12,29 +13,29 @@ Strict adherence to "Free Tier Safe" policy.
 AGENT_ROLES = {
     "orchestrator": {
         "role": "Outline & High-Level Logic",
-        "primary": "deepseek/deepseek-chat:free", # DeepSeek Chat (valid model)
-        "fallback": "thudm/glm-4-9b-chat:free", # GLM 4.5 Air equivalent
-        "max_tokens": 2000, 
+        "primary": "deepseek/deepseek-r1-0528:free",
+        "fallback": "tngtech/deepseek-r1t-chimera:free",
+        "max_tokens": 2000,
         "temperature": 0.6
     },
     "drafter": {
         "role": "Section Writer (Chunked)",
-        "primary": "mistralai/mistral-7b-instruct:free", # Proven workhorse
-        "fallback": "mistralai/mistral-small-24b-instruct-2501:free", # Stable small model
+        "primary": "mistralai/mistral-small-3.1-24b-instruct:free",
+        "fallback": "meta-llama/llama-3.2-3b-instruct:free",
         "max_tokens": 1500,
         "temperature": 0.7
     },
     "critic": {
         "role": "Quality Validator & Logic",
-        "primary": "deepseek/deepseek-chat:free", # Strong logic
-        "fallback": "tngtech/deepseek-r1t2-chimera:free", # R1T Chimera
-        "max_tokens": 1000, 
+        "primary": "deepseek/deepseek-r1-0528:free",
+        "fallback": "z-ai/glm-4.5-air:free",
+        "max_tokens": 1000,
         "temperature": 0.3
     },
     "polisher": {
         "role": "Final Style & tone",
-        "primary": "cognitivecomputations/dolphin-mixtral-8x7b:free", # Best proxy for Dolphin 24B
-        "fallback": "mistralai/mistral-small-24b-instruct-2501:free",
+        "primary": "mistralai/mistral-small-3.1-24b-instruct:free",
+        "fallback": "meta-llama/llama-3.2-3b-instruct:free",
         "max_tokens": 1000,
         "temperature": 0.6
     }
