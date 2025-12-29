@@ -170,15 +170,15 @@ Error message to user
 
 ### Chatbot-Specific
 ```bash
-CHATBOT_NEW_KEY=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
+CHATBOT_NEW_KEY=<See .env file - OpenRouter API key for chatbot>
 CHATBOT=<HuggingFace_Token>
 GEMINI_API_KEY=<Google_API_Key>
 ```
 
 ### Auto-Blogger-Specific
 ```bash
-BLOG_KEY=sk-or-v1-fb2f9e6527b47e7ec99a75a47e57a44ec1aff515a2705373a58a0d3a5844e
-SERPER_API_KEY=4ad9b14287491f1b8e03c3e0f2bc11a7ecb5e99a
+BLOG_KEY=<See .env file - OpenRouter API key for auto-blogger>
+SERPER_API_KEY=<See .env file - Serper API key for web research>
 ```
 
 ### Shared/System
