@@ -6,6 +6,7 @@ Generates and publishes a blog WITHOUT critic validation
 import logging
 import sys
 import os
+import asyncio  # Add for async support
 
 # Configure logging to stdout explicitly
 logging.basicConfig(
@@ -19,7 +20,7 @@ logger = logging.getLogger(__name__)
 logging.getLogger("BlogWriterAgent").setLevel(logging.INFO)
 logging.getLogger("BlogWriterAgent").addHandler(logging.StreamHandler(sys.stdout))
 
-def main():
+async def main():
     logger.info("=" * 60)
     logger.info("MANUAL BLOG GENERATION TEST (No Critic)")
     logger.info("=" * 60)
@@ -30,6 +31,10 @@ def main():
         from backend.auto_blogger.researcher import BlogResearcher
         from backend.auto_blogger.writer import BlogWriter
         from backend.auto_blogger.publisher import BlogPublisher
+        from backend.auto_blogger.notifier import BlogNotifier  # ✅ ADD NOTIFIER
+        
+        # Initialize notifier
+        notifier = BlogNotifier()
         
         # Step 1: Research
         logger.info("\n[1/3] Starting Research Phase...")
@@ -64,30 +69,59 @@ def main():
             "tags": [category.lower(), "technology", "devops", "automation"]
         }
         
-        url = publisher.publish(blog)
-        
-        logger.info("=" * 60)
-        logger.info("✅ BLOG PUBLISHED SUCCESSFULLY!")
-        logger.info("=" * 60)
-        logger.info(f"Title: {title}")
-        logger.info(f"Category: {category}")
-        logger.info(f"URL: {url}")
-        logger.info(f"Length: {len(draft)} characters")
+        try:
+            url = publisher.publish(blog)
+            
+            # ✅ SEND SUCCESS EMAIL
+            await notifier.send_success(blog, url)
+            
+            logger.info("=" * 60)
+            logger.info("✅ BLOG PUBLISHED SUCCESSFULLY!")
+            logger.info("=" * 60)
+            logger.info(f"Title: {title}")
+            logger.info(f"Category: {category}")
+            logger.info(f"URL: {url}")
+            logger.info(f"Length: {len(draft)} characters")
+            logger.info("📧 Success email sent!")
+            
+        except ValueError as ve:
+            # Validation error (failed sections)
+            logger.error(f"❌ VALIDATION FAILED: {ve}")
+            await notifier.send_failure(
+                str(ve),
+                "Manual Blog Generation - Validation Failed",
+                metadata={"category": category, "title": title}
+            )
+            logger.info("📧 Failure email sent!")
+            return False
         
         # Verify file was created
         import os
         blog_dir = "/app/backend/generated_blogs"
-        files = os.listdir(blog_dir)
-        logger.info(f"\nGenerated blogs directory: {len(files)} file(s)")
-        for f in files:
-            logger.info(f"  - {f}")
+        if os.path.exists(blog_dir):
+            files = os.listdir(blog_dir)
+            logger.info(f"\nGenerated blogs directory: {len(files)} file(s)")
+            for f in files:
+                logger.info(f"  - {f}")
         
         return True
         
     except Exception as e:
         logger.error(f"❌ FAILED: {e}", exc_info=True)
+        
+        # ✅ SEND FAILURE EMAIL
+        try:
+            await notifier.send_failure(
+                str(e),
+                "Manual Blog Generation - System Error", 
+                metadata={"category": category if 'category' in locals() else "Unknown"}
+            )
+            logger.info("📧 Failure email sent!")
+        except:
+            logger.error("Could not send failure email")
+        
         return False
 
 if __name__ == "__main__":
-    success = main()
+    success = asyncio.run(main())  # ✅ Run async
     sys.exit(0 if success else 1)

@@ -178,6 +178,20 @@ class BlogPublisher:
         """Save blog and embed"""
         logger.info(f"Publishing blog: {blog.get('title')}")
         
+        # VALIDATION: Check for failed sections
+        content = blog.get('content', '')
+        if '[Content Generation Failed' in content or not content or len(content) < 500:
+            error_msg = "Blog validation FAILED: Contains failed sections or insufficient content"
+            logger.error(f"❌ {error_msg}")
+            logger.error(f"Content preview: {content[:200]}...")
+            raise ValueError(error_msg)
+        
+        # Additional validation: Check for raw markdown artifacts
+        if content.count('##') > 20:  # Suspiciously high header count
+            logger.warning("⚠️ High markdown header count detected - possible rendering issue")
+        
+        logger.info("✅ Blog content validation passed")
+        
         # 1. Finalize Metadata
         blog_id = f"{blog['category'].replace(' ', '_')}_{int(time.time())}"
         blog['id'] = blog_id
