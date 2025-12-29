@@ -13,6 +13,17 @@ import time
 from typing import Dict, List, Optional
 from openai import OpenAI
 from backend.auto_blogger.models.model_config import AGENT_ROLES, BLOG_SPECS
+from backend.auto_blogger.job_state import get_job_state_manager
+from backend.auto_blogger.logger_utils import (
+    setup_section_logger,
+    setup_agent_logger,
+    log_api_call,
+    log_section_completion,
+    create_job_metadata,
+    update_job_metadata,
+    IST
+)
+from datetime import datetime
 
 # Configure Logging
 logging.basicConfig(level=logging.INFO)
@@ -35,34 +46,64 @@ class BlogWriter:
         )
         print(f"DEBUG: Initialized Writer with Key: {self.api_key[:10]}...")
 
-    def generate_blog(self, category: str, research_data: Dict) -> str:
+    def generate_blog(self, category: str, research_data: Dict, job_id: str = None) -> str:
         """
         Main entry point for the Agentic Pipeline.
         Phase 1: Outline Generation
-        Phase 2: Section-by-Section Drafting
+        Phase 2: Section-by-Section Drafting (Resumable)
         Phase 3: Assembly
+        
+        Args:
+            category: Blog category
+            research_data: Research context
+            job_id: Optional job ID for resume capability
         """
-        logger.info(f"🚀 Starting Agentic Generation for: {category}")
+        job_mgr = get_job_state_manager()
         
-        # Step 1: Generate Outline
-        outline = self._agent_outliner(category, research_data)
-        if not outline:
-            raise RuntimeError("Agent 1 (Outliner) failed to produce a valid outline.")
+        # Load or create job
+        if job_id:
+            job = job_mgr.load_job(job_id)
+            if not job:
+                raise ValueError(f"Job {job_id} not found")
+        else:
+            # Create new job (legacy path)
+            job_id = job_mgr.create_job(category)
+            job = job_mgr.load_job(job_id)
         
-        logger.info("✅ Outline Generated. Starting Section Drafting Loop (Agent 2)...")
+        logger.info(f"🚀 Starting Agentic Generation for: {category} (Job: {job_id})")
+        
+        # Create job metadata log
+        create_job_metadata(job_id, category, datetime.now(IST))
+        
+        # Step 1: Generate Outline (if not already done)
+        if not job.get('outline'):
+            logger.info("Generating outline...")
+            outline = self._agent_outliner(category, research_data, job_id)
+            if not outline:
+                raise RuntimeError("Agent 1 (Outliner) failed to produce a valid outline.")
+            job_mgr.save_outline(job_id, outline)
+            job = job_mgr.load_job(job_id)  # Reload
+        else:
+            logger.info(f"✅ Outline already exists ({len(job['outline'])} sections), resuming...")
+            outline = job['outline']
+        
+        logger.info("✅ Outline Ready. Starting Section Drafting Loop (Agent 2)...")
+        job_mgr.update_status(job_id, "DRAFTING")
 
-        # Step 2: Loop through sections and draft content
-        full_content = self._agent_drafter_loop(category, outline, research_data)
+        # Step 2: Loop through sections and draft content (RESUMABLE)
+        full_content = self._agent_drafter_loop(category, outline, research_data, job_id)
         
         logger.info(f"🎉 Blog Generation Complete! Length: {len(full_content)} chars")
         
         # Clean Model Artifacts (BOS/EOS tokens)
         full_content = full_content.replace("<s>", "").replace("</s>", "")
-        # Ensure it starts with # Title if possible (best effort)
+        
+        # Update job metadata
+        update_job_metadata(job_id, {"status": "generated", "completed_at": datetime.now(IST).strftime('%Y-%m-%d %H:%M:%S IST')})
         
         return full_content
 
-    def _agent_outliner(self, category: str, research_data: Dict) -> List[str]:
+    def _agent_outliner(self, category: str, research_data: Dict, job_id: str = None) -> List[str]:
         """
         Agent 1: The Architect
         Uses a robust model to create a structured outline based on research.
@@ -153,17 +194,31 @@ class BlogWriter:
             traceback.print_exc()
             return None
 
-    def _agent_drafter_loop(self, category: str, outline: List[str], research_data: Dict) -> str:
+    def _agent_drafter_loop(self, category: str, outline: List[str], research_data: Dict, job_id: str) -> str:
         """
         Agent 2: The Builder (Loop)
         Uses Llama 8B to write each section individually to maintain context and depth.
         """
         model_cfg = AGENT_ROLES["drafter"]
         model_id = model_cfg["primary"]
+        job_mgr = get_job_state_manager()
+        
+        # Load existing sections from MongoDB
+        job = job_mgr.load_job(job_id)
+        completed_sections = job_mgr.get_completed_sections(job_id)
         
         full_draft = []
         
         for index, section in enumerate(outline):
+            # CHECK: Skip if already completed
+            if index in completed_sections:
+                logger.info(f"⏭️ Section {index + 1}/{len(outline)} already completed, skipping: {section}")
+                full_draft.append(completed_sections[index])
+                continue
+            
+            # Setup section logger
+            section_logger = setup_section_logger(job_id, index, section)
+            section_logger.info(f"Starting Section {index + 1}/{len(outline)}: {section}")
             logger.info(f"✍️ Drafting Section {index + 1}/{len(outline)}: {section}")
             
             # Context Chunking: Send strict context to avoid 8k limit
@@ -216,7 +271,16 @@ class BlogWriter:
                                 formatted_section = f"\n\n## {section}\n\n{content}"
                             else:
                                 formatted_section = f"\n\n{content}"
-                                
+                            
+                            # SAVE TO MONGODB IMMEDIATELY
+                            job_mgr.save_section(job_id, index, formatted_section)
+                            section_logger.info(f"✅ Section {index} saved to MongoDB")
+                            
+                            # Log metrics
+                            word_count = len(content.split())
+                            char_count = len(content)
+                            log_section_completion(section_logger, index, word_count, char_count)
+                            
                             full_draft.append(formatted_section)
                             success = True
                             time.sleep(15)
