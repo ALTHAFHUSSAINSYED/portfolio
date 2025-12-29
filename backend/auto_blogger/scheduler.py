@@ -101,7 +101,20 @@ class BlogScheduler:
             research_data = self.researcher.analyze_trends(category)
             
             # 3. Write Draft
-            draft = self.writer.generate_blog(category, research_data)
+            blog_data = self.writer.generate_blog(category, research_data)
+            
+            # Handle new dict format from writer
+            if isinstance(blog_data, dict):
+                # New format with metadata
+                title = blog_data.get('title', '')
+                summary = blog_data.get('summary', '')
+                draft = blog_data.get('content', '')
+                logger.info(f"📝 Blog generated: {title}")
+            else:
+                # Old format - just string content
+                draft = blog_data
+                title = None
+                summary = ""
             
             # Safety Check: Ensure draft is valid
             if not draft or len(draft) < 100:
@@ -147,22 +160,21 @@ class BlogScheduler:
                 category = f"{category} (Review Pending)" # Mark as pending review in category logic if needed, or just let it slide.
 
             # Store for Publishing
-            # Store for Publishing
-            title = None
-            # Attempt to extract title from markdown
-            for line in draft.split('\n')[:15]: # Checked first 15 lines
-                # Match # Title or **Title** or Title:
-                clean_line = line.strip()
-                if clean_line.startswith("# "):
-                    title = clean_line.replace("#", "").strip()
-                    break
-                elif clean_line.startswith("Title:"):
-                    title = clean_line.replace("Title:", "").strip()
-                    break
+            # Use title from writer (already extracted above)
+            if not title:
+                # Fallback: try to extract from draft if writer didn't provide
+                for line in draft.split('\n')[:15]:
+                    clean_line = line.strip()
+                    if clean_line.startswith("# "):
+                        title = clean_line.replace("#", "").strip()
+                        break
+                    elif clean_line.startswith("Title:"):
+                        title = clean_line.replace("Title:", "").strip()
+                        break
             
             if not title:
-                # CRITICAL FIX: Do not publish fallback titles. Fail the pipeline.
-                error_msg = f"Failed to extract valid title from draft. Aborting publication to prevent 'Data-Driven Blog' errors."
+                # CRITICAL FIX: Do not publish without title
+                error_msg = f"Failed to extract valid title from blog. Aborting publication."
                 logger.error(error_msg)
                 
                 meta = {
@@ -177,6 +189,7 @@ class BlogScheduler:
 
             self.pending_draft = {
                 "title": title,
+                "summary": summary,  # ✅ Add summary for blog cards
                 "category": category,
                 "content": draft,
                 "tags": [category, "Tech", "Auto-Generated"],
