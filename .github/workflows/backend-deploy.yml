@@ -134,6 +134,7 @@ jobs:  # WHAT jobs to run
               --restart always \
               -p 8000:8000 \
               --env-file backend/.env.local \
+              -v /home/ec2-user/portfolio-logs:/app/backend/logs \
               portfolio-backend
 
       - name: Wait for container to start
