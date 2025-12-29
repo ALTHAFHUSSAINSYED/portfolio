@@ -637,6 +637,34 @@ async def get_blogs():
         # Fallback: return empty to avoid 500 error
         return {"blogs": []}
 
+@api_router.get("/blogs/{blog_id}")
+async def get_blog_post(blog_id: str):
+    """
+    Serve individual blog post JSON from S3
+    """
+    try:
+        # Import S3BlogStorage dynamically
+        import sys
+        from pathlib import Path
+        sys.path.insert(0, str(Path(__file__).parent))
+        from auto_blogger.publisher import S3BlogStorage
+        
+        s3_bucket = os.getenv("S3_BLOG_BUCKET", "althaf-blogs-storage")
+        storage = S3BlogStorage(bucket_name=s3_bucket)
+        
+        blog = storage.read_blog(blog_id)
+        
+        if not blog:
+             raise HTTPException(status_code=404, detail="Blog not found")
+             
+        return blog
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error loading blog {blog_id} from S3: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
 
 @api_router.put("/projects/{project_id}", response_model=Project)
 async def update_project(

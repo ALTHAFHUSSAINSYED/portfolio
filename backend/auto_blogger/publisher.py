@@ -34,17 +34,30 @@ class S3BlogStorage:
         self.posts_prefix = "blogs/posts/"
         logger.info(f"S3BlogStorage initialized: s3://{bucket_name}")
     
-    def read_index(self) -> Dict[str, List]:
-        """Read blogs/index.json from S3, return {blogs: [...]}"""
+    def read_index(self) -> Dict:
+        """Read blogs/index.json from S3"""
         try:
             response = self.s3.get_object(Bucket=self.bucket, Key=self.index_key)
-            content = response['Body'].read().decode('utf-8')
-            return json.loads(content)
-        except ClientError as e:
-            if e.response['Error']['Code'] == 'NoSuchKey':
-                logger.warning("index.json not found, returning empty")
-                return {"blogs": []}
-            raise
+            return json.loads(response['Body'].read().decode('utf-8'))
+        except self.s3.exceptions.NoSuchKey:
+            logger.warning("index.json not found, returning empty")
+            return {"blogs": []}
+        except Exception as e:
+            logger.error(f"Error reading S3 index: {e}")
+            return {"blogs": []}
+
+    def read_blog(self, blog_id: str) -> Optional[Dict]:
+        """Read individual blog post from blogs/posts/{id}.json"""
+        key = f"{self.posts_prefix}{blog_id}.json"
+        try:
+            response = self.s3.get_object(Bucket=self.bucket, Key=key)
+            return json.loads(response['Body'].read().decode('utf-8'))
+        except self.s3.exceptions.NoSuchKey:
+            logger.info(f"Blog post {key} not found in S3.")
+            return None
+        except Exception as e:
+            logger.error(f"Error reading S3 blog post {key}: {e}")
+            return None
     
     def write_index(self, data: Dict[str, List]):
         """Write blogs/index.json to S3"""
