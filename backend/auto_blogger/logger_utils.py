@@ -34,8 +34,8 @@ def setup_section_logger(job_id: str, section_index: int, section_title: str) ->
     Returns:
         Configured logger instance
     """
-    # Create log directory
-    log_dir = Path(f"backend/logs/auto_blogger/{job_id}")
+    # Create log directory (Persistent Volume: /app/backend/logs -> /home/ec2-user/portfolio-logs)
+    log_dir = Path(f"logs/auto_blogger/{job_id}")
     log_dir.mkdir(parents=True, exist_ok=True)
     
     # Sanitize filename (remove special chars, limit length)
@@ -78,7 +78,7 @@ def setup_agent_logger(job_id: str, agent_name: str) -> logging.Logger:
     Returns:
         Configured logger instance
     """
-    log_dir = Path(f"backend/logs/auto_blogger/{job_id}")
+    log_dir = Path(f"logs/auto_blogger/{job_id}")
     log_dir.mkdir(parents=True, exist_ok=True)
     
     log_file = log_dir / f"{agent_name}.log"
@@ -147,7 +147,7 @@ def create_job_metadata(job_id: str, category: str, started_at: datetime):
     """
     import json
     
-    log_dir = Path(f"backend/logs/auto_blogger/{job_id}")
+    log_dir = Path(f"logs/auto_blogger/{job_id}")
     log_dir.mkdir(parents=True, exist_ok=True)
     
     metadata = {
@@ -171,7 +171,7 @@ def update_job_metadata(job_id: str, updates: dict):
     """
     import json
     
-    metadata_file = Path(f"backend/logs/auto_blogger/{job_id}/job_metadata.json")
+    metadata_file = Path(f"logs/auto_blogger/{job_id}/job_metadata.json")
     
     if metadata_file.exists():
         with open(metadata_file, 'r', encoding='utf-8') as f:
