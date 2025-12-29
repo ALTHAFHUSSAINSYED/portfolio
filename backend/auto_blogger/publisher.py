@@ -11,7 +11,7 @@ import uuid
 import boto3
 import google.generativeai as genai
 import chromadb
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from datetime import datetime
 from dotenv import load_dotenv
 from botocore.exceptions import ClientError
