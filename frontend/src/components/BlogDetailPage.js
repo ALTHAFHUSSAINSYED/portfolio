@@ -24,24 +24,27 @@ const BlogDetailPage = () => {
   const fetchBlog = async () => {
     setLoading(true);
     try {
-      // FAST: Load directly from local blogs.json for instant performance
-      const localRes = await fetch('/data/blogs.json');
-      if (!localRes.ok) {
-        throw new Error('Failed to load blogs data');
+      // Phase C: Fetch individual blog from backend API (reads from S3)
+      // This ensures we get the latest content, not just cached metadata
+      const apiRes = await fetch(`${API_BASE_URL}/api/blogs/${blogId}`);
+
+      if (!apiRes.ok) {
+        if (apiRes.status === 404) {
+          throw new Error('Blog not found');
+        }
+        throw new Error('Failed to load blog post');
       }
 
-      const data = await localRes.json();
-      // Extract blogs array from the response (handle both {blogs: [...]} and [...] formats)
-      const allBlogs = Array.isArray(data) ? data : (data.blogs || []);
-      const blog = allBlogs.find(b => b.id === blogId || b._id === blogId);
+      const blogData = await apiRes.json();
 
-      if (blog) {
-        setBlog(blog);
+      if (blogData) {
+        setBlog(blogData);
         setError(null);
       } else {
-        throw new Error('Blog not found');
+        throw new Error('Blog data is empty');
       }
     } catch (err) {
+      console.error("Error fetching blog:", err);
       setError(err.message);
     } finally {
       setLoading(false);
