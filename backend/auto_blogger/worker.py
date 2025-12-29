@@ -75,7 +75,7 @@ def process_job(job_id: str):
         publisher_logger.info("Publishing blog...")
         
         publisher = BlogPublisher()
-        blog_url = publisher.publish_blog({
+        blog_url = publisher.publish({
             "title": category,
             "category": category,
             "content": blog_content
