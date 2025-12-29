@@ -109,10 +109,16 @@ class BlogNotifier:
             </ul>
             """
 
+        import pytz
+        from datetime import datetime
+        IST = pytz.timezone('Asia/Kolkata')
+        now_ist = datetime.now(IST).strftime('%Y-%m-%d %H:%M:%S IST')
+
         subject = f"❌ Auto-Blogger FAILED: {context} ({metadata.get('category', 'General') if metadata else 'General'})"
         body = f"""
         <h1>Auto-Blogger Failure</h1>
         <p><strong>Context:</strong> {context}</p>
+        <p><strong>Time:</strong> {now_ist}</p>
         
         {meta_html}
         
