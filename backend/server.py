@@ -766,13 +766,6 @@ async def generate_blog(request: BlogPostRequest):
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
-@api_router.get("/blogs")
-async def get_blogs():
-    try:
-        from backend.read_local_blogs import get_local_blogs
-        return get_local_blogs()
-    except Exception:
-        return []
 
 @api_router.post("/ask-all-u-bot")
 async def ask_agent(query: dict):
