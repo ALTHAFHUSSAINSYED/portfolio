@@ -101,29 +101,29 @@ Error message to user
 - **Primary Model**: `mistralai/mistral-7b-instruct:free`
 #### **Agent 1 - Orchestrator (The Architect)**
 - **Role**: High-level planning, SEO strategy, and outline creation
-- **Primary Model**: `deepseek/deepseek-r1:free` (Reasoning Specialist)
-- **Fallback Model**: `thudm/glm-4-9b-chat:free`
+- **Primary Model**: `deepseek/deepseek-r1-0528:free` (Reasoning Specialist)
+- **Fallback Model**: `tngtech/deepseek-r1t-chimera:free`
 
 ---
 
 #### **Agent 2 - Drafter (Section Writer)**
 - **Role**: Writes each section (section-by-section loop)
-- **Primary Model**: `mistralai/mistral-7b-instruct:free` (Proven Workhorse)
-- **Fallback Model**: `mistralai/mistral-small-24b-instruct-2501:free`
+- **Primary Model**: `mistralai/mistral-small-3.1-24b-instruct:free` (Proven Workhorse)
+- **Fallback Model**: `meta-llama/llama-3.2-3b-instruct:free`
 
 ---
 
 #### **Agent 3 - Critic (Quality Validator)**
 - **Role**: Evaluates blog quality, provides feedback
-- **Primary Model**: `deepseek/deepseek-r1:free` (Strict Reasoning)
-- **Fallback Model**: `tngtech/deepseek-r1t2-chimera:free`
+- **Primary Model**: `deepseek/deepseek-r1-0528:free` (Strict Reasoning)
+- **Fallback Model**: `z-ai/glm-4.5-air:free`
 
 ---
 
 #### **Agent 4 - Polisher (Style & Tone)**
 - **Role**: Final refinement of writing style
-- **Primary Model**: `cognitivecomputations/dolphin-mixtral-8x7b:free` (Human Tone)
-- **Fallback Model**: `mistralai/mistral-small-24b-instruct-2501:free`
+- **Primary Model**: `mistralai/mistral-small-3.1-24b-instruct:free` (Human Tone)
+- **Fallback Model**: `meta-llama/llama-3.2-3b-instruct:free`
 - **Max Tokens**: 1000
 - **Status**: Active ✅
 
