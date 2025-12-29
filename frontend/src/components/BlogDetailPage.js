@@ -51,34 +51,62 @@ const BlogDetailPage = () => {
     }
   };
 
-  // Helper function to convert markdown to HTML (simple version)
+  // Improved markdown rendering with cleanup and theme-adaptive styling
   const renderMarkdown = (content) => {
     if (!content) return '';
 
-    // Handle paragraphs
-    const withParagraphs = content
-      .split('\n\n')
-      .map(para => `<p>${para.trim()}</p>`)
-      .join('');
+    let html = content;
 
-    // Handle headers
-    const withHeaders = withParagraphs
-      .replace(/## (.*?)$/gm, '<h2 class="text-2xl font-bold my-4">$1</h2>')
-      .replace(/# (.*?)$/gm, '<h1 class="text-3xl font-bold my-4">$1</h1>')
-      .replace(/### (.*?)$/gm, '<h3 class="text-xl font-bold my-3">$1</h3>');
+    // 1. CLEANUP: Remove raw markdown artifacts
+    // Remove stray markdown symbols that shouldn't render
+    html = html.replace(/^\s*~+\s*$/gm, ''); // Remove tilde lines
+    html = html.replace(/^\s*-{3,}\s*$/gm, ''); // Remove horizontal rules (---)
+    html = html.replace(/^\s*\*{3,}\s*$/gm, ''); // Remove asterisk lines (***)
+    html = html.replace(/^\s*#{2,}\s*$/gm, ''); // Remove standalone ## markers
 
-    // Handle bold and italics
-    const withFormatting = withHeaders
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/`(.*?)`/g, '<code class="bg-gray-100 dark:bg-gray-800 px-1 rounded">$1</code>');
+    // 2. Handle code blocks first (to avoid processing code content)
+    html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
+      return `<pre class="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto my-4"><code class="text-sm">${code.trim()}</code></pre>`;
+    });
 
-    // Handle lists
-    const withLists = withFormatting
-      .replace(/^\s*-\s+(.*?)$/gm, '<li>$1</li>')
-      .replace(/(<li>.*?<\/li>\n)+/g, '<ul class="list-disc pl-5 my-3">$&</ul>');
+    // 3. Handle headers (convert to HTML with theme-adaptive styling)
+    html = html.replace(/^### (.*?)$/gm, '<h3 class="text-xl font-bold my-3 text-gray-900 dark:text-gray-100">$1</h3>');
+    html = html.replace(/^## (.*?)$/gm, '<h2 class="text-2xl font-bold my-4 text-gray-900 dark:text-gray-100">$1</h2>');
+    html = html.replace(/^# (.*?)$/gm, '<h1 class="text-3xl font-bold my-6 text-gray-900 dark:text-gray-100">$1</h1>');
 
-    return withLists;
+    // 4. Handle inline code (before bold/italics to avoid conflicts)
+    html = html.replace(/`([^`]+)`/g, '<code class="bg-gray-100 dark:bg-gray-800 text-cyan-600 dark:text-cyan-400 px-1.5 py-0.5 rounded text-sm">$1</code>');
+
+    // 5. Handle bold and italics (headings only - clean body text)
+    // Only convert ** to <strong> if NOT already in a heading tag
+    html = html.replace(/\*\*(?!<)(.*?)\*\*/g, (match, p1) => {
+      // Don't make body text bold - only use for actual emphasis
+      return `<span class="font-semibold text-gray-900 dark:text-gray-100">${p1}</span>`;
+    });
+    html = html.replace(/\*(?!<)(.*?)\*/g, '<em>$1</em>');
+
+    // 6. Handle lists
+    html = html.replace(/^\s*[-*]\s+(.+)$/gm, '<li class="ml-4">$1</li>');
+    html = html.replace(/((?:<li class="ml-4">.*?<\/li>\n?)+)/g, '<ul class="list-disc pl-5 my-3 text-gray-800 dark:text-gray-200">$1</ul>');
+
+    // 7. Handle links
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-cyan-600 dark:text-cyan-400 hover:underline" target="_blank" rel="noopener noreferrer">$1</a>');
+
+    // 8. Handle paragraphs (after all other conversions)
+    html = html.split('\n\n').map(para => {
+      para = para.trim();
+      if (!para) return '';
+      // Don't wrap headings, lists, or code blocks in <p> tags
+      if (para.match(/^<(h[1-6]|ul|ol|pre|code)/)) {
+        return para;
+      }
+      return `<p class="my-3 leading-relaxed text-gray-800 dark:text-gray-300">${para}</p>`;
+    }).join('\n');
+
+    // 9. Final cleanup: remove extra blank lines
+    html = html.replace(/\n{3,}/g, '\n\n');
+
+    return html;
   };
 
   if (loading) {
