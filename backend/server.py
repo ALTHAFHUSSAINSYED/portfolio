@@ -603,38 +603,61 @@ async def create_project(
     # Background sync removed to prevent OOM
     return project_data
 
-# --- GET /api/blogs (Phase B2: Serve from S3) ---
+# --- GET /api/blogs (Merged: Local + S3) ---
 @api_router.get("/blogs")
 async def get_blogs():
     """
-    Serve ALL blogs from S3 (static + auto-generated)
-    Returns list sorted by creation date (newest first)
-    
-    Phase B2: Now reads from S3 persistent storage
+    Serve ALL blogs: existing local blogs + new S3 auto-generated blogs
+    Returns merged list sorted by creation date (newest first)
     """
+    all_blogs = []
+    
     try:
-        # Import S3BlogStorage dynamically to avoid circular imports
-        import sys
-        from pathlib import Path
-        sys.path.insert(0, str(Path(__file__).parent))
-        from auto_blogger.publisher import S3BlogStorage
+        # 1. Load existing local blogs (original 10 blogs)
+        try:
+            from backend.read_local_blogs import get_local_blogs
+            local_blogs = get_local_blogs()
+            if local_blogs:
+                logger.info(f"Loaded {len(local_blogs)} local blogs")
+                all_blogs.extend(local_blogs)
+        except Exception as e:
+            logger.warning(f"Could not load local blogs: {e}")
         
-        # Initialize S3 storage
-        s3_bucket = os.getenv("S3_BLOG_BUCKET", "althaf-blogs-storage")
-        storage = S3BlogStorage(bucket_name=s3_bucket)
+        # 2. Load new auto-generated blogs from S3
+        try:
+            import sys
+            from pathlib import Path
+            sys.path.insert(0, str(Path(__file__).parent))
+            from auto_blogger.publisher import S3BlogStorage
+            
+            s3_bucket = os.getenv("S3_BLOG_BUCKET", "althaf-blogs-storage")
+            storage = S3BlogStorage(bucket_name=s3_bucket)
+            index_data = storage.read_index()
+            s3_blogs = index_data.get('blogs', [])
+            
+            if s3_blogs:
+                logger.info(f"Loaded {len(s3_blogs)} S3 blogs")
+                all_blogs.extend(s3_blogs)
+        except Exception as e:
+            logger.warning(f"Could not load S3 blogs: {e}")
         
-        # Read index.json from S3
-        index_data = storage.read_index()
-        all_blogs = index_data.get('blogs', [])
+        # 3. Remove duplicates (in case a blog exists in both sources)
+        seen_ids = set()
+        unique_blogs = []
+        for blog in all_blogs:
+            blog_id = blog.get('id') or blog.get('_id')
+            if blog_id and blog_id not in seen_ids:
+                seen_ids.add(blog_id)
+                unique_blogs.append(blog)
         
-        logger.info(f"Loaded {len(all_blogs)} blogs from S3")
+        # 4. Sort by creation date (newest first)
+        unique_blogs.sort(key=lambda x: x.get('created_at', ''), reverse=True)
         
-        # Already sorted by creation date in S3 (newest first)
-        return {"blogs": all_blogs}
+        logger.info(f"Total blogs served: {len(unique_blogs)} (local + S3, deduplicated)")
+        return {"blogs": unique_blogs}
         
     except Exception as e:
-        logger.error(f"Error loading blogs from S3: {e}")
-        # Fallback: return empty to avoid 500 error
+        logger.error(f"Error loading blogs: {e}")
         return {"blogs": []}
 
 @api_router.get("/blogs/{blog_id}")
