@@ -49,13 +49,14 @@ class BlogCritic:
     def evaluate(self, blog_content: str, category: str) -> Tuple[bool, str]:
         """
         Agent 3: The Judge
-        Uses DeepSeek R1 to critique the blog.
+        Uses DeepSeek R1 to critique the blog with fallback to GLM-4.5-Air.
         Returns: (passed: bool, feedback: str)
         """
         model_cfg = AGENT_ROLES["critic"]
-        model_id = model_cfg["primary"]
+        primary_model = model_cfg["primary"]
+        fallback_model = model_cfg["fallback"]
         
-        logger.info(f"⚖️ Critic Agent ({model_id}) evaluating blog for {category}...")
+        logger.info(f"⚖️ Critic Agent ({primary_model}) evaluating blog for {category}...")
 
         prompt = f"""
         You are a strict editorial critic.
@@ -84,9 +85,10 @@ class BlogCritic:
         }}
         """
 
+        # Try primary model first
         try:
             response = self.client.chat.completions.create(
-                model=model_id,
+                model=primary_model,
                 messages=[
                     {"role": "user", "content": prompt}
                 ],
@@ -103,20 +105,53 @@ class BlogCritic:
                 score = result.get("score", 0)
                 verdict = result.get("verdict", "FAIL").upper()
                 
-                logger.info(f"⚖️ Verdict: {verdict} (Score: {score})")
+                logger.info(f"⚖️ Verdict: {verdict} (Score: {score}) [Primary Model]")
                 
                 if score >= 90 or "PASS" in verdict:
                     return True, json.dumps(result, indent=2)
                 else:
                     return False, json.dumps(result, indent=2)
             else:
-                logger.error("Critic output not valid JSON. Defaulting to PASS (Fallback).")
-                return True, "Critic JSON parse error. Approved by default."
+                logger.error("Critic output not valid JSON. Trying fallback model...")
+                raise ValueError("Invalid JSON response from primary model")
 
-        except Exception as e:
-            logger.error(f"❌ Critic Agent Failed: {e}")
-            # Fail safe: Approve if critic breaks, or Reject?
-            # User wants reliability. If critic breaks (e.g. rate limit), maybe pass with warning?
-            # Or fail?
-            # Let's return False to be safe, but log it.
-            return True, f"Critic Agent Failed ({e}). Approving to ensure publication."
+        except Exception as primary_error:
+            logger.warning(f"⚠️ Primary Critic Model Failed: {primary_error}")
+            logger.info(f"🔄 Retrying with fallback model: {fallback_model}")
+            
+            # Try fallback model
+            try:
+                response = self.client.chat.completions.create(
+                    model=fallback_model,
+                    messages=[
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=2000,
+                    temperature=model_cfg["temperature"]
+                )
+                content = response.choices[0].message.content
+                
+                # Extract JSON
+                import re
+                match = re.search(r'\{.*\}', content, re.DOTALL)
+                if match:
+                    result = json.loads(match.group(0))
+                    score = result.get("score", 0)
+                    verdict = result.get("verdict", "FAIL").upper()
+                    
+                    logger.info(f"⚖️ Verdict: {verdict} (Score: {score}) [Fallback Model]")
+                    
+                    if score >= 90 or "PASS" in verdict:
+                        return True, json.dumps(result, indent=2)
+                    else:
+                        return False, json.dumps(result, indent=2)
+                else:
+                    logger.error("Fallback model also returned invalid JSON.")
+                    raise ValueError("Invalid JSON response from fallback model")
+                    
+            except Exception as fallback_error:
+                logger.error(f"❌ Fallback Critic Model Also Failed: {fallback_error}")
+                # Both models failed - auto-approve to ensure publication
+                error_msg = f"Both critic models failed. Primary: {primary_error}. Fallback: {fallback_error}. Auto-approving to ensure publication."
+                logger.warning(error_msg)
+                return True, error_msg
