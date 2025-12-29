@@ -46,16 +46,28 @@ async def main():
         # Step 2: Write
         logger.info("\n[2/3] Starting Writing Phase...")
         writer = BlogWriter()
-        draft = writer.generate_blog(category, research_data)
+        blog_data = writer.generate_blog(category, research_data)
         
-        # Parse the draft to extract metadata
-        logger.info(f"✓ Draft generated: {len(draft)} characters")
+        # Parse the result (now returns dict with metadata)
+        if isinstance(blog_data, dict):
+            # New format with metadata
+            title = blog_data.get('title', f"Latest Insights in {category}")
+            summary = blog_data.get('summary', '')
+            draft = blog_data.get('content', '')
+            logger.info(f"✓ Blog generated:")
+            logger.info(f"   Title: {title}")
+            logger.info(f"   Summary: {summary[:100]}...")
+            logger.info(f"   Content: {len(draft)} characters")
+        else:
+            # Old format - just string content
+            draft = blog_data
+            import re
+            title_match = re.search(r'#+\s*(.+)', draft)
+            title = title_match.group(1).strip() if title_match else f"Latest Insights in {category}"
+            summary = ""
+            logger.info(f"✓ Draft generated: {len(draft)} characters")
+        
         logger.info(f"Preview: {draft[:200]}...")
-        
-        # Extract title from draft (first line after # or ##)
-        import re
-        title_match = re.search(r'#+\s*(.+)', draft)
-        title = title_match.group(1).strip() if title_match else f"Latest Insights in {category}"
         
         # Step 3: Publish (NO CRITIC)
         logger.info("\n[3/3] Publishing directly (skipping critic)...")
@@ -64,6 +76,7 @@ async def main():
         # Create blog object
         blog = {
             "title": title,
+            "summary": summary,  # ✅ Add summary for card previews
             "content": draft,
             "category": category,
             "tags": [category.lower(), "technology", "devops", "automation"]

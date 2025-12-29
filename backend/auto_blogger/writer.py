@@ -84,14 +84,29 @@ class BlogWriter:
             job_mgr.save_outline(job_id, outline)
             job = job_mgr.load_job(job_id)  # Reload
         else:
-            logger.info(f"✅ Outline already exists ({len(job['outline'])} sections), resuming...")
             outline = job['outline']
+            # Handle dict format
+            if isinstance(outline, dict):
+                logger.info(f"✅ Outline exists: {outline.get('title', 'Unknown')}, resuming...")
+            else:
+                logger.info(f"✅ Outline exists ({len(outline)} sections), resuming...")
+        
+        # Extract metadata and sections from outline
+        if isinstance(outline, dict):
+            blog_title = outline.get('title', f"{category} - Technical Deep Dive")
+            blog_summary = outline.get('summary', '')
+            sections = outline.get('sections', [])
+        else:
+            # Old format - list of sections
+            blog_title = f"{category} - Technical Deep Dive"
+            blog_summary = f"Comprehensive guide to {category}."
+            sections = outline
         
         logger.info("✅ Outline Ready. Starting Section Drafting Loop (Agent 2)...")
         job_mgr.update_status(job_id, "DRAFTING")
 
         # Step 2: Loop through sections and draft content (RESUMABLE)
-        full_content = self._agent_drafter_loop(category, outline, research_data, job_id)
+        full_content = self._agent_drafter_loop(category, sections, research_data, job_id)
         
         logger.info(f"🎉 Blog Generation Complete! Length: {len(full_content)} chars")
         
@@ -101,7 +116,13 @@ class BlogWriter:
         # Update job metadata
         update_job_metadata(job_id, {"status": "generated", "completed_at": datetime.now(IST).strftime('%Y-%m-%d %H:%M:%S IST')})
         
-        return full_content
+        # Return dict with metadata + content
+        return {
+            "title": blog_title,
+            "summary": blog_summary,
+            "content": full_content,
+            "category": category
+        }
 
     def _agent_outliner(self, category: str, research_data: Dict, job_id: str = None) -> List[str]:
         """
@@ -121,20 +142,30 @@ class BlogWriter:
 
         TASK:
         Create a detailed structural outline for a 2500-word technical blog.
-        The outline must follow this specific flow:
-        1. Title
-        2. Introduction (Hook + Problem Statement)
-        3. Core Concept Deep Dive
-        4. Technical Implementation / How-To (Code heavy)
-        5. Real-World Use Cases
-        6. Best Practices / Challenges
-        7. Future Trends
-        8. Conclusion
+        
+        IMPORTANT: Generate THREE things:
+        1. A DESCRIPTIVE TITLE (not just "{category}")
+        2. A 2-3 SENTENCE SUMMARY for preview cards
+        3. Section outline following this flow:
+           - Introduction (Hook + Problem Statement)
+           - Core Concept Deep Dive
+           - Technical Implementation / How-To (Code heavy)
+           - Real-World Use Cases
+           - Best Practices / Challenges
+           - Future Trends
+           - Conclusion
 
-        OUTPUT FORMAT:
-        Return ONLY a JSON list of section headers.
-        Example: ["Title: ...", "Introduction", "Section 1: ...", "Conclusion"]
-        Do not write the blog. Just the headers.
+        OUTPUT FORMAT (JSON ONLY):
+        {{
+            "title": "Descriptive blog title here (NOT just category name)",
+            "summary": "2-3 sentence preview explaining what this blog covers",
+            "sections": ["Introduction", "Section 1: ...", "Conclusion"]
+        }}
+        
+        Example good title: "Building Resilient Microservices with Kubernetes: A Production Guide"
+        Example bad title: "DevOps"
+        
+        Do not write the blog content. Just return the JSON structure.
         """
 
         try:
@@ -165,10 +196,44 @@ class BlogWriter:
 
                     # 3. Validate JSON immediately
                     try:
-                        outline = json.loads(clean_content)
-                        if isinstance(outline, list) and len(outline) > 0:
-                            logger.info(f"📋 Outline created with {len(outline)} sections.")
-                            return outline # SUCCESS - Return immediately
+                        outline_data = json.loads(clean_content)
+                        
+                        # Handle new format: {title, summary, sections}
+                        if isinstance(outline_data, dict):
+                            if 'sections' in outline_data:
+                                # New format with metadata
+                                sections = outline_data['sections']
+                                title = outline_data.get('title', f"{category} - Technical Deep Dive")
+                                summary = outline_data.get('summary', '')
+                                
+                                if isinstance(sections, list) and len(sections) > 0:
+                                    logger.info(f"📋 Outline created:")
+                                    logger.info(f"   Title: {title}")
+                                    logger.info(f"   Summary: {summary[:100]}...")
+                                    logger.info(f"   Sections: {len(sections)}")
+                                    
+                                    # Store metadata in outline for later use
+                                    return {
+                                        "title": title,
+                                        "summary": summary,
+                                        "sections": sections
+                                    }
+                            else:
+                                # Old format - just a dict, try to extract list
+                                logger.warning("Received dict but no 'sections' key, trying to use as-is")
+                                raise ValueError("Invalid outline format")
+                        
+                        # Handle old format: ["Section 1", "Section 2", ...]
+                        elif isinstance(outline_data, list) and len(outline_data) > 0:
+                            logger.warning("⚠️ Received old list format, converting to new format")
+                            return {
+                                "title": f"{category} - Technical Deep Dive",
+                                "summary": f"Comprehensive guide to {category} covering key concepts, implementation, and best practices.",
+                                "sections": outline_data
+                            }
+                        else:
+                            raise ValueError("Invalid outline structure")
+                            
                     except json.JSONDecodeError:
                         logger.warning(f"⚠️ Model {model_id} returned invalid JSON. Content: {content[:100]}...")
                         # Fall through to 'except' or continue loop
