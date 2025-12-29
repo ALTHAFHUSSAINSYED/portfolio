@@ -234,11 +234,11 @@ class BlogScheduler:
         # 6:00 AM IST -> Cleanup
         scheduler.add_job(self.run_cleanup_job, CronTrigger(hour=6, minute=0, timezone='Asia/Kolkata'))
         
-        # SCHEDULE: 07:00 AM IST -> Generate
-        scheduler.add_job(self.run_generation_pipeline, CronTrigger(hour=7, minute=0, timezone='Asia/Kolkata'))
+        # SCHEDULE: 10:00 AM IST -> Generate (USER CHANGED from 7 AM)
+        scheduler.add_job(self.run_generation_pipeline, CronTrigger(hour=10, minute=0, timezone='Asia/Kolkata'))
         
-        # SCHEDULE: 10:00 AM IST -> Publish
-        scheduler.add_job(self.run_publishing_job, CronTrigger(hour=10, minute=0, timezone='Asia/Kolkata'))
+        # SCHEDULE: 01:00 PM IST -> Publish (Moved to 1 PM to allow 3 hours for generation/review)
+        scheduler.add_job(self.run_publishing_job, CronTrigger(hour=13, minute=0, timezone='Asia/Kolkata'))
         
         # Optional: Run immediately for testing
         if run_now:
