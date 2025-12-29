@@ -154,7 +154,7 @@ const HeroSection = ({ personalInfo }) => {
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-4 items-start w-full mt-8">
 
             <div className="relative z-30 order-2 lg:order-1 lg:col-span-1 flex justify-center lg:justify-start pt-4">
-              <div className="relative group bg-background rounded-xl">
+              <div className="relative group bg-background rounded-xl overflow-hidden">
                 <video
                   ref={leftVideoRef}
                   src="https://res.cloudinary.com/dtzaicj6s/video/upload/f_auto,q_auto/v1766402043/intro_left.mp4"
@@ -162,7 +162,7 @@ const HeroSection = ({ personalInfo }) => {
                   playsInline
                   loop
                   muted={isLeftMuted}
-                  className="w-72 h-72 lg:w-[500px] lg:h-80 rounded-xl object-cover border-2 border-pink-500/30 shadow-lg"
+                  className="w-72 h-72 lg:w-[500px] lg:h-80 rounded-xl object-cover border-2 border-pink-500/30 shadow-lg scale-[1.35] origin-bottom"
                 />
                 {/* ✨ MODIFIED: Changed bg-black/50 to bg-background/50 and text-white to text-foreground */}
                 <button onClick={() => toggleMute(leftVideoRef, setIsLeftMuted)} className="absolute bottom-2 right-2 p-2 bg-background/50 rounded-full text-foreground hover:bg-background/75 transition-colors">
@@ -202,7 +202,7 @@ const HeroSection = ({ personalInfo }) => {
             </div>
 
             <div className="relative z-30 order-3 lg:order-3 lg:col-span-1 flex justify-center lg:justify-end pt-4">
-              <div className="relative group bg-background rounded-xl">
+              <div className="relative group bg-background rounded-xl overflow-hidden">
                 <video
                   ref={rightVideoRef}
                   src="https://res.cloudinary.com/dtzaicj6s/video/upload/f_auto,q_auto/v1766401977/intro_right.mp4"
@@ -210,7 +210,7 @@ const HeroSection = ({ personalInfo }) => {
                   playsInline
                   loop
                   muted={isRightMuted}
-                  className="w-72 h-72 lg:w-[500px] lg:h-80 rounded-xl object-cover border-2 border-green-500/30 shadow-lg"
+                  className="w-72 h-72 lg:w-[500px] lg:h-80 rounded-xl object-cover border-2 border-green-500/30 shadow-lg scale-[1.35] origin-bottom"
                 />
                 {/* ✨ MODIFIED: Changed bg-black/50 to bg-background/50 and text-white to text-foreground */}
                 <button onClick={() => toggleMute(rightVideoRef, setIsRightMuted)} className="absolute bottom-2 right-2 p-2 bg-background/50 rounded-full text-foreground hover:bg-background/75 transition-colors">
