@@ -194,35 +194,45 @@ class BlogPublisher:
         except Exception as e:
             logger.warning(f"Local save failed (non-critical): {e}")
 
-        # 3. Save to ChromaDB
+        # 3. Save to ChromaDB (with retry logic)
         if self.chroma_client:
-            try:
-                collection = self.chroma_client.get_or_create_collection("Blogs_data")
-                
-                # Check if embedding exists (rare collision)
-                existing = collection.get(ids=[blog_id])
-                if existing and existing['ids']:
-                     logger.warning(f"Blog {blog_id} already in ChromaDB. Updating...")
-                
-                embedding = self._get_embedding(blog['content'])
-                if embedding:
+            max_retries = 3
+            retry_delay = 5
+            
+            for attempt in range(max_retries):
+                try:
+                    collection = self.chroma_client.get_or_create_collection("Blogs_data")
+                    
+                    # Check if embedding exists (rare collision)
+                    existing = collection.get(ids=[blog_id])
+                    if existing and existing['ids']:
+                         logger.warning(f"Blog {blog_id} already in ChromaDB. Updating...")
+                    
+                    embedding = self._get_embedding(blog['content'])
+                    if not embedding:
+                        raise ValueError("Embedding generation failed - null embedding returned")
+                    
                     collection.upsert(
                         ids=[blog_id],
                         documents=[blog['content']],
                         metadatas=[{
                             "title": blog['title'],
                             "category": blog['category'],
-                            "url": f"https://althafportfolio.site/blogs/{blog_id}", # Live URL construction
+                            "url": f"https://althafportfolio.site/blogs/{blog_id}",
                             "timestamp": str(int(time.time()))
                         }],
                         embeddings=[embedding]
                     )
-                    logger.info("Successfully embedded into ChromaDB")
-                else:
-                    logger.error("Skipped ChromaDB: Embedding failed")
-            except Exception as e:
-                 logger.error(f"ChromaDB insert failed: {e}")
-                 # We don't raise here to avoid failing the whole publish if local save worked
+                    logger.info("✅ Successfully embedded into ChromaDB")
+                    break  # Success - exit retry loop
+                    
+                except Exception as e:
+                    logger.warning(f"ChromaDB sync attempt {attempt + 1}/{max_retries} failed: {e}")
+                    if attempt < max_retries - 1:
+                        time.sleep(retry_delay)
+                    else:
+                        logger.error(f"❌ ChromaDB sync FAILED after {max_retries} attempts for blog {blog_id}")
+                        # Continue anyway - S3 is the source of truth
         
         return f"https://althafportfolio.site/blogs/{blog_id}"
 

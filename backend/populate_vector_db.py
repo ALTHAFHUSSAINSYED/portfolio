@@ -3,6 +3,7 @@ import os
 import json
 import re
 import glob
+import boto3
 import google.generativeai as genai
 from chromadb import Documents, EmbeddingFunction, Embeddings
 from dotenv import load_dotenv
@@ -52,6 +53,83 @@ def clean_text(text):
 def safe_meta(val):
     return "Unknown" if val is None else str(val)
 
+def sync_blogs_from_s3(chroma_client, embed_function):
+    """
+    Sync all blogs from S3 bucket (source of truth) to ChromaDB Blogs_data collection.
+    Downloads index.json from S3 and embeds each blog.
+    """
+    print("\n📚 [BLOGS] Syncing blogs from S3...")
+    
+    try:
+        s3 = boto3.client('s3')
+        bucket = os.getenv('S3_BLOG_BUCKET', 'althaf-blogs-storage')
+        
+        # Download index.json from S3
+        try:
+            response = s3.get_object(Bucket=bucket, Key='blogs/index.json')
+            index_data = json.loads(response['Body'].read().decode('utf-8'))
+            print(f"✅ Found {len(index_data)} blogs in S3 index.json")
+        except Exception as e:
+            print(f"❌ Could not fetch S3 index.json: {e}")
+            return
+        
+        # Get or create Blogs_data collection
+        blogs_col = chroma_client.get_or_create_collection(
+            "Blogs_data",
+            embedding_function=embed_function
+        )
+        
+        # Get existing blog IDs to avoid duplicates
+        existing = blogs_col.get()
+        existing_ids = set(existing['ids']) if existing and existing['ids'] else set()
+        
+        synced_count = 0
+        skipped_count = 0
+        
+        for blog in index_data:
+            blog_id = blog.get('id')
+            if not blog_id:
+                continue
+            
+            # Prepare content for embedding
+            content = blog.get('content', '')
+            if not content:
+                # Fallback to description if content missing
+                content = blog.get('description', blog.get('title', ''))
+            
+            if not content or len(content) < 50:
+                print(f"⚠️ Skipping {blog_id}: Content too short")
+                continue
+            
+            # Check if already exists
+            if blog_id in existing_ids:
+                print(f"  ↻ {blog_id} already in ChromaDB, updating...")
+            
+            # Upsert to ChromaDB (will embed automatically via embedding_function)
+            try:
+                blogs_col.upsert(
+                    ids=[blog_id],
+                    documents=[clean_text(content)],
+                    metadatas=[{
+                        "title": safe_meta(blog.get('title', 'Untitled')),
+                        "category": safe_meta(blog.get('category', 'General')),
+                        "url": f"https://althafportfolio.site/blogs/{blog_id}",
+                        "timestamp": safe_meta(blog.get('createdAt', ''))
+                    }]
+                )
+                synced_count += 1
+                print(f"  ✅ Synced: {blog.get('title', blog_id)[:50]}...")
+            except Exception as e:
+                print(f"  ❌ Failed to sync {blog_id}: {e}")
+                skipped_count += 1
+        
+        print(f"\n📊 S3 Sync Summary: {synced_count} synced, {skipped_count} skipped")
+        
+    except Exception as e:
+        print(f"❌ S3 sync failed: {e}")
+        import traceback
+        traceback.print_exc()
+
 def main():
     print("🚀 [START] Starting Database Population...")
 
@@ -80,13 +158,13 @@ def main():
     print("✅ Collections Ready (Persistent Mode).")
 
     def upsert_if_new(collection, uid, doc, meta):
-        """Helper to add only if ID does not exist saves tokens/costs"""
+        """Upserts data only if it doesn't exist yet (avoid duplicates)."""
         try:
             # Check if ID exists (lightweight)
             existing = collection.get(ids=[uid])
             if existing and existing['ids']:
                 # print(f"[SKIP] {uid} already exists.") # Verbose off
-                return False
+                return False  # Already exists, skip
             
             # Add if missing
             collection.add(ids=[uid], documents=[doc], metadatas=[meta])
@@ -97,7 +175,12 @@ def main():
             return False
 
     # ==========================================
-    # 1. SYNC BLOGS -> 'Blogs_data'
+    # 1. SYNC BLOGS FROM S3 -> 'Blogs_data'
+    # ==========================================
+    sync_blogs_from_s3(client, GeminiEmbeddingFunction())
+
+    # ==========================================
+    # 2. SYNC LOCAL BLOGS (LEGACY FALLBACK)
     # ==========================================
     blog_dir = "generated_blogs"
     if not os.path.exists(blog_dir):
