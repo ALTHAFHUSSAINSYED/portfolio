@@ -162,7 +162,7 @@ const HeroSection = ({ personalInfo }) => {
                   playsInline
                   loop
                   muted={isLeftMuted}
-                  className="w-72 h-72 lg:w-[500px] lg:h-80 rounded-xl object-cover object-top border-2 border-pink-500/30 shadow-lg"
+                  className="w-72 h-96 lg:w-[500px] lg:h-80 rounded-xl object-cover object-top border-2 border-pink-500/30 shadow-lg"
                 />
                 {/* ✨ MODIFIED: Changed bg-black/50 to bg-background/50 and text-white to text-foreground */}
                 <button onClick={() => toggleMute(leftVideoRef, setIsLeftMuted)} className="absolute bottom-2 right-2 p-2 bg-background/50 rounded-full text-foreground hover:bg-background/75 transition-colors">
@@ -210,7 +210,7 @@ const HeroSection = ({ personalInfo }) => {
                   playsInline
                   loop
                   muted={isRightMuted}
-                  className="w-72 h-72 lg:w-[500px] lg:h-80 rounded-xl object-cover object-top border-2 border-green-500/30 shadow-lg"
+                  className="w-72 h-96 lg:w-[500px] lg:h-80 rounded-xl object-cover object-top border-2 border-green-500/30 shadow-lg"
                 />
                 {/* ✨ MODIFIED: Changed bg-black/50 to bg-background/50 and text-white to text-foreground */}
                 <button onClick={() => toggleMute(rightVideoRef, setIsRightMuted)} className="absolute bottom-2 right-2 p-2 bg-background/50 rounded-full text-foreground hover:bg-background/75 transition-colors">
