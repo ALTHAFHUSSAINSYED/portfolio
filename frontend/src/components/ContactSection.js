@@ -139,12 +139,12 @@ const ContactSection = ({ personalInfo }) => {
               <CustomLinkedInCard theme={theme} />
             </div>
           </div>
-          <Card className={`p-8 neon-card ${isVisible ? 'fade-in-right stagger-8' : ''}`}>
+          <Card className={`p-8 neon-card h-full flex flex-col ${isVisible ? 'fade-in-right stagger-8' : ''}`}>
             <div className="flex items-center space-x-3 mb-6">
               <div className="w-10 h-10 bg-cyan-400/10 rounded-lg flex items-center justify-center border border-cyan-400/30"><MessageCircle className="w-5 h-5 text-cyan-soft" /></div>
               <h3 className="text-xl font-semibold text-foreground">Send me a message</h3>
             </div>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6 h-full flex flex-col">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-muted-foreground mb-2">Your Name</label>
@@ -167,7 +167,7 @@ const ContactSection = ({ personalInfo }) => {
                 {isSubmitting ? 'Sending...' : <><Send className="w-5 h-5 mr-3" />Send Message</>}
               </Button>
 
-              <div className="mt-24 flex flex-col items-center justify-center text-center space-y-1">
+              <div className="flex-grow flex flex-col items-center justify-center text-center space-y-1">
                 <p className="text-lg font-medium italic text-muted-foreground">
                   <span className="text-3xl text-cyan-soft mr-2 align-middle">❝</span>
                   Open to new opportunities in DevOps.
