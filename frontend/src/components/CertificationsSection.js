@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import { Award, Calendar, Filter } from 'lucide-react';
+import { Award, Calendar, Filter, ExternalLink } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 const CertificationsSection = ({ certifications }) => {
