@@ -102,8 +102,8 @@ const ContactSection = ({ personalInfo }) => {
             <div className="space-y-4">
               <Card className={`p-4 neon-card transition-all ${isVisible ? 'scale-in stagger-3' : ''}`}>
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-cyan-400/10 rounded-lg flex items-center justify-center border border-cyan-400/30">
-                    <img src="/assets/gmail-real.png" alt="Email" className="w-6 h-6 object-contain" />
+                  <div className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
+                    <img src="/assets/gmail-real.png" alt="Email" className="w-full h-full object-cover scale-110" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-foreground">Email</h4>
@@ -113,7 +113,9 @@ const ContactSection = ({ personalInfo }) => {
               </Card>
               <Card className={`p-4 neon-card transition-all ${isVisible ? 'scale-in stagger-4' : ''}`}>
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-green-400/10 rounded-lg flex items-center justify-center border border-green-400/30"><Phone className="w-6 h-6 text-green-soft" /></div>
+                  <div className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
+                    <img src="/assets/phone-blue.png" alt="Phone" className="w-full h-full object-cover scale-110" />
+                  </div>
                   <div>
                     <h4 className="font-semibold text-foreground">Phone</h4>
                     <a href={`tel:${personalInfo.phone}`} className="text-green-soft hover:underline">{personalInfo.phone}</a>
@@ -122,8 +124,8 @@ const ContactSection = ({ personalInfo }) => {
               </Card>
               <Card className={`p-4 neon-card transition-all ${isVisible ? 'scale-in stagger-5' : ''}`}>
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-purple-400/10 rounded-lg flex items-center justify-center border border-purple-400/30">
-                    <img src="/assets/whatsapp-real.png" alt="WhatsApp" className="w-6 h-6 object-contain" />
+                  <div className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
+                    <img src="/assets/whatsapp-green.png" alt="WhatsApp" className="w-full h-full object-cover scale-110" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-foreground">WhatsApp</h4>
