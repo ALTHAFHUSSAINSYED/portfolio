@@ -180,9 +180,25 @@ class BlogPublisher:
         
         # VALIDATION: Check for failed sections
         content = blog.get('content', '')
-        if '[Content Generation Failed' in content or not content or len(content) < 500:
+        
+        # Strict validation checks
+        failed_indicators = [
+            '<<SECTION_GENERATION_FAILED>>', # New strict token
+            '[Content Generation Failed',    # Legacy token
+            '[Section Generation Failed]'    # Potential legacy token
+        ]
+        
+        has_failure = any(indicator in content for indicator in failed_indicators)
+        
+        if has_failure or not content or len(content) < 1000:
             error_msg = "Blog validation FAILED: Contains failed sections or insufficient content"
             logger.error(f"❌ {error_msg}")
+            
+            # Find which indicator triggered it
+            for indicator in failed_indicators:
+                if indicator in content:
+                     logger.error(f"   Reason: Found failure token '{indicator}'")
+                     
             logger.error(f"Content preview: {content[:200]}...")
             raise ValueError(error_msg)
         

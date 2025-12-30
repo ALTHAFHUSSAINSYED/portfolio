@@ -360,7 +360,7 @@ class BlogWriter:
             
             if not success:
                  logger.error(f"❌ Failed to draft section: {section}. Skipping.")
-                 full_draft.append(f"\n\n## {section}\n\n[Content Generation Failed for this section]")
+                 full_draft.append(f"\n\n## {section}\n\n<<SECTION_GENERATION_FAILED>>")
         
         # Assemble and return the complete blog
         complete_blog = "\n".join(full_draft)
