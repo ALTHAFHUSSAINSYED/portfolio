@@ -102,7 +102,9 @@ const ContactSection = ({ personalInfo }) => {
             <div className="space-y-4">
               <Card className={`p-4 neon-card transition-all ${isVisible ? 'scale-in stagger-3' : ''}`}>
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-cyan-400/10 rounded-lg flex items-center justify-center border border-cyan-400/30"><Mail className="w-6 h-6 text-cyan-soft" /></div>
+                  <div className="w-12 h-12 bg-cyan-400/10 rounded-lg flex items-center justify-center border border-cyan-400/30">
+                    <img src="/assets/gmail-3d.png" alt="Email" className="w-6 h-6 object-contain" />
+                  </div>
                   <div>
                     <h4 className="font-semibold text-foreground">Email</h4>
                     <a href={`mailto:${personalInfo.email}`} className="text-cyan-soft hover:underline">{personalInfo.email}</a>
@@ -121,7 +123,7 @@ const ContactSection = ({ personalInfo }) => {
               <Card className={`p-4 neon-card transition-all ${isVisible ? 'scale-in stagger-5' : ''}`}>
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-purple-400/10 rounded-lg flex items-center justify-center border border-purple-400/30">
-                    <MessageSquare className="w-6 h-6 text-purple-soft" />
+                    <img src="/assets/whatsapp-3d.png" alt="WhatsApp" className="w-6 h-6 object-contain" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-foreground">WhatsApp</h4>
@@ -163,17 +165,17 @@ const ContactSection = ({ personalInfo }) => {
                 {isSubmitting ? 'Sending...' : <><Send className="w-5 h-5 mr-3" />Send Message</>}
               </Button>
 
-              <div className="mt-14 text-center space-y-2">
-                <p className="text-lg font-medium italic text-muted-foreground">
-                  <span className="text-3xl text-cyan-soft mr-2">❝</span>
+              <div className="mt-14 flex flex-col items-center justify-center min-h-[140px] text-center space-y-2">
+                <p className="text-lg font-medium italic text-muted-foreground relative inline-block">
+                  <span className="text-3xl text-cyan-soft absolute -left-6 -top-2">❝</span>
                   Open to new opportunities in DevOps.
                 </p>
                 <p className="text-lg font-medium italic text-muted-foreground">
                   Driving scalable, resilient platforms while continuously evolving toward AIOps and MLOps.
                 </p>
-                <p className="text-lg font-medium italic text-muted-foreground">
+                <p className="text-lg font-medium italic text-muted-foreground relative inline-block">
                   Building systems that are production-ready today and future-proof by design.
-                  <span className="text-3xl text-cyan-soft ml-2">❞</span>
+                  <span className="text-3xl text-cyan-soft absolute -right-6 -bottom-4">❞</span>
                 </p>
               </div>
             </form>
