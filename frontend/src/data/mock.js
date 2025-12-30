@@ -188,6 +188,10 @@ export const portfolioData = {
     {
       title: "100% On-Time Project Delivery",
       description: "Consistently delivered all assigned infrastructure projects and change requests within committed timelines, maintaining zero SLA breaches"
+    },
+    {
+      title: "RAG Pipeline & AI Assistant Development",
+      description: "Built and integrated AlluBot, an intelligent portfolio assistant powered by RAG (Retrieval Augmented Generation) architecture, connected to ChromaDB vector database for semantic search and context-aware responses"
     }
   ],
 
