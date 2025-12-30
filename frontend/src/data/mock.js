@@ -127,11 +127,12 @@ export const portfolioData = {
       badgeImage: "/assets/badges/gcp-architect.png"
     },
     {
-      name: "Microsoft Azure Administrator Associate (AZ-104)",
+      name: "Microsoft Certified: Azure Administrator Associate (AZ-104)",
       issuer: "Microsoft",
       year: "2024",
       category: "azure",
-      credentialUrl: "https://learn.microsoft.com/api/credentials/share/en-us/AlthafHussainSyed-6949/92511826F135B400?sharingId=82FA5743CCD0C069"
+      credentialUrl: "https://learn.microsoft.com/api/credentials/share/en-us/AlthafHussainSyed-6949/92511826F135B400?sharingId=82FA5743CCD0C069",
+      badgeImage: "/assets/badges/azure-admin.png"
     },
     {
       name: "Microsoft Certified Azure Fundamentals (AZ-900)",
@@ -146,21 +147,24 @@ export const portfolioData = {
       issuer: "GitHub",
       year: "2024",
       category: "github",
-      credentialUrl: "https://www.credly.com/badges/d257802b-475a-4467-b32a-35167db1809d/public_url"
+      credentialUrl: "https://www.credly.com/badges/d257802b-475a-4467-b32a-35167db1809d/public_url",
+      badgeImage: "/assets/badges/github-foundations.png"
     },
     {
-      name: "Generative AI Certified",
+      name: "Oracle Cloud Infrastructure Generative AI Professional",
       issuer: "Oracle",
       year: "2024",
       category: ["oracle", "ai"],
-      credentialUrl: "https://catalog-education.oracle.com/ords/certview/sharebadge?id=0A4040FD8181DCEAEE79FD7873A3A42BDDC71736C9B61C9BF0D789900F0F0AD6"
+      credentialUrl: "https://catalog-education.oracle.com/ords/certview/sharebadge?id=0A4040FD8181DCEAEE79FD7873A3A42BDDC71736C9B61C9BF0D789900F0F0AD6",
+      badgeImage: "/assets/badges/oracle-genai-pro.png"
     },
     {
-      name: "Oracle Cloud Infrastructure Architect Associate",
+      name: "Oracle Cloud Infrastructure Foundations Associate",
       issuer: "Oracle",
       year: "2024",
       category: "oracle",
-      credentialUrl: "https://catalog-education.oracle.com/ords/certview/sharebadge?id=0A4040FD8181DCEAEE79FD7873A3A42BC7A054A4918B29D16D42E58D5FEA35A4"
+      credentialUrl: "https://catalog-education.oracle.com/ords/certview/sharebadge?id=0A4040FD8181DCEAEE79FD7873A3A42BC7A054A4918B29D16D42E58D5FEA35A4",
+      badgeImage: "/assets/badges/oracle-foundations.png"
     }
   ],
 
