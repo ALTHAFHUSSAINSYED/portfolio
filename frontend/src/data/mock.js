@@ -99,28 +99,32 @@ export const portfolioData = {
       issuer: "Amazon Web Services",
       year: "2024",
       category: "aws",
-      credentialUrl: "https://www.credly.com/badges/7073a545-b009-4af8-ab89-7102dadf9beb/public_url"
+      credentialUrl: "https://www.credly.com/badges/7073a545-b009-4af8-ab89-7102dadf9beb/public_url",
+      badgeImage: "/assets/badges/aws-solutions-architect.png"
     },
     {
-      name: "AWS Certified AI Practitioner",
+      name: "AWS Certified AI Practitioner Foundational",
       issuer: "Amazon Web Services",
       year: "2024",
       category: ["aws", "ai"],
-      credentialUrl: "https://www.credly.com/badges/58d07f38-4245-48cf-97f2-98c0b74c5126/public_url"
+      credentialUrl: "https://www.credly.com/badges/58d07f38-4245-48cf-97f2-98c0b74c5126/public_url",
+      badgeImage: "/assets/badges/aws-ai-practitioner.png"
     },
     {
-      name: "AWS Cloud Practitioner",
+      name: "AWS Certified Cloud Practitioner Foundational",
       issuer: "Amazon Web Services",
       year: "2023",
       category: "aws",
-      credentialUrl: "https://www.credly.com/badges/13e91437-75a0-4d3a-a455-3c6af8dad32c/public_url"
+      credentialUrl: "https://www.credly.com/badges/13e91437-75a0-4d3a-a455-3c6af8dad32c/public_url",
+      badgeImage: "/assets/badges/aws-cloud-practitioner.png"
     },
     {
-      name: "Google Cloud Professional Cloud Architect",
+      name: "Google Cloud Certified Professional Cloud Architect",
       issuer: "Google Cloud",
       year: "2024",
       category: "gcp",
-      credentialUrl: "https://www.credly.com/badges/1371ab1a-bb3a-4c9f-9517-225cb5c02140/public_url"
+      credentialUrl: "https://www.credly.com/badges/1371ab1a-bb3a-4c9f-9517-225cb5c02140/public_url",
+      badgeImage: "/assets/badges/gcp-architect.png"
     },
     {
       name: "Microsoft Azure Administrator Associate (AZ-104)",
@@ -130,11 +134,12 @@ export const portfolioData = {
       credentialUrl: "https://learn.microsoft.com/api/credentials/share/en-us/AlthafHussainSyed-6949/92511826F135B400?sharingId=82FA5743CCD0C069"
     },
     {
-      name: "Azure Fundamentals (AZ-900)",
+      name: "Microsoft Certified Azure Fundamentals (AZ-900)",
       issuer: "Microsoft",
       year: "2023",
       category: "azure",
-      credentialUrl: "https://www.credly.com/badges/ebc4542a-98ee-48de-9221-89ae35e12aa1/public_url"
+      credentialUrl: "https://www.credly.com/badges/ebc4542a-98ee-48de-9221-89ae35e12aa1/public_url",
+      badgeImage: "/assets/badges/azure-fundamentals.png"
     },
     {
       name: "GitHub Foundations",

@@ -151,12 +151,22 @@ const CertificationsSection = ({ certifications }) => {
                 }`}
             >
               <div className="flex items-start space-x-4">
-                {/* ✨ MODIFIED: Changed border to be theme-aware */}
-                <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${getCertificationBg(cert.category)} group-hover:scale-110 transition-all duration-300 hover-rotate border border-border/30`}>
-                  <div className={`${getCertificationColor(cert.category)} glow-text`}>
-                    {getCertificationIcon(cert.category)}
+                {/* ✨ MODIFIED: Render Real Badge Image if provided, else Generic Icon */}
+                {cert.badgeImage ? (
+                  <div className="flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                    <img
+                      src={cert.badgeImage}
+                      alt={`${cert.name} badge`}
+                      className="w-16 h-16 object-contain drop-shadow-md"
+                    />
                   </div>
-                </div>
+                ) : (
+                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${getCertificationBg(cert.category)} group-hover:scale-110 transition-all duration-300 hover-rotate border border-border/30`}>
+                    <div className={`${getCertificationColor(cert.category)} glow-text`}>
+                      {getCertificationIcon(cert.category)}
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-gray-900 dark:text-foreground mb-2 leading-tight group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-all duration-300 shine-text-slow light-mode-bright">
