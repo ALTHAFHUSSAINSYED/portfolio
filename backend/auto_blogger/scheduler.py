@@ -189,11 +189,13 @@ class BlogScheduler:
 
             self.pending_draft = {
                 "title": title,
-                "summary": summary,  # ✅ Add summary for blog cards
+                "summary": summary,
                 "category": category,
                 "content": draft,
                 "tags": [category, "Tech", "Auto-Generated"],
-                "created_at": datetime.now().isoformat()
+                "created_at": datetime.now().isoformat(),
+                "gen_start_time": start_time.isoformat(),
+                "gen_end_time": datetime.now().isoformat()
             }
             logger.info(f"Draft ready for publishing: '{title}'")
             
