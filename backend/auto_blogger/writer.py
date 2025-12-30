@@ -340,7 +340,8 @@ class BlogWriter:
                         )
                         content = response.choices[0].message.content.strip()
                         
-                        if content and len(content) > 50:
+                        # ATOMIC VALIDATION: Is this section complete?
+                        if self._validate_section(content):
                             # Success! Format and Append
                             if not content.startswith("#"):
                                 formatted_section = f"\n\n## {section}\n\n{content}"
@@ -360,6 +361,9 @@ class BlogWriter:
                             success = True
                             time.sleep(15)
                             break
+                        else:
+                            logger.warning(f"⚠️ Generated section incomplete/cut-off. Discarding entirely. (Attempt {attempt + 1})")
+                            # Do NOT append partial content. Retry or Fail completely.
                             
                     except Exception as e:
                          logger.warning(f"Drafting error ({attempt_model}): {e}")
@@ -370,38 +374,39 @@ class BlogWriter:
             
             if not success:
                  logger.error(f"❌ Failed to draft section: {section}. Skipping.")
-                 full_draft.append(f"\n\n## {section}\n\n<<SECTION_GENERATION_FAILED>>")
+                 # ATOMIC FAIL: Do not append header. Do not append error token. Just SKIP.
+                 # The blog will be shorter, but 100% clean.
         
         # Assemble and return the complete blog
-        raw_blog = "\n".join(full_draft)
-        complete_blog = self._clean_content(raw_blog)
+        # No more post-processing trim needed because we validated atomic sections upstream
+        complete_blog = "\n".join(full_draft)
         
-        logger.info(f"✅ Blog assembly complete: {len(complete_blog)} characters (Cleaned)")
+        logger.info(f"✅ Blog assembly complete: {len(complete_blog)} characters (Atomic Verified)")
         return complete_blog
 
-    def _clean_content(self, text: str) -> str:
+    def _validate_section(self, content: str) -> bool:
         """
-        Trims text to the last complete sentence.
+        Atomic Section Validator:
+        Returns True if section looks complete.
+        Returns False if it looks cut-off or broken.
         """
-        if not text:
-            return ""
+        if not content or len(content) < 50:
+            return False
             
-        # Common sentence terminators
+        # Structure check: Does it terminate properly?
+        stripped = content.rstrip()
+        
+        # Safe endings
+        if stripped.endswith("```"): return True
+        if stripped.endswith("}"): return True
+        if stripped.endswith("]"): return True
+        
+        # Punctuation check
         terminators = ['.', '!', '?', '"', ')']
-        
-        # Find the last occurrence of any terminator
-        last_idx = -1
-        for char in terminators:
-            idx = text.rfind(char)
-            if idx > last_idx:
-                last_idx = idx
-        
-        if last_idx != -1:
-            # Keep up to the terminator (inclusive)
-            return text[:last_idx+1]
-        
-        # If no terminator found (rare), just return as is or handle logic
-        return text
+        if any(stripped.endswith(t) for t in terminators):
+            return True
+            
+        return False
 
     
     def revise_blog(self, draft: str, feedback: Dict) -> str:
