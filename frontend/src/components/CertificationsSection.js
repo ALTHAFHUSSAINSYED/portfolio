@@ -94,23 +94,40 @@ const CertificationsSection = ({ certifications }) => {
         </div>
 
         {/* Filter Buttons */}
-        <div className={`flex flex-wrap justify-center gap-3 mb-12 ${isVisible ? 'fade-in-up stagger-2' : ''}`}>
-          {Object.entries(categories).map(([key, category], index) => (
+        {/* Sticky Filter Buttons */}
+        <div className={`sticky top-20 z-40 py-4 mb-8 bg-background/95 backdrop-blur-sm transition-all duration-300 ${isVisible ? 'fade-in-up stagger-2' : ''}`}>
+          <div className="flex flex-wrap justify-center gap-3">
+            {/* Explicitly render ALL first to ensure order */}
             <Button
-              key={key}
-              onClick={() => setSelectedCategory(key)}
-              variant={selectedCategory === key ? 'default' : 'outline'}
+              key="all"
+              onClick={() => setSelectedCategory('all')}
+              variant={selectedCategory === 'all' ? 'default' : 'outline'}
               size="sm"
-              // ✨ MODIFIED: Unselected state is now theme-aware
-              className={`transition-all duration-300 hover-shine sparkle-text mr-2 ${selectedCategory === key
+              className={`transition-all duration-300 hover-shine sparkle-text mr-2 ${selectedCategory === 'all'
                 ? `neon-button ${theme === 'light' ? 'bg-gradient-to-r from-pink-500 to-green-500' : 'bg-gradient-to-r from-cyan-500 to-pink-500'}  text-white font-bold shadow-lg`
                 : 'border-border/50 text-muted-foreground bg-background/50 hover:bg-secondary/50 hover-glow'
-                } ${isVisible ? `scale-in stagger-${index + 3}` : ''}`}
+                }`}
             >
               <Filter className="w-4 h-4 mr-2" />
-              {category.name}
+              All Certifications
             </Button>
-          ))}
+
+            {Object.entries(categories).filter(([key]) => key !== 'all').map(([key, category], index) => (
+              <Button
+                key={key}
+                onClick={() => setSelectedCategory(key)}
+                variant={selectedCategory === key ? 'default' : 'outline'}
+                size="sm"
+                className={`transition-all duration-300 hover-shine sparkle-text mr-2 ${selectedCategory === key
+                  ? `neon-button ${theme === 'light' ? 'bg-gradient-to-r from-pink-500 to-green-500' : 'bg-gradient-to-r from-cyan-500 to-pink-500'}  text-white font-bold shadow-lg`
+                  : 'border-border/50 text-muted-foreground bg-background/50 hover:bg-secondary/50 hover-glow'
+                  }`}
+              >
+                <Filter className="w-4 h-4 mr-2" />
+                {category.name}
+              </Button>
+            ))}
+          </div>
         </div>
 
         {/* Certifications Count */}
