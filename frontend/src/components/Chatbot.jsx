@@ -11,6 +11,7 @@ const Chatbot = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [hasUnread, setHasUnread] = useState(true);
+  const [hasInteracted, setHasInteracted] = useState(false); // New state to track interaction
   const [isMaximized, setIsMaximized] = useState(false);
   const messagesEndRef = useRef(null);
 
@@ -76,6 +77,7 @@ const Chatbot = () => {
   const toggleChat = () => {
     if (!isOpen) {
       setHasUnread(false); // Clear unread indicator when opening chat
+      setHasInteracted(true); // Stop shake animation permanently
     }
     setIsOpen(!isOpen);
   };
@@ -254,7 +256,7 @@ const Chatbot = () => {
       {/* Chatbot Icon with Unread Badge and Avatar */}
       <div style={{ position: 'relative', display: 'inline-block' }}>
         <button
-          className={`chat-toggle-button${isOpen ? ' open' : ''}${!isOpen ? ' pop-shake' : ''}`}
+          className={`chat-toggle-button${isOpen ? ' open' : ''}${!isOpen && !hasInteracted ? ' pop-shake' : ''}`}
           onClick={toggleChat}
           aria-label={isOpen ? 'Close chat' : 'Open chat'}
         >
