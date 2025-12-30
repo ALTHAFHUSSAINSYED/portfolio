@@ -20,7 +20,7 @@ const ProjectsSection = () => {
         if (!response.ok) throw new Error('Something went wrong fetching projects.');
         const data = await response.json();
         setProjects(data);
-      } catch (err) { setError(err.message); } 
+      } catch (err) { setError(err.message); }
       finally { setLoading(false); }
     };
     fetchProjects();
@@ -35,7 +35,7 @@ const ProjectsSection = () => {
     }, { threshold: 0.1 });
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => {
-      if(sectionRef.current) {
+      if (sectionRef.current) {
         observer.unobserve(sectionRef.current);
       }
     };
@@ -85,16 +85,24 @@ const ProjectsSection = () => {
                     <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 bg-cyan-400/10 border border-cyan-400/30"><IconComponent className="w-6 h-6 text-cyan-soft" /></div>
                     <div><h3 className="text-xl font-bold text-foreground">{project.name}</h3></div>
                   </div>
-                  
+
                   {/* ✨ REMOVED: The project image has been removed from this view. */}
 
                   <div className="space-y-2 mb-6">
-                    {(project.summary || '').split('\n').filter(line => line.trim() !== '').map((line, idx) => (
-                      <div key={idx} className="flex items-start space-x-3">
-                        <ArrowRight className="w-4 h-4 text-cyan-soft mt-1 flex-shrink-0" />
-                        <p className="text-muted-foreground text-sm">{line}</p>
-                      </div>
-                    ))}
+                    {(() => {
+                      const lines = (project.summary || '').split('\n').filter(line => line.trim() !== '');
+                      const displayLines = [];
+                      for (const line of lines) {
+                        if (line.match(/(Objective|Key Responsibilities|Architecture|Challenges)/i)) break;
+                        displayLines.push(line);
+                      }
+                      return displayLines.map((line, idx) => (
+                        <div key={idx} className="flex items-start space-x-3">
+                          <ArrowRight className="w-4 h-4 text-cyan-soft mt-1 flex-shrink-0" />
+                          <p className="text-muted-foreground text-sm">{line}</p>
+                        </div>
+                      ));
+                    })()}
                   </div>
 
                   <div className="mb-6">
@@ -102,7 +110,7 @@ const ProjectsSection = () => {
                     <div className="flex flex-wrap gap-2">{project.technologies.map((tech) => (<Badge key={tech} variant="outline" className="border-cyan-400/30 text-cyan-soft bg-background/50">{tech}</Badge>))}</div>
                   </div>
 
-                  <div className="flex-grow"></div> 
+                  <div className="flex-grow"></div>
 
                   <div className="pt-4 mt-auto border-t border-border/30">
                     <Link to={`/projects/${project.id}`} className="flex items-center text-cyan-soft text-sm font-medium">
