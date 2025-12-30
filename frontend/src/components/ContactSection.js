@@ -162,6 +162,20 @@ const ContactSection = ({ personalInfo }) => {
               <Button type="submit" disabled={isSubmitting} className="w-full neon-button bg-gradient-to-r from-cyan-500 to-pink-500 text-black py-3 text-lg font-bold disabled:opacity-50">
                 {isSubmitting ? 'Sending...' : <><Send className="w-5 h-5 mr-3" />Send Message</>}
               </Button>
+
+              <div className="mt-8 text-center space-y-2">
+                <p className="text-lg font-medium italic text-muted-foreground">
+                  <span className="text-3xl text-cyan-soft mr-2">❝</span>
+                  Open to new opportunities in DevOps.
+                </p>
+                <p className="text-lg font-medium italic text-muted-foreground">
+                  Driving scalable, resilient platforms while continuously evolving toward AIOps and MLOps.
+                </p>
+                <p className="text-lg font-medium italic text-muted-foreground">
+                  Building systems that are production-ready today and future-proof by design.
+                  <span className="text-3xl text-cyan-soft ml-2">❞</span>
+                </p>
+              </div>
             </form>
           </Card>
         </div>
