@@ -157,7 +157,7 @@ const CertificationsSection = ({ certifications }) => {
                     <img
                       src={cert.badgeImage}
                       alt={`${cert.name} badge`}
-                      className="w-16 h-16 object-contain drop-shadow-md"
+                      className={`${cert.issuer === 'Oracle' ? 'w-20 h-20' : 'w-16 h-16'} object-contain drop-shadow-md`}
                     />
                   </div>
                 ) : (
