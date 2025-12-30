@@ -63,8 +63,12 @@ const ExperienceSection = ({ experience }) => {
                 {/* Company Header */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
                   <div className="flex items-center space-x-4 mb-4 md:mb-0">
-                    <div className="w-14 h-14 bg-gradient-to-r from-cyan-400/20 to-pink-500/20 rounded-lg flex items-center justify-center hover-rotate transition-all duration-300 border border-cyan-400/30">
-                      <Building className="w-7 h-7 text-cyan-soft glow-text" />
+                    <div className="w-14 h-14 bg-gradient-to-r from-cyan-400/20 to-pink-500/20 rounded-lg flex items-center justify-center hover-rotate transition-all duration-300 border border-cyan-400/30 overflow-hidden">
+                      {job.company === 'DXC Technology' ? (
+                        <img src="/assets/dxc-logo.png" alt="DXC Logo" className="w-full h-full object-contain" />
+                      ) : (
+                        <Building className="w-7 h-7 text-cyan-soft glow-text" />
+                      )}
                     </div>
                     <div>
                       <h3 className="text-2xl font-bold shine-text-slow">
