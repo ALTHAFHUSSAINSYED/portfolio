@@ -4,7 +4,7 @@ import { Badge } from './ui/badge';
 import { Award, TrendingUp, Shield, Zap } from 'lucide-react';
 import IntroductionVideo from './IntroductionVideo';
 
-const AboutSection = ({ personalInfo, achievements }) => {
+const AboutSection = ({ personalInfo, achievements, education }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [hoveredSkill, setHoveredSkill] = useState(null);
   const sectionRef = useRef(null);
@@ -84,16 +84,28 @@ const AboutSection = ({ personalInfo, achievements }) => {
                       key={index}
                       className={`p-3 rounded-lg border border-border/30 bg-background/40 backdrop-blur-sm transition-all duration-300 hover:border-cyan-400/30 group ${isVisible ? `fade-in-up stagger-${index + 2}` : ''}`}
                     >
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h5 className="text-sm font-semibold text-cyan-soft group-hover:text-cyan-400 transition-colors">
-                            {edu.degree}
-                          </h5>
-                          <p className="text-xs text-muted-foreground mt-1">{edu.institution}</p>
+                      <div className="flex items-start gap-3">
+                        {/* University Logo */}
+                        <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-white/90 p-1 flex items-center justify-center">
+                          <img
+                            src="/assets/anu.png"
+                            alt="Acharya Nagarjuna University"
+                            className="w-full h-full object-contain"
+                          />
                         </div>
-                        <span className="text-xs font-mono text-pink-soft/80 bg-pink-500/10 px-2 py-1 rounded">
-                          {edu.duration}
-                        </span>
+
+                        {/* Education Details */}
+                        <div className="flex-1 flex justify-between items-start">
+                          <div>
+                            <h5 className="text-sm font-semibold text-cyan-soft group-hover:text-cyan-400 transition-colors">
+                              {edu.degree}
+                            </h5>
+                            <p className="text-xs text-muted-foreground mt-1">{edu.institution}</p>
+                          </div>
+                          <span className="text-xs font-mono text-pink-soft/80 bg-pink-500/10 px-2 py-1 rounded whitespace-nowrap ml-3">
+                            {edu.duration}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   ))}
