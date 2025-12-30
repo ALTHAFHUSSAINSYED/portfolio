@@ -163,7 +163,7 @@ const ContactSection = ({ personalInfo }) => {
                 {isSubmitting ? 'Sending...' : <><Send className="w-5 h-5 mr-3" />Send Message</>}
               </Button>
 
-              <div className="mt-8 text-center space-y-2">
+              <div className="mt-14 text-center space-y-2">
                 <p className="text-lg font-medium italic text-muted-foreground">
                   <span className="text-3xl text-cyan-soft mr-2">❝</span>
                   Open to new opportunities in DevOps.
