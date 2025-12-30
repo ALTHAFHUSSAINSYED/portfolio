@@ -19,7 +19,7 @@ const TechAssistant = () => {
     // ✨ MODIFIED: Added "relative" to create a stable anchor for the page layout.
     <div className="min-h-screen bg-background relative">
       <HeroSection personalInfo={portfolioData.personal_info} />
-      <AboutSection personalInfo={portfolioData.personal_info} achievements={portfolioData.achievements} />
+      <AboutSection personalInfo={portfolioData.personal_info} achievements={portfolioData.achievements} education={portfolioData.education} />
       <SkillsSection skills={portfolioData.skills} />
       <ExperienceSection experience={portfolioData.experience} />
       <CertificationsSection certifications={portfolioData.certifications} />

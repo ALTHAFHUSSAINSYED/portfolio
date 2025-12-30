@@ -70,9 +70,36 @@ const AboutSection = ({ personalInfo, achievements }) => {
               <span className="text-cyan-soft">Professional</span> <span className="text-pink-soft">Summary</span>
             </h3>
             {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
-            <p className="text-muted-foreground leading-relaxed text-lg">
+            <p className="text-muted-foreground leading-relaxed text-lg mb-8">
               {personalInfo.summary}
             </p>
+
+            {/* Education Block */}
+            {education && (
+              <div className="space-y-4 mb-8">
+                <h4 className="text-lg font-semibold text-foreground">Education:</h4>
+                <div className="grid gap-3">
+                  {education.map((edu, index) => (
+                    <div
+                      key={index}
+                      className={`p-3 rounded-lg border border-border/30 bg-background/40 backdrop-blur-sm transition-all duration-300 hover:border-cyan-400/30 group ${isVisible ? `fade-in-up stagger-${index + 2}` : ''}`}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h5 className="text-sm font-semibold text-cyan-soft group-hover:text-cyan-400 transition-colors">
+                            {edu.degree}
+                          </h5>
+                          <p className="text-xs text-muted-foreground mt-1">{edu.institution}</p>
+                        </div>
+                        <span className="text-xs font-mono text-pink-soft/80 bg-pink-500/10 px-2 py-1 rounded">
+                          {edu.duration}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="space-y-4">
               {/* ✨ MODIFIED: Changed text-white to text-foreground */}
