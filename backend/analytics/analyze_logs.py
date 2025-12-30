@@ -6,7 +6,7 @@ import statistics
 
 # Configuration
 ROOT_DIR = Path(__file__).parent.parent.parent
-LOG_FILE = ROOT_DIR / 'backend' / 'telemetry.log'
+LOG_FILE = ROOT_DIR / 'backend' / 'logs' / 'chatbot.log'
 
 def analyze_logs():
     print(f"🔍 Analyzing logs from: {LOG_FILE}")
