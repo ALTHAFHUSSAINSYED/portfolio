@@ -255,7 +255,7 @@ const Chatbot = () => {
       {/* Chatbot Icon with Unread Badge and Avatar */}
       <div style={{ position: 'relative', display: 'inline-block' }}>
         <button
-          className={`chat-toggle-button${isOpen ? ' open' : ''}`}
+          className={`chat-toggle-button${isOpen ? ' open' : ''}${!isOpen ? ' pop-shake' : ''}`}
           onClick={toggleChat}
           aria-label={isOpen ? 'Close chat' : 'Open chat'}
         >

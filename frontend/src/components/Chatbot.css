@@ -665,3 +665,35 @@
 [data-theme="dark"] .chatbot-window * {
   scrollbar-color: #52525b transparent !important;
 }
+
+/* ✨ NEW ANIMATION: Pop-Shake (Attention Grabber) */
+@keyframes pop-shake {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  10%,
+  20% {
+    transform: scale(0.9) rotate(-3deg);
+  }
+
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: scale(1.1) rotate(3deg);
+  }
+
+  40%,
+  60%,
+  80% {
+    transform: scale(1.1) rotate(-3deg);
+  }
+}
+
+.pop-shake {
+  animation: pop-shake 2s infinite;
+  /* Continuous loop to attract attention */
+}
