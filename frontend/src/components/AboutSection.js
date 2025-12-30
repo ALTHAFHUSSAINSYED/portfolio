@@ -44,7 +44,7 @@ const AboutSection = ({ personalInfo, achievements, education }) => {
 
   return (
     // ✨ MODIFIED: Changed gradient to be theme-aware
-    <section id="about" className="py-20 bg-gradient-to-b from-background to-secondary relative overflow-hidden" ref={sectionRef}>
+    <section id="about" className="pt-8 pb-20 bg-gradient-to-b from-background to-secondary relative overflow-hidden" ref={sectionRef}>
       {/* Animated background effects */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="bg-orb bg-orb-1"></div>
@@ -104,7 +104,7 @@ const AboutSection = ({ personalInfo, achievements, education }) => {
                             </h5>
                             <p className="text-xs text-muted-foreground mt-1">{edu.institution}</p>
                           </div>
-                          <span className="text-xs font-mono text-pink-soft/80 bg-pink-500/10 px-2 py-1 rounded whitespace-nowrap ml-3">
+                          <span className="text-sm font-medium text-cyan-soft dark:text-cyan-400 bg-background/40 dark:bg-background/60 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-border/30 whitespace-nowrap ml-3">
                             {edu.duration}
                           </span>
                         </div>
