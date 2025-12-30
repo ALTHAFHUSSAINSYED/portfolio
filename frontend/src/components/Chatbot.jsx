@@ -229,7 +229,6 @@ const Chatbot = () => {
 
   // Common questions suggestions
   const suggestedQuestions = [
-    "Show me his recent blogs",
     "What are Althaf's skills?",
     "Tell me about his projects",
     "What DevOps tools does he use?",
