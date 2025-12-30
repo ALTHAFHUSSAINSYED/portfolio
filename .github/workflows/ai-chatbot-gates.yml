@@ -4,8 +4,16 @@ name: AI Chatbot CI/CD Gates
 on:
   pull_request:
     branches: [ "main" ]
+    paths:
+      - 'backend/**'
+      - 'tests/**'
+      - '.github/workflows/ai-chatbot-gates.yml'
   push:
     branches: [ "main" ]
+    paths:
+      - 'backend/**'
+      - 'tests/**'
+      - '.github/workflows/ai-chatbot-gates.yml'
 
 jobs:
   ai-chatbot-gates:
