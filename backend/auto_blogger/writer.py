@@ -116,6 +116,16 @@ class BlogWriter:
         # Update job metadata
         update_job_metadata(job_id, {"status": "generated", "completed_at": datetime.now(IST).strftime('%Y-%m-%d %H:%M:%S IST')})
         
+        # Fallback Summary Logic
+        if not blog_summary:
+            logger.warning("Summary missing from outline. Generating fallback summary from content...")
+            # Extract first 200 chars, clean markdown headers
+            clean_excerpt = full_content.replace("#", "").replace("*", "").strip()[:200]
+            last_space = clean_excerpt.rfind(" ")
+            if last_space != -1:
+                clean_excerpt = clean_excerpt[:last_space]
+            blog_summary = f"{clean_excerpt}..."
+
         # Return dict with metadata + content
         return {
             "title": blog_title,
@@ -363,9 +373,35 @@ class BlogWriter:
                  full_draft.append(f"\n\n## {section}\n\n<<SECTION_GENERATION_FAILED>>")
         
         # Assemble and return the complete blog
-        complete_blog = "\n".join(full_draft)
-        logger.info(f"✅ Blog assembly complete: {len(complete_blog)} characters")
+        raw_blog = "\n".join(full_draft)
+        complete_blog = self._clean_content(raw_blog)
+        
+        logger.info(f"✅ Blog assembly complete: {len(complete_blog)} characters (Cleaned)")
         return complete_blog
+
+    def _clean_content(self, text: str) -> str:
+        """
+        Trims text to the last complete sentence.
+        """
+        if not text:
+            return ""
+            
+        # Common sentence terminators
+        terminators = ['.', '!', '?', '"', ')']
+        
+        # Find the last occurrence of any terminator
+        last_idx = -1
+        for char in terminators:
+            idx = text.rfind(char)
+            if idx > last_idx:
+                last_idx = idx
+        
+        if last_idx != -1:
+            # Keep up to the terminator (inclusive)
+            return text[:last_idx+1]
+        
+        # If no terminator found (rare), just return as is or handle logic
+        return text
 
     
     def revise_blog(self, draft: str, feedback: Dict) -> str:
