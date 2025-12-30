@@ -78,6 +78,10 @@ const Chatbot = () => {
     if (!isOpen) {
       setHasUnread(false); // Clear unread indicator when opening chat
       setHasInteracted(true); // Stop shake animation permanently
+      // Scroll to latest message when opening
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100); // Small delay to allow DOM to render
     }
     setIsOpen(!isOpen);
   };

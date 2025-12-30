@@ -116,12 +116,12 @@
         {
             "degree": "Master of Science (M.Sc.) in Computer Science",
             "institution": "Acharya Nagarjuna University",
-            "year": "Dec 2022 - June 2024"
+            "duration": "Dec 2022 - June 2024"
         },
         {
             "degree": "Bachelor of Science (B.Sc.) in Computer Science",
             "institution": "Acharya Nagarjuna University",
-            "year": "June 2019 - June 2022"
+            "duration": "June 2019 - June 2022"
         }
     ],
     "achievements": [
@@ -144,6 +144,10 @@
         {
             "title": "DXC CHAMPS Award – FY26 H1",
             "description": "Awarded for sustained performance, end-to-end accountability, and operational excellence in supporting critical infrastructure services."
+        },
+        {
+            "title": "RAG Pipeline & AI Assistant Development",
+            "description": "Built and integrated AlluBot, an intelligent portfolio assistant powered by RAG (Retrieval Augmented Generation) architecture, connected to ChromaDB vector database for semantic search and context-aware responses."
         }
     ],
     "certifications": [
