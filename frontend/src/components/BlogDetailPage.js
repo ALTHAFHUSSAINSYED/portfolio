@@ -191,7 +191,7 @@ const BlogDetailPage = () => {
             "author": {
               "@type": "Person",
               "name": "Althaf Hussain Syed",
-              "jobTitle": "DevOps Engineer | Infrastructure Engineer",
+              "jobTitle": "DevOps Engineer | Cloud & Infrastructure Engineer",
               "url": siteUrl,
               "sameAs": [
                 "https://www.linkedin.com/in/althafhussainsyed/",
@@ -246,7 +246,7 @@ const BlogDetailPage = () => {
                 />
                 <div>
                   <p className="text-lg font-semibold text-foreground">Althaf Hussain Syed</p>
-                  <p className="text-sm text-muted-foreground">DevOps Engineer | Infrastructure Engineer</p>
+                  <p className="text-sm text-muted-foreground">DevOps Engineer | Cloud & Infrastructure Engineer</p>
                 </div>
               </div>
               <div className="flex items-center text-sm text-muted-foreground">
@@ -378,7 +378,7 @@ const BlogDetailPage = () => {
                   </div>
                   <div className="flex-1">
                     <h4 className="text-lg font-semibold mb-2">Althaf Hussain Syed</h4>
-                    <p className="text-sm text-primary font-medium mb-3">DevOps Engineer | Cloud Infrastructure Engineer</p>
+                    <p className="text-sm text-primary font-medium mb-3">DevOps Engineer | Cloud & Infrastructure Engineer</p>
                     <p className="text-muted-foreground leading-relaxed mb-4">
                       Althaf Hussain Syed is a DevOps Engineer with 3.5+ years of experience building scalable cloud infrastructure
                       and automation solutions for enterprise clients. Currently working as Analyst III Infrastructure Services at DXC Technology,

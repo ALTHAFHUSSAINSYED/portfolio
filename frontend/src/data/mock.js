@@ -2,7 +2,7 @@
 export const portfolioData = {
   personalInfo: {
     name: "Althaf Hussain Syed",
-    title: "DevOps Engineer | Cloud & Infrastructure Specialist",
+    title: "DevOps Engineer | Cloud & Infrastructure Engineer",
     email: "allualthaf42@gmail.com",
     phone: "+91 8184812249",
     location: "Hyderabad, India",

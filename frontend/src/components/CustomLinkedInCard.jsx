@@ -21,7 +21,7 @@ export default function CustomLinkedInCard({ theme }) {
                 <h3 className="linkedin-name">ALTHAF HUSSAIN SYED</h3>
 
                 <p className="linkedin-role">
-                    Cloud &amp; Infrastructure Engineer | Devops Engineer |1X GCP Certified |
+                    DevOps Engineer | Cloud & Infrastructure Engineer | 1x GCP Certified |
                 </p>
 
                 <p className="linkedin-role">
