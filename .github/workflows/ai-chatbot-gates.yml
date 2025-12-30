@@ -41,6 +41,12 @@ jobs:
           python -m py_compile backend/chatbot_provider.py
 
       # --------------------------------------------------
+      # GATE 0.5 — Architecture & RAG Config Guards
+      # --------------------------------------------------
+      - name: Guard RAG Limits & Logic
+        run: python backend/ci/check_rag_limits.py
+
+      # --------------------------------------------------
       # RUN ALL GATES (via Pytest)
       # Includes:
       # - GATE 1: Intent Routing Safety

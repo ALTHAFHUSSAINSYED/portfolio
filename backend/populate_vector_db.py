@@ -124,7 +124,8 @@ def sync_blogs_from_s3(chroma_client, embed_function):
                         "title": safe_meta(blog.get('title', 'Untitled')),
                         "category": safe_meta(blog.get('category', 'General')),
                         "url": f"https://althafportfolio.site/blogs/{blog_id}",
-                        "timestamp": safe_meta(blog.get('createdAt', ''))
+                        "timestamp": safe_meta(blog.get('createdAt', '')),
+                        "published_date": safe_meta(blog.get('createdAt', '')[:10]) # Extract YYYY-MM-DD
                     }]
                 )
                 synced_count += 1

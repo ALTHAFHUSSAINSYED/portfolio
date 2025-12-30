@@ -385,6 +385,29 @@ async def get_portfolio_context(query: str, intent: str) -> str:
         
         logger.info(f"Querying collections: {collections_to_query}")
         
+        # --- RAG DATE ANCHORING UTILS ---
+        from datetime import date
+        
+        def normalize_blog_query(text: str) -> dict:
+            text = text.lower()
+            return {
+                "is_today": any(k in text for k in ["today", "todays", "posted today"]),
+                "is_recent": any(k in text for k in ["recent", "latest", "new"]),
+                "explicit_title": None # Placeholder for NLP title extraction
+            }
+            
+        def filter_blogs_by_date(docs, metas, ids, target_date):
+            filtered_docs, filtered_metas, filtered_ids = [], [], []
+            for d, m, i in zip(docs, metas, ids):
+                # Ensure it's a blog and matches date
+                if m.get('published_date') == target_date:
+                    filtered_docs.append(d)
+                    filtered_metas.append(m)
+                    filtered_ids.append(i)
+            return filtered_docs, filtered_metas, filtered_ids
+
+        # --------------------------------
+        
         for collection_name in collections_to_query:
             try:
                 collection = chroma_client.get_collection(
@@ -392,37 +415,69 @@ async def get_portfolio_context(query: str, intent: str) -> str:
                     embedding_function=GeminiEmbeddingFunction()
                 )
                 
-                # Intent-Specific Retrieval Parameters (Task 2)
-                limit = 2
+                # Split Limits Strategy (Visibility vs Safety)
+                CANDIDATE_LIMIT = 5  
+                INJECTION_LIMIT = 2
+                
+                # Intent-Specific Configurations
                 search_query = query
                 
                 if intent == "aws_projects":
-                    limit = 2
-                    # Boost relevance for AWS queries
+                    CANDIDATE_LIMIT = 5
+                    INJECTION_LIMIT = 2
                     search_query = f"AWS Cloud Infrastructure {query}"
                 elif intent == "projects":
-                    limit = 3
+                    CANDIDATE_LIMIT = 5
+                    INJECTION_LIMIT = 3
                 elif intent == "blogs":
-                    limit = 2
+                    CANDIDATE_LIMIT = 6 # Higher visibility for blogs
+                    INJECTION_LIMIT = 2
                 elif intent == "profile":
-                    limit = 2  # Focus on key bio/skills ONLY
+                    CANDIDATE_LIMIT = 3
+                    INJECTION_LIMIT = 2
+
+                logger.info(f"Querying {collection_name} | Candidates: {CANDIDATE_LIMIT} | Injection: {INJECTION_LIMIT}")
                 
-                logger.info(f"Querying {collection_name} | Limit: {limit} | Query: {search_query}")
+                # 1. Fetch Candidates (High Visibility)
+                results = collection.query(query_texts=[search_query], n_results=CANDIDATE_LIMIT)
                 
-                results = collection.query(query_texts=[search_query], n_results=limit)
                 docs = results.get('documents', [[]])[0]
+                metas = results.get('metadatas', [[]])[0]
+                ids = results.get('ids', [[]])[0]
+                
+                # 2. Date Anchoring & Scope Logic (Blogs Only)
+                if collection_name == "Blogs_data":
+                    filters = normalize_blog_query(query)
+                    today_iso = date.today().isoformat()
+                    
+                    if filters['is_today']:
+                        # Prioritize temporal match over semantic rank
+                        f_docs, f_metas, f_ids = filter_blogs_by_date(docs, metas, ids, today_iso)
+                        if f_docs:
+                            logger.info(f"📅 Date Anchor Hit: Found {len(f_docs)} blogs for {today_iso}")
+                            docs, metas, ids = f_docs, f_metas, f_ids
+                            # SCOPE LOCK: Force exactly 1 source for specific date queries
+                            INJECTION_LIMIT = 1 
+                        else:
+                            logger.info(f"📅 Date Anchor Miss: No blogs found for {today_iso}")
+                            # Fallback to semantic recent (already sorted by similarity)
+                            pass
+                            
+                # 3. Injection Clamping (Safety)
+                docs = docs[:INJECTION_LIMIT]
+                metas = metas[:INJECTION_LIMIT]
                 
                 if docs:
-                    # Pre-Summarization Layer (Task 3)
                     summarized_docs = []
-                    for d in docs:
+                    for i, d in enumerate(docs):
+                        meta = metas[i] if i < len(metas) else {}
+                        source_label = meta.get('title', collection_name)
+                        
                         if chatbot_provider:
-                            # Compress raw doc into bullet points
                             summary = chatbot_provider.summarize_content(d)
-                            summarized_docs.append(f"[Source: {collection_name}]\n{summary}")
+                            summarized_docs.append(f"[Source: {source_label}] (Date: {meta.get('published_date', 'N/A')})\n{summary}")
                         else:
-                            # Fallback if provider unavailable
-                            summarized_docs.append(f"[Source: {collection_name}]\n{d[:800]}...")
+                            summarized_docs.append(f"[Source: {source_label}]\n{d[:800]}...")
                             
                     all_context.extend(summarized_docs)
             except Exception as e:
