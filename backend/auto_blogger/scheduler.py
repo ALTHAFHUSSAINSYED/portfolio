@@ -156,8 +156,8 @@ class BlogScheduler:
                  self.pending_draft = None
                  return
             elif not passed:
-                logger.warning(f"⚠️ Quality Gate Compromised: Publishing with score {review.get('score')} due to 'guarantee' policy.")
-                category = f"{category} (Review Pending)" # Mark as pending review in category logic if needed, or just let it slide.
+                logger.warning(f"⚠️ Quality Gate Compromised: Publishing with score {review.get('score')} due to 'guarantee' policy. (Auto-publishing without review flag as per user request)")
+                # category = category # KEEP ORIGINAL CATEGORY. Do not append (Review Pending)
 
             # Store for Publishing
             # Use title from writer (already extracted above)
