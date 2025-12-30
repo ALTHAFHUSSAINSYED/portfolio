@@ -145,56 +145,59 @@ const CertificationsSection = ({ certifications }) => {
         {/* Certifications Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCertifications.map((cert, index) => (
-            // ✨ MODIFIED: Wrap in anchor tag for verification link
-            <a
+            <Card
               key={index}
-              href={cert.credentialUrl || '#'}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`block w-full ${cert.credentialUrl ? 'cursor-pointer' : 'cursor-default'}`}
-              onClick={(e) => !cert.credentialUrl && e.preventDefault()}
+              className={`p-6 transition-all duration-500 backdrop-blur-sm neon-card hover-lift hover-shine group h-full ${isVisible ? `rotate-in stagger-${index + 4}` : ''
+                }`}
             >
-              <Card
-                className={`p-6 transition-all duration-500 backdrop-blur-sm neon-card hover-lift hover-shine group h-full ${isVisible ? `rotate-in stagger-${index + 4}` : ''
-                  }`}
-              >
-                <div className="flex items-start space-x-4">
-                  {/* ✨ MODIFIED: Changed border to be theme-aware */}
-                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${getCertificationBg(cert.category)} group-hover:scale-110 transition-all duration-300 hover-rotate border border-border/30`}>
-                    <div className={`${getCertificationColor(cert.category)} glow-text`}>
-                      {getCertificationIcon(cert.category)}
-                    </div>
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 dark:text-foreground mb-2 leading-tight group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-all duration-300 shine-text-slow light-mode-bright">
-                      {cert.name}
-                    </h3>
-                    {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
-                    <p className="text-muted-foreground text-sm mb-3 font-medium glow-text">
-                      {cert.issuer}
-                    </p>
-                    {/* ✨ MODIFIED: Changed text-gray-400 to text-muted-foreground */}
-                    <div className="flex items-center text-muted-foreground text-sm">
-                      <Calendar className="w-4 h-4 mr-2 text-green-soft pulse-shine" />
-                      <span className="glow-text">{cert.year}</span>
-                    </div>
-                  </div>
-                </div>
-
+              <div className="flex items-start space-x-4">
                 {/* ✨ MODIFIED: Changed border to be theme-aware */}
-                <div className="mt-4 pt-4 border-t border-border/30">
-                  <Badge
-                    variant="outline"
-                    className={`${getCertificationBg(cert.category)} ${getCertificationColor(cert.category)} border-current text-xs px-3 py-1 hover-scale transition-all duration-300 sparkle-text`}
-                  >
-                    {selectedCategory !== 'all' && Array.isArray(cert.category) && cert.category.includes(selectedCategory)
-                      ? categories[selectedCategory]?.name
-                      : categories[getMainCategory(cert.category)]?.name || cert.category}
-                  </Badge>
+                <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${getCertificationBg(cert.category)} group-hover:scale-110 transition-all duration-300 hover-rotate border border-border/30`}>
+                  <div className={`${getCertificationColor(cert.category)} glow-text`}>
+                    {getCertificationIcon(cert.category)}
+                  </div>
                 </div>
-              </Card>
-            </a>
+
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-gray-900 dark:text-foreground mb-2 leading-tight group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-all duration-300 shine-text-slow light-mode-bright">
+                    {cert.name}
+                  </h3>
+                  {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
+                  <p className="text-muted-foreground text-sm mb-3 font-medium glow-text">
+                    {cert.issuer}
+                  </p>
+                  {/* ✨ MODIFIED: Changed text-gray-400 to text-muted-foreground */}
+                  <div className="flex items-center text-muted-foreground text-sm">
+                    <Calendar className="w-4 h-4 mr-2 text-green-soft pulse-shine" />
+                    <span className="glow-text">{cert.year}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* ✨ MODIFIED: Changed border to be theme-aware AND added Verify Button */}
+              <div className="mt-4 pt-4 border-t border-border/30 flex justify-between items-center">
+                <Badge
+                  variant="outline"
+                  className={`${getCertificationBg(cert.category)} ${getCertificationColor(cert.category)} border-current text-xs px-3 py-1 hover-scale transition-all duration-300 sparkle-text`}
+                >
+                  {selectedCategory !== 'all' && Array.isArray(cert.category) && cert.category.includes(selectedCategory)
+                    ? categories[selectedCategory]?.name
+                    : categories[getMainCategory(cert.category)]?.name || cert.category}
+                </Badge>
+
+                {cert.credentialUrl && (
+                  <a
+                    href={cert.credentialUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`flex items-center gap-1 text-xs font-medium px-3 py-1 rounded-full border transition-all duration-300 ${getCertificationBg(cert.category)} ${getCertificationColor(cert.category)} border-current hover:bg-current hover:text-white dark:hover:text-black group/btn`}
+                  >
+                    <span>Verify</span>
+                    <ExternalLink className="w-3 h-3 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
+                  </a>
+                )}
+              </div>
+            </Card>
           ))}
         </div>
 
