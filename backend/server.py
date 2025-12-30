@@ -57,7 +57,10 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 # Configure Logging
-log_file_path = ROOT_DIR / 'telemetry.log'
+log_dir = ROOT_DIR / 'logs'
+log_dir.mkdir(exist_ok=True)
+log_file_path = log_dir / 'chatbot.log'
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
