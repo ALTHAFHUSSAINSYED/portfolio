@@ -151,55 +151,79 @@
             "name": "AWS Certified Solutions Architect – Associate",
             "issuer": "Amazon Web Services",
             "year": "2024",
-            "category": "aws"
+            "category": "aws",
+            "credentialUrl": "https://www.credly.com/badges/7073a545-b009-4af8-ab89-7102dadf9beb/public_url",
+            "badgeImage": "/assets/badges/aws-solutions-architect.png"
         },
         {
-            "name": "Google Cloud Professional Cloud Architect",
+            "name": "AWS Certified AI Practitioner Foundational",
+            "issuer": "Amazon Web Services",
+            "year": "2024",
+            "category": [
+                "aws",
+                "ai"
+            ],
+            "credentialUrl": "https://www.credly.com/badges/58d07f38-4245-48cf-97f2-98c0b74c5126/public_url",
+            "badgeImage": "/assets/badges/aws-ai-practitioner.png"
+        },
+        {
+            "name": "AWS Certified Cloud Practitioner Foundational",
+            "issuer": "Amazon Web Services",
+            "year": "2023",
+            "category": "aws",
+            "credentialUrl": "https://www.credly.com/badges/13e91437-75a0-4d3a-a455-3c6af8dad32c/public_url",
+            "badgeImage": "/assets/badges/aws-cloud-practitioner.png"
+        },
+        {
+            "name": "Google Cloud Certified Professional Cloud Architect",
             "issuer": "Google Cloud",
             "year": "2024",
-            "category": "gcp"
+            "category": "gcp",
+            "credentialUrl": "https://www.credly.com/badges/1371ab1a-bb3a-4c9f-9517-225cb5c02140/public_url",
+            "badgeImage": "/assets/badges/gcp-architect.png"
         },
         {
-            "name": "Microsoft Azure Administrator Associate (AZ-104)",
+            "name": "Microsoft Certified: Azure Administrator Associate (AZ-104)",
             "issuer": "Microsoft",
             "year": "2024",
-            "category": "azure"
+            "category": "azure",
+            "credentialUrl": "https://learn.microsoft.com/api/credentials/share/en-us/AlthafHussainSyed-6949/92511826F135B400?sharingId=82FA5743CCD0C069",
+            "badgeImage": "/assets/badges/azure-admin.png"
         },
         {
-            "name": "Oracle Cloud Infrastructure Architect Associate",
-            "issuer": "Oracle",
-            "year": "2024",
-            "category": "oracle"
-        },
-        {
-            "name": "AWS Certified AI Practitioner",
-            "issuer": "Amazon Web Services",
-            "year": "2024",
-            "category": "aws"
-        },
-        {
-            "name": "AWS Cloud Practitioner",
-            "issuer": "Amazon Web Services",
-            "year": "2023",
-            "category": "aws"
-        },
-        {
-            "name": "Azure Fundamentals (AZ-900)",
+            "name": "Microsoft Certified Azure Fundamentals (AZ-900)",
             "issuer": "Microsoft",
             "year": "2023",
-            "category": "azure"
+            "category": "azure",
+            "credentialUrl": "https://www.credly.com/badges/ebc4542a-98ee-48de-9221-89ae35e12aa1/public_url",
+            "badgeImage": "/assets/badges/azure-fundamentals.png"
         },
         {
             "name": "GitHub Foundations",
             "issuer": "GitHub",
             "year": "2024",
-            "category": "github"
+            "category": "github",
+            "credentialUrl": "https://www.credly.com/badges/d257802b-475a-4467-b32a-35167db1809d/public_url",
+            "badgeImage": "/assets/badges/github-foundations.png"
         },
         {
-            "name": "Generative AI Certified",
+            "name": "Oracle Cloud Infrastructure Generative AI Professional",
             "issuer": "Oracle",
             "year": "2024",
-            "category": "ai"
+            "category": [
+                "oracle",
+                "ai"
+            ],
+            "credentialUrl": "https://catalog-education.oracle.com/ords/certview/sharebadge?id=0A4040FD8181DCEAEE79FD7873A3A42BDDC71736C9B61C9BF0D789900F0F0AD6",
+            "badgeImage": "/assets/badges/oracle-genai-pro.png"
+        },
+        {
+            "name": "Oracle Cloud Infrastructure Foundations Associate",
+            "issuer": "Oracle",
+            "year": "2024",
+            "category": "oracle",
+            "credentialUrl": "https://catalog-education.oracle.com/ords/certview/sharebadge?id=0A4040FD8181DCEAEE79FD7873A3A42BC7A054A4918B29D16D42E58D5FEA35A4",
+            "badgeImage": "/assets/badges/oracle-foundations.png"
         }
     ],
     "projects": [
