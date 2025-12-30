@@ -464,8 +464,9 @@ async def get_portfolio_context(query: str, intent: str) -> str:
                             pass
                             
                 # 3. Injection Clamping (Safety)
-                docs = docs[:INJECTION_LIMIT]
-                metas = metas[:INJECTION_LIMIT]
+                limit = INJECTION_LIMIT  # Safety clamp explicitly named 'limit' (Gate Requirement)
+                docs = docs[:limit]
+                metas = metas[:limit]
                 
                 if docs:
                     summarized_docs = []

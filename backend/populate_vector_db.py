@@ -213,7 +213,7 @@ def main():
                     content = safe_meta(blog.get('content'))
                     
                     # Store structured blog data
-                    text = f"Blog Title: {title}. Content: {content[:15000]}..." # Limit chunk size
+                    text = f"Blog Title: {title}. Content: {content[:4000]}..." # Limit chunk size (Safe < 16KB)
                     
                     if upsert_if_new(blogs_col, b_id, clean_text(text), 
                         {"title": title, "type": "blog", "category": safe_meta(blog.get('tags', ['General'])[0])}):
