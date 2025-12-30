@@ -224,11 +224,11 @@ const HeroSection = ({ personalInfo }) => {
 
         {/* Profile Banner */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-          <div className="relative overflow-hidden rounded-2xl shadow-2xl max-h-48">
+          <div className="relative overflow-hidden rounded-2xl shadow-2xl transform scale-90 origin-center">
             <img
               src="/assets/profile-banner.png"
               alt="Althaf Hussain Syed - DevOps Engineer Profile Banner"
-              className="w-full h-full object-cover object-center dark:opacity-90 dark:brightness-95"
+              className="w-full h-auto object-cover dark:opacity-90 dark:brightness-95"
             />
           </div>
         </div>
