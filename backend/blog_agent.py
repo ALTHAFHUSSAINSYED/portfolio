@@ -144,10 +144,10 @@ async def post_blog(blog=None, max_retries=3):
             # Save to ChromaDB first
             try:
                 import chromadb
-                chroma_client = chromadb.CloudClient(
-                    api_key=os.getenv('api_key'),
-                    tenant=os.getenv('tenant'),
-                    database=os.getenv('database')
+                # Use local ChromaDB instead of CloudClient to avoid 404s
+                chroma_client = chromadb.HttpClient(
+                    host='chroma', # Docker service name
+                    port=8000
                 )
                 collection = chroma_client.get_or_create_collection(name='Blogs_data')
                 # Use blog title as ID, or generate a unique one

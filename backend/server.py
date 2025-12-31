@@ -1121,6 +1121,12 @@ async def ask_agent(query: dict):
 # Include router
 app.include_router(api_router)
 
+# Health/Version Endpoint
+from datetime import timezone # Added for timezone.utc
+@app.get("/version")
+async def get_version():
+    return {"version": "1.0.0", "status": "active", "timestamp": datetime.now(timezone.utc).isoformat()}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

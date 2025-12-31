@@ -156,13 +156,12 @@ class ChatbotProvider:
             {text[:4000]}
             """
             
-            # Use Gemini Flash 8B (Fastest Model) for internal micro-tasks
-            # Use Gemini Flash 8B (Fastest Model) for internal micro-tasks
+            # Use Gemini Flash (Standard) for internal micro-tasks
             if not self.gemini_client:
                  return text[:1000] + "... [Truncated]"
 
             response = self.gemini_client.models.generate_content(
-                model='gemini-1.5-flash-8b',
+                model='gemini-1.5-flash',
                 contents=prompt
             )
             

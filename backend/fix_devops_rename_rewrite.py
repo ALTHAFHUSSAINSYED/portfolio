@@ -146,13 +146,13 @@ try:
         db_name = os.getenv("CHROMA_DB_NAME")
         
         if api_key:
+            # Use local ChromaDB (HttpClient)
             client = chromadb.HttpClient(
-                ssl=True, host='api.trychroma.com',
-                tenant=tenant, database=db_name,
-                headers={"x-chroma-token": api_key, "x-tenant": tenant, "x-database": db_name}
+                host='chroma',
+                port=8000
             )
         else:
-             client = chromadb.PersistentClient(path="./chroma_db")
+            client = chromadb.PersistentClient(path="./chroma_db")
 
         collection = client.get_or_create_collection("Blogs_data")
         

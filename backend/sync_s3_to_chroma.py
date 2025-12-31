@@ -55,16 +55,10 @@ def sync():
         
         if api_key:
             print(f"🔌 Connecting to Chroma Cloud (DB: {db_name})...")
+            # Use local ChromaDB (HttpClient) instead of CloudClient
             client = chromadb.HttpClient(
-                ssl=True,
-                host='api.trychroma.com',
-                tenant=tenant,
-                database=db_name,
-                headers={
-                    "x-chroma-token": api_key,
-                    "x-tenant": tenant,
-                    "x-database": db_name
-                }
+                host='chroma',
+                port=8000
             )
         else:
             print("🔌 Connecting to Local Chroma...")
