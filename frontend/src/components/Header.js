@@ -60,12 +60,10 @@ const Header = ({ personalInfo }) => {
         <div className="flex justify-between items-center py-3">
           {/* Logo/Name */}
           <div className="flex-shrink-0 mr-6 flex items-center gap-3"> {/* Added gap-3 for spacing */}
-            {/* Added Circular Logo */}
-            <img
-              src={`${process.env.PUBLIC_URL || ''}/logo.png`}
-              alt="Logo"
-              className="h-10 w-10 rounded-full shadow-lg shadow-cyan-400/20 object-cover scale-[3.0]"
-            />
+            {/* Profile Icon */}
+            <div className="h-10 w-10 rounded-full bg-cyan-400/10 flex items-center justify-center border border-cyan-400/30 shadow-lg shadow-cyan-400/20">
+              <User className="h-6 w-6 text-cyan-400" />
+            </div>
             <h1
               className={`text-2xl font-bold transition-all duration-300 cursor-pointer hover-scale ${theme === 'dark' ? 'site-title-gradient' : 'name-text-light'}`}
               onClick={() => scrollToSection('hero')}
