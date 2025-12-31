@@ -13,7 +13,7 @@ export default function CustomLinkedInCard({ theme }) {
             {/* CONTENT AREA - Profile information */}
             <div className="linkedin-body">
                 <img
-                    src="/profile-transparent.png"
+                    src="/profile-pic.jpg"
                     alt="Althaf Hussain Syed"
                     className="linkedin-avatar"
                 />
