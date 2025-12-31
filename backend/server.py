@@ -569,7 +569,7 @@ async def get_portfolio_context(query: str, intent: str) -> str:
         
     except Exception as e:
         logger.error(f"RAG Error: {e}")
-        return ""
+        return "", ""
 
 # --- ENDPOINTS ---
 
@@ -1131,7 +1131,7 @@ async def ask_agent(query: dict):
                  # Fallback if INFO state triggered by generic keywords but intent classifier was weak
                  rag_intent = "projects" if intent_scores.get("projects", 0) > 0 else "profile"
                  
-            portfolio_context = await get_portfolio_context(message, rag_intent)
+            portfolio_context, _ = await get_portfolio_context(message, rag_intent)
             
             # C. LLM Generation
             response_text = chatbot_provider.generate_response(
