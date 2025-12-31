@@ -127,7 +127,7 @@ const HeroSection = ({ personalInfo }) => {
           <div className="relative z-20 mb-8">
             <img
               ref={profilePicRef} // Attach ref to profile picture
-              src="/profile-pic.jpg"
+              src="/profile-pic.jpg?v=updated"
               alt={personalInfo.name}
               className="w-48 h-48 md:w-56 md:h-56 rounded-full object-cover border-4 border-cyan-400/30 shadow-lg shadow-cyan-500/20"
             />
