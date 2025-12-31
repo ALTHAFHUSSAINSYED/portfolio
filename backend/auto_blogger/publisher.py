@@ -135,27 +135,20 @@ class BlogPublisher:
         """Initialize ChromaDB client"""
         try:
             # Using ChromaDB Cloud or Persistent Client based on env
-            # Assuming Cloud for EC2 based on user context, or local persistent
-            # Reusing environment variables used in server.py likely
             chroma_api_key = os.getenv("CHROMA_API_KEY")
-            chroma_host = "api.trychroma.com" # Or from env
-            chroma_tenant = os.getenv("CHROMA_TENANT_ID")
-            chroma_db = os.getenv("CHROMA_DB_NAME")  # Fixed: Match live container env var
+            chroma_tenant = os.getenv("CHROMA_TENANT") or os.getenv("CHROMA_TENANT_ID")
+            chroma_db = os.getenv("CHROMA_DATABASE") or os.getenv("CHROMA_DB_NAME")
             
-            if chroma_api_key:
+            if chroma_api_key and chroma_tenant and chroma_db:
                 logger.info("Connecting to ChromaDB Cloud...")
-                return chromadb.HttpClient(
-                    host=chroma_host,
-                    ssl=True,
-                    headers={
-                        "x-chroma-token": chroma_api_key,
-                        "x-tenant": chroma_tenant,
-                        "x-database": chroma_db
-                    }
+                return chromadb.CloudClient(
+                    api_key=chroma_api_key,
+                    tenant=chroma_tenant,
+                    database=chroma_db
                 )
             else:
                  # Local fallback if cloud not configured
-                logger.info("Using local ChromaDB (fallback)...")
+                logger.info("Using local ChromaDB (fallback/dev)...")
                 return chromadb.PersistentClient(path="./chroma_db")
         except Exception as e:
             logger.error(f"ChromaDB setup failed: {e}")
