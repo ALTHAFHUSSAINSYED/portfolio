@@ -6,7 +6,8 @@ import os
 import requests
 import logging
 from typing import List, Dict, Optional
-import google.generativeai as genai
+import google.generativeai as unused_legacy
+from google import genai
 from gradio_client import Client
 from datetime import datetime
 
@@ -63,9 +64,13 @@ class ChatbotProvider:
         
         # Gemini (fallback)
         self.gemini_key = os.getenv('GEMINI_API_KEY')
+        self.gemini_client = None
         if self.gemini_key:
-            genai.configure(api_key=self.gemini_key)
-            logger.info("Gemini API configured")
+            try:
+                self.gemini_client = genai.Client(api_key=self.gemini_key)
+                logger.info("Gemini Client initialized")
+            except Exception as e:
+                logger.error(f"Gemini Client init failed: {e}")
             
         # Task 6: Summary Cache (In-Memory)
         # Structure: {md5_hash: summary_text}
@@ -122,8 +127,14 @@ class ChatbotProvider:
             """
             
             # Use Gemini Flash 8B (Fastest Model) for internal micro-tasks
-            model = genai.GenerativeModel('models/gemini-1.5-flash-8b')
-            response = model.generate_content(prompt)
+            # Use Gemini Flash 8B (Fastest Model) for internal micro-tasks
+            if not self.gemini_client:
+                 return text[:1000] + "... [Truncated]"
+
+            response = self.gemini_client.models.generate_content(
+                model='gemini-1.5-flash-8b',
+                contents=prompt
+            )
             
             if response and response.text:
                 summary = f"[Summarized Evidence]:\n{response.text}"
@@ -378,8 +389,14 @@ class ChatbotProvider:
             for model_id in models_to_try:
                 try:
                     logger.info(f"Trying Gemini Fallback Model: {model_id}")
-                    model = genai.GenerativeModel(model_id)
-                    response = model.generate_content(combined_prompt)
+                    # Remove 'models/' prefix if present as new SDK often prefers clean names, but it usually handles both. 
+                    # Let's keep it clean.
+                    clean_model = model_id.replace("models/", "")
+                    
+                    response = self.gemini_client.models.generate_content(
+                        model=clean_model,
+                        contents=combined_prompt
+                    )
                     
                     if response and response.text:
                         logger.info(f"Gemini fallback success ({model_id}): {len(response.text)} chars")

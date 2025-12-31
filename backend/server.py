@@ -20,7 +20,9 @@ import bleach
 import subprocess
 import cloudinary
 import cloudinary.uploader
-import google.generativeai as genai
+import google.generativeai as unused_genai_legacy # PREVENT IMPORT ERRORS DURING MIGRATION
+from google import genai
+from google.genai import types
 import chromadb
 from chromadb import EmbeddingFunction, Documents, Embeddings
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -94,7 +96,13 @@ cloudinary.config(
 )
 
 # Configure Gemini
-genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
+# Configure Gemini Client
+# genai.configure(api_key=os.getenv('GEMINI_API_KEY')) # Legacy
+try:
+    genai_client = genai.Client(api_key=os.getenv('GEMINI_API_KEY'))
+except Exception as e:
+    print(f"Warning: Failed to init global Gemini Client: {e}")
+    genai_client = None
 
 # Initialize Multi-Provider Chatbot Components
 try:
@@ -158,14 +166,21 @@ class GeminiEmbeddingFunction(EmbeddingFunction):
 
     def __call__(self, input: Documents) -> Embeddings:
         try:
-            return [
-                genai.embed_content(
-                    model='models/text-embedding-004',
-                    content=text,
-                    task_type="retrieval_query" 
-                )['embedding']
-                for text in input
-            ]
+            # New SDK Embedding logic
+            if not genai_client:
+                return [[0.0] * 768 for _ in input]
+                
+            embeddings = []
+            for text in input:
+                response = genai_client.models.embed_content(
+                    model='text-embedding-004',
+                    contents=text,
+                    config=types.EmbedContentConfig(
+                        task_type="RETRIEVAL_QUERY"
+                    )
+                )
+                embeddings.append(response.embeddings[0].values)
+            return embeddings
         except Exception as e:
             logger.error(f"Embedding failed: {e}")
             return [[0.0] * 768 for _ in input]

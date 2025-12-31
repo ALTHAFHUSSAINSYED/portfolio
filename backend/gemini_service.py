@@ -8,7 +8,9 @@ It maintains the same interface as the OpenAI client for easy swapping.
 import os
 import logging
 from typing import List, Dict, Any, Optional
-import google.generativeai as genai
+import google.generativeai as unused_legacy
+from google import genai
+from google.genai import types
 from dotenv import load_dotenv
 
 logger = logging.getLogger('AlluAgent')
@@ -34,32 +36,36 @@ class GeminiClient:
                 self.is_available = False
                 return
                 
-            # Configure the Gemini API
-            genai.configure(api_key=self.api_key)
+            # Configure the Gemini Client
+            self.client = genai.Client(api_key=self.api_key)
             
-            # Set default safety settings to be similar to OpenAI defaults
+            # Set default safety settings (New SDK format - explicit list of dicts/types)
+            # Actually, standard dicts usually work, but let's stick to simple configs if possible.
+            # For now, we will pass them dynamically in requests.
             self.safety_settings = [
-                {
-                    "category": "HARM_CATEGORY_HARASSMENT",
-                    "threshold": "BLOCK_MEDIUM_AND_ABOVE"
-                },
-                {
-                    "category": "HARM_CATEGORY_HATE_SPEECH",
-                    "threshold": "BLOCK_MEDIUM_AND_ABOVE"
-                },
-                {
-                    "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                    "threshold": "BLOCK_MEDIUM_AND_ABOVE"
-                },
-                {
-                    "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-                    "threshold": "BLOCK_MEDIUM_AND_ABOVE"
-                }
+                types.SafetySetting(
+                    category="HARM_CATEGORY_HARASSMENT",
+                    threshold="BLOCK_MEDIUM_AND_ABOVE"
+                ),
+                types.SafetySetting(
+                    category="HARM_CATEGORY_HATE_SPEECH",
+                    threshold="BLOCK_MEDIUM_AND_ABOVE"
+                ),
+                types.SafetySetting(
+                    category="HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                    threshold="BLOCK_MEDIUM_AND_ABOVE"
+                ),
+                types.SafetySetting(
+                    category="HARM_CATEGORY_DANGEROUS_CONTENT",
+                    threshold="BLOCK_MEDIUM_AND_ABOVE"
+                )
             ]
             
             # Test the API connection
-            self._test_model = genai.GenerativeModel(model_name="models/gemini-pro-latest")
-            self._test_model.generate_content("Test")
+            self.client.models.generate_content(
+                model="gemini-1.5-flash",
+                contents="Test"
+            )
             
             self.is_available = True
             logger.info("Gemini API client initialized successfully")
@@ -101,21 +107,24 @@ class GeminiClient:
                 gemini_model = self.model_mapping.get(model, "gemini-pro")
                 
                 # Create the Gemini model
-                generation_model = genai.GenerativeModel(
-                    model_name=gemini_model,
-                    generation_config={
-                        "temperature": temperature,
-                        "max_output_tokens": max_tokens if max_tokens else 2048,
-                        "top_p": 0.95,
-                    },
-                    safety_settings=self.parent.safety_settings
-                )
+                # Create the Gemini model config
+                # Cleanup model name (remove models/ prefix if needed or new SDK handles it)
+                clean_model = gemini_model.replace("models/", "")
                 
                 # Convert OpenAI message format to Gemini format
                 prompt = self._convert_messages_to_prompt(messages)
                 
                 # Generate content
-                response = generation_model.generate_content(prompt)
+                response = self.parent.client.models.generate_content(
+                    model=clean_model,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        temperature=temperature,
+                        max_output_tokens=max_tokens if max_tokens else 2048,
+                        top_p=0.95,
+                        safety_settings=self.parent.safety_settings
+                    )
+                )
                 
                 # Convert the response to match OpenAI's format
                 return self._convert_to_openai_response(response)

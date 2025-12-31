@@ -9,7 +9,9 @@ import logging
 import time
 import uuid
 import boto3
-import google.generativeai as genai
+import google.generativeai as unused_legacy
+from google import genai
+from google.genai import types
 import chromadb
 from typing import Dict, Any, List, Optional
 from datetime import datetime
@@ -113,8 +115,12 @@ class BlogPublisher:
         
         # Setup Gemini for Embeddings
         self.gemini_key = os.getenv("GEMINI_BLOG_API_KEY") or os.getenv("GEMINI_API_KEY")
+        self.gemini_client = None
         if self.gemini_key:
-            genai.configure(api_key=self.gemini_key)
+             try:
+                self.gemini_client = genai.Client(api_key=self.gemini_key)
+             except Exception as e:
+                logger.warning(f"Gemini Client init failed: {e}")
         
         # Setup ChromaDB
         self.chroma_client = self._setup_chroma()
@@ -157,12 +163,17 @@ class BlogPublisher:
     def _get_embedding(self, text: str) -> list:
         """Generate embedding using Gemini"""
         try:
-            result = genai.embed_content(
-                model="models/text-embedding-004",
-                content=text,
-                task_type="retrieval_document"
+            if not self.gemini_client:
+                return []
+                
+            result = self.gemini_client.models.embed_content(
+                model="text-embedding-004",
+                contents=text,
+                config=types.EmbedContentConfig(
+                    task_type="RETRIEVAL_DOCUMENT"
+                )
             )
-            return result['embedding']
+            return result.embeddings[0].values
         except Exception as e:
             logger.error(f"Embedding generation failed: {e}")
             return []
