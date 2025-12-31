@@ -9,7 +9,6 @@ import logging
 import time
 import uuid
 import boto3
-import google.generativeai as unused_legacy
 from google import genai
 from google.genai import types
 import chromadb

@@ -6,7 +6,6 @@ import os
 import requests
 import logging
 from typing import List, Dict, Optional
-import google.generativeai as unused_legacy
 from google import genai
 from gradio_client import Client
 from datetime import datetime

@@ -20,7 +20,6 @@ import bleach
 import subprocess
 import cloudinary
 import cloudinary.uploader
-import google.generativeai as unused_genai_legacy # PREVENT IMPORT ERRORS DURING MIGRATION
 from google import genai
 from google.genai import types
 import chromadb

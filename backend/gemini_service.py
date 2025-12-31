@@ -8,7 +8,6 @@ It maintains the same interface as the OpenAI client for easy swapping.
 import os
 import logging
 from typing import List, Dict, Any, Optional
-import google.generativeai as unused_legacy
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
