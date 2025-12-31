@@ -79,8 +79,12 @@
     margin-bottom: 16px;
     display: block;
     transition: all 0.3s ease;
-    transform: scale(1.15);
-    /* Zoom in to cover white space */
+    transform: scale(1.2);
+    /* Increased zoom to cover white space */
+    border: none !important;
+    /* Force no border */
+    box-shadow: none !important;
+    /* Remove any shadow looking like border */
 }
 
 .linkedin-avatar:hover {
