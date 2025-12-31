@@ -438,9 +438,7 @@ async def get_portfolio_context(query: str, intent: str) -> str:
                 "is_recent": any(k in text for k in ["recent", "latest", "new"]),
                 "explicit_title": None # Placeholder for NLP title extraction
             }
-            
-                "explicit_title": None # Placeholder for NLP title extraction
-            }
+
             
         def filter_blogs_by_date(docs, metas, ids, target_date=None, mode="exact"):
             """
