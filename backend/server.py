@@ -911,19 +911,39 @@ async def ask_agent(query: dict):
         else:
             disengagement_count = 0 # Reset on engagement
 
-        # 3. DETERMINE NEXT STATE
-        # If history is empty, force START logic evaluation
-        if not history: 
-            current_state = "START"
+        # 3. CONVERSATION STATE MACHINE (The "Gods' Logic")
+        # Deterministic control before AI capabilities
+        next_state = chatbot_provider.detect_conversation_state(message)
+        
+        # Session Persistence Logic for EXIT
+        if next_state == "EXIT":
+            if session_metadata.get(session_id, {}).get("exit_acknowledged"):
+                # Already said bye, now silent or minimal
+                logger.info(f"Ignoring post-exit input: {message}")
+                return JSONResponse(status_code=200, content={"reply": "Take care!", "source": "System"})
+            session_metadata[session_id]["exit_acknowledged"] = True
+        else:
+            # Reset exit flag if user re-engages (Greeting, Question, etc)
+            if session_id in session_metadata:
+                 session_metadata[session_id]["exit_acknowledged"] = False
+
+        logger.info(f"🧠 State: {next_state.upper()} (Prev: {current_state})")
+
+        # 4. EXECUTE RESPONSE STRATEGY
+        response_text = ""
+        portfolio_context = "" # Only used for telemetry/logging
+        
+        if next_state != "INFO":
+            # MICRO-RESPONSES (Fast path, no LLM)
+            response_text = chatbot_provider.generate_response_by_state(next_state, message)
             
-        next_state = determine_next_state(current_state, intent_scores, disengagement_count)
-        
-        logger.info(f"State Transition: {current_state} -> {next_state} | Scores: {intent_scores} | Disengagement: {disengagement_count}")
-        
-        # 4. EXECUTE RAG (Strict Gate: Only INFO state)
-        portfolio_context = ""
-        if next_state == "INFO":
-            # Map state to specific intent for RAG retrieval
+        else:
+            # INFO STATE -> FULL RAG PIPELINE
+            
+            # A. Intent Detection for Retrieval
+            intent, _, intent_scores = detect_intent_priority(message)
+            
+            # B. Retrieval
             rag_intent = intent
             if rag_intent == "conversation": 
                  # Fallback if INFO state triggered by generic keywords but intent classifier was weak
@@ -931,46 +951,21 @@ async def ask_agent(query: dict):
                  
             portfolio_context = await get_portfolio_context(message, rag_intent)
             
-        # 5. GENERATE RESPONSE & UPDATE HISTORY
-        start_time = datetime.now()
-        
-        # Response Policy Logic
-        response_text = ""
-        
-        # Static/Strict Responses for certain states
-        if next_state == "EXIT":
-            response_text = "Understood. Have a great day."
-            # Clear session to reset for next time (optional, or keep dead until restart)
-            # session_metadata.pop(session_id, None) 
-            # conversation_sessions.pop(session_id, None)
-            
-        elif next_state == "AMBIGUOUS" and not history:
-             # Rare edge case: Start -> Ambiguous
-             response_text = "Hello! I'm Allu Bot, Althaf's portfolio assistant. How can I help?"
-             
-        else:
-            # Dynamic Generation for INFO / AMBIGUOUS / START
-            # Pass strict behavior instruction
-            behavior_instruction = "neutral"
-            if next_state == "AMBIGUOUS":
-                behavior_instruction = "ambiguous_hold" # Tell provider to be neutral/passive
-            elif next_state == "START":
-                behavior_instruction = "greeting"
-            
+            # C. LLM Generation
             response_text = chatbot_provider.generate_response(
                 query=message,
                 context=portfolio_context,
                 history=history,
-                sentiment=behavior_instruction
+                sentiment="neutral" # Context is already filtered/safe
             )
 
         duration = (datetime.now() - start_time).total_seconds()
         
-        # 6. UPDATE STATE PERSISTENCE
+        # 5. UPDATE STATE PERSISTENCE
         session_metadata[session_id]["state"] = next_state
         session_metadata[session_id]["disengagement_count"] = disengagement_count
         
-        # 7. TELEMETRY LOGGING
+        # 6. TELEMETRY LOGGING
         est_input_tok = (len(message) + len(portfolio_context)) / 4
         est_output_tok = len(response_text) / 4
         
@@ -978,10 +973,10 @@ async def ask_agent(query: dict):
             "session_id": session_id,
             "timestamp": datetime.utcnow().isoformat(),
             "normalized_input": message.lower().strip()[:50],
-            "intent_scores": intent_scores,
+            "intent_scores": intent_scores if next_state == "INFO" else {},
             "final_state": next_state,
             "rag_used": next_state == "INFO",
-            "model_used": "multi-tier-chain",
+            "model_used": "multi-tier-chain" if next_state == "INFO" else "deterministic",
             "input_tokens": int(est_input_tok),
             "output_tokens": int(est_output_tok),
             "latency_ms": int(duration * 1000)
@@ -989,15 +984,16 @@ async def ask_agent(query: dict):
         logger.info(json.dumps(telemetry_log))
         
         # Update conversations
-        if next_state != "EXIT": # Don't optimize history for exit commands, just reply and stop
-            history.append({"role": "user", "content": message})
-            history.append({"role": "assistant", "content": response_text})
-            if len(history) > 4:
-                history = history[-4:]
-            conversation_sessions[session_id] = history
-            # Cache active interactions
-            if next_state == "INFO":
-                response_cache.set(message, response_text, history)
+        # Only append valid interactions (Skip SILENT if needed, but keeping for continuity is safer)
+        history.append({"role": "user", "content": message})
+        history.append({"role": "assistant", "content": response_text})
+        if len(history) > 4:
+            history = history[-4:]
+        conversation_sessions[session_id] = history
+        
+        # Cache active interactions (Only INFO/RAG)
+        if next_state == "INFO":
+            response_cache.set(message, response_text, history)
         
         return JSONResponse(
             status_code=200,

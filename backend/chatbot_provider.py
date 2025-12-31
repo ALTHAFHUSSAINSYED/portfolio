@@ -73,14 +73,24 @@ class ChatbotProvider:
         
         logger.info("ChatbotProvider initialized with all providers")
     
+    
     def _detect_query_complexity(self, query: str) -> int:
         """
-        Estimate tokens needed for response.
-        Simple heuristic: longer questions might need longer answers.
+        Detect query complexity for dynamic token allocation
+        
+        Args:
+            query: User query
+            
+        Returns:
+            Recommended max_tokens (150 or 450)
         """
-        if len(query) > 200 or "explain" in query.lower() or "detail" in query.lower():
-            return 800
-        return 400
+        complexity_keywords = ["analyze", "breakdown", "report", "why", "explain", 
+                              "details", "describe", "compare", "difference"]
+        
+        query_lower = query.lower()
+        is_complex = any(keyword in query_lower for keyword in complexity_keywords)
+        
+        return 450 if is_complex else 150
 
     def summarize_content(self, text: str) -> str:
         """
@@ -126,22 +136,65 @@ class ChatbotProvider:
         except Exception as e:
             logger.warning(f"Summarization failed: {e}")
             return text[:600] + "... [Truncated fallback]"
+    
+    def detect_conversation_state(self, text: str) -> str:
         """
-        Detect query complexity for dynamic token allocation
+        Deterministic Conversation State Machine
+        Rules over AI vibes.
+        """
+        t = text.lower().strip()
         
-        Args:
-            query: User query
+        # 1. ABUSE / PROFANITY
+        profanity = ["fuck", "shit", "bitch", "stupid", "idiot", "crap", "hell", "asshole"]
+        if any(w in t for w in profanity):
+            return "ABUSE"
             
-        Returns:
-            Recommended max_tokens (150 or 450)
+        # 2. EXIT
+        exit_phrases = ["bye", "goodbye", "exit", "stop", "quit", "end", "nothing else", "that's it", "thats it", "done", "cancel"]
+        # checks for exact match or starts with exit phrase
+        if t in exit_phrases or any(t.startswith(w + " ") for w in exit_phrases):
+             return "EXIT"
+             
+        # 3. GREETING (START)
+        greetings = ["hi", "hello", "hey", "yo", "good morning", "good evening", "greetings"]
+        if t in greetings or any(t.startswith(w + " ") for w in greetings):
+            return "START"
+            
+        # 4. SILENT / FILLER
+        fillers = ["ok", "okay", "cool", "hmm", "ah", "oh", "right", "alright", "got it", "nice", ".", ""]
+        if t in fillers:
+            return "SILENT"
+            
+        # 5. AMBIGUOUS / META
+        ambiguous = ["what?", "really?", "sure", "why?", "how?", "explain", "meaning?"]
+        if t in ambiguous:
+            return "AMBIGUOUS"
+            
+        # 6. DEFAULT -> INFO (Proceed to RAG)
+        return "INFO"
+
+    def generate_response_by_state(self, state: str, user_input: str) -> str:
         """
-        complexity_keywords = ["analyze", "breakdown", "report", "why", "explain", 
-                              "details", "describe", "compare", "difference"]
-        
-        query_lower = query.lower()
-        is_complex = any(keyword in query_lower for keyword in complexity_keywords)
-        
-        return 450 if is_complex else 150
+        Micro-responses for non-INFO states.
+        Bypasses LLM for speed and consistency.
+        """
+        if state == "START":
+            return "Hey! How can I help you with Althaf's work today?"
+            
+        if state == "AMBIGUOUS":
+            return "I can explain more if you want—what part would you like me to expand on?"
+            
+        if state == "ABUSE":
+            return "I'm here to help, but I won't engage with abusive language. Let me know if you want to continue respectfully."
+            
+        if state == "SILENT":
+            return "Alright. I'm here when you're ready."
+            
+        if state == "EXIT":
+            # NOTE: Server handles persistence of 'exit_acknowledged'
+            return "Alright. Feel free to come back anytime."
+            
+        return "" # Should not happen if called correctly
     
     def _format_messages(self, query: str, context: str, history: List[Dict], sentiment: str = "neutral") -> List[Dict]:
         """
@@ -379,9 +432,9 @@ class ChatbotProvider:
         if response:
             return response
         
-        # Tier 2: Gemma 2 9B (Free) - Stable Fallback
-        logger.info("Trying Tier 2: Gemma 2 9B (Free)")
-        response = self._call_openrouter("google/gemma-2-9b-it:free", messages, max_tokens)
+        # Tier 2: Nemotron 9B (Free) - New High Quality Fallback
+        logger.info("Trying Tier 2: Nvidia Nemotron 9B v2 (Free)")
+        response = self._call_openrouter("nvidia/nemotron-nano-9b-v2:free", messages, max_tokens)
         if response:
             return response
         
