@@ -101,8 +101,8 @@ const HeroSection = ({ personalInfo }) => {
   };
 
   return (
-    // ✨ MODIFIED: Changed bg-black to bg-background
-    <section id="hero" className="bg-background py-20 lg:py-32 relative overflow-hidden">
+    // ✨ MODIFIED: Changed bg-black to bg-background. Reduced bottom padding to pull next section up.
+    <section id="hero" className="bg-background pt-20 pb-10 lg:pt-32 lg:pb-14 relative overflow-hidden">
       <style>{`
         @keyframes snake-draw {
           to { stroke-dashoffset: 0; }
@@ -225,7 +225,8 @@ const HeroSection = ({ personalInfo }) => {
         </div>
 
         {/* Profile Video Banner */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+        {/* ✨ MODIFIED: Increased top margin to mt-12 to push video down. */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
           <div className="relative overflow-hidden rounded-2xl shadow-2xl transform scale-90 origin-center group">
             <video
               ref={bannerVideoRef}
@@ -236,7 +237,8 @@ const HeroSection = ({ personalInfo }) => {
               muted={isBannerMuted}
               className="w-full h-auto object-cover dark:opacity-90 dark:brightness-95"
             />
-            <button onClick={() => toggleMute(bannerVideoRef, setIsBannerMuted)} className="absolute bottom-4 right-4 p-3 bg-background/50 rounded-full text-foreground hover:bg-background/75 transition-colors opacity-0 group-hover:opacity-100 duration-300">
+            {/* ✨ MODIFIED: Removed opacity classes to keep button always visible */}
+            <button onClick={() => toggleMute(bannerVideoRef, setIsBannerMuted)} className="absolute bottom-4 right-4 p-3 bg-background/50 rounded-full text-foreground hover:bg-background/75 transition-colors duration-300">
               {isBannerMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
             </button>
           </div>
