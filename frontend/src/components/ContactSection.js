@@ -79,7 +79,8 @@ const ContactSection = ({ personalInfo }) => {
 
   const phoneNumber = personalInfo.phone.replace(/\D/g, '');
   const prefilledMessage = "Hello Althaf, I saw your portfolio and would like to connect!";
-  const whatsappUrl = `https://wa.me/91${phoneNumber}?text=${encodeURIComponent(prefilledMessage)}`;
+  // Removed hardcoded '91' as phoneNumber already includes it (from +91...)
+  const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(prefilledMessage)}`;
 
   return (
     <section id="contact" className="py-20 bg-background relative overflow-hidden" ref={sectionRef}>
@@ -103,7 +104,7 @@ const ContactSection = ({ personalInfo }) => {
               <Card className={`p-4 neon-card transition-all ${isVisible ? 'scale-in stagger-3' : ''}`}>
                 <div className="flex items-center space-x-4">
                   <div className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
-                    <img src="/assets/gmail-real.png" alt="Email" className="w-full h-full object-cover scale-110" />
+                    <img src="/assets/gmail-real.png" alt="Email" className="w-full h-full object-cover scale-125" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-foreground">Email</h4>
@@ -114,7 +115,7 @@ const ContactSection = ({ personalInfo }) => {
               <Card className={`p-4 neon-card transition-all ${isVisible ? 'scale-in stagger-4' : ''}`}>
                 <div className="flex items-center space-x-4">
                   <div className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
-                    <img src="/assets/phone-blue.png" alt="Phone" className="w-full h-full object-cover scale-110" />
+                    <img src="/assets/phone-blue.png" alt="Phone" className="w-full h-full object-cover scale-125" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-foreground">Phone</h4>
@@ -125,7 +126,7 @@ const ContactSection = ({ personalInfo }) => {
               <Card className={`p-4 neon-card transition-all ${isVisible ? 'scale-in stagger-5' : ''}`}>
                 <div className="flex items-center space-x-4">
                   <div className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
-                    <img src="/assets/whatsapp-green.png" alt="WhatsApp" className="w-full h-full object-cover scale-110" />
+                    <img src="/assets/whatsapp-green.png" alt="WhatsApp" className="w-full h-full object-cover scale-125" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-foreground">WhatsApp</h4>

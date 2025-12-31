@@ -289,12 +289,12 @@ def detect_intent_priority(text: str) -> Tuple[str, str, dict]:
     CONFIDENCE-BASED INTENT ROUTER
     Normalize -> Score -> Decide (Thresholding)
     Prevents guessing on ambiguous inputs.
-    Returns: (intent_key, sentiment)
+    Returns: (intent_key, sentiment, scores)
     """
     # 1. NORMALIZE
     text = text.lower().strip()
-    text = re.sub(r'[^a-z0-9\s]', '', text)  # Remove punctuation
-    text = re.sub(r'\s+', ' ', text)         # Collapse spaces
+    text_clean = re.sub(r'[^a-z0-9\s]', '', text)  # Remove punctuation
+    text_clean = re.sub(r'\s+', ' ', text_clean)   # Collapse spaces
     
     scores = {
         "conversation": 0, # Covers Ambiguous/Start
@@ -307,50 +307,74 @@ def detect_intent_priority(text: str) -> Tuple[str, str, dict]:
         "profile": 0
     }
     
-    # 2. SCORING RULES
+    # 2. SENTIMENT DETECTION (FIRST - HIGHEST PRIORITY)
+    
+    # HIGH SEVERITY PROFANITY (Direct abuse)
+    high_profanity = ["fuck you", "fuck off", "go to hell", "fucking stupid"]
+    if any(p in text for p in high_profanity):
+        return "conversation", "hostile", scores
+    
+    # LOW SEVERITY PROFANITY (Frustration, not abuse)
+    low_profanity = ["shit", "damn", "crap", "oh shit"]
+    if any(p in text for p in low_profanity):
+        return "conversation", "frustrated", scores
+    
+    # FRUSTRATION SIGNALS (No profanity but clear frustration)
+    frustration_signals = ["i havent asked", "i haven't asked", "i didnt ask", "i didn't ask", 
+                          "this is wrong", "not what i meant", "you are wrong", "annoying", 
+                          "irritated", "irritating"]
+    if any(sig in text for sig in frustration_signals):
+        return "conversation", "frustrated", scores
+    
+    # CONFUSION SIGNALS
+    confusion_signals = ["what?", "about what", "what do you mean", "i don't understand", 
+                        "i dont understand", "why", "how come", "confused"]
+    if any(sig in text for sig in confusion_signals):
+        return "conversation", "confused", scores
+    
+    # 3. SCORING RULES (Only if sentiment is neutral)
     
     # Conversational / Ambiguous / Fillers
     ambiguous_triggers = ["ok", "fine", "hmm", "is it", "are you sure", "oh", "ah", "got it", "right", "good"]
-    if any(t == text or text.startswith(t + " ") for t in ambiguous_triggers):
+    if any(t == text_clean or text_clean.startswith(t + " ") for t in ambiguous_triggers):
         scores["conversation"] += 2
 
     # Strong Exit Triggers (Terminal)
-    # "nothing much" falls here too
     exit_triggers = ["bye", "goodbye", "stop", "end", "nothing else", "done", "thank you bye", "cancel"]
-    if any(t == text or text.startswith(t + " ") for t in exit_triggers):
+    if any(t == text_clean or text_clean.startswith(t + " ") for t in exit_triggers):
         scores["exit"] += 3
 
     # Repeated/Weak Disengagement
-    if text in ["nothing", "no", "nope", "nah"]:
+    if text_clean in ["nothing", "no", "nope", "nah"]:
         scores["exit"] += 1
         scores["conversation"] += 1 # Serves as ambiguous filler too until threshold met
         
-    # Feedback detection
-    if "relev" in text or "relav" in text:
+    # Feedback detection (relevance complaints)
+    if "relev" in text_clean or "relav" in text_clean:
         scores["conversation"] += 3
         return "conversation", "frustrated", scores
 
     # Profile / About (General)
-    if any(k in text for k in ["who", "about", "bio", "background", "resume", "experience", "skill", "contact", "email"]):
+    if any(k in text_clean for k in ["who", "about", "bio", "background", "resume", "experience", "skill", "contact", "email"]):
         scores["profile"] += 5
         scores["info"] += 3
         
     # Projects (General)
-    if any(k in text for k in ["project", "built", "work", "develop", "portfolio", "app", "website"]):
+    if any(k in text_clean for k in ["project", "built", "work", "develop", "portfolio", "app", "website"]):
         scores["projects"] += 10
         scores["info"] += 3
         
     # AWS / Cloud (Specific)
-    if any(k in text for k in ["aws", "cloud", "terraform", "deploy", "infrastructure", "pipeline", "ci/cd"]):
+    if any(k in text_clean for k in ["aws", "cloud", "terraform", "deploy", "infrastructure", "pipeline", "ci/cd"]):
         scores["aws_projects"] += 10 
         scores["info"] += 3
         
     # Blogs
-    if any(k in text for k in ["blog", "article", "write", "post", "read"]):
+    if any(k in text_clean for k in ["blog", "article", "write", "post", "read"]):
         scores["blogs"] += 10
         scores["info"] += 3
 
-    # 3. DECISION & THRESHOLD
+    # 4. DECISION & THRESHOLD
     # Get highest scoring intent
     best_intent, score = max(scores.items(), key=lambda x: x[1])
     
@@ -359,6 +383,7 @@ def detect_intent_priority(text: str) -> Tuple[str, str, dict]:
         return "conversation", "neutral", scores
         
     return best_intent, "neutral", scores
+
 
 async def get_portfolio_context(query: str, intent: str) -> str:
     """
@@ -914,7 +939,11 @@ async def ask_agent(query: dict):
         
         # --- STATE MACHINE RECOVERY ---
         if session_id not in session_metadata:
-            session_metadata[session_id] = {"state": "START", "disengagement_count": 0}
+            session_metadata[session_id] = {
+                "state": "START", 
+                "disengagement_count": 0,
+                "response_mode": "ANSWER_ONLY"  # Default: answer only what was asked
+            }
             
         current_state = session_metadata[session_id]["state"]
         disengagement_count = session_metadata[session_id]["disengagement_count"]
@@ -922,30 +951,94 @@ async def ask_agent(query: dict):
         # 1. INTENT & SCORING
         intent, sentiment, intent_scores = detect_intent_priority(message)
         
+        # ========================================
+        # SENTIMENT GATE (ABSOLUTE PRIORITY)
+        # Sentiment overrides ALL downstream logic
+        # ========================================
+        
+        if sentiment == "hostile":
+            # HARD STOP - Direct abuse
+            session_metadata[session_id]["state"] = "EXIT"
+            session_metadata[session_id]["exit_acknowledged"] = True
+            logger.warning(f"🚨 HOSTILE sentiment detected: {message[:50]}")
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "reply": "I'm here to help, but I can't continue this conversation if the language stays disrespectful.",
+                    "source": "SentimentGate"
+                }
+            )
+        
+        if sentiment == "frustrated":
+            # SOFT RESET - User is annoyed/frustrated
+            session_metadata[session_id]["state"] = "AMBIGUOUS"
+            session_metadata[session_id]["disengagement_count"] = 0
+            logger.info(f"⚠️ FRUSTRATED sentiment detected: {message[:50]}")
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "reply": "It sounds like this wasn't what you expected. What would you like me to clarify?",
+                    "source": "SentimentGate"
+                }
+            )
+        
+        if sentiment == "confused":
+            # CLARIFICATION MODE - User doesn't understand
+            session_metadata[session_id]["state"] = "AMBIGUOUS"
+            logger.info(f"❓ CONFUSED sentiment detected: {message[:50]}")
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "reply": "It seems I may not have explained that clearly. What would you like me to clarify?",
+                    "source": "SentimentGate"
+                }
+            )
+        
+        # ========================================
+        # END SENTIMENT GATE
+        # Only neutral/positive sentiment reaches here
+        # ========================================
+        
         # 2. UPDATE DISENGAGEMENT COUNTER
         # Track consecutive "nothing/no" to allow gentle exit escalation
         if message.lower().strip() in ["nothing", "no", "nope", "nah"]:
             disengagement_count += 1
         else:
             disengagement_count = 0 # Reset on engagement
+        
+        # ========================================
+        # POST-EXIT SILENCE CHECK (BEFORE STATE DETECTION)
+        # If user already exited, ignore all further input
+        # ========================================
+        if session_metadata.get(session_id, {}).get("exit_acknowledged"):
+            logger.info(f"Post-exit input ignored (silence): {message}")
+            return JSONResponse(status_code=200, content={"reply": "", "source": "System"})
+        # ========================================
 
         # 3. CONVERSATION STATE MACHINE (The "Gods' Logic")
         # Deterministic control before AI capabilities
         next_state = chatbot_provider.detect_conversation_state(message)
         
+        # ========================================
+        # RESPONSE MODE MAPPING (Phase 2)
+        # Determines HOW to respond based on state
+        # ========================================
+        if next_state in ["START", "AMBIGUOUS", "SILENT"]:
+            response_mode = "CONVERSATION"  # Casual, minimal
+        elif next_state == "INFO":
+            response_mode = "ANSWER_ONLY"   # Answer what was asked, nothing more
+        else:
+            response_mode = "ANSWER_ONLY"   # Default safe mode
+        
+        session_metadata[session_id]["response_mode"] = response_mode
+        logger.info(f"📝 Response Mode: {response_mode}")
+        # ========================================
+        
         # Session Persistence Logic for EXIT
         if next_state == "EXIT":
-            if session_metadata.get(session_id, {}).get("exit_acknowledged"):
-                # Already said bye, now silent or minimal
-                logger.info(f"Ignoring post-exit input: {message}")
-                return JSONResponse(status_code=200, content={"reply": "Take care!", "source": "System"})
             session_metadata[session_id]["exit_acknowledged"] = True
-        else:
-            # Reset exit flag if user re-engages (Greeting, Question, etc)
-            if session_id in session_metadata:
-                 session_metadata[session_id]["exit_acknowledged"] = False
 
-        logger.info(f"🧠 State: {next_state.upper()} (Prev: {current_state})")
+        logger.info(f"🧠 State: {next_state.upper()} (Prev: {current_state}) | Mode: {response_mode}")
 
         # 4. EXECUTE RESPONSE STRATEGY
         response_text = ""
