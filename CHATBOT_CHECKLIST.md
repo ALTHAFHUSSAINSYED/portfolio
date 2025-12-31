@@ -36,7 +36,7 @@ This document serves as the **centralized ground-truth checklist** for the "Allu
 ## 🧠 Model Reliability
 - [x] **4-Tier Fallback Chain**: 
     1. Mistral 7B (Free)
-    2. Nvidia Nemotron 9B (Free)
+    2. OpenAI gpt-oss-20b (Free)
     3. Llama 3.2 3B (Specialized)
     4. Gemini Flash (Fallback)
 - [x] **Free-Tier Prioritization**: Architecture aggressively prefers free/cheaper models first.
