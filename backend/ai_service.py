@@ -10,7 +10,8 @@ import logging
 from typing import Dict, List, Any, Optional, Union
 import json
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -38,16 +39,18 @@ class GeminiService:
             self.vision_model = None
             return
         
-        # Configure Gemini
-        genai.configure(api_key=self.api_key)
+        # Configure Gemini Client
+        try:
+            self.client = genai.Client(api_key=self.api_key)
+        except Exception as e:
+            logging.error(f"Failed to init Gemini Client: {e}")
+            self.is_available = False
+            return
+
+        # Default model ID
+        self.model_id = "gemini-2.0-flash"
         
-        # Initialize models
-        self.text_model = genai.GenerativeModel(
-            model_name="models/gemini-2.5-flash",  # Fast modern model for general text generation
-            generation_config=genai.GenerationConfig(temperature=0.7)
-        )
-        
-        self.chat_model = None  # Will be initialized when needed
+        self.chat_session = None  # Will be initialized when needed
         self._langchain_components = None  # Will be initialized on demand
     
     def generate_content(self, prompt: str, temperature: float = 0.7) -> str:
@@ -68,10 +71,13 @@ class GeminiService:
             logger.info(f"Generating content with Gemini prompt length: {len(prompt)}")
             
             # Update temperature if different from default
-            if temperature != 0.7:
-                self.text_model.generation_config.temperature = temperature
+            config = types.GenerateContentConfig(temperature=temperature)
             
-            response = self.text_model.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model=self.model_id,
+                contents=prompt,
+                config=config
+            )
             
             if not response or not response.text:
                 raise Exception("Empty response from Gemini API")
@@ -86,7 +92,7 @@ class GeminiService:
         """
         Start a new chat session.
         """
-        self.chat_model = self.text_model.start_chat(history=[])
+        self.chat_session = self.client.chats.create(model=self.model_id)
     
     def chat(self, user_input: str) -> str:
         """
@@ -100,11 +106,11 @@ class GeminiService:
         """
         try:
             # Create a conversation if not already created
-            if self.chat_model is None:
+            if self.chat_session is None:
                 self.start_chat()
                 
             # Process the message and get a response
-            response = self.chat_model.send_message(user_input)
+            response = self.chat_session.send_message(user_input)
             return response.text
         except Exception as e:
             logger.error(f"Error in chat with Gemini: {e}")
