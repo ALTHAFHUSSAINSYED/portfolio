@@ -200,7 +200,7 @@ const CertificationsSection = ({ certifications }) => {
                     href={cert.credentialUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`flex items-center gap-1 text-xs font-medium px-3 py-1 rounded-full border transition-all duration-300 ${getCertificationBg(cert.category)} ${getCertificationColor(cert.category)} border-current bg-current/10 hover:bg-current/20 dark:hover:bg-current dark:hover:text-black group/btn`}
+                    className={`flex items-center gap-1 text-xs font-medium px-3 py-1 rounded-full border transition-all duration-300 ${getCertificationBg(cert.category)} ${getCertificationColor(cert.category)} border-current bg-current/10 hover:bg-current/20 dark:hover:bg-transparent group/btn`}
                   >
                     <span>Verify</span>
                     <ExternalLink className="w-3 h-3 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
