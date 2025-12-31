@@ -16,8 +16,10 @@ try:
     # Calculate size for square crop (use smallest dimension)
     min_dim = min(img.size)
     
-    # ZOOM LOGIC: Crop a smaller center square (e.g., 60% of original) to zoom in
-    zoom_factor = 0.6  # Lower value = Higher Zoom
+    # ZOOM LOGIC: Crop a smaller center square to simulate zoom
+    # 1.0 = No Zoom (100% show)
+    # 0.8 = 1.25x Zoom (80% show) -> Matches Hero/LinkedIn 1.25x scale
+    zoom_factor = 0.8
     crop_size = int(min_dim * zoom_factor)
     
     # Calculate crop box (left, upper, right, lower)
