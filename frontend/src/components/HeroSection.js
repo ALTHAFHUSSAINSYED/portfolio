@@ -227,7 +227,7 @@ const HeroSection = ({ personalInfo }) => {
         {/* Profile Video Banner */}
         {/* ✨ MODIFIED: Increased top margin to mt-12 to push video down. */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
-          <div className="relative overflow-hidden rounded-2xl shadow-2xl transform scale-90 origin-center group">
+          <div className="relative overflow-hidden rounded-2xl shadow-2xl transform lg:scale-90 origin-center group">
             <video
               ref={bannerVideoRef}
               src="https://res.cloudinary.com/dtzaicj6s/video/upload/f_auto,q_auto/Linkdn_uc533k.mp4"
