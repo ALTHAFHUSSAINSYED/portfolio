@@ -12,7 +12,7 @@ try:
     # Open image
     img = Image.open(input_path).convert("RGBA")
     
-    # Calculate size for square crop (use smallest dimension)
+    # --- LOGO.PNG (Favicon - Zoomed) ---
     # Calculate size for square crop (use smallest dimension)
     min_dim = min(img.size)
     
@@ -41,10 +41,22 @@ try:
     # Fit image to mask
     output = ImageOps.fit(img_resized, size, centering=(0.5, 0.5))
     output.putalpha(mask)
-    
-    # Save as PNG
     output.save(output_path)
-    print(f"✅ Successfully created circular logo at: {output_path}")
+    print(f"✅ Created zoomed favicon: {output_path}")
+
+    # --- PROFILE-TRANSPARENT.PNG (LinkedIn - Full Face) ---
+    output_profile_path = os.path.join(base_dir, "frontend", "public", "profile-transparent.png")
+    
+    # Use full image square crop
+    size_full = (min_dim, min_dim)
+    mask_full = Image.new('L', size_full, 0)
+    draw_full = ImageDraw.Draw(mask_full)
+    draw_full.ellipse((0, 0) + size_full, fill=255)
+    
+    output_profile = ImageOps.fit(img, size_full, centering=(0.5, 0.5))
+    output_profile.putalpha(mask_full)
+    output_profile.save(output_profile_path)
+    print(f"✅ Created transparent profile: {output_profile_path}")
 
 except ImportError:
     print("❌ Error: Pillow library not found. Please run 'pip install Pillow'")
