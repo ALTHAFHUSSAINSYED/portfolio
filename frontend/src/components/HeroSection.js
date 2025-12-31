@@ -21,17 +21,19 @@ const useMediaQuery = (query) => {
 const HeroSection = ({ personalInfo }) => {
   const leftVideoRef = useRef(null);
   const rightVideoRef = useRef(null);
+  const bannerVideoRef = useRef(null); // Ref for the banner video
   const profilePicRef = useRef(null); // Ref for the profile picture
 
   const [isLeftMuted, setIsLeftMuted] = useState(true);
   const [isRightMuted, setIsRightMuted] = useState(true);
+  const [isBannerMuted, setIsBannerMuted] = useState(true); // State for banner video mute
   const [profilePicLoaded, setProfilePicLoaded] = useState(false); // State to track profile pic load
 
   // Use useMediaQuery hook to check for large screens (Tailwind's 'lg' breakpoint)
   const isLargeScreen = useMediaQuery('(min-width: 1024px)');
 
   const handleVideoScroll = useCallback(() => {
-    const videoElements = [leftVideoRef.current, rightVideoRef.current];
+    const videoElements = [leftVideoRef.current, rightVideoRef.current, bannerVideoRef.current];
     const threshold = 150;
 
     videoElements.forEach((videoRef) => {
@@ -222,14 +224,21 @@ const HeroSection = ({ personalInfo }) => {
           </div>
         </div>
 
-        {/* Profile Banner */}
+        {/* Profile Video Banner */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-          <div className="relative overflow-hidden rounded-2xl shadow-2xl transform scale-90 origin-center">
-            <img
-              src="/assets/profile-banner.png"
-              alt="Althaf Hussain Syed - DevOps Engineer Profile Banner"
+          <div className="relative overflow-hidden rounded-2xl shadow-2xl transform scale-90 origin-center group">
+            <video
+              ref={bannerVideoRef}
+              src="https://res.cloudinary.com/dtzaicj6s/video/upload/f_auto,q_auto/Linkdn_uc533k.mp4"
+              autoPlay
+              playsInline
+              loop
+              muted={isBannerMuted}
               className="w-full h-auto object-cover dark:opacity-90 dark:brightness-95"
             />
+            <button onClick={() => toggleMute(bannerVideoRef, setIsBannerMuted)} className="absolute bottom-4 right-4 p-3 bg-background/50 rounded-full text-foreground hover:bg-background/75 transition-colors opacity-0 group-hover:opacity-100 duration-300">
+              {isBannerMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
+            </button>
           </div>
         </div>
 
