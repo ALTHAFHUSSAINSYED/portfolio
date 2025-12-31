@@ -79,7 +79,7 @@
     margin-bottom: 16px;
     display: block;
     transition: all 0.3s ease;
-    transform: scale(1.2);
+    transform: scale(1.5);
     /* Increased zoom to cover white space */
     border: none !important;
     /* Force no border */
