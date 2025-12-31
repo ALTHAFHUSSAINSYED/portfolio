@@ -64,7 +64,7 @@ const Header = ({ personalInfo }) => {
             <img
               src={`${process.env.PUBLIC_URL || ''}/logo.png`}
               alt="Logo"
-              className="h-10 w-10 rounded-full shadow-lg shadow-cyan-400/20 object-cover"
+              className="h-10 w-10 rounded-full shadow-lg shadow-cyan-400/20 object-cover scale-[3.0]"
             />
             <h1
               className={`text-2xl font-bold transition-all duration-300 cursor-pointer hover-scale ${theme === 'dark' ? 'site-title-gradient' : 'name-text-light'}`}

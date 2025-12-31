@@ -490,16 +490,18 @@ class ChatbotProvider:
             safe_length = int(MAX_INPUT_TOKENS * 3.5) # Safe char count
             messages[-1]['content'] = last_msg[:safe_length] + "\n...[Context Truncated for Safety]"
             
-        # Tier 1: Mistral 7B Instruct (Free) - Fast & Reliable
+        # Tier 1: Mistral 7B Instruct (Free) - Fast & Reliable PRIMARY
         logger.info("Trying Tier 1: Mistral 7B Instruct (Free)")
         response = self._call_openrouter("mistralai/mistral-7b-instruct:free", messages, max_tokens)
         if response:
+            logger.info("✅ Response from Mistral 7B")
             return response
         
-        # Tier 2: Nemotron 9B (Free) - New High Quality Fallback
-        logger.info("Trying Tier 2: Nvidia Nemotron 9B v2 (Free)")
-        response = self._call_openrouter("nvidia/nemotron-nano-9b-v2:free", messages, max_tokens)
+        # Tier 2: OpenAI gpt-oss-20b (Free) - OpenAI Quality Fallback
+        logger.info("Trying Tier 2: OpenAI gpt-oss-20b (Free)")
+        response = self._call_openrouter("openai/gpt-oss-20b:free", messages, max_tokens)
         if response:
+            logger.info("✅ Response from OpenAI gpt-oss-20b")
             return response
         
         # Tier 3: Hugging Face - Llama 3.2 3B Instruct
@@ -508,12 +510,14 @@ class ChatbotProvider:
         simple_message = f"{context}\n\nUser: {query}"
         response = self._call_huggingface(simple_message, max_tokens)
         if response:
+            logger.info("✅ Response from Llama 3.2 3B (HF)")
             return response
         
         # Tier 4: Gemini Fallback
         logger.info("Trying Tier 4: Gemini Fallback")
         response = self._call_gemini_fallback(messages, max_tokens)
         if response:
+            logger.info("✅ Response from Gemini Flash")
             return response
         
         # All providers failed
