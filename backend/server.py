@@ -891,8 +891,12 @@ async def ask_agent(query: dict):
         # Record request for rate limiting
         rate_limiter.record_request()
         
+        
         # Record request for rate limiting
         rate_limiter.record_request()
+        
+        # Start timer for telemetry
+        start_time = datetime.now()
         
         # --- STATE MACHINE RECOVERY ---
         if session_id not in session_metadata:
