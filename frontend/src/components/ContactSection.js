@@ -104,7 +104,7 @@ const ContactSection = ({ personalInfo }) => {
               <Card className={`p-4 neon-card transition-all ${isVisible ? 'scale-in stagger-3' : ''}`}>
                 <div className="flex items-center space-x-4">
                   <div className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
-                    <img src="/assets/gmail-real.png" alt="Email" className="w-full h-full object-cover scale-[2.5]" />
+                    <img src="/assets/gmail-real.png" alt="Email" className="w-full h-full object-cover scale-[1.8]" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-foreground">Email</h4>
@@ -115,7 +115,7 @@ const ContactSection = ({ personalInfo }) => {
               <Card className={`p-4 neon-card transition-all ${isVisible ? 'scale-in stagger-4' : ''}`}>
                 <div className="flex items-center space-x-4">
                   <div className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
-                    <img src="/assets/phone-blue.png" alt="Phone" className="w-full h-full object-cover scale-[3.0]" />
+                    <img src="/assets/phone-blue.png" alt="Phone" className="w-full h-full object-cover scale-[1.8]" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-foreground">Phone</h4>
@@ -126,7 +126,7 @@ const ContactSection = ({ personalInfo }) => {
               <Card className={`p-4 neon-card transition-all ${isVisible ? 'scale-in stagger-5' : ''}`}>
                 <div className="flex items-center space-x-4">
                   <div className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
-                    <img src="/assets/whatsapp-green.png" alt="WhatsApp" className="w-full h-full object-cover scale-[3.0]" />
+                    <img src="/assets/whatsapp-green.png" alt="WhatsApp" className="w-full h-full object-cover scale-[1.8]" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-foreground">WhatsApp</h4>
