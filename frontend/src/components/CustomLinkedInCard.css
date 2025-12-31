@@ -71,20 +71,32 @@
 }
 
 /* AVATAR */
-.linkedin-avatar {
+/* AVATAR WRAPPER - Acts as the Clipping Mask */
+.linkedin-avatar-wrapper {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    object-fit: cover;
+    overflow: hidden;
+    /* This clips the zoomed image */
     margin-bottom: 16px;
+    /* Ensure the wrapper itself doesn't have a border/shadow that conflicts */
+    border: none;
+    box-shadow: none;
+}
+
+/* AVATAR IMAGE - Zoomed inside the wrapper */
+.linkedin-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
     display: block;
     transition: all 0.3s ease;
-    transform: scale(2.5);
-    /* Increased zoom to cover white space */
+    transform: scale(1.35);
+    /* Zoom to crop white ring */
+
+    /* Ensure no borders on image */
     border: none !important;
-    /* Force no border */
     box-shadow: none !important;
-    /* Remove any shadow looking like border */
 }
 
 .linkedin-avatar:hover {

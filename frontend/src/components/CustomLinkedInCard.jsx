@@ -12,11 +12,13 @@ export default function CustomLinkedInCard({ theme }) {
 
             {/* CONTENT AREA - Profile information */}
             <div className="linkedin-body">
-                <img
-                    src="/profile-pic.jpg"
-                    alt="Althaf Hussain Syed"
-                    className="linkedin-avatar"
-                />
+                <div className="linkedin-avatar-wrapper">
+                    <img
+                        src="/profile-pic.jpg"
+                        alt="Althaf Hussain Syed"
+                        className="linkedin-avatar"
+                    />
+                </div>
 
                 <h3 className="linkedin-name">ALTHAF HUSSAIN SYED</h3>
 
