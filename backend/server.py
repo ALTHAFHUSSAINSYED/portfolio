@@ -232,6 +232,10 @@ api_router = APIRouter(prefix="/api")
 if HAS_SECURITY_MIDDLEWARE and SecurityHeadersMiddleware:
     app.add_middleware(SecurityHeadersMiddleware)
 
+# Register Apology Sanitizer Middleware (Phase 9)
+from backend.middleware.response_sanitizer import ResponseSanitizerMiddleware
+app.add_middleware(ResponseSanitizerMiddleware)
+
 # Explicitly define allowed origins
 default_origins = [
     "http://localhost:3000",
@@ -435,15 +439,39 @@ async def get_portfolio_context(query: str, intent: str) -> str:
                 "explicit_title": None # Placeholder for NLP title extraction
             }
             
-        def filter_blogs_by_date(docs, metas, ids, target_date):
-            filtered_docs, filtered_metas, filtered_ids = [], [], []
+                "explicit_title": None # Placeholder for NLP title extraction
+            }
+            
+        def filter_blogs_by_date(docs, metas, ids, target_date=None, mode="exact"):
+            """
+            Filter blogs by date logic.
+            mode="exact": strict match (e.g., today)
+            mode="recent": sort by date DESC, take top 1
+            """
+            # Combine into objects for sorting
+            combined = []
             for d, m, i in zip(docs, metas, ids):
-                # Ensure it's a blog and matches date
-                if m.get('published_date') == target_date:
-                    filtered_docs.append(d)
-                    filtered_metas.append(m)
-                    filtered_ids.append(i)
-            return filtered_docs, filtered_metas, filtered_ids
+                pub_date = m.get('published_date', '1970-01-01')
+                combined.append({"doc": d, "meta": m, "id": i, "date": pub_date})
+            
+            if mode == "exact" and target_date:
+                # Filter strict
+                filtered = [c for c in combined if c['date'] == target_date]
+                return ([c['doc'] for c in filtered], 
+                        [c['meta'] for c in filtered], 
+                        [c['id'] for c in filtered])
+                        
+            if mode == "recent":
+                # Sort DESC string comparison works for ISO dates
+                combined.sort(key=lambda x: x['date'], reverse=True)
+                # Take top 1 (The latest blog)
+                # But keep list structure
+                if not combined:
+                    return [], [], []
+                top = combined[0]
+                return [top['doc']], [top['meta']], [top['id']]
+                
+            return docs, metas, ids
 
         # --------------------------------
         
@@ -499,6 +527,19 @@ async def get_portfolio_context(query: str, intent: str) -> str:
                             INJECTION_LIMIT = 1 
                         else:
                             logger.info(f"📅 Date Anchor Miss: No blogs found for {today_iso}")
+                            
+                    elif filters['is_recent']:
+                        # NEW PHASE 9 LOGIC: "Recent" means TIME, not RELEVANCE
+                        # Re-sort by date DESC and take top 1
+                        logger.info("📅 Temporal Logic: Sorting by 'Recent' (Date DESC)")
+                        f_docs, f_metas, f_ids = filter_blogs_by_date(docs, metas, ids, mode="recent")
+                        if f_docs:
+                            docs, metas, ids = f_docs, f_metas, f_ids
+                            INJECTION_LIMIT = 1
+                            logger.info(f"✅ Found most recent blog: {metas[0].get('title')} ({metas[0].get('published_date')})")
+                        else:
+                            logger.info("⚠️ Recent filter failed, falling back to semantic.")
+                            
                             # Fallback to semantic recent (already sorted by similarity)
                             pass
                             
@@ -950,7 +991,39 @@ async def ask_agent(query: dict):
         
         # 1. INTENT & SCORING
         intent, sentiment, intent_scores = detect_intent_priority(message)
+
+        # ========================================
+        # RECONCILE / EXPLANATION HOOK (Phase 9)
+        # Deterministic override for "Why?" questions. NEVER calls LLM.
+        # ========================================
+        if chatbot_provider.is_behavior_question(message):
+             reply_text = chatbot_provider.explain_previous_decision(message, history)
+             logger.info(f"🧠 RECONCILE Triggered: {message[:50]} -> {reply_text[:50]}...")
+             return JSONResponse(
+                 status_code=200,
+                 content={"reply": reply_text, "source": "System-Reconcile"}
+             )
+
+        # ========================================
+        # POST-INFO HOLD STATE CHECK
+        # Prevents "Anything else?" from triggering helpful hallucinations
+        # ========================================
+        current_state = session_metadata[session_id].get("state", "START")
         
+        # If we are in HOLD state and the user says something weak/empty, DO NOT re-engage
+        if current_state == "HOLD":
+            # Very simple guard: Only break HOLD if it looks like a real question
+            is_weak_input = len(message.split()) < 4 and "?" not in message
+            trigger_words = ["tell", "show", "what", "how", "who", "where", "why", "explain"]
+            has_trigger = any(w in message.lower() for w in trigger_words)
+            
+            if is_weak_input and not has_trigger:
+                logger.info("🔒 HOLD state active: Ignoring weak input.")
+                return JSONResponse(
+                    status_code=200, 
+                    content={"reply": "👍", "source": "System-Hold"}
+                )
+
         # ========================================
         # SENTIMENT GATE (ABSOLUTE PRIORITY)
         # Sentiment overrides ALL downstream logic
@@ -1073,6 +1146,11 @@ async def ask_agent(query: dict):
         duration = (datetime.now() - start_time).total_seconds()
         
         # 5. UPDATE STATE PERSISTENCE
+        
+        # Phase 9: Auto-Lock to HOLD after INFO response
+        if next_state == "INFO":
+             next_state = "HOLD"
+             
         session_metadata[session_id]["state"] = next_state
         session_metadata[session_id]["disengagement_count"] = disengagement_count
         

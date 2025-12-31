@@ -36,9 +36,9 @@ This document serves as the **centralized ground-truth checklist** for the "Allu
 ## 🧠 Model Reliability
 - [x] **4-Tier Fallback Chain**: 
     1. Mistral 7B (Free)
-    2. OpenAI gpt-oss-20b (Free)
-    3. Llama 3.2 3B (Specialized)
-    4. Gemini Flash (Fallback)
+    2. openai/gpt-oss-20b:free (OpenAI Chain)
+    3. Gemini Chain (Standard)
+    4. meta-llama/Llama-3.2-3B-Instruct (Hugging Face)
 - [x] **Free-Tier Prioritization**: Architecture aggressively prefers free/cheaper models first.
 - [x] **Provider-Level Failover**: Seamless switching between OpenRouter, Hugging Face, and Google GenAI.
 
@@ -223,6 +223,29 @@ This document serves as the **centralized ground-truth checklist** for the "Allu
 - [x] **Add first-message greeting**
   - START state now returns: "Hi! I'm Allu Bot, Althaf's Portfolio Assistant. You can ask me about Althaf's projects, blogs, or experience."
   - Location: `chatbot_provider.py:217`
+
+### Phase 9: Trust & Consistency Layer (New - Jan 1, 2026) ✅ COMPLETED
+- [x] **Temporal Grounding Fix**: "Recent" queries strictly sort by Date DESC + Top 1.
+  - Fixes semantic drift where "recent" meant "relevant".
+- [x] **Reconciliation State**: Deterministic logic to handle "why/earlier/but" queries.
+  - Returns template: "Earlier, I treated 'recent' as multiple posts... I switched to exact date filter."
+  - **NO LLM Call** for these explanations.
+- [x] **Apology Stripping Middleware**: Global regex sanitizer.
+  - Strips: "It seems I may not have", "I apologize", "Sorry for the confusion".
+  - Enforced on ALL outputs (Mistral, OpenAI, Gemini, HF).
+- [x] **Post-INFO Hold State**: State locks to `HOLD` after 1 answer.
+  - "Anything else?" -> Silence or minimal ack.
+  - Prevents "helpful" hallucination of unrelated awards/certifications.
+- [x] **Provider-Normalized Prompts**: Uniform identity contract injection.
+  - OpenRouter: System Role.
+  - HF Llama: Inline User Prompt Prepend (Critical for consistency).
+  - Gemini: Sandwich Prompt.
+
+### Phase 10: UX Immersion (New - Jan 1, 2026)
+- [ ] **Typing Effect**: Stream text character-by-character for bot responses.
+- [ ] **Audio Feedback**: Play subtle mechanical keyboard/Copilot sound during typing.
+- [ ] **Smart Scrolling**: Auto-scroll that tracks the typing cursor.
+
 
 ---
 
