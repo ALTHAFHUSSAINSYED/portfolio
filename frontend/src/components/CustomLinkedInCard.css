@@ -206,6 +206,8 @@
 .linkedin-card.dark {
     background: #000000;
     color: #ffffff;
+    border: 1px solid #1e293b;
+    /* Dark border instead of white */
 }
 
 .linkedin-card.dark .linkedin-header {
@@ -219,6 +221,10 @@
 
 .linkedin-card.dark .linkedin-avatar {
     /* Border removed to clear white ring */
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
 }
 
 .linkedin-card.dark .linkedin-button {
