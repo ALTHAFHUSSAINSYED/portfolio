@@ -124,12 +124,12 @@ const HeroSection = ({ personalInfo }) => {
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="relative flex flex-col items-center">
 
-          <div className="relative z-20 mb-8">
+          <div className="relative z-20 mb-8 w-48 h-48 md:w-56 md:h-56 rounded-full border-4 border-cyan-400/30 shadow-lg shadow-cyan-500/20 overflow-hidden group">
             <img
               ref={profilePicRef} // Attach ref to profile picture
-              src="/profile-pic.jpg?v=updated"
+              src="/profile-pic.jpg?v=updated3"
               alt={personalInfo.name}
-              className="w-48 h-48 md:w-56 md:h-56 rounded-full object-cover border-4 border-cyan-400/30 shadow-lg shadow-cyan-500/20"
+              className="w-full h-full object-cover transform scale-125 transition-transform duration-500 group-hover:scale-135"
             />
           </div>
 
