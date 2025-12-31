@@ -142,11 +142,15 @@ class ChatbotProvider:
         Deterministic Conversation State Machine
         Rules over AI vibes.
         """
+        import re
         t = text.lower().strip()
+        # Clean punctuation for exact word matching
+        t_clean = re.sub(r'[^\w\s]', '', t)
+        words = set(t_clean.split())
         
-        # 1. ABUSE / PROFANITY
-        profanity = ["fuck", "shit", "bitch", "stupid", "idiot", "crap", "hell", "asshole"]
-        if any(w in t for w in profanity):
+        # 1. ABUSE / PROFANITY (Whole word match only)
+        profanity = {"fuck", "shit", "bitch", "stupid", "idiot", "crap", "asshole"} # 'hell' removed as it's too risky (shell, hello)
+        if any(w in words for w in profanity):
             return "ABUSE"
             
         # 2. EXIT
@@ -161,8 +165,8 @@ class ChatbotProvider:
             return "START"
             
         # 4. SILENT / FILLER
-        fillers = ["ok", "okay", "cool", "hmm", "ah", "oh", "right", "alright", "got it", "nice", ".", ""]
-        if t in fillers:
+        fillers = ["ok", "okay", "cool", "hmm", "ah", "oh", "right", "alright", "got it", "nice"]
+        if t in fillers or t == "":
             return "SILENT"
             
         # 5. AMBIGUOUS / META
