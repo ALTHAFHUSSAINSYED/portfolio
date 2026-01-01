@@ -42,16 +42,6 @@ Blog URLs (e.g., `https://www.althafportfolio.site/blogs/Low-Code_No-Code_175905
 ```
 /
 /blogs/Low-Code_No-Code_1759057460
-/blogs/Cybersecurity_1750492800
-/blogs/AI_ML_1750492801
-/blogs/Software_Development_1750492802
-/blogs/DevOps_1750492803
-/blogs/Cloud_Computing_1750492804
-/blogs/Mobile_Development_1750492805
-/blogs/Web_Development_1750492806
-/blogs/Data_Science_1750492807
-/blogs/Blockchain_1750492808
-/blogs/IoT_1750492809
 ```
 
 ### 3. Sitemap Generation
