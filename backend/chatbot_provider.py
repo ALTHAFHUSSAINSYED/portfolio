@@ -156,21 +156,25 @@ class ChatbotProvider:
     
     def _detect_query_complexity(self, query: str) -> int:
         """
-        Detect query complexity for dynamic token allocation
+        Detect query complexity for tier-based token allocation
         
         Args:
             query: User query
             
         Returns:
-            Recommended max_tokens (150 or 450)
+            Recommended max_tokens (300 simple, 800 complex)
         """
         complexity_keywords = ["analyze", "breakdown", "report", "why", "explain", 
-                              "details", "describe", "compare", "difference"]
+                              "details", "describe", "compare", "difference", "list", 
+                              "tell me about", "show me", "multiple"]
         
         query_lower = query.lower()
         is_complex = any(keyword in query_lower for keyword in complexity_keywords)
         
-        return 450 if is_complex else 150
+        # Tier-based token allocation:
+        # Simple queries (greetings, single facts): 300 tokens
+        # Complex queries (explanations, comparisons): 800 tokens
+        return 800 if is_complex else 300
 
     def summarize_content(self, text: str) -> str:
         """
@@ -201,17 +205,20 @@ class ChatbotProvider:
             {text[:4000]}
             """
             
-            # Use Gemini Flash (Standard) for internal micro-tasks
-            if not self.gemini_client:
-                 return text[:1000] + "... [Truncated]"
+            # Use Mistral (via OpenRouter) for internal micro-tasks
+            # 1. Wrap the prompt in the standard message format
+            messages = [{"role": "user", "content": prompt}]
 
-            response = self.gemini_client.models.generate_content(
-                model='gemini-2.5-flash',
-                contents=prompt
+            # 2. Call your existing OpenRouter helper function
+            # Using the same model as your main chat: mistralai/mistral-7b-instruct:free
+            summary_text = self._call_openrouter(
+                model="mistralai/mistral-7b-instruct:free",
+                messages=messages,
+                max_tokens=300  # 300 tokens is plenty for a bullet-point summary
             )
             
-            if response and response.text:
-                summary = f"[Summarized Evidence]:\n{response.text}"
+            if summary_text:
+                summary = f"[Summarized Evidence]:\n{summary_text}"
                 # Cache the result
                 self.summary_cache[text_hash] = summary
                 return summary
@@ -331,11 +338,15 @@ class ChatbotProvider:
         current_date = datetime.now().strftime("%B %d, %Y")
         identity_context = f"MY IDENTITY: I am Allu Bot, Althaf's dedicated portfolio assistant. Today is {current_date}. The text below is my internal knowledge about Althaf."
         
-        # TRUNCATE CONTEXT (Increased to 12000 chars based on logs showing ~8800 chars retrieved)
-        # Safe for Mistral (8k tokens) and Gemini (1M tokens). 12000 chars ~= 3000 tokens.
-        max_context_chars = 12000
+        # TIER-BASED CONTEXT ALLOCATION
+        # Mistral 7B (6K input token limit): 24000 chars ~= 6000 tokens
+        # Gemini (1M context window): 100000 chars ~= 25000 tokens
+        # Default to Mistral limits (will be primary tier)
+        max_context_chars = 24000  # Conservative for Mistral 7B (6K tokens)
+        
         if len(context) > max_context_chars:
             context = context[:max_context_chars] + "..."
+            logger.info(f"Context truncated to {max_context_chars} chars for tier compatibility")
             
         # SANDWICH TECHNIQUE: Psychological framing for the model
         final_context_block = f"{identity_context}\n\n[MY INTERNAL KNOWLEDGE_BASE]:\n{context}"
@@ -444,12 +455,14 @@ class ChatbotProvider:
             logger.error(f"Hugging Face error: {str(e)}")
             return None
     
-    def _call_gemini_fallback(self, messages: List[Dict], max_tokens: int) -> Optional[str]:
+    def _call_gemini_fallback(self, query: str, context: str, history: List[Dict], max_tokens: int) -> Optional[str]:
         """
-        Call Gemini API as last resort fallback
+        Call Gemini API as last resort fallback with 25K context window
         
         Args:
-            messages: Formatted messages
+            query: User query
+            context: RAG context (Gemini can handle 100K chars ~= 25K tokens)
+            history: Conversation history
             max_tokens: Maximum tokens
             
         Returns:
@@ -460,11 +473,30 @@ class ChatbotProvider:
             return None
         
         try:
-            # Extract user message and PREPEND system prompt for Gemini/Gemma
-            # We sandwich consistency across all models in the chain
-            system_instruction = messages[0]['content']
-            user_msg_content = messages[-1]['content']
-            combined_prompt = f"{system_instruction}\n\n{user_msg_content}"
+            # Gemini has 1M context window - use generous 100K chars (~25K tokens)
+            max_gemini_context_chars = 100000
+            truncated_context = context[:max_gemini_context_chars] if context else ""
+            
+            if len(context or "") > max_gemini_context_chars:
+                logger.info(f"Gemini context truncated to {max_gemini_context_chars} chars")
+            
+            # Build Gemini-optimized prompt with system instructions
+            system_instruction = (
+                "IDENTITY CONTRACT (NON-NEGOTIABLE)\n"
+                "You are 'Allu Bot', the official portfolio assistant for Althaf Hussain Syed.\n"
+                "You speak on his behalf in a professional, calm, and human manner.\n\n"
+                "ROLE & SCOPE\n"
+                "- Answer only about Althaf's profile, projects, blogs, skills.\n"
+                "- Never refer to 'this developer' or 'provided info'.\n\n"
+                "STYLE RULES\n"
+                "- No raw dumps.\n"
+                "- No numbered lists.\n"
+                "- No apologies.\n"
+                "- No 'Based on provided info'.\n\n"
+                "CONTEXT:\n" + truncated_context
+            )
+            
+            combined_prompt = f"{system_instruction}\n\nUSER QUESTION: {query}"
             
             # Fallback Chain: Try models in order until one works
             # Different models often have separate rate limit buckets
@@ -592,7 +624,8 @@ class ChatbotProvider:
         estimated_input_chars = sum(len(m.get('content', '')) for m in messages)
         estimated_input_tokens = estimated_input_chars / 4
         
-        MAX_INPUT_TOKENS = 3800
+        # Mistral 7B supports 6K input tokens (updated from 3800)
+        MAX_INPUT_TOKENS = 6000
         if estimated_input_tokens > MAX_INPUT_TOKENS:
             logger.warning(f"⚠️ Input budget exceeded ({int(estimated_input_tokens)} > {MAX_INPUT_TOKENS}). Truncating context.")
             # Emergency truncate of the last user message (which contains the context)
