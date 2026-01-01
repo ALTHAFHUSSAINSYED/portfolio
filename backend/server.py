@@ -106,12 +106,12 @@ except Exception as e:
 # Initialize Multi-Provider Chatbot Components
 try:
     response_cache = ResponseCache(max_size=100, ttl_seconds=3600)
-    rate_limiter = RateLimiter(max_requests_per_minute=20)
+    rate_limiter = RateLimiter(max_requests_per_minute=12)  # Per-session limit: 12 RPM
     chatbot_provider = ChatbotProvider()
     chatbot_provider = ChatbotProvider()
     conversation_sessions = {}  # {session_id: [messages]}
     session_metadata = {}       # {session_id: {"state": "START", "disengagement_count": 0}}
-    logger.info("Multi-provider chatbot components initialized")
+    logger.info("Multi-provider chatbot components initialized (per-session rate limiting: 12 RPM)")
 except Exception as e:
     logger.error(f"Failed to initialize chatbot components: {e}")
     response_cache = None
@@ -955,10 +955,10 @@ async def ask_agent(query: dict):
         )
     
     try:
-        # Rate limiting check
-        if not rate_limiter.check_limit():
-            wait_time = rate_limiter.get_wait_time()
-            logger.warning(f"Rate limit exceeded. Wait time: {wait_time:.1f}s")
+        # Per-session rate limiting check
+        if not rate_limiter.check_limit(session_id):
+            wait_time = rate_limiter.get_wait_time(session_id)
+            logger.warning(f"Rate limit exceeded for session {session_id}. Wait time: {wait_time:.1f}s")
             return JSONResponse(
                 status_code=429,
                 content={
@@ -979,12 +979,8 @@ async def ask_agent(query: dict):
                 content={"reply": cached_response, "source": "Cache"}
             )
         
-        # Record request for rate limiting
-        rate_limiter.record_request()
-        
-        
-        # Record request for rate limiting
-        rate_limiter.record_request()
+        # Record request for per-session rate limiting
+        rate_limiter.record_request(session_id)
         
         # Start timer for telemetry
         start_time = datetime.now()
