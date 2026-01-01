@@ -287,45 +287,61 @@ class BlogPublisher:
         except Exception as e:
             logger.warning(f"Local save failed (non-critical): {e}")
 
-        # 3. Save to ChromaDB (with retry logic)
+        # 3. Save to ChromaDB (with retry logic + dual-write to portfolio_master)
+        # Task 12: Dual-write phase - write to BOTH Blogs_data AND portfolio_master
         if self.chroma_client:
             max_retries = 3
             retry_delay = 5
             
-            for attempt in range(max_retries):
-                try:
-                    collection = self.chroma_client.get_or_create_collection("Blogs_data")
-                    
-                    # Check if embedding exists (rare collision)
-                    existing = collection.get(ids=[blog_id])
-                    if existing and existing['ids']:
-                         logger.warning(f"Blog {blog_id} already in ChromaDB. Updating...")
-                    
-                    embedding = self._get_embedding(blog['content'])
-                    if not embedding:
-                        raise ValueError("Embedding generation failed - null embedding returned")
-                    
-                    collection.upsert(
-                        ids=[blog_id],
-                        documents=[blog['content']],
-                        metadatas=[{
-                            "title": blog['title'],
-                            "category": blog['category'],
-                            "url": f"https://althafportfolio.site/blogs/{blog_id}",
-                            "timestamp": str(int(time.time()))
-                        }],
-                        embeddings=[embedding]
-                    )
-                    logger.info("✅ Successfully embedded into ChromaDB")
-                    break  # Success - exit retry loop
-                    
-                except Exception as e:
-                    logger.warning(f"ChromaDB sync attempt {attempt + 1}/{max_retries} failed: {e}")
-                    if attempt < max_retries - 1:
-                        time.sleep(retry_delay)
-                    else:
-                        logger.error(f"❌ ChromaDB sync FAILED after {max_retries} attempts for blog {blog_id}")
-                        # Continue anyway - S3 is the source of truth
+            # Generate embedding once (reuse for both collections)
+            embedding = self._get_embedding(blog['content'])
+            if not embedding:
+                logger.error("Embedding generation failed - cannot save to ChromaDB")
+            else:
+                # Prepare metadata
+                metadata = {
+                    "title": blog['title'],
+                    "category": blog['category'],
+                    "url": f"https://althafportfolio.site/blogs/{blog_id}",
+                    "timestamp": str(int(time.time())),
+                    "published_date": blog.get('createdAt', '')[:10] if 'createdAt' in blog else datetime.now().strftime('%Y-%m-%d')
+                }
+                
+                # Dual-Write Strategy: Write to both collections
+                collections_to_write = [
+                    ("Blogs_data", metadata),  # Legacy collection
+                    ("portfolio_master", {**metadata, "subcategory": blog['category']})  # Unified collection with category='blog'
+                ]
+                
+                # Update portfolio_master metadata to include main category tag
+                collections_to_write[1][1]["category"] = "blog"  # Override with 'blog' for unified collection
+                
+                for collection_name, collection_metadata in collections_to_write:
+                    for attempt in range(max_retries):
+                        try:
+                            collection = self.chroma_client.get_or_create_collection(collection_name)
+                            
+                            # Check if embedding exists (rare collision)
+                            existing = collection.get(ids=[blog_id])
+                            if existing and existing['ids']:
+                                logger.warning(f"Blog {blog_id} already in {collection_name}. Updating...")
+                            
+                            collection.upsert(
+                                ids=[blog_id],
+                                documents=[blog['content']],
+                                metadatas=[collection_metadata],
+                                embeddings=[embedding]
+                            )
+                            logger.info(f"✅ Successfully embedded into {collection_name}")
+                            break  # Success - exit retry loop
+                            
+                        except Exception as e:
+                            logger.warning(f"{collection_name} sync attempt {attempt + 1}/{max_retries} failed: {e}")
+                            if attempt < max_retries - 1:
+                                time.sleep(retry_delay)
+                            else:
+                                logger.error(f"❌ {collection_name} sync FAILED after {max_retries} attempts for blog {blog_id}")
+                                # Continue to next collection - partial success is acceptable during dual-write phase
         
         return f"https://althafportfolio.site/blogs/{blog_id}"
 
