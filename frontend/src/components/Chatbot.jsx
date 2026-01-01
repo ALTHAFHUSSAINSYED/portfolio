@@ -425,12 +425,8 @@ const Chatbot = () => {
                   </div>
                 )}
 
-                {/* Logic: Only use Typewriter for the VERY LAST message if it's from bot AND we aren't loading */}
-                {msg.sender === "bot" && index === messages.length - 1 && !isLoading ? (
-                  <TypewriterMessage text={msg.text} />
-                ) : (
-                  <div className="message-content">{msg.text}</div>
-                )}
+                <div className="message-content">{msg.text}</div>
+
 
                 {msg.sender === "user" && (
                   <div className="user-avatar">
