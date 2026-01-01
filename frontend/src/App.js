@@ -1,6 +1,6 @@
 import React, { useLayoutEffect } from "react";
 import "./App.css";
-import { Outlet, ScrollRestoration, useLocation } from "react-router-dom"; 
+import { Outlet, ScrollRestoration, useLocation } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
 
 import { portfolioData as techAssistantData } from './data/mock';
@@ -17,23 +17,31 @@ function App() {
   useLayoutEffect(() => {
     if (location.state && location.state.scrollTo) {
       const targetId = location.state.scrollTo;
-      const element = document.getElementById(targetId);
-      
-      if (element) {
-        // 1. Temporarily disable smooth scrolling to force an instant JUMP
-        document.documentElement.style.scrollBehavior = 'auto';
-        
-        // 2. Teleport to the section
-        element.scrollIntoView({ block: 'start' });
-        
-        // 3. Re-enable smooth scrolling after a tiny delay
-        setTimeout(() => {
-          document.documentElement.style.scrollBehavior = 'smooth';
-        }, 50);
-        
-        // 4. Clear the state so it doesn't happen on refresh
-        window.history.replaceState({}, document.title);
-      }
+
+      // Function to perform safe scroll
+      const performScroll = (behavior = 'auto') => {
+        const element = document.getElementById(targetId);
+        if (element) {
+          element.scrollIntoView({ block: 'start', behavior });
+        }
+      };
+
+      // 1. Initial Instant Scroll
+      document.documentElement.style.scrollBehavior = 'auto';
+      performScroll('auto');
+
+      // Re-enable smooth scrolling
+      setTimeout(() => {
+        document.documentElement.style.scrollBehavior = 'smooth';
+      }, 50);
+
+      // 2. Retry scrolls to handle dynamic content loading (layout shifts)
+      // Checks again after short delays to ensure we stay on target if sections above expand
+      setTimeout(() => performScroll('auto'), 150);
+      setTimeout(() => performScroll('smooth'), 600);
+
+      // Clear state
+      window.history.replaceState({}, document.title);
     }
   }, [location]);
 
@@ -41,13 +49,13 @@ function App() {
     <HelmetProvider>
       <div className="min-h-screen bg-background flex flex-col overflow-hidden">
         <ScrollRestoration />
-        
+
         <Header personalInfo={techAssistantData.personalInfo} />
-        
+
         <main className="flex-grow">
           <Outlet />
         </main>
-        
+
         <Footer personalInfo={techAssistantData.personalInfo} />
         <Toaster />
         <Chatbot />
