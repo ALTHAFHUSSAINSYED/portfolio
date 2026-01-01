@@ -277,9 +277,10 @@ class ChatbotProvider:
         - No "Let me know if you'd like more details"
         - No repetition
         - No content dumping
+        - No emojis (professional text only)
         """
         if state == "GREETING":
-            return "👋 Hello! I can help with Althaf's blogs, projects, or experience."
+            return "Hello! I can help with Althaf's blogs, projects, or experience."
             
         if state == "AMBIGUOUS":
             return "Alright. Let me know what you'd like to explore."
@@ -294,7 +295,7 @@ class ChatbotProvider:
             
         if state == "EXIT":
             # NOTE: Server handles persistence of 'exit_acknowledged'
-            return "👋 Goodbye! Feel free to return anytime."
+            return "Goodbye! Feel free to return anytime."
             
         return "" # Should not happen if called correctly
     

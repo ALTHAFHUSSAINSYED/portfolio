@@ -1144,7 +1144,19 @@ async def ask_agent(query: dict):
         response_text = ""
         portfolio_context = "" # Only used for telemetry/logging
         
-        if next_state != "INFO":
+        # ========================================
+        # DETERMINISTIC DATE HANDLING (Phase 12)
+        # Date queries MUST NOT reach LLM
+        # ========================================
+        date_keywords = ["date", "today", "when", "what day", "current date", "todays date", "what's the date"]
+        if any(keyword in message.lower() for keyword in date_keywords):
+            from datetime import datetime
+            current_date = datetime.now().strftime("%B %d, %Y")
+            response_text = f"Today is {current_date}."
+            logger.info(f"📅 Deterministic date response: {response_text}")
+        # ========================================
+        
+        elif next_state != "INFO":
             # MICRO-RESPONSES (Fast path, no LLM)
             response_text = chatbot_provider.generate_response_by_state(next_state, message)
             

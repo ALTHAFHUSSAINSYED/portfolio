@@ -18,7 +18,10 @@ APOLOGY_PATTERNS = [
     r"\bfor the confusion\b",
     r"\bi didn.?t explain\b",
     r"\bbased on the provided information\b",
-    r"\bas an ai model\b"
+    r"\bas an ai model\b",
+    r"\bi don.?t have real-time capabilities\b",
+    r"\bi don.?t have access to real-time\b",
+    r"\bi can.?t access real-time\b"
 ]
 
 def strip_apology_boilerplate(text: str) -> str:
