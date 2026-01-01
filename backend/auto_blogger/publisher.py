@@ -22,6 +22,40 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("BlogPublisher")
 
 # ═══════════════════════════════════════════════════════════
+# HELPER FUNCTIONS
+# ═══════════════════════════════════════════════════════════
+
+def create_clean_excerpt(content: str, max_length: int = 200) -> str:
+    """Create clean excerpt by stripping markdown and extracting readable text"""
+    import re
+    
+    # Remove markdown headers
+    clean = re.sub(r'^#+\s+', '', content, flags=re.MULTILINE)
+    
+    # Remove markdown links [text](url) -> text
+    clean = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'\1', clean)
+    
+    # Remove code blocks
+    clean = re.sub(r'```.*?```', '', clean, flags=re.DOTALL)
+    
+    # Remove inline code
+    clean = re.sub(r'`([^`]+)`', r'\1', clean)
+    
+    # Remove bold/italic markers
+    clean = re.sub(r'\*\*([^\*]+)\*\*', r'\1', clean)
+    clean = re.sub(r'\*([^\*]+)\*', r'\1', clean)
+    
+    # Get first paragraph (split by double newline)
+    paragraphs = [p.strip() for p in clean.split('\n\n') if p.strip()]
+    excerpt = paragraphs[0] if paragraphs else clean
+    
+    # Truncate at word boundary
+    if len(excerpt) > max_length:
+        excerpt = excerpt[:max_length].rsplit(' ', 1)[0] + '...'
+    
+    return excerpt
+
+# ═══════════════════════════════════════════════════════════
 # S3 BLOG STORAGE HELPER
 # ═══════════════════════════════════════════════════════════
 
@@ -94,7 +128,7 @@ class S3BlogStorage:
             "category": blog['category'],
             "slug": blog.get('slug', blog['id']),
             "created_at": blog['created_at'],
-            "excerpt": blog['content'][:200] + "..." if len(blog['content']) > 200 else blog['content'],
+            "excerpt": create_clean_excerpt(blog['content']),  # ✅ Clean excerpt without markdown
             "tags": blog.get('tags', []),
             "author": blog.get('author', 'Althaf Hussain Syed'),
             "author_title": blog.get('author_title', 'Solutions Architect')

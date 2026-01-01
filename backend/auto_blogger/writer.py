@@ -29,6 +29,39 @@ from datetime import datetime
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("BlogWriterAgent")
 
+def strip_leaked_instructions(content: str) -> str:
+    """Remove leaked prompt instructions from generated content"""
+    import re
+    
+    # Remove SEO Implementation sections
+    content = re.sub(
+        r'####?\s*SEO Implementation.*?(?=\n##|\Z)',
+        '',
+        content,
+        flags=re.DOTALL | re.IGNORECASE
+    )
+    
+    # Remove meta description instructions
+    content = re.sub(
+        r'(?:1\.|•)\s*Meta Descriptions:.*?(?=\n(?:2\.|##)|\Z)',
+        '',
+        content,
+        flags=re.DOTALL | re.IGNORECASE
+    )
+    
+    # Remove "To enhance the search engine optimization" phrases
+    content = re.sub(
+        r'To enhance the search engine optimization.*?(?=\n##|\Z)',
+        '',
+        content,
+        flags=re.DOTALL | re.IGNORECASE
+    )
+    
+    # Clean up excessive whitespace
+    content = re.sub(r'\n{3,}', '\n\n', content)
+    
+    return content.strip()
+
 class BlogWriter:
     def __init__(self):
         self.api_key = os.getenv("BLOG_KEY") or os.getenv("OPENROUTER_API_KEY")
@@ -126,6 +159,9 @@ class BlogWriter:
                 clean_excerpt = clean_excerpt[:last_space]
             blog_summary = f"{clean_excerpt}..."
 
+        # ✅ Strip any leaked SEO instructions or prompt artifacts
+        full_content = strip_leaked_instructions(full_content)
+
         # Return dict with metadata + content
         return {
             "title": blog_title,
@@ -153,8 +189,25 @@ class BlogWriter:
         TASK:
         Create a detailed structural outline for a 2500-word technical blog.
         
-        IMPORTANT: Generate THREE things:
-        1. A DESCRIPTIVE TITLE (not just "{category}")
+        CRITICAL TITLE REQUIREMENTS:
+        - Title MUST be unique and specific (NOT generic like "Technical Deep Dive")
+        - Title should reflect CURRENT TRENDS from the research data
+        - Title should be engaging and descriptive
+        - Include year (2026) or specific technologies/approaches
+        
+        GOOD TITLE EXAMPLES:
+        - "DevOps in 2026: AI-Driven Pipelines and Self-Healing Infrastructure"
+        - "The Rise of Platform Engineering: DevOps' Next Evolution"
+        - "Building Resilient Microservices with Kubernetes: A Production Guide"
+        
+        BAD TITLE EXAMPLES (DO NOT USE):
+        - "DevOps - Technical Deep Dive"
+        - "Understanding {category}"
+        - "{category} Best Practices"
+        
+        STRUCTURE REQUIREMENTS:
+        Generate THREE things:
+        1. A UNIQUE, DESCRIPTIVE TITLE (see examples above)
         2. A 2-3 SENTENCE SUMMARY for preview cards
         3. Section outline following this flow:
            - Introduction (Hook + Problem Statement)
@@ -167,13 +220,10 @@ class BlogWriter:
 
         OUTPUT FORMAT (JSON ONLY):
         {{
-            "title": "Descriptive blog title here (NOT just category name)",
+            "title": "Unique, specific, engaging title here (NOT generic)",
             "summary": "2-3 sentence preview explaining what this blog covers",
-            "sections": ["Introduction", "Section 1: ...", "Conclusion"]
+            "sections": ["Introduction: ...", "Section 1: ...", "Conclusion"]
         }}
-        
-        Example good title: "Building Resilient Microservices with Kubernetes: A Production Guide"
-        Example bad title: "DevOps"
         
         Do not write the blog content. Just return the JSON structure.
         """
