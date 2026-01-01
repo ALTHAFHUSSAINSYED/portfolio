@@ -1,7 +1,7 @@
 # GitHub Actions Workflow File - Complete Learning Guide with Inline Comments
 # This file defines an automated CI/CD pipeline that runs on GitHub's servers
 # When you push code, it automatically builds, tests, and deploys your backend
-
+# done
 
 name: Deploy Backend to EC2  # Display name shown in GitHub Actions UI
 
@@ -46,9 +46,6 @@ jobs:  # WHAT jobs to run
           RESEND_KEY=${{ secrets.RESEND_KEY }}
           RESEND_API_KEY=${{ secrets.RESEND_KEY }}
           TO_EMAIL=${{ secrets.TO_EMAIL }}
-          CHATBOT_KEY=${{ secrets.CHATBOT_KEY }}
-          CHATBOT=${{ secrets.CHATBOT }}
-          GEMINI_BLOG_API_KEY=${{ secrets.GEMINI_BLOG_API_KEY }}
           EOF
           chmod 600 .env
 
@@ -61,8 +58,6 @@ jobs:  # WHAT jobs to run
           CHROMA_TENANT_ID=${{ secrets.CHROMA_TENANT }}
           CHROMA_DB_NAME=Development
           GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
-          CHATBOT_KEY=${{ secrets.CHATBOT_KEY }}
-          CHATBOT=${{ secrets.CHATBOT }}
           EOF
 
           if git diff HEAD~1 HEAD --name-only | grep -E "(portfolio_data\.json|formatted_data\.json|fixed_data\.json)"; then
@@ -86,54 +81,55 @@ jobs:  # WHAT jobs to run
           fi
           exit 0
 
-      - name: Deploy to EC2 (Local Shell)
-        run: |
-          # We are already ON the EC2 instance (self-hosted runner)
-          # So we run these commands directly without SSH
-          
-          cd /home/ec2-user/portfolio
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ec2-user/portfolio
 
-          # FORCE RESET (prevents corrupted files surviving)
-          git fetch --all
-          git reset --hard origin/main
-          git pull origin main
+            # FORCE RESET (prevents corrupted files surviving)
+            git fetch --all
+            git reset --hard origin/main
+            git pull origin main
 
-          # Update environment file
-          cd backend
-          echo "MONGO_URL=${{ secrets.MONGO_URL }}" > .env.local
-          echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> .env.local
-          echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> .env.local
-          echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> .env.local
-          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env.local
-          echo "CHROMA_API_KEY=${{ secrets.CHROMA_API_KEY }}" >> .env.local
-          echo "CHROMA_TENANT_ID=${{ secrets.CHROMA_TENANT }}" >> .env.local
-          echo "CHROMA_DB_NAME=Development" >> .env.local
-          echo "BLOG_KEY=${{ secrets.BLOG_KEY }}" >> .env.local
-          echo "CHATBOT_NEW_KEY=${{ secrets.CHATBOT_NEW_KEY }}" >> .env.local
-          echo "CHATBOT=${{ secrets.CHATBOT }}" >> .env.local
-          echo "GEMINI_BLOG_API_KEY=${{ secrets.GEMINI_BLOG_API_KEY }}" >> .env.local
-          echo "SERPER_API_KEY=${{ secrets.SERPER_API_KEY }}" >> .env.local
-          echo "RESEND_KEY=${{ secrets.RESEND_KEY }}" >> .env.local
-          echo "EMAIL_ADDRESS=${{ secrets.TO_EMAIL }}" >> .env.local
-          cd ..
+            # Update environment file (.env.local contains all production secrets)
+            cd backend
+            echo "MONGO_URL=${{ secrets.MONGO_URL }}" > .env.local
+            echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> .env.local
+            echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> .env.local
+            echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> .env.local
+            echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env.local
+            echo "CHROMA_API_KEY=${{ secrets.CHROMA_API_KEY }}" >> .env.local
+            echo "CHROMA_TENANT_ID=${{ secrets.CHROMA_TENANT }}" >> .env.local
+            echo "CHROMA_DB_NAME=Development" >> .env.local
+            echo "BLOG_KEY=${{ secrets.BLOG_KEY }}" >> .env.local
+            echo "CHATBOT_NEW_KEY=${{ secrets.CHATBOT_NEW_KEY }}" >> .env.local
+            echo "CHATBOT=${{ secrets.CHATBOT }}" >> .env.local
+            echo "GEMINI_BLOG_API_KEY=${{ secrets.GEMINI_BLOG_API_KEY }}" >> .env.local
+            echo "SERPER_API_KEY=${{ secrets.SERPER_API_KEY }}" >> .env.local
+            echo "RESEND_KEY=${{ secrets.RESEND_KEY }}" >> .env.local
+            echo "EMAIL_ADDRESS=${{ secrets.TO_EMAIL }}" >> .env.local
+            echo "USE_LEGACY_COLLECTIONS=false" >> .env.local
+            cd ..
 
-          # HARD CLEAN Docker & Disk Space (Aggressive)
-          docker stop portfolio-backend || true
-          docker rm portfolio-backend || true
-          docker system prune -af --volumes
-          sudo apt-get clean || true
-          sudo rm -rf /tmp/* /var/tmp/*
+            # HARD CLEAN Docker (important after crash loops)
+            docker stop portfolio-backend || true
+            docker rm portfolio-backend || true
+            docker image prune -f
 
-          # Rebuild & run (Using backend directory as context)
-          docker build --no-cache -t portfolio-backend backend
-          docker run -d \
-            --memory=5g \
-            --name portfolio-backend \
-            --restart always \
-            -p 8000:8000 \
-            --env-file backend/.env.local \
-            -v /home/ec2-user/portfolio-logs:/app/backend/logs \
-            portfolio-backend
+            # Rebuild & run
+            docker build --no-cache -t portfolio-backend -f backend/Dockerfile .
+            docker run -d \
+              --memory=5g \
+              --name portfolio-backend \
+              --restart always \
+              -p 8000:8000 \
+              -v /home/ec2-user/portfolio-logs:/app/backend/logs \
+              --env-file /home/ec2-user/portfolio/backend/.env.local \
+              portfolio-backend
 
       - name: Wait for container to start
         run: |
@@ -159,4 +155,4 @@ jobs:  # WHAT jobs to run
           echo "Backend health check failed!"
           sudo docker logs portfolio-backend --tail 100
           exit 1
-#good
+#goodd

@@ -159,8 +159,8 @@ Reject blog + log failure
 ### Deployment
 - **Frontend:** Push to `main` → Amplify auto-deploys (no GitHub Action needed)
 - **Backend:** GitHub Actions workflow deploys to EC2 on `backend/` changes. Manual restart: SSH to EC2 → `docker restart portfolio-backend`
-- **Environment Sync:** Update `.env` on EC2 for production secrets (NEVER commit `.env` to repo)
-- **Docker Container:** Runs on port 8000, memory limit 5GB, auto-restart enabled
+- **Environment File:** `/home/ec2-user/portfolio/backend/.env.local` contains all production secrets (NEVER commit to repo)
+- **Docker Container:** Runs on port 8000, memory limit 5GB, auto-restart enabled, uses `--env-file /home/ec2-user/portfolio/backend/.env.local`
 - **Log Persistence:** Docker volume mounts `/home/ec2-user/portfolio-logs` to `/app/backend/logs`
 
 ### EC2 Instance Access
@@ -176,7 +176,8 @@ ssh -i "<path-to-pem-file>" ec2-user@<ec2-ip-address>
 - **Access container shell:** `docker exec -it portfolio-backend bash`
 - **Check disk usage:** `df -h`
 - **Clean unused images:** `docker image prune -a`
-- **Update .env:** `nano /home/ec2-user/.env` (then restart container)
+- **Update .env.local:** `nano /home/ec2-user/portfolio/backend/.env.local` (then restart container)
+- **Verify env loaded:** `docker exec portfolio-backend printenv | grep -E '(CHATBOT|BLOG_KEY|GEMINI)'`
 
 **Important Notes:**
 - PEM file must have correct permissions: `chmod 400 <pem-file>`
