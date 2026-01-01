@@ -78,6 +78,10 @@ db_name = os.environ.get('DB_NAME', 'portfolioDB')
 client = None
 db = None
 
+# ChromaDB Migration Toggle (Task 15)
+USE_LEGACY_COLLECTIONS = os.environ.get('USE_LEGACY_COLLECTIONS', 'false').lower() == 'true'
+logger.info(f"ChromaDB Mode: {'LEGACY (3 collections)' if USE_LEGACY_COLLECTIONS else 'UNIFIED (portfolio_master)'}")
+
 if mongo_url:
     try:
         client = AsyncIOMotorClient(mongo_url)
@@ -428,18 +432,25 @@ async def get_portfolio_context(query: str, intent: str) -> str:
         # Use passed intent
         logger.info(f"🧠 Routing Intent: {str(intent).upper()}")
         
-        collections_to_query = set()
-        
-        if intent == "aws_projects":
-            collections_to_query.add('Projects_data') # Will be filtered for AWS later (Task 2)
-        elif intent == "projects":
-            collections_to_query.add('Projects_data')
-        elif intent == "blogs":
-            collections_to_query.add('Blogs_data')
-        else: # limit to portfolio only for profile queries
-            collections_to_query.add('portfolio')
-        
-        logger.info(f"Querying collections: {collections_to_query}")
+        # Unified Collection Logic (Task 11)
+        if USE_LEGACY_COLLECTIONS:
+            # Rollback Mode: Use 3 separate collections
+            collections_to_query = set()
+            
+            if intent == "aws_projects":
+                collections_to_query.add('Projects_data') # Will be filtered for AWS later (Task 2)
+            elif intent == "projects":
+                collections_to_query.add('Projects_data')
+            elif intent == "blogs":
+                collections_to_query.add('Blogs_data')
+            else: # limit to portfolio only for profile queries
+                collections_to_query.add('portfolio')
+            
+            logger.info(f"[LEGACY MODE] Querying collections: {collections_to_query}")
+        else:
+            # Production Mode: Use unified portfolio_master with metadata filters
+            collections_to_query = None  # Will use unified logic below
+            logger.info(f"[UNIFIED MODE] Using portfolio_master with metadata filtering")
         
         # --- RAG DATE ANCHORING UTILS ---
         from datetime import date
@@ -486,45 +497,90 @@ async def get_portfolio_context(query: str, intent: str) -> str:
 
         # --------------------------------
         
-        for collection_name in collections_to_query:
+        # Unified Collection Query Logic
+        if USE_LEGACY_COLLECTIONS:
+            # Legacy Mode: Iterate 3 collections
+            collection_iterator = collections_to_query
+        else:
+            # Unified Mode: Query portfolio_master once with metadata filters
+            collection_iterator = ['portfolio_master']
+        
+        for collection_name in collection_iterator:
             try:
+                # Prepare metadata filter for unified collection
+                metadata_filter = None
+                
+                if not USE_LEGACY_COLLECTIONS:
+                    # Intelligent filtering based on intent (Task 11)
+                    if intent == "blogs":
+                        # Strict blog filter
+                        metadata_filter = {"category": "blog"}
+                    elif intent == "projects" or intent == "aws_projects":
+                        # Mixed query: project + profile data
+                        metadata_filter = {"$or": [{"category": "project"}, {"category": "profile"}]}
+                    elif intent == "profile":
+                        # Profile only
+                        metadata_filter = {"category": "profile"}
+                    # else: No filter (query all categories)
+                    
+                    logger.info(f"Metadata filter: {metadata_filter}")
+                
                 collection = chroma_client.get_collection(
                     name=collection_name,
                     embedding_function=GeminiEmbeddingFunction()
                 )
                 
                 # Split Limits Strategy (Visibility vs Safety)
-                CANDIDATE_LIMIT = 5  
-                INJECTION_LIMIT = 2
-                
-                # Intent-Specific Configurations
-                search_query = query
-                
-                if intent == "aws_projects":
-                    CANDIDATE_LIMIT = 5
+                # Unified collection uses GLOBAL_LIMIT = 6 (Task 11)
+                if USE_LEGACY_COLLECTIONS:
+                    CANDIDATE_LIMIT = 5  
                     INJECTION_LIMIT = 2
-                    search_query = f"AWS Cloud Infrastructure {query}"
-                elif intent == "projects":
-                    CANDIDATE_LIMIT = 5
-                    INJECTION_LIMIT = 3
-                elif intent == "blogs":
-                    CANDIDATE_LIMIT = 6 # Higher visibility for blogs
-                    INJECTION_LIMIT = 2
-                elif intent == "profile":
-                    CANDIDATE_LIMIT = 3
-                    INJECTION_LIMIT = 2
+                    
+                    # Intent-Specific Configurations (Legacy)
+                    search_query = query
+                    
+                    if intent == "aws_projects":
+                        CANDIDATE_LIMIT = 5
+                        INJECTION_LIMIT = 2
+                        search_query = f"AWS Cloud Infrastructure {query}"
+                    elif intent == "projects":
+                        CANDIDATE_LIMIT = 5
+                        INJECTION_LIMIT = 3
+                    elif intent == "blogs":
+                        CANDIDATE_LIMIT = 6 # Higher visibility for blogs
+                        INJECTION_LIMIT = 2
+                    elif intent == "profile":
+                        CANDIDATE_LIMIT = 3
+                        INJECTION_LIMIT = 2
+                else:
+                    # Unified Mode: GLOBAL_LIMIT = 6
+                    CANDIDATE_LIMIT = 6
+                    INJECTION_LIMIT = 6  # Return all candidates in unified mode
+                    search_query = query
+                    
+                    if intent == "aws_projects":
+                        search_query = f"AWS Cloud Infrastructure {query}"
 
                 logger.info(f"Querying {collection_name} | Candidates: {CANDIDATE_LIMIT} | Injection: {INJECTION_LIMIT}")
                 
                 # 1. Fetch Candidates (High Visibility)
-                results = collection.query(query_texts=[search_query], n_results=CANDIDATE_LIMIT)
+                # Apply metadata filter for unified collection
+                query_kwargs = {"query_texts": [search_query], "n_results": CANDIDATE_LIMIT}
+                if metadata_filter and not USE_LEGACY_COLLECTIONS:
+                    query_kwargs["where"] = metadata_filter
+                
+                results = collection.query(**query_kwargs)
                 
                 docs = results.get('documents', [[]])[0]
                 metas = results.get('metadatas', [[]])[0]
                 ids = results.get('ids', [[]])[0]
                 
                 # 2. Date Anchoring & Scope Logic (Blogs Only)
-                if collection_name == "Blogs_data":
+                # Works for both legacy (Blogs_data) and unified (portfolio_master with category='blog')
+                is_blog_query = (USE_LEGACY_COLLECTIONS and collection_name == "Blogs_data") or \
+                                (not USE_LEGACY_COLLECTIONS and intent == "blogs")
+                
+                if is_blog_query:
                     filters = normalize_blog_query(query)
                     today_iso = date.today().isoformat()
                     
