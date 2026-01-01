@@ -38,10 +38,12 @@ try:
     from backend.cache_manager import ResponseCache
     from backend.rate_limiter import RateLimiter
     from backend.chatbot_provider import ChatbotProvider
+    from backend.monitoring import chromadb_monitor
     HAS_AGENT_SERVICE = True
 except ImportError as e:
     HAS_AGENT_SERVICE = False
     print(f"⚠️ Warning: Some backend services could not be imported: {e}")
+    chromadb_monitor = None  # Monitoring disabled if import fails
     def sanitize_html(text):
         return bleach.clean(text)
 
@@ -530,6 +532,10 @@ async def get_portfolio_context(query: str, intent: str) -> str:
                     embedding_function=GeminiEmbeddingFunction()
                 )
                 
+                # Monitor ChromaDB operation success
+                if chromadb_monitor:
+                    chromadb_monitor.track_success("get_collection", collection_name, duration_ms=0)
+                
                 # Split Limits Strategy (Visibility vs Safety)
                 # Unified collection uses GLOBAL_LIMIT = 6 (Task 11)
                 if USE_LEGACY_COLLECTIONS:
@@ -569,7 +575,12 @@ async def get_portfolio_context(query: str, intent: str) -> str:
                 if metadata_filter and not USE_LEGACY_COLLECTIONS:
                     query_kwargs["where"] = metadata_filter
                 
-                results = collection.query(**query_kwargs)
+                # Monitor query operation
+                if chromadb_monitor:
+                    with chromadb_monitor.track_operation("query", collection_name):
+                        results = collection.query(**query_kwargs)
+                else:
+                    results = collection.query(**query_kwargs)
                 
                 docs = results.get('documents', [[]])[0]
                 metas = results.get('metadatas', [[]])[0]
@@ -630,6 +641,33 @@ async def get_portfolio_context(query: str, intent: str) -> str:
                     all_context.extend(summarized_docs)
             except Exception as e:
                 logger.warning(f"Skipping collection {collection_name}: {e}")
+                
+                # Log error to monitoring system
+                if chromadb_monitor:
+                    # Classify error severity
+                    if "not found" in str(e).lower() or "does not exist" in str(e).lower():
+                        severity = "CRITICAL"
+                        error_type = "CollectionNotFound"
+                    elif "query" in str(e).lower() or "failed" in str(e).lower():
+                        severity = "HIGH"
+                        error_type = "QueryFailed"
+                    else:
+                        severity = "MEDIUM"
+                        error_type = "UnknownError"
+                    
+                    chromadb_monitor.log_error(
+                        operation="query",
+                        collection=collection_name,
+                        error_type=error_type,
+                        error_message=str(e),
+                        severity=severity,
+                        context={
+                            "query": query[:200] if query else "",
+                            "intent": intent,
+                            "use_legacy": USE_LEGACY_COLLECTIONS
+                        }
+                    )
+                
                 continue
         
         context_text = '\n\n'.join(all_context)
@@ -638,6 +676,22 @@ async def get_portfolio_context(query: str, intent: str) -> str:
         
     except Exception as e:
         logger.error(f"RAG Error: {e}")
+        
+        # Log critical RAG pipeline failure
+        if chromadb_monitor:
+            chromadb_monitor.log_error(
+                operation="rag_pipeline",
+                collection="multiple" if USE_LEGACY_COLLECTIONS else "portfolio_master",
+                error_type="RAGPipelineFailure",
+                error_message=str(e),
+                severity="CRITICAL",
+                context={
+                    "query": query[:200] if query else "",
+                    "intent": intent,
+                    "use_legacy": USE_LEGACY_COLLECTIONS
+                }
+            )
+        
         return "", ""
 
 # --- ENDPOINTS ---

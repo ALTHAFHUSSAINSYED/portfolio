@@ -17,6 +17,14 @@ from datetime import datetime
 from dotenv import load_dotenv
 from botocore.exceptions import ClientError
 
+# Import monitoring system
+try:
+    from backend.monitoring import chromadb_monitor
+    HAS_MONITORING = True
+except ImportError:
+    chromadb_monitor = None
+    HAS_MONITORING = False
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("BlogPublisher")
@@ -337,6 +345,23 @@ class BlogPublisher:
                             
                         except Exception as e:
                             logger.warning(f"{collection_name} sync attempt {attempt + 1}/{max_retries} failed: {e}")
+                            
+                            # Log to monitoring system
+                            if chromadb_monitor and attempt == max_retries - 1:
+                                chromadb_monitor.log_error(
+                                    operation="add",
+                                    collection=collection_name,
+                                    error_type="EmbeddingFailed",
+                                    error_message=str(e),
+                                    severity="HIGH",  # Auto-blogger failures are HIGH (not CRITICAL)
+                                    context={
+                                        "blog_id": blog_id,
+                                        "category": blog.get('category', 'unknown'),
+                                        "attempts": max_retries,
+                                        "dual_write_phase": True
+                                    }
+                                )
+                            
                             if attempt < max_retries - 1:
                                 time.sleep(retry_delay)
                             else:

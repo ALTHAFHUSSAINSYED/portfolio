@@ -130,6 +130,46 @@ class NotificationService:
         except Exception as e:
             logger.error(f"Failed to send generic email: {e}")
             raise e
+    
+    def send_notification(self, subject: str, message: str) -> bool:
+        """
+        Synchronous notification method for monitoring alerts.
+        Used by chromadb_monitor.py for alert emails.
+        
+        Args:
+            subject: Email subject line
+            message: Plain text message (will be converted to HTML)
+        
+        Returns:
+            bool: True if email sent successfully, False otherwise
+        """
+        if not self.resend_api_key or not self.to_email:
+            logger.warning("Resend not configured. Skipping notification.")
+            return False
+        
+        try:
+            # Convert plain text message to HTML with proper formatting
+            html_body = f"""
+            <div style="font-family: 'Courier New', monospace; max-width: 700px; margin: 0 auto; padding: 20px;">
+                <pre style="background-color: #f5f5f5; padding: 15px; border-left: 4px solid #dc3545; overflow-x: auto;">
+{message}
+                </pre>
+            </div>
+            """
+            
+            params = {
+                "from": "Portfolio Monitoring <contact@althafportfolio.site>",
+                "to": [self.to_email],
+                "subject": subject,
+                "html": html_body
+            }
+            
+            response = resend.Emails.send(params)
+            logger.info(f"Monitoring alert sent: {subject}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to send monitoring alert: {e}")
+            return False
 
 # Initialize global notification service
 notification_service = NotificationService()
