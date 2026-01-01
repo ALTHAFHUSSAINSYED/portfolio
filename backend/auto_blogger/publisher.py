@@ -25,8 +25,13 @@ logger = logging.getLogger("BlogPublisher")
 # HELPER FUNCTIONS
 # ═══════════════════════════════════════════════════════════
 
-def create_clean_excerpt(content: str, max_length: int = 200) -> str:
-    """Create clean excerpt by stripping markdown and extracting readable text"""
+def create_clean_excerpt(content: str, max_length: int = 350) -> str:
+    """Create clean excerpt by stripping markdown and extracting readable text
+    
+    Args:
+        content: Blog content with markdown
+        max_length: Maximum character length (default 350 for ~3 lines)
+    """
     import re
     
     # Remove markdown headers
@@ -45,15 +50,23 @@ def create_clean_excerpt(content: str, max_length: int = 200) -> str:
     clean = re.sub(r'\*\*([^\*]+)\*\*', r'\1', clean)
     clean = re.sub(r'\*([^\*]+)\*', r'\1', clean)
     
-    # Get first paragraph (split by double newline)
+    # Get first 2-3 paragraphs (not just first one)
     paragraphs = [p.strip() for p in clean.split('\n\n') if p.strip()]
-    excerpt = paragraphs[0] if paragraphs else clean
+    
+    # Combine first 2 paragraphs for richer excerpt
+    if len(paragraphs) >= 2:
+        excerpt = paragraphs[0] + ' ' + paragraphs[1]
+    elif paragraphs:
+        excerpt = paragraphs[0]
+    else:
+        excerpt = clean
     
     # Truncate at word boundary
     if len(excerpt) > max_length:
         excerpt = excerpt[:max_length].rsplit(' ', 1)[0] + '...'
     
     return excerpt
+
 
 # ═══════════════════════════════════════════════════════════
 # S3 BLOG STORAGE HELPER
