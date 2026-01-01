@@ -1128,7 +1128,7 @@ async def ask_agent(query: dict):
         # ========================================
         current_state = session_metadata[session_id].get("state", "START")
         
-        # If we are in HOLD state and the user says something weak/empty, DO NOT re-engage
+        # If we are in HOLD state and the user says something weak/empty, respond naturally
         if current_state == "HOLD":
             # Very simple guard: Only break HOLD if it looks like a real question
             is_weak_input = len(message.split()) < 4 and "?" not in message
@@ -1136,10 +1136,10 @@ async def ask_agent(query: dict):
             has_trigger = any(w in message.lower() for w in trigger_words)
             
             if is_weak_input and not has_trigger:
-                logger.info("🔒 HOLD state active: Ignoring weak input.")
+                logger.info("🔒 HOLD state active: Weak input detected, offering help.")
                 return JSONResponse(
                     status_code=200, 
-                    content={"reply": "👍", "source": "System-Hold"}
+                    content={"reply": "I can help with Althaf's profile, projects, skills, or experience. What would you like to know?", "source": "System-Hold"}
                 )
 
         # ========================================
