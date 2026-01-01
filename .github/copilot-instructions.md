@@ -47,7 +47,7 @@ FastAPI app with lifespan context manager that:
 
 **API Layer (7):**
 1. `server.py` - Main FastAPI app, endpoints, health checks
-2. `chatbot_provider.py` - Chatbot state machine & 3-tier LLM fallback logic
+2. `chatbot_provider.py` - Chatbot state machine & 4-tier LLM fallback logic
 3. `ai_service.py` - LLM integration (Gemini embeddings + OpenRouter)
 4. `cache_manager.py` - Response caching (chatbot)
 5. `rate_limiter.py` - Rate limiting (10 req/min per IP)
@@ -105,11 +105,12 @@ cd frontend
 npm start  # Runs on localhost:3000
 ```
 
-### Chatbot System (3-Tier Fallback)
+### Chatbot System (4-Tier Fallback)
 **Architecture:**
-- **Tier 1 (Primary - 90%):** `mistralai/mistral-7b-instruct:free` via OpenRouter (`CHATBOT_NEW_KEY`)
-- **Tier 2 (Fallback):** `meta-llama/llama-3.2-3b-instruct` via Hugging Face Gradio (`CHATBOT` token)
-- **Tier 3 (Emergency):** `models/gemini-2.5-flash` via Google Gemini (`GEMINI_API_KEY`)
+- **Tier 1 (Primary):** `mistralai/mistral-7b-instruct:free` via OpenRouter (`CHATBOT_NEW_KEY`)
+- **Tier 2 (OpenAI Fallback):** `openai/gpt-oss-20b:free` via OpenRouter (`CHATBOT_NEW_KEY`)
+- **Tier 3 (Gemini Chain):** `gemini-2.5-flash` → `gemini-2.0-flash-exp` → `gemma-3-12b-it` via Google AI (`GEMINI_API_KEY`)
+- **Tier 4 (Last Resort):** `meta-llama/llama-3.2-3b-instruct` via Hugging Face Gradio (`CHATBOT` token)
 
 **State Machine:**
 ```python
@@ -162,6 +163,26 @@ Reject blog + log failure
 - **Docker Container:** Runs on port 8000, memory limit 5GB, auto-restart enabled
 - **Log Persistence:** Docker volume mounts `/home/ec2-user/portfolio-logs` to `/app/backend/logs`
 
+### EC2 Instance Access
+**SSH Connection:**
+```bash
+ssh -i "<path-to-pem-file>" ec2-user@<ec2-ip-address>
+```
+
+**Common Operations:**
+- **Check Docker status:** `docker ps -a`
+- **View logs:** `docker logs portfolio-backend --tail 100`
+- **Restart container:** `docker restart portfolio-backend`
+- **Access container shell:** `docker exec -it portfolio-backend bash`
+- **Check disk usage:** `df -h`
+- **Clean unused images:** `docker image prune -a`
+- **Update .env:** `nano /home/ec2-user/.env` (then restart container)
+
+**Important Notes:**
+- PEM file must have correct permissions: `chmod 400 <pem-file>`
+- Always backup `.env` before modifications
+- Container logs are persisted in `/home/ec2-user/portfolio-logs`
+
 ## Project-Specific Conventions
 
 ### API Patterns
@@ -198,10 +219,12 @@ embedding = genai.embed_content(
 ```
 
 **Important Notes:**
-- **Chatbot:** Uses `CHATBOT_NEW_KEY` (OpenRouter) for Mistral 7B (primary)
+- **Chatbot:** Uses `CHATBOT_NEW_KEY` (OpenRouter) for Tier 1 (Mistral 7B) + Tier 2 (OpenAI gpt-oss-20b)
+- **Chatbot Gemini:** Uses `GEMINI_API_KEY` (Google AI) for Tier 3 (gemini-2.5-flash, gemini-2.0-flash-exp, gemma-3-12b-it)
+- **Chatbot HF:** Uses `CHATBOT` (HuggingFace) for Tier 4 last resort (Llama 3.2 3B)
 - **Auto-Blogger:** Uses `BLOG_KEY` (OpenRouter) for Mistral Small, DeepSeek R1, Llama 405B
 - **Embeddings:** Uses `GEMINI_API_KEY` (Google) for text-embedding-004
-- **Fallback:** 3-tier system ensures 99.9% uptime (Mistral → HF Gradio → Gemini)
+- **Fallback:** 4-tier system ensures 99.9% uptime (Mistral → OpenAI → Gemini Chain → HF Gradio)
 
 ### Search & Caching
 ```python
