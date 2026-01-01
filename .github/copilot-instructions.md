@@ -1,39 +1,93 @@
 # Portfolio Project - AI Coding Agent Instructions
 
+**Last Updated:** January 1, 2026  
+**Version:** 2.0  
+**Status:** Production
+
 ## Project Overview
-This is an AI-powered portfolio and blogging platform with automated blog generation and an interactive chatbot.
-- **Backend:** Python (FastAPI) with MongoDB, ChromaDB, Motor async driver
-- **Frontend:** React (Create React App) with Radix UI, Tailwind CSS
-- **AI:** Google Gemini (primary) via `gemini_service`, OpenAI (fallback)
-- **Search:** Serper.dev API (primary, cached), DuckDuckGo (fallback)
-- **Deployment:** AWS EC2 (backend), AWS Amplify (frontend, auto-deploys on `main` push)
+This is an AI-powered portfolio and blogging platform with automated blog generation (4-agent system) and an interactive chatbot (3-tier fallback model system).
+
+### Technology Stack
+- **Backend:** Python 3.11 (FastAPI + Uvicorn) with MongoDB Atlas, ChromaDB Cloud, AWS S3
+- **Frontend:** React 18 with Shadcn/UI, React Router v6, Context API
+- **AI Services:** 
+  - **Chatbot:** OpenRouter API (Mistral 7B primary, Llama 3.2 fallback, Gemini emergency)
+  - **Auto-Blogger:** OpenRouter API (4-agent system: Mistral Small, DeepSeek R1, Llama 405B, Gemma 2)
+  - **Embeddings:** Google Gemini text-embedding-004
+- **Search:** Serper.dev API (Google Search API wrapper)
+- **Deployment:** AWS EC2 t2.large (backend Docker), AWS Amplify (frontend CDN)
+- **Storage:** AWS S3 (blogs), MongoDB Atlas (portfolio data), ChromaDB Cloud (vector embeddings)
 
 ## Architecture & Data Flows
 
-### Backend (`backend/server.py`)
-FastAPI app with lifespan context manager that:
-1. Starts `APScheduler` with `CronTrigger` for daily blog generation (1 AM UTC)
-2. Initializes `agent_service` in daemon thread for background AI processing
-3. Configures CORS with explicit origin list from `CORS_ORIGINS` env var (not `*`)
-4. Registers `api_router` with `/api` prefix for all endpoints
+### High-Level Architecture
+```
+User Browser
+    ↓
+AWS Amplify (Frontend CDN) ←→ AWS S3 (Blog Storage)
+    ↓
+EC2 Instance (t2.large) → Docker Container (FastAPI App)
+    ↓
+├── ChromaDB Cloud (Vector Embeddings)
+├── MongoDB Atlas (Portfolio Data)
+├── AWS S3 (Blog Posts + Index)
+├── OpenRouter API (LLM Models)
+├── Google Gemini API (Embeddings)
+└── SERPER API (Web Search)
+```
 
-**Key Service Layers:**
-- **AI Generation:** `gemini_service.py` (`GeminiClient.ChatCompletions.create()`) mimics OpenAI interface
-- **Agent Logic:** `agent_service.py` (`WebSearchEngine` class) orchestrates search → AI response pipeline
-- **Search Optimization:** `search_utils.py` (`SearchCache`, `RateLimiter`, `QueryOptimizer`) caches results 24h, enforces rate limits
-- **Security:** `security_utils.py` (`sanitize_html`, `SecurityHeadersMiddleware`) uses `bleach` for XSS prevention
-- **Notifications:** `notification_service.py` sends email via Resend API on blog success/failure
+### Backend Architecture (`backend/server.py`)
+FastAPI app with lifespan context manager that:
+1. **Auto-Blogger Scheduler:** APScheduler with CronTrigger for daily blog generation (7:00 AM IST)
+2. **Chatbot System:** 3-tier fallback model system with rate limiting (10 req/min)
+3. **CORS:** Explicit origin list from `CORS_ORIGINS` env var
+4. **API Router:** All endpoints registered with `/api` prefix
+
+**Core Active Files (25):**
+
+**API Layer (7):**
+1. `server.py` - Main FastAPI app, endpoints, health checks
+2. `chatbot_provider.py` - Chatbot state machine & 3-tier LLM fallback logic
+3. `ai_service.py` - LLM integration (Gemini embeddings + OpenRouter)
+4. `cache_manager.py` - Response caching (chatbot)
+5. `rate_limiter.py` - Rate limiting (10 req/min per IP)
+6. `notification_service.py` - Email notifications via Resend API
+7. `middleware/response_sanitizer.py` - Strip apology phrases from responses
+
+**Auto-Blogger System (13):**
+8. `auto_blogger/scheduler.py` - Cron scheduler (7:00 AM daily, category rotation)
+9. `auto_blogger/writer.py` - 4-agent blog generation orchestrator
+10. `auto_blogger/critic.py` - Quality validation (score ≥90 required)
+11. `auto_blogger/publisher.py` - S3 upload + ChromaDB embedding
+12. `auto_blogger/researcher.py` - SERPER API web research
+13. `auto_blogger/job_state.py` - Resumable job management
+14. `auto_blogger/logger_utils.py` - Structured logging system
+15. `auto_blogger/notifier.py` - Email success/failure notifications
+16. `auto_blogger/cleanup.py` - Old job cleanup (>7 days)
+17. `auto_blogger/watchdog.py` - Process health monitoring
+18. `auto_blogger/worker.py` - Background task worker
+19. `auto_blogger/models/model_config.py` - Agent model definitions
+20. `auto_blogger/models/model_benchmarker.py` - Model performance testing
+
+**Utilities (5):**
+21. `populate_vector_db.py` - Sync portfolio data to ChromaDB (Gemini embeddings)
+22. `verify_chroma_state.py` - Verify ChromaDB state
+23. `rebuild_s3_index.py` - Rebuild blog index.json from S3 posts
+24. `fix_todays_blog.py` - Quick blog patching tool
+25. `fetch_free_models.py` - Discover free OpenRouter models
 
 ### Data Storage
 - **MongoDB (Motor):** Async `motor.motor_asyncio.AsyncIOMotorClient` for blogs/projects. Use `await db.collection.find()` patterns.
-- **ChromaDB (Cloud):** `chromadb.CloudClient` for vector search. Monitor usage via `chromadb_monitor.py` (50 queries/day limit, 900MB storage cap).
+- **ChromaDB (Cloud):** `chromadb.CloudClient` for vector search with Gemini embeddings. Monitor usage via `chromadb_monitor.py` (free tier: 1000 documents, 10GB storage).
+- **AWS S3:** Blog storage bucket `althaf-blogs-storage` with JSON posts + index.json.
 - **Cloudinary:** Image hosting configured in `server.py` with `cloudinary.uploader.upload()`.
 
 ### Frontend (`frontend/src/`)
-- **Routing:** React Router v7 with `Outlet`, `ScrollRestoration`, programmatic navigation via `location.state.scrollTo`
-- **UI:** Shadcn/Radix components in `components/ui/`, custom `Chatbot` component
+- **Routing:** React Router v6 with `Outlet`, `ScrollRestoration`, programmatic navigation via `location.state.scrollTo`
+- **UI:** Shadcn/Radix components in `components/ui/` (46 files), custom `Chatbot` component
 - **API Client:** Axios calls to `REACT_APP_BACKEND_URL` (set in Amplify env vars)
-- **Build:** Managed by `amplify.yml` (`yarn install --ignore-engines`, output to `build/`)
+- **Build:** Managed by `amplify.yml` (monorepo format: `appRoot: frontend`, `yarn install --ignore-engines`, output to `build/`)
+- **Deployment:** AWS Amplify (auto-deploy on push to `main` when frontend changes detected)
 
 ## Critical Workflows
 
@@ -41,7 +95,7 @@ FastAPI app with lifespan context manager that:
 **Backend:**
 ```bash
 cd backend
-# Ensure .env has GEMINI_API_KEY, MONGO_URL, SERPER_API_KEY
+# Ensure .env has GEMINI_API_KEY, MONGO_URL, SERPER_API_KEY, CHATBOT_NEW_KEY, BLOG_KEY
 uvicorn server:app --reload --port 8000
 ```
 
@@ -51,11 +105,44 @@ cd frontend
 npm start  # Runs on localhost:3000
 ```
 
-### Blog Generation System
-1. **Scheduled:** `APScheduler` calls `scheduled_blog_generation()` → `gemini_service.generate_blog_post(topic)`
-2. **Manual:** POST `/trigger-blog-generation` (calls same function)
-3. **Pipeline:** Generate content → Insert to MongoDB → Send email via `notification_service.send_blog_notification()`
-4. **Logging:** Prints formatted success/failure boxes to stdout + writes to `agent.log`
+### Chatbot System (3-Tier Fallback)
+**Architecture:**
+- **Tier 1 (Primary - 90%):** `mistralai/mistral-7b-instruct:free` via OpenRouter (`CHATBOT_NEW_KEY`)
+- **Tier 2 (Fallback):** `meta-llama/llama-3.2-3b-instruct` via Hugging Face Gradio (`CHATBOT` token)
+- **Tier 3 (Emergency):** `models/gemini-2.5-flash` via Google Gemini (`GEMINI_API_KEY`)
+
+**State Machine:**
+```python
+def detect_conversation_state(text: str) -> str:
+    # States: GREETING, EXIT, SILENT, ABUSE, AMBIGUOUS, INFO
+    # INFO state triggers RAG pipeline (ChromaDB query → LLM generation)
+```
+
+**Rate Limiting:** 10 requests/minute per IP (enforced by `rate_limiter.py`)
+
+### Blog Generation System (4-Agent Pipeline)
+**Daily Schedule:** 7:00 AM IST (APScheduler CronTrigger)
+**Category Rotation:** DevOps → Cloud Computing → Cybersecurity → AI/ML
+
+**Agent System:**
+1. **Researcher** (`researcher.py`): SERPER API web research → trending topics
+2. **Writer** (`writer.py`): `mistralai/mistral-small-3.1-24b-instruct:free` → generate outline + sections
+3. **Critic** (`critic.py`): `deepseek/deepseek-r1-0528:free` → quality validation (score ≥90)
+4. **Publisher** (`publisher.py`): S3 upload + ChromaDB embedding + email notification
+
+**Pipeline:**
+```
+1. Research (SERPER) → 2. Outline (Mistral Small) → 3. Draft Sections (Mistral Small)
+   ↓
+4. Quality Check (DeepSeek R1) → Score ≥90? → 5. Publish (S3 + ChromaDB)
+   ↓ (if failed)
+Reject blog + log failure
+```
+
+**Job Management:**
+- Resumable jobs with `job_state.py` (stores outline, sections, metadata)
+- Logs in `/app/backend/logs/auto_blogger/{job_id}/`
+- Cleanup after 7 days (`cleanup.py`)
 
 ### Testing Strategy
 - **Test Files:** `backend/test_*.py` (pytest-based, no classes)
@@ -65,11 +152,15 @@ npm start  # Runs on localhost:3000
   - `test_api.py`: FastAPI endpoint responses
   - `test_chatbot_connectivity.py`: AI agent query flow
   - `test_serper_utils.py`: Cache/rate limiter logic
+  - `test_chatbot_fixes.py`: Chatbot 3-tier fallback system
+  - `test_rag_pipeline.py`: RAG retrieval accuracy
 
 ### Deployment
 - **Frontend:** Push to `main` → Amplify auto-deploys (no GitHub Action needed)
-- **Backend:** GitHub Actions workflow deploys to EC2 on `backend/` changes. Manual restart: SSH to EC2 → `sudo systemctl restart portfolio-backend`
+- **Backend:** GitHub Actions workflow deploys to EC2 on `backend/` changes. Manual restart: SSH to EC2 → `docker restart portfolio-backend`
 - **Environment Sync:** Update `.env` on EC2 for production secrets (NEVER commit `.env` to repo)
+- **Docker Container:** Runs on port 8000, memory limit 5GB, auto-restart enabled
+- **Log Persistence:** Docker volume mounts `/home/ec2-user/portfolio-logs` to `/app/backend/logs`
 
 ## Project-Specific Conventions
 
@@ -81,45 +172,69 @@ npm start  # Runs on localhost:3000
 
 ### AI Service Usage
 ```python
-# Correct way to use Gemini service
-from backend.ai_service import gemini_service
+# Correct way to use OpenRouter for chatbot
+from backend.chatbot_provider import ChatbotProvider
 
-response = gemini_service.chat.completions.create(
-    model="gpt-4",  # Maps to gemini-pro-latest
-    messages=[{"role": "user", "content": "..."}],
-    temperature=0.7,
-    max_tokens=2048
-)
-content = response.choices[0].message.content
+chatbot = ChatbotProvider()
+response = await chatbot.get_response(message="What are your projects?")
+# Returns: {"response": "...", "intent": "projects", "cached": false}
+
+# For auto-blogger (4-agent system)
+from backend.auto_blogger.writer import BlogWriter
+
+writer = BlogWriter()
+blog = await writer.generate_blog(category="DevOps", research_data={...})
+# Returns: {"title": "...", "content": "...", "metadata": {...}}
+
+# For embeddings
+import google.generativeai as genai
+
+genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
+embedding = genai.embed_content(
+    model='models/text-embedding-004',
+    content=text,
+    task_type="retrieval_query"
+)['embedding']
 ```
-- **Fallback:** If `gemini_service.is_available == False`, implement OpenAI fallback or graceful degradation
-- **Safety:** Gemini configured with `BLOCK_MEDIUM_AND_ABOVE` for all harm categories
+
+**Important Notes:**
+- **Chatbot:** Uses `CHATBOT_NEW_KEY` (OpenRouter) for Mistral 7B (primary)
+- **Auto-Blogger:** Uses `BLOG_KEY` (OpenRouter) for Mistral Small, DeepSeek R1, Llama 405B
+- **Embeddings:** Uses `GEMINI_API_KEY` (Google) for text-embedding-004
+- **Fallback:** 3-tier system ensures 99.9% uptime (Mistral → HF Gradio → Gemini)
 
 ### Search & Caching
 ```python
-from backend.search_utils import search_cache, rate_limiter
+# Chatbot caching (in-memory)
+from backend.cache_manager import cache_manager
 
-# Always check cache first
-cached = search_cache.get(query)
+cached = cache_manager.get(query)
 if cached:
     return cached
 
-# Rate limit check before API call
-if not rate_limiter.allow_request():
-    raise HTTPException(status_code=429, detail="Rate limit exceeded")
+response = await chatbot.get_response(query)
+cache_manager.set(query, response, ttl=3600)  # 1 hour
 
-# Make API call and cache
-results = serper_search(query)
-search_cache.set(query, results)
+# SERPER API research (auto-blogger)
+from backend.auto_blogger.researcher import BlogResearcher
+
+researcher = BlogResearcher()
+research_data = researcher.analyze_trends(category="DevOps")
+# Returns: {"trending_topics": [...], "recent_advances": [...]}
 ```
-- **Cache TTL:** 24 hours (configurable in `SearchCache.__init__`)
-- **Rate Limits:** Track in `rate_limiter.request_timestamps` (default: max requests per time window)
-- **Admin Tool:** Use `python backend/serper_admin.py --help` for cache management
+
+**Key Points:**
+- **Chatbot Cache:** In-memory, 1-hour TTL, per-user isolation
+- **SERPER Usage:** Only for auto-blogger research (daily), ~30 searches/month
+- **Rate Limits:** 10 req/min for chatbot (enforced by `rate_limiter.py`)
+- **No DuckDuckGo:** Removed fallback, SERPER is primary for research
 
 ### Security Patterns
 - **Input Sanitization:** Always use `sanitize_html()` for user-generated content before DB storage
 - **Middleware Order:** SecurityHeadersMiddleware → CORSMiddleware (order matters!)
 - **Guardrails:** `guardrails.py` defines blocked topics, greeting patterns for chatbot
+- **Rate Limiting:** 10 requests/minute per IP for chatbot (enforced by `slowapi`)
+- **Response Sanitizer:** Strips apology phrases ("I apologize", "I'm sorry") via middleware
 
 
 ### Error Handling, Logging & Commit Policy
@@ -145,46 +260,51 @@ except Exception as e:
 ### Required Environment Variables
 ```bash
 # AI Services
-GEMINI_API_KEY="<get from makersuite.google.com>"  # Primary
-OPENAI_API_KEY="<optional fallback>"
+GEMINI_API_KEY="<your-gemini-api-key>"  # Primary embeddings from Google AI Studio
+CHATBOT_NEW_KEY="<your-openrouter-key>"  # OpenRouter for chatbot (Mistral 7B)
+BLOG_KEY="<your-openrouter-key>"  # OpenRouter for auto-blogger (4 agents)
+CHATBOT="<your-huggingface-token>"  # HuggingFace Gradio fallback
+GEMINI_BLOG_API_KEY="<your-gemini-api-key>"  # Backup embeddings
 
 # Search APIs
-SERPER_API_KEY="<get from serper.dev>"  # Primary (paid)
-NEWS_API_KEY="<optional for news>"
+SERPER_API_KEY="<your-serper-key>"  # Primary (Google Search)
 
 # Databases
-MONGO_URL="mongodb+srv://..."
+MONGO_URL="<your-mongodb-connection-string>"
 DB_NAME="portfolioDB"
-CHROMA_API_KEY="<ChromaDB cloud key>"
-CHROMA_TENANT="<ChromaDB tenant ID>"
+CHROMA_API_KEY="<your-chromadb-key>"
+CHROMA_TENANT="<your-chromadb-tenant>"
 CHROMA_DATABASE="Development"
 
 # Email & Notifications
-RESEND_KEY="<from resend.com>"
-TO_EMAIL="your@email.com"
+RESEND_KEY="<your-resend-key>"
+TO_EMAIL="<your-email>"
 
 # Image Hosting
-CLOUDINARY_CLOUD_NAME="..."
-CLOUDINARY_API_KEY="..."
-CLOUDINARY_API_SECRET="..."
+CLOUDINARY_CLOUD_NAME="<your-cloudinary-name>"
+CLOUDINARY_API_KEY="<your-cloudinary-key>"
+CLOUDINARY_API_SECRET="<your-cloudinary-secret>"
 
-# Security
+# Security & Logging
 CORS_ORIGINS="http://localhost:3000,https://www.althafportfolio.site,https://althafportfolio.site"
+LOG_LEVEL="INFO"
 ```
 
 ### Key File References
 - **Main Entry:** [backend/server.py](backend/server.py) (FastAPI app, scheduler setup)
-- **AI Wrapper:** [backend/gemini_service.py](backend/gemini_service.py) (OpenAI-compatible interface)
-- **Agent Orchestration:** [backend/agent_service.py](backend/agent_service.py) (search + AI pipeline)
-- **Search Utils:** [backend/search_utils.py](backend/search_utils.py) (cache, rate limiter)
-- **Security:** [backend/security_utils.py](backend/security_utils.py) (sanitization, middleware)
-- **DB Monitor:** [backend/chromadb_monitor.py](backend/chromadb_monitor.py) (usage tracking)
+- **Chatbot Logic:** [backend/chatbot_provider.py](backend/chatbot_provider.py) (state machine, 3-tier fallback)
+- **AI Service:** [backend/ai_service.py](backend/ai_service.py) (OpenRouter + Gemini embeddings)
+- **Cache Manager:** [backend/cache_manager.py](backend/cache_manager.py) (in-memory caching)
+- **Rate Limiter:** [backend/rate_limiter.py](backend/rate_limiter.py) (10 req/min enforcement)
+- **Notifications:** [backend/notification_service.py](backend/notification_service.py) (Resend email)
+- **Auto-Blogger:** [backend/auto_blogger/](backend/auto_blogger/) (4-agent system)
 - **Frontend Router:** [frontend/src/App.js](frontend/src/App.js) (React Router setup)
 
 ### Common Pitfalls
 1. **CORS Errors:** Ensure `CORS_ORIGINS` includes the exact frontend URL (no trailing slash mismatches)
-2. **ChromaDB Quotas:** Monitor `query_tracking_log.json` - free tier has 50 queries/day limit
-3. **Serper.dev Credits:** Use cache aggressively to avoid burning API credits (check `cache/` directory)
+2. **ChromaDB Quotas:** Monitor `query_tracking_log.json` - free tier has 1000 documents limit
+3. **Serper.dev Credits:** Use SERPER only for auto-blogger (daily), ~30 searches/month budget
 4. **Motor Async:** Always `await` MongoDB operations (`await db.collection.find_one()`)
 5. **Scheduler Conflicts:** Only one `APScheduler` instance should run (lifespan manager ensures this)
 6. **Import Errors:** Use `from backend import <module>` (not relative imports) due to package structure
+7. **API Keys:** Separate keys for chatbot (`CHATBOT_NEW_KEY`) and auto-blogger (`BLOG_KEY`)
