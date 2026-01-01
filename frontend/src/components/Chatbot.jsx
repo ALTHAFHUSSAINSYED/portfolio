@@ -3,45 +3,6 @@ import "./Chatbot.css";
 import "./ChatbotExtras.css";
 import "./ChatbotUnread.css";
 
-const TypewriterMessage = ({ text, onComplete }) => {
-  const [displayedText, setDisplayedText] = useState("");
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const audioRef = useRef(new Audio("/typing-sound.mp3"));
-
-  useEffect(() => {
-    // Preload audio
-    audioRef.current.volume = 0.3; // Lower volume for subtlety
-  }, []);
-
-  useEffect(() => {
-    // Reset state when text changes completely (new message)
-    if (text !== displayedText && currentIndex === 0) {
-      setDisplayedText("");
-    }
-  }, [text]);
-
-  useEffect(() => {
-    if (currentIndex < text.length) {
-      const timeout = setTimeout(() => {
-        setDisplayedText(prev => prev + text[currentIndex]);
-        setCurrentIndex(prev => prev + 1);
-
-        // Play sound every 3rd character
-        if (currentIndex % 3 === 0 || [' ', '.', ',', '!'].includes(text[currentIndex])) {
-          audioRef.current.currentTime = 0;
-          audioRef.current.play().catch(e => { });
-        }
-      }, 25);
-
-      return () => clearTimeout(timeout);
-    } else {
-      if (onComplete) onComplete();
-    }
-  }, [currentIndex, text, onComplete]);
-
-  return <div className="message-content">{displayedText}</div>;
-};
-
 const Chatbot = () => {
 
   const [isOpen, setIsOpen] = useState(false);
@@ -54,6 +15,33 @@ const Chatbot = () => {
   const [hasInteracted, setHasInteracted] = useState(false); // New state to track interaction
   const [isMaximized, setIsMaximized] = useState(false);
   const messagesEndRef = useRef(null);
+  const loadingSoundRef = useRef(null);
+
+  // Initialize audio on mount
+  useEffect(() => {
+    loadingSoundRef.current = new Audio("/typing-sound.mp3");
+    loadingSoundRef.current.loop = true; // Loop while loading
+    loadingSoundRef.current.volume = 0.3; // 30% volume
+
+    return () => {
+      // Cleanup on unmount
+      if (loadingSoundRef.current) {
+        loadingSoundRef.current.pause();
+        loadingSoundRef.current = null;
+      }
+    };
+  }, []);
+
+  // Play/stop sound based on loading state
+  useEffect(() => {
+    if (isLoading && loadingSoundRef.current) {
+      loadingSoundRef.current.currentTime = 0;
+      loadingSoundRef.current.play().catch(e => console.log("Audio play failed:", e));
+    } else if (!isLoading && loadingSoundRef.current) {
+      loadingSoundRef.current.pause();
+      loadingSoundRef.current.currentTime = 0;
+    }
+  }, [isLoading]);
 
   // Conversation memory to track context - MOVED TO COMPONENT LEVEL
   const conversationMemory = useRef({
