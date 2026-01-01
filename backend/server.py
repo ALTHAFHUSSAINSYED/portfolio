@@ -336,14 +336,7 @@ def detect_intent_priority(text: str) -> Tuple[str, str, dict]:
     if any(sig in text for sig in confusion_signals):
         return "conversation", "confused", scores
     
-    # 3. GREETING DETECTION (BEFORE OTHER SCORING)
-    # Greetings are first-class intents, not ambiguous conversation
-    greeting_triggers = ["hi", "hello", "hey", "hy", "hai", "hii", "hola", "greetings", "good morning", "good evening"]
-    if any(t == text_clean or text_clean.startswith(t + " ") for t in greeting_triggers):
-        scores["greeting"] = 5
-        return "greeting", "neutral", scores
-    
-    # 4. SCORING RULES (Only if sentiment is neutral and not a greeting)
+    # 3. SCORING RULES (Only if sentiment is neutral)
     
     # Conversational / Ambiguous / Fillers
     ambiguous_triggers = ["ok", "fine", "hmm", "is it", "are you sure", "oh", "ah", "got it", "right", "good"]
@@ -385,7 +378,20 @@ def detect_intent_priority(text: str) -> Tuple[str, str, dict]:
         scores["blogs"] += 10
         scores["info"] += 3
 
-    # 4. DECISION & THRESHOLD
+    # 4. PURE GREETING DETECTION (After scoring, before decision)
+    # Only trigger for standalone greetings with no real query
+    greeting_triggers = ["hi", "hello", "hey", "hy", "hai", "hii", "hola", "greetings", "good morning", "good evening"]
+    words = text_clean.split()
+    
+    # Pure greeting: 1-2 words max, starts with greeting, no strong intent detected
+    if len(words) <= 2 and any(words[0] == t for t in greeting_triggers):
+        best_intent, score = max(scores.items(), key=lambda x: x[1])
+        # Only return greeting if no strong intent (score < 3)
+        if score < 3:
+            scores["greeting"] = 5
+            return "greeting", "neutral", scores
+    
+    # 5. DECISION & THRESHOLD
     # Get highest scoring intent
     best_intent, score = max(scores.items(), key=lambda x: x[1])
     
