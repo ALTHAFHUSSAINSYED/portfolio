@@ -243,8 +243,13 @@ This document serves as the **centralized ground-truth checklist** for the "Allu
 
 ### Phase 10: UX Immersion (New - Jan 1, 2026)
 - [ ] **Typing Effect**: Stream text character-by-character for bot responses.
-- [ ] **Audio Feedback**: Play subtle mechanical keyboard/Copilot sound during typing.
+  - ❌ Removed per user request (character animation was "ugly")
+- [x] **Audio Feedback**: Play subtle sound during three-dot loading animation.
+  - ✅ Sound loops while bot is "thinking" (isLoading = true)
+  - ✅ Sound stops when message appears instantly
+  - ✅ Volume set to 30% for subtlety
 - [ ] **Smart Scrolling**: Auto-scroll that tracks the typing cursor.
+  - ℹ️ Not needed (no typing effect)
 
 
 ---
