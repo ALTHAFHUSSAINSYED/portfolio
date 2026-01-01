@@ -49,7 +49,10 @@ def get_portfolio_context(query: str) -> str:
         chroma_tenant = os.getenv('CHROMA_TENANT_ID') # User env might use ID
         chroma_database = os.getenv('CHROMA_DATABASE', 'Development') # Default to Development
         
-        print(f"[INFO] Connecting to Chroma: DB={chroma_database}", flush=True)
+        # Check migration toggle (Task 14)
+        use_legacy = os.getenv('USE_LEGACY_COLLECTIONS', 'false').lower() == 'true'
+        
+        print(f"[INFO] Connecting to Chroma: DB={chroma_database} | Mode={'LEGACY' if use_legacy else 'UNIFIED'}", flush=True)
         
         chroma_client = chromadb.CloudClient(
             api_key=chroma_api_key,
@@ -57,42 +60,94 @@ def get_portfolio_context(query: str) -> str:
             database=chroma_database
         )
         
-        collection_names = ['portfolio', 'Blogs_data', 'Projects_data']
-        
-        for collection_name in collection_names:
+        if use_legacy:
+            # Legacy mode: Query 3 separate collections
+            collection_names = ['portfolio', 'Blogs_data', 'Projects_data']
+            
+            for collection_name in collection_names:
+                try:
+                    print(f"[DEBUG] Getting collection object: {collection_name}...", flush=True)
+                    collection = chroma_client.get_collection(
+                        name=collection_name,
+                        embedding_function=GeminiEmbeddingFunction()
+                    )
+                    # Prioritization Rules:
+                    # 1. Portfolio: Fetch ALL relevant items (Limit 20)
+                    # 2. Projects: Fetch top 3
+                    # 3. Blogs: Fetch top 5
+                    if collection_name == 'portfolio':
+                        limit = 20 
+                    elif collection_name == 'Projects_data':
+                        limit = 3
+                    else: 
+                        limit = 5
+                    
+                    print(f"[INFO] Querying collection: {collection_name} (Limit: {limit})", flush=True)
+                    results = collection.query(query_texts=[query], n_results=limit)
+                    print(f"[DEBUG] Query returned.", flush=True)
+                    
+                    docs = results.get('documents', [[]])[0]
+                    if docs:
+                        print(f"   -> Found {len(docs)} docs in {collection_name}", flush=True)
+                        labeled_docs = [f"[Source: {collection_name}]\n{d}" for d in docs]
+                        all_context.extend(labeled_docs)
+                    else:
+                        print(f"   -> No relevant docs in {collection_name}", flush=True)
+                        
+                except Exception as e:
+                    print(f"[WARN] Skipping collection {collection_name}: {e}", flush=True)
+                    continue
+        else:
+            # Unified mode: Query portfolio_master with metadata filters (Task 14)
             try:
-                print(f"[DEBUG] Getting collection object: {collection_name}...", flush=True)
+                print(f"[DEBUG] Getting unified collection: portfolio_master...", flush=True)
                 collection = chroma_client.get_collection(
-                    name=collection_name,
+                    name='portfolio_master',
                     embedding_function=GeminiEmbeddingFunction()
                 )
-                # Prioritization Rules (User Request):
-                # 1. Portfolio: Fetch ALL relevant items (Limit 20 covering skills, exp, basic info)
-                # 2. Projects: Fetch top 3
-                # 3. Blogs: Fetch top 5 for tech context
-                if collection_name == 'portfolio':
-                    limit = 20 
-                elif collection_name == 'Projects_data':
-                    limit = 3
-                else: 
-                    limit = 5
                 
-                print(f"[INFO] Querying collection: {collection_name} (Limit: {limit})", flush=True)
-                results = collection.query(query_texts=[query], n_results=limit)
-                print(f"[DEBUG] Query returned.", flush=True)
+                # Test category filtering (Task 14)
+                categories_to_test = [
+                    {'filter': {'category': 'profile'}, 'name': 'profile', 'limit': 20},
+                    {'filter': {'category': 'project'}, 'name': 'project', 'limit': 3},
+                    {'filter': {'category': 'blog'}, 'name': 'blog', 'limit': 5}
+                ]
+                
+                for cat_config in categories_to_test:
+                    print(f"[INFO] Testing category filter: {cat_config['name']} (Limit: {cat_config['limit']})", flush=True)
+                    
+                    results = collection.query(
+                        query_texts=[query],
+                        n_results=cat_config['limit'],
+                        where=cat_config['filter']
+                    )
+                    
+                    docs = results.get('documents', [[]])[0]
+                    if docs:
+                        print(f"   -> Found {len(docs)} docs with category={cat_config['name']}", flush=True)
+                        labeled_docs = [f"[Source: portfolio_master/{cat_config['name']}]\n{d}" for d in docs]
+                        all_context.extend(labeled_docs)
+                    else:
+                        print(f"   -> No docs with category={cat_config['name']}", flush=True)
+                
+                # Test $or metadata query (Task 14)
+                print(f"[INFO] Testing $or filter: projects OR profile", flush=True)
+                results = collection.query(
+                    query_texts=[query],
+                    n_results=5,
+                    where={"$or": [{"category": "project"}, {"category": "profile"}]}
+                )
                 
                 docs = results.get('documents', [[]])[0]
                 if docs:
-                    print(f"   -> Found {len(docs)} docs in {collection_name}", flush=True)
-                    # Label the context with source for better LLM understanding
-                    labeled_docs = [f"[Source: {collection_name}]\n{d}" for d in docs]
-                    all_context.extend(labeled_docs)
+                    print(f"   -> Found {len(docs)} docs with $or filter", flush=True)
                 else:
-                    print(f"   -> No relevant docs in {collection_name}", flush=True)
+                    print(f"   -> No docs with $or filter", flush=True)
                     
             except Exception as e:
-                print(f"[WARN] Skipping collection {collection_name}: {e}", flush=True)
-                continue
+                print(f"[ERROR] Unified mode query failed: {e}", flush=True)
+                import traceback
+                traceback.print_exc()
         
         return '\n\n'.join(all_context)
     except Exception as e:

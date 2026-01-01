@@ -3,6 +3,11 @@
 Chatbot Fixes Validation Script
 Tests all 7 golden test cases from the behavioral improvements review.
 
+NOTE (Task 14): This script tests the chatbot endpoint which automatically uses
+the correct ChromaDB collection based on USE_LEGACY_COLLECTIONS env var:
+- USE_LEGACY_COLLECTIONS=false (default): Uses portfolio_master with metadata filters
+- USE_LEGACY_COLLECTIONS=true: Falls back to 3 separate collections (portfolio, Projects_data, Blogs_data)
+
 Run this on EC2 after deploying the fixes.
 Usage: python test_chatbot_fixes.py
 """
