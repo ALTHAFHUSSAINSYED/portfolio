@@ -507,30 +507,30 @@ def detect_conversation_state(self, text: str) -> str:
 |----------|-------|----------|---------|
 | **Primary** | `google/gemini-2.0-flash-exp:free` | OpenRouter | Main chatbot model |
 | **Fallback 1** | `meta-llama/llama-3.2-3b-instruct` | Hugging Face | If OpenRouter fails |
-| **Fallback 2** | `gemini-1.5-flash` | Google AI | If HF fails |
+| **Tier 3 (Emergency)** | `gemini-2.5-flash` | Google AI | Last resort fallback |
 
 **Code:**
 ```python
-# Primary: OpenRouter
+# Tier 1: Mistral 7B (Primary - OpenRouter)
 response = requests.post(
     "https://openrouter.ai/api/v1/chat/completions",
     headers={"Authorization": f"Bearer {CHATBOT_NEW_KEY}"},
     json={
-        "model": "google/gemini-2.0-flash-exp:free",
+        "model": "mistralai/mistral-7b-instruct:free",
         "messages": messages
     }
 )
 
-# Fallback 1: Hugging Face
+# Tier 2: Hugging Face Gradio (Fallback)
 if not response.ok:
     hf_client = Client("huggingface-projects/llama-3.2-3B-Instruct")
     response = hf_client.predict(message=prompt)
 
-# Fallback 2: Gemini
+# Tier 3: Gemini 2.5 Flash (Emergency)
 if not response:
     gemini_client = genai.Client(api_key=GEMINI_API_KEY)
     response = gemini_client.models.generate_content(
-        model="gemini-1.5-flash",
+        model="gemini-2.5-flash",
         contents=prompt
     )
 ```

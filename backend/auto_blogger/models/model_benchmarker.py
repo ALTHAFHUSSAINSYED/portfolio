@@ -97,7 +97,7 @@ class ModelBenchmarker:
         try:
             # Clean model ID for Gemini client (remove 'gemini-' prefix if needed for some versions,
             # but usually it expects 'models/gemini-pro' etc. Let's try direct ID first)
-            # The config has IDs like 'gemini-1.5-flash'. genai.GenerativeModel handles this.
+            # The config has IDs like 'gemini-2.5-flash'. genai.GenerativeModel handles this.
             
             gen_model = genai.GenerativeModel(model["model_id"])
             response = gen_model.generate_content(prompt)

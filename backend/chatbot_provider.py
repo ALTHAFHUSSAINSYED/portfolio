@@ -206,7 +206,7 @@ class ChatbotProvider:
                  return text[:1000] + "... [Truncated]"
 
             response = self.gemini_client.models.generate_content(
-                model='gemini-1.5-flash',
+                model='gemini-2.5-flash',
                 contents=prompt
             )
             
@@ -469,9 +469,9 @@ class ChatbotProvider:
             # Fallback Chain: Try models in order until one works
             # Different models often have separate rate limit buckets
             models_to_try = [
-                "models/gemini-2.5-flash",  # Primary Flash
-                "models/gemma-3-12b-it",    # User Requested Backup (High Quality)
-                "models/gemini-1.5-flash"   # Legacy Flash (Reliable)
+                "models/gemini-2.5-flash",  # Primary Flash (Latest)
+                "models/gemini-2.0-flash-exp",  # Experimental Flash 2.0
+                "models/gemma-3-12b-it"    # High Quality Backup
             ]
             
             for model_id in models_to_try:
