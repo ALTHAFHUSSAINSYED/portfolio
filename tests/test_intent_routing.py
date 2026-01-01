@@ -33,7 +33,7 @@ def test_profile_fallback():
     intent, sentiment, scores = detect_intent_priority("what is your experience")
     assert intent == "profile"
 @pytest.mark.parametrize("query,expected_intent,expected_priority", [
-    ("hello", "conversation", "neutral"),
+    ("hello", "greeting", "neutral"),
     ("what projects have you worked on", "projects", "neutral"),
     ("show me aws infrastructure", "aws_projects", "neutral"),
     ("who is althaf", "profile", "neutral"),
@@ -49,7 +49,7 @@ def test_intent_detection(query, expected_intent, expected_priority):
 def test_conversational_inputs():
     """Verify strong conversational/dismissal inputs skip RAG"""
     intent, sentiment, scores = detect_intent_priority("hello")
-    assert intent == "conversation"
+    assert intent == "greeting"
     
     intent, sentiment, scores = detect_intent_priority("nothing")
     # "nothing" gives exit+1, conv+1. Max might be tied or random depending on hash?
