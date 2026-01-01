@@ -31,7 +31,9 @@ logger = logging.getLogger("BlogScheduler")
 
 class BlogScheduler:
     def __init__(self):
-        self.state_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "scheduler_state.json")
+        # CRITICAL FIX: Move state file to persistent volume (not code directory)
+        # This prevents state loss during Docker rebuilds and git pulls
+        self.state_file = "/app/backend/logs/auto_blogger/scheduler_state.json"
         self.categories = [
             "AI_and_ML",
             "Cloud_Computing", 
@@ -49,8 +51,9 @@ class BlogScheduler:
         self.cleanup = BlogCleanup()
         self.notifier = BlogNotifier()
         
-        # Temp Draft Storage
+        # Temp Draft Storage (with disk persistence)
         self.pending_draft = None
+        self.draft_file = "/app/backend/logs/auto_blogger/pending_draft.json"
 
     def _load_state(self) -> Dict[str, Any]:
         if os.path.exists(self.state_file):
@@ -197,6 +200,15 @@ class BlogScheduler:
                 "gen_start_time": start_time.isoformat(),
                 "gen_end_time": datetime.now().isoformat()
             }
+            
+            # CRITICAL FIX: Persist draft to disk (survives Docker rebuilds)
+            try:
+                with open(self.draft_file, 'w') as f:
+                    json.dump(self.pending_draft, f, indent=2)
+                logger.info(f"✅ Draft persisted to disk: {self.draft_file}")
+            except Exception as e:
+                logger.warning(f"Failed to persist draft to disk: {e}")
+            
             logger.info(f"Draft ready for publishing: '{title}'")
             
         except Exception as e:
@@ -212,6 +224,16 @@ class BlogScheduler:
     async def run_publishing_job(self):
         """Job: 10:00 AM Publishing"""
         logger.info("Running scheduled publishing...")
+        
+        # CRITICAL FIX: Load draft from disk if not in memory (Docker rebuild recovery)
+        if not self.pending_draft and os.path.exists(self.draft_file):
+            try:
+                with open(self.draft_file, 'r') as f:
+                    self.pending_draft = json.load(f)
+                logger.info(f"✅ Recovered draft from disk: {self.pending_draft.get('title')}")
+            except Exception as e:
+                logger.error(f"Failed to load draft from disk: {e}")
+        
         if not self.pending_draft:
             logger.warning("No pending draft to publish.")
             return
@@ -219,7 +241,12 @@ class BlogScheduler:
         try:
             url = self.publisher.publish(self.pending_draft)
             await self.notifier.send_success(self.pending_draft, url)
-            self.pending_draft = None # Clear
+            self.pending_draft = None # Clear memory
+            
+            # CRITICAL FIX: Remove draft file after successful publish
+            if os.path.exists(self.draft_file):
+                os.remove(self.draft_file)
+                logger.info(f"✅ Removed draft file after successful publish")
         except Exception as e:
             logger.error(f"Publishing failed: {e}")
             await self.notifier.send_failure(str(e), "Publishing Job")
