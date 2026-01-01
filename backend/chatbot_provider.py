@@ -244,10 +244,10 @@ class ChatbotProvider:
         if t in exit_phrases or any(t.startswith(w + " ") for w in exit_phrases):
              return "EXIT"
              
-        # 3. GREETING (START)
-        greetings = ["hi", "hello", "hey", "yo", "good morning", "good evening", "greetings"]
+        # 3. GREETING
+        greetings = ["hi", "hello", "hey", "yo", "hy", "hai", "hii", "hola", "good morning", "good evening", "greetings"]
         if t in greetings or any(t.startswith(w + " ") for w in greetings):
-            return "START"
+            return "GREETING"
             
         # 4. SILENT / FILLER
         fillers = ["ok", "okay", "cool", "hmm", "ah", "oh", "right", "alright", "got it", "nice", "fine", "sure", "yeah", "yep", "yup"]
@@ -278,8 +278,8 @@ class ChatbotProvider:
         - No repetition
         - No content dumping
         """
-        if state == "START":
-            return "Hi! I'm Allu Bot, Althaf's Portfolio Assistant. You can ask me about Althaf's projects, blogs, or experience."
+        if state == "GREETING":
+            return "👋 Hello! I can help with Althaf's blogs, projects, or experience."
             
         if state == "AMBIGUOUS":
             return "Alright. Let me know what you'd like to explore."
@@ -289,12 +289,12 @@ class ChatbotProvider:
             return "I'm here to help, but I can't continue this conversation if the language stays disrespectful."
             
         if state == "SILENT":
-            # Fillers get minimal response or silence
-            return "👍"
+            # Return empty string for filler messages - no response needed
+            return ""
             
         if state == "EXIT":
             # NOTE: Server handles persistence of 'exit_acknowledged'
-            return "Understood. Feel free to come back anytime."
+            return "👋 Goodbye! Feel free to return anytime."
             
         return "" # Should not happen if called correctly
     

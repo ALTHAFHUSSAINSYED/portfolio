@@ -336,7 +336,14 @@ def detect_intent_priority(text: str) -> Tuple[str, str, dict]:
     if any(sig in text for sig in confusion_signals):
         return "conversation", "confused", scores
     
-    # 3. SCORING RULES (Only if sentiment is neutral)
+    # 3. GREETING DETECTION (BEFORE OTHER SCORING)
+    # Greetings are first-class intents, not ambiguous conversation
+    greeting_triggers = ["hi", "hello", "hey", "hy", "hai", "hii", "hola", "greetings", "good morning", "good evening"]
+    if any(t == text_clean or text_clean.startswith(t + " ") for t in greeting_triggers):
+        scores["greeting"] = 5
+        return "greeting", "neutral", scores
+    
+    # 4. SCORING RULES (Only if sentiment is neutral and not a greeting)
     
     # Conversational / Ambiguous / Fillers
     ambiguous_triggers = ["ok", "fine", "hmm", "is it", "are you sure", "oh", "ah", "got it", "right", "good"]
@@ -981,6 +988,7 @@ async def ask_agent(query: dict):
             session_metadata[session_id] = {
                 "state": "START", 
                 "disengagement_count": 0,
+                "greeting_count": 0,  # Track greetings per session
                 "response_mode": "ANSWER_ONLY"  # Default: answer only what was asked
             }
             
@@ -1091,10 +1099,25 @@ async def ask_agent(query: dict):
         next_state = chatbot_provider.detect_conversation_state(message)
         
         # ========================================
+        # GREETING SILENCE LOGIC (Phase 11)
+        # Only respond to first greeting per session
+        # ========================================
+        if next_state == "GREETING":
+            greeting_count = session_metadata[session_id].get("greeting_count", 0)
+            if greeting_count > 0:
+                # Subsequent greeting -> silence
+                logger.info(f"🔇 Silencing subsequent greeting (count: {greeting_count})")
+                next_state = "SILENT"
+            else:
+                # First greeting -> respond
+                session_metadata[session_id]["greeting_count"] = 1
+        # ========================================
+        
+        # ========================================
         # RESPONSE MODE MAPPING (Phase 2)
         # Determines HOW to respond based on state
         # ========================================
-        if next_state in ["START", "AMBIGUOUS", "SILENT"]:
+        if next_state in ["GREETING", "AMBIGUOUS", "SILENT"]:
             response_mode = "CONVERSATION"  # Casual, minimal
         elif next_state == "INFO":
             response_mode = "ANSWER_ONLY"   # Answer what was asked, nothing more
