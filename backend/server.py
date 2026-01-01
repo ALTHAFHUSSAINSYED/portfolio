@@ -1150,7 +1150,7 @@ async def ask_agent(query: dict):
         # ========================================
         date_keywords = ["date", "today", "when", "what day", "current date", "todays date", "what's the date"]
         if any(keyword in message.lower() for keyword in date_keywords):
-            from datetime import datetime
+            # from datetime import datetime  <-- REMOVED: Shadows global import causing UnboundLocalError
             current_date = datetime.now().strftime("%B %d, %Y")
             response_text = f"Today is {current_date}."
             logger.info(f"📅 Deterministic date response: {response_text}")
