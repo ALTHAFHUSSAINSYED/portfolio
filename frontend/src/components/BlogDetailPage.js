@@ -239,11 +239,13 @@ const BlogDetailPage = () => {
             {/* Author Byline */}
             <div className="mb-6 pb-6 border-b border-border">
               <div className="flex items-center gap-3 mb-3">
-                <img
-                  src="/profile-pic.jpg"
-                  alt="Althaf Hussain Syed"
-                  className="w-12 h-12 rounded-full border-2 border-primary"
-                />
+                <div className="w-12 h-12 rounded-full border-2 border-primary overflow-hidden">
+                  <img
+                    src="/profile-pic.jpg"
+                    alt="Althaf Hussain Syed"
+                    className="w-full h-full object-cover transform scale-125 hover:scale-110 transition-transform duration-300"
+                  />
+                </div>
                 <div>
                   <p className="text-lg font-semibold text-foreground">Althaf Hussain Syed</p>
                   <p className="text-sm text-muted-foreground">DevOps Engineer | Cloud & Infrastructure Engineer</p>
@@ -369,11 +371,11 @@ const BlogDetailPage = () => {
               <div className="bg-secondary/30 rounded-lg p-6">
                 <h3 className="text-xl font-bold mb-4 text-foreground">About the Author</h3>
                 <div className="flex flex-col md:flex-row gap-6">
-                  <div className="flex-shrink-0">
+                  <div className="flex-shrink-0 w-24 h-24 rounded-full border-4 border-primary overflow-hidden">
                     <img
                       src="/profile-pic.jpg"
                       alt="Althaf Hussain Syed"
-                      className="w-24 h-24 rounded-full border-4 border-primary"
+                      className="w-full h-full object-cover transform scale-125 hover:scale-110 transition-transform duration-300"
                     />
                   </div>
                   <div className="flex-1">
@@ -403,15 +405,7 @@ const BlogDetailPage = () => {
                         <ExternalLink className="h-4 w-4" />
                         LinkedIn
                       </a>
-                      <a
-                        href="https://github.com/ALTHAFHUSSAINSYED"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                        GitHub
-                      </a>
+
                       <a
                         href="mailto:allualthaf42@gmail.com"
                         className="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1"
