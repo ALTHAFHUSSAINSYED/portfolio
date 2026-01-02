@@ -19,13 +19,22 @@ const Chatbot = () => {
 
   // Initialize audio on mount
   useEffect(() => {
+    console.log("🔊 Initializing audio...");
     loadingSoundRef.current = new Audio("/typing-sound.mp3");
-    loadingSoundRef.current.loop = true; // Loop while loading
-    loadingSoundRef.current.volume = 0.8; // 80% volume
-    loadingSoundRef.current.preload = "auto"; // Preload audio
+    loadingSoundRef.current.loop = true;
+    loadingSoundRef.current.volume = 0.8;
+    loadingSoundRef.current.preload = "auto";
+    
+    // Test if audio loaded successfully
+    loadingSoundRef.current.addEventListener('canplaythrough', () => {
+      console.log("✅ Audio loaded successfully");
+    });
+    
+    loadingSoundRef.current.addEventListener('error', (e) => {
+      console.error("❌ Audio failed to load:", e);
+    });
 
     return () => {
-      // Cleanup on unmount
       if (loadingSoundRef.current) {
         loadingSoundRef.current.pause();
         loadingSoundRef.current = null;
@@ -33,15 +42,24 @@ const Chatbot = () => {
     };
   }, []);
 
-  // Play/stop sound based on loading state (simplified - no audioEnabled check)
+  // Play/stop sound based on loading state
   useEffect(() => {
+    console.log("🎵 Loading state changed:", isLoading, "Audio ref:", !!loadingSoundRef.current);
+    
     if (isLoading && loadingSoundRef.current) {
+      console.log("▶️ Attempting to play audio...");
       loadingSoundRef.current.currentTime = 0;
-      // Try to play, ignore errors if browser blocks autoplay
-      loadingSoundRef.current.play().catch(e => {
-        console.log("Audio autoplay blocked by browser - will work after user interaction");
-      });
+      
+      loadingSoundRef.current.play()
+        .then(() => {
+          console.log("✅ Audio playing successfully");
+        })
+        .catch(e => {
+          console.error("❌ Audio play failed:", e.message);
+          console.log("Reason: Browser may block autoplay. User interaction required.");
+        });
     } else if (!isLoading && loadingSoundRef.current) {
+      console.log("⏸️ Stopping audio");
       loadingSoundRef.current.pause();
       loadingSoundRef.current.currentTime = 0;
     }
@@ -108,18 +126,26 @@ const Chatbot = () => {
 
   const toggleChat = () => {
     if (!isOpen) {
-      setHasUnread(false); // Clear unread indicator when opening chat
-      setHasInteracted(true); // Stop shake animation permanently
+      setHasUnread(false);
+      setHasInteracted(true);
       
-      // Initialize audio context on user interaction (required by browsers)
+      // Prime audio on chat open (user interaction unlocks autoplay)
       if (loadingSoundRef.current) {
-        loadingSoundRef.current.load(); // Reload audio to enable playback
+        console.log("🔓 Priming audio after user interaction");
+        loadingSoundRef.current.load();
+        // Immediately test play (silent, short duration to unlock autoplay policy)
+        loadingSoundRef.current.play()
+          .then(() => {
+            console.log("✅ Audio context unlocked");
+            loadingSoundRef.current.pause();
+            loadingSoundRef.current.currentTime = 0;
+          })
+          .catch(e => console.log("⚠️ Could not unlock audio yet:", e.message));
       }
       
-      // Scroll to latest message when opening
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      }, 100); // Small delay to allow DOM to render
+      }, 100);
     }
     setIsOpen(!isOpen);
   };
