@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import SEO from './SEO';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
-import { ArrowLeft, Loader2, AlertTriangle, Zap, Code, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertTriangle, Zap, Code, CheckCircle, Newspaper } from 'lucide-react';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://api.althafportfolio.site';
 
@@ -19,6 +19,7 @@ const ProjectDetailsPage = () => {
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [relatedBlogs, setRelatedBlogs] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,6 +29,18 @@ const ProjectDetailsPage = () => {
         if (!response.ok) throw new Error('Project not found.');
         const data = await response.json();
         setProject(data);
+        
+        // Fetch related blogs
+        try {
+          const blogsResponse = await fetch(`${API_BASE_URL}/api/blogs`);
+          if (blogsResponse.ok) {
+            const blogs = await blogsResponse.json();
+            // Get first 3 blogs as related
+            setRelatedBlogs(blogs.slice(0, 3));
+          }
+        } catch (err) {
+          console.error("Error fetching related blogs:", err);
+        }
       } catch (err) { setError(err.message); } 
       finally { setLoading(false); }
     };
@@ -176,6 +189,56 @@ const ProjectDetailsPage = () => {
             ))}
           </div>
         </section>
+
+        {/* Related Blogs Section */}
+        {relatedBlogs.length > 0 && (
+          <section className="mt-8 pt-6 border-t border-border">
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-foreground">
+              <Newspaper className="w-5 h-5 text-cyan-soft" />
+              Related DevOps & Cloud Blogs
+            </h2>
+            <div className="grid gap-4">
+              {relatedBlogs.map((blog) => (
+                <Link
+                  key={blog.id}
+                  to={`/blogs/${blog.id}`}
+                  className="block p-4 rounded-lg border border-border hover:border-cyan-400/50 transition-colors group"
+                >
+                  <h3 className="font-semibold text-foreground group-hover:text-cyan-soft transition-colors mb-2">
+                    {blog.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                    {blog.description || blog.summary || 'Read more about this topic'}
+                  </p>
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Badge variant="outline" className="text-xs">
+                        {blog.category || 'DevOps'}
+                      </Badge>
+                    </span>
+                    {blog.created_at && (
+                      <span>
+                        {new Date(blog.created_at).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+            <div className="mt-4">
+              <Link
+                to="/#blogs"
+                className="text-cyan-soft hover:text-cyan-400 text-sm font-medium inline-flex items-center gap-1"
+              >
+                View All Blogs →
+              </Link>
+            </div>
+          </section>
+        )}
       </Card>
     </div>
   );

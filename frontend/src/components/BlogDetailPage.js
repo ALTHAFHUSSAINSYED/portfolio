@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import SEO from './SEO';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
-import { Newspaper, ArrowLeft, Calendar, Tag, ExternalLink } from 'lucide-react';
+import { Newspaper, ArrowLeft, Calendar, Tag, ExternalLink, Folder } from 'lucide-react';
 import { Button } from './ui/button';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://api.althafportfolio.site';
@@ -16,9 +16,11 @@ const BlogDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showFullContent, setShowFullContent] = useState(true);
+  const [relatedProjects, setRelatedProjects] = useState([]);
 
   useEffect(() => {
     fetchBlog();
+    fetchRelatedProjects();
     // eslint-disable-next-line
   }, [blogId]);
 
@@ -49,6 +51,19 @@ const BlogDetailPage = () => {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchRelatedProjects = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/projects`);
+      if (response.ok) {
+        const projects = await response.json();
+        // Get first 3 projects as related
+        setRelatedProjects(projects.slice(0, 3));
+      }
+    } catch (err) {
+      console.error("Error fetching related projects:", err);
     }
   };
 
@@ -440,6 +455,47 @@ const BlogDetailPage = () => {
                     </li>
                   ))}
                 </ul>
+              </div>
+            )}
+
+            {/* Related Projects Section */}
+            {relatedProjects.length > 0 && (
+              <div className="mt-8 pt-6 border-t border-border">
+                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2 text-foreground">
+                  <Folder className="w-5 h-5 text-cyan-soft" />
+                  Related DevOps Projects
+                </h3>
+                <div className="grid gap-4">
+                  {relatedProjects.map((project) => (
+                    <Link
+                      key={project.id}
+                      to={`/projects/${project.id}`}
+                      className="block p-4 rounded-lg border border-border hover:border-cyan-400/50 transition-colors group"
+                    >
+                      <h4 className="font-semibold text-foreground group-hover:text-cyan-soft transition-colors mb-2">
+                        {project.name}
+                      </h4>
+                      <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                        {project.summary?.split('\n')[0] || 'View project details'}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {project.technologies?.slice(0, 4).map((tech) => (
+                          <Badge key={tech} variant="outline" className="text-xs">
+                            {tech}
+                          </Badge>
+                        ))}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+                <div className="mt-4">
+                  <Link
+                    to="/#projects"
+                    className="text-cyan-soft hover:text-cyan-400 text-sm font-medium inline-flex items-center gap-1"
+                  >
+                    View All Projects →
+                  </Link>
+                </div>
               </div>
             )}
 
