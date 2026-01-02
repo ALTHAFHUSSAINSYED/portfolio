@@ -74,7 +74,7 @@ const ProjectsSection = () => {
   return (
     <section id="projects" className="py-20 bg-background min-h-screen" ref={sectionRef}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16"><h2 className={`text-3xl md:text-4xl font-bold mb-4 text-foreground ${isVisible ? 'fade-in-up' : ''}`}>Featured Projects</h2></div>
+        <div className="text-center mb-16"><h1 className={`text-3xl md:text-4xl font-bold mb-4 text-foreground ${isVisible ? 'fade-in-up' : ''}`}>DevOps & Cloud Infrastructure Projects</h1></div>
         <div className="grid lg:grid-cols-3 gap-8">
           {projects.map((project, index) => {
             const IconComponent = getProjectIcon(project.name);

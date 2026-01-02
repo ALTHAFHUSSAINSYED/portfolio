@@ -91,7 +91,7 @@ const ContactSection = ({ personalInfo }) => {
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
-          <h2 className={`text-3xl md:text-4xl font-bold mb-4 text-foreground shine-text ${isVisible ? 'fade-in-up' : ''}`}>Let's Connect</h2>
+          <h1 className={`text-3xl md:text-4xl font-bold mb-4 text-foreground shine-text ${isVisible ? 'fade-in-up' : ''}`}>Contact DevOps Engineer - Let's Connect</h1>
           <p className={`text-lg text-muted-foreground max-w-3xl mx-auto glow-text ${isVisible ? 'fade-in-up stagger-1' : ''}`}>Ready to discuss your next DevOps project or explore opportunities? I'd love to hear from you!</p>
         </div>
         <div className="grid lg:grid-cols-2 gap-12">
