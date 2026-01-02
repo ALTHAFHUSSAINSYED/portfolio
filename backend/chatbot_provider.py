@@ -276,8 +276,8 @@ class ChatbotProvider:
             return "I'm here to help, but I can't continue this conversation if the language stays disrespectful."
             
         if state == "SILENT":
-            # Return empty string for filler messages - no response needed
-            return ""
+            # Friendly acknowledgment instead of empty response
+            return "Happy to help! Anything else you'd like to know?"
             
         if state == "EXIT":
             # NOTE: Server handles persistence of 'exit_acknowledged'
