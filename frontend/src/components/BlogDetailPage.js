@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import SEO from './SEO';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Newspaper, ArrowLeft, Calendar, Tag, ExternalLink } from 'lucide-react';
@@ -146,8 +147,56 @@ const BlogDetailPage = () => {
     ? blog.content.replace(/[#*`_\[\]]/g, '').substring(0, 200)
     : description;
 
+  // Blog structured data for Schema.org
+  const blogStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": blog.title,
+    "description": description,
+    "image": imageUrl,
+    "datePublished": publishedDate,
+    "dateModified": publishedDate,
+    "author": {
+      "@type": "Person",
+      "name": "Althaf Hussain Syed",
+      "jobTitle": "DevOps Engineer | Cloud & Infrastructure Engineer",
+      "url": siteUrl,
+      "sameAs": [
+        "https://www.linkedin.com/in/althafhussainsyed/",
+        "https://github.com/ALTHAFHUSSAINSYED"
+      ]
+    },
+    "publisher": {
+      "@type": "Person",
+      "name": "Althaf Hussain Syed",
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${siteUrl}/profile-pic.jpg`
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": blogUrl
+    },
+    "keywords": keywords,
+    "articleBody": contentPreview
+  };
+
   return (
     <>
+      <SEO
+        title={`${blog.title} | Althaf Hussain`}
+        description={description}
+        keywords={keywords}
+        url={blogUrl}
+        image={imageUrl}
+        type="article"
+        author="Althaf Hussain"
+        publishedTime={publishedDate}
+        modifiedTime={publishedDate}
+        tags={blog.tags || []}
+        structuredData={blogStructuredData}
+      />
       <Helmet>
         {/* Primary Meta Tags */}
         <title>{blog.title} | Althaf Hussain</title>
@@ -168,52 +217,8 @@ const BlogDetailPage = () => {
           <meta key={`og-tag-${idx}`} property="article:tag" content={tag} />
         ))}
 
-        {/* Twitter */}
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:url" content={blogUrl} />
-        <meta property="twitter:title" content={blog.title} />
-        <meta property="twitter:description" content={description} />
-        <meta property="twitter:image" content={imageUrl} />
-
-        {/* Canonical URL */}
-        <link rel="canonical" href={blogUrl} />
-
-        {/* JSON-LD Structured Data for SEO */}
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "BlogPosting",
-            "headline": blog.title,
-            "description": description,
-            "image": imageUrl,
-            "datePublished": publishedDate,
-            "dateModified": publishedDate,
-            "author": {
-              "@type": "Person",
-              "name": "Althaf Hussain Syed",
-              "jobTitle": "DevOps Engineer | Cloud & Infrastructure Engineer",
-              "url": siteUrl,
-              "sameAs": [
-                "https://www.linkedin.com/in/althafhussainsyed/",
-                "https://github.com/ALTHAFHUSSAINSYED"
-              ]
-            },
-            "publisher": {
-              "@type": "Person",
-              "name": "Althaf Hussain Syed",
-              "logo": {
-                "@type": "ImageObject",
-                "url": `${siteUrl}/profile-pic.jpg`
-              }
-            },
-            "mainEntityOfPage": {
-              "@type": "WebPage",
-              "@id": blogUrl
-            },
-            "keywords": keywords,
-            "articleBody": contentPreview
-          })}
-        </script>
+      <Helmet>
+        {/* Keep Helmet for backward compatibility - SEO component handles all meta tags now */}
       </Helmet>
 
       <section className="py-20 bg-background text-foreground">

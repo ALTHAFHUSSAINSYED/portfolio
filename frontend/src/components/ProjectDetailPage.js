@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import SEO from './SEO';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { ArrowLeft, Loader2, AlertTriangle, Zap, Code, CheckCircle } from 'lucide-react';
@@ -69,8 +70,53 @@ const ProjectDetailsPage = () => {
     return null; // Render nothing until the project data is available
   }
 
+  // Generate SEO data for project
+  const projectTitle = `${project.name} | Althaf Hussain Portfolio`;
+  const projectDescription = project.summary 
+    ? project.summary.split('\n').filter(line => line.trim()).join(' ').substring(0, 160)
+    : `DevOps project: ${project.name}. Explore implementation details, technologies used, and key outcomes.`;
+  const projectKeywords = [
+    'DevOps Project',
+    project.name,
+    ...(project.technologies || []),
+    'Cloud Computing',
+    'Infrastructure Automation'
+  ].join(', ');
+  const projectUrl = `https://www.althafportfolio.site/projects/${projectId}`;
+  const projectImage = project.image_url || 'https://www.althafportfolio.site/profile-pic.jpg';
+
+  const projectStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "CreativeWork",
+    "name": project.name,
+    "description": projectDescription,
+    "image": projectImage,
+    "url": projectUrl,
+    "author": {
+      "@type": "Person",
+      "name": "Althaf Hussain Syed",
+      "url": "https://www.althafportfolio.site"
+    },
+    "keywords": projectKeywords,
+    "inLanguage": "en-US",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "Althaf Hussain Portfolio",
+      "url": "https://www.althafportfolio.site"
+    }
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
+      <SEO
+        title={projectTitle}
+        description={projectDescription}
+        keywords={projectKeywords}
+        url={projectUrl}
+        image={projectImage}
+        type="article"
+        structuredData={projectStructuredData}
+      />
       <button onClick={handleGoBack} className="flex items-center text-cyan-soft mb-8 hover:text-cyan-400 group transition-colors">
         <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
         Back to All Projects
