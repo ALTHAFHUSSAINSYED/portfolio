@@ -14,6 +14,7 @@ const Chatbot = () => {
   const [hasUnread, setHasUnread] = useState(true);
   const [hasInteracted, setHasInteracted] = useState(false); // New state to track interaction
   const [isMaximized, setIsMaximized] = useState(false);
+  const [audioEnabled, setAudioEnabled] = useState(false); // Track if audio is enabled
   const messagesEndRef = useRef(null);
   const loadingSoundRef = useRef(null);
 
@@ -32,16 +33,29 @@ const Chatbot = () => {
     };
   }, []);
 
+  // Enable audio on first user interaction (required for browser autoplay policies)
+  useEffect(() => {
+    if (isOpen && !audioEnabled) {
+      const enableAudio = () => {
+        setAudioEnabled(true);
+        // Remove listener after first interaction
+        document.removeEventListener('click', enableAudio);
+      };
+      document.addEventListener('click', enableAudio);
+      return () => document.removeEventListener('click', enableAudio);
+    }
+  }, [isOpen, audioEnabled]);
+
   // Play/stop sound based on loading state
   useEffect(() => {
-    if (isLoading && loadingSoundRef.current) {
+    if (isLoading && loadingSoundRef.current && audioEnabled) {
       loadingSoundRef.current.currentTime = 0;
       loadingSoundRef.current.play().catch(e => console.log("Audio play failed:", e));
     } else if (!isLoading && loadingSoundRef.current) {
       loadingSoundRef.current.pause();
       loadingSoundRef.current.currentTime = 0;
     }
-  }, [isLoading]);
+  }, [isLoading, audioEnabled]);
 
   // Conversation memory to track context - MOVED TO COMPONENT LEVEL
   const conversationMemory = useRef({
