@@ -216,9 +216,6 @@ const BlogDetailPage = () => {
         {blog.tags && blog.tags.map((tag, idx) => (
           <meta key={`og-tag-${idx}`} property="article:tag" content={tag} />
         ))}
-
-      <Helmet>
-        {/* Keep Helmet for backward compatibility - SEO component handles all meta tags now */}
       </Helmet>
 
       <section className="py-20 bg-background text-foreground">

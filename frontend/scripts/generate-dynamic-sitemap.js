@@ -11,8 +11,34 @@ const generateDynamicSitemap = async () => {
     console.log('🔍 Fetching blogs from S3 bucket via API...');
     
     // Fetch blogs from backend API (which reads from S3)
-    const response = await axios.get(`${API_BASE_URL}/api/blogs`);
-    const blogs = response.data || [];
+    let blogs = [];
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/blogs`);
+      const data = response.data;
+      
+      // Handle different response formats
+      if (Array.isArray(data)) {
+        blogs = data;
+      } else if (data && Array.isArray(data.data)) {
+        blogs = data.data;
+      } else if (data && Array.isArray(data.blogs)) {
+        blogs = data.blogs;
+      } else {
+        console.warn('⚠️ API returned unexpected format:', data);
+        blogs = [];
+      }
+    } catch (apiError) {
+      console.error('❌ API fetch failed:', apiError.message);
+      // Fall back to local file
+      try {
+        const localData = fs.readFileSync(path.join(__dirname, '../public/data/blogs.json'), 'utf8');
+        blogs = JSON.parse(localData);
+        console.log('✅ Loaded blogs from local fallback');
+      } catch (fallbackError) {
+        console.error('❌ Local fallback also failed:', fallbackError.message);
+        blogs = [];
+      }
+    }
     
     console.log(`✅ Found ${blogs.length} blogs from S3`);
 
