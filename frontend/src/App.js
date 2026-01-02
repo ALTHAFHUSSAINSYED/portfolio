@@ -35,10 +35,13 @@ function App() {
         document.documentElement.style.scrollBehavior = 'smooth';
       }, 50);
 
-      // 2. Retry scrolls to handle dynamic content loading (layout shifts)
-      // Checks again after short delays to ensure we stay on target if sections above expand
-      setTimeout(() => performScroll('auto'), 150);
-      setTimeout(() => performScroll('smooth'), 600);
+      // 2. Retry scrolls ONLY for non-data sections
+      // Blogs/Projects show loading spinners in place (no layout shifts)
+      // Contact needs retries because form loads dynamically
+      if (targetId !== 'blogs' && targetId !== 'projects') {
+        setTimeout(() => performScroll('auto'), 150);
+        setTimeout(() => performScroll('smooth'), 600);
+      }
 
       // Clear state
       window.history.replaceState({}, document.title);
