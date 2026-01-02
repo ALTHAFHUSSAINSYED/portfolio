@@ -1098,218 +1098,54 @@ async def ask_agent(query: dict):
         # --- STATE MACHINE RECOVERY ---
         if session_id not in session_metadata:
             session_metadata[session_id] = {
-                "state": "START", 
-                "disengagement_count": 0,
-                "greeting_count": 0,  # Track greetings per session
-                "response_mode": "ANSWER_ONLY"  # Default: answer only what was asked
+                "state": "ACTIVE", 
+                "greeting_count": 0,
+                "history": []
             }
-            
-        current_state = session_metadata[session_id]["state"]
-        disengagement_count = session_metadata[session_id]["disengagement_count"]
         
-        # 1. INTENT & SCORING
-        intent, sentiment, intent_scores = detect_intent_priority(message)
+        # Track conversation history
+        history = session_metadata[session_id].get("history", [])
+        history.append({"role": "user", "content": message})
+        session_metadata[session_id]["history"] = history[-10:]  # Keep last 10 messages
+        logger.info(f"🧠 Processing message: {message[:50]}...")
 
-        # ========================================
-        # RECONCILE / EXPLANATION HOOK (Phase 9)
-        # Deterministic override for "Why?" questions. NEVER calls LLM.
-        # ========================================
-        if chatbot_provider.is_behavior_question(message):
-             reply_text = chatbot_provider.explain_previous_decision(message, history)
-             logger.info(f"🧠 RECONCILE Triggered: {message[:50]} -> {reply_text[:50]}...")
-             return JSONResponse(
-                 status_code=200,
-                 content={"reply": reply_text, "source": "System-Reconcile"}
-             )
-
-        # ========================================
-        # POST-INFO HOLD STATE CHECK
-        # Prevents "Anything else?" from triggering helpful hallucinations
-        # ========================================
-        current_state = session_metadata[session_id].get("state", "START")
-        
-        # If we are in HOLD state and the user says something weak/empty, respond naturally
-        if current_state == "HOLD":
-            # Very simple guard: Only break HOLD if it looks like a real question
-            is_weak_input = len(message.split()) < 4 and "?" not in message
-            trigger_words = ["tell", "show", "what", "how", "who", "where", "why", "explain"]
-            has_trigger = any(w in message.lower() for w in trigger_words)
-            
-            if is_weak_input and not has_trigger:
-                logger.info("🔒 HOLD state active: Weak input detected, offering help.")
-                return JSONResponse(
-                    status_code=200, 
-                    content={"reply": "I can help with Althaf's profile, projects, skills, or experience. What would you like to know?", "source": "System-Hold"}
-                )
-
-        # ========================================
-        # SENTIMENT GATE (ABSOLUTE PRIORITY)
-        # Sentiment overrides ALL downstream logic
-        # ========================================
-        
-        if sentiment == "hostile":
-            # HARD STOP - Direct abuse
-            session_metadata[session_id]["state"] = "EXIT"
-            session_metadata[session_id]["exit_acknowledged"] = True
-            logger.warning(f"🚨 HOSTILE sentiment detected: {message[:50]}")
-            return JSONResponse(
-                status_code=200,
-                content={
-                    "reply": "I'm here to help, but I can't continue this conversation if the language stays disrespectful.",
-                    "source": "SentimentGate"
-                }
-            )
-        
-        if sentiment == "frustrated":
-            # SOFT RESET - User is annoyed/frustrated
-            session_metadata[session_id]["state"] = "AMBIGUOUS"
-            session_metadata[session_id]["disengagement_count"] = 0
-            logger.info(f"⚠️ FRUSTRATED sentiment detected: {message[:50]}")
-            return JSONResponse(
-                status_code=200,
-                content={
-                    "reply": "It sounds like this wasn't what you expected. What would you like me to clarify?",
-                    "source": "SentimentGate"
-                }
-            )
-        
-        if sentiment == "confused":
-            # CLARIFICATION MODE - User doesn't understand
-            session_metadata[session_id]["state"] = "AMBIGUOUS"
-            logger.info(f"❓ CONFUSED sentiment detected: {message[:50]}")
-            return JSONResponse(
-                status_code=200,
-                content={
-                    "reply": "It seems I may not have explained that clearly. What would you like me to clarify?",
-                    "source": "SentimentGate"
-                }
-            )
-        
-        # ========================================
-        # END SENTIMENT GATE
-        # Only neutral/positive sentiment reaches here
-        # ========================================
-        
-        # 2. UPDATE DISENGAGEMENT COUNTER
-        # Track consecutive "nothing/no" to allow gentle exit escalation
-        if message.lower().strip() in ["nothing", "no", "nope", "nah"]:
-            disengagement_count += 1
-        else:
-            disengagement_count = 0 # Reset on engagement
-        
-        # ========================================
-        # POST-EXIT SILENCE CHECK (BEFORE STATE DETECTION)
-        # If user already exited, ignore all further input
-        # ========================================
-        if session_metadata.get(session_id, {}).get("exit_acknowledged"):
-            logger.info(f"Post-exit input ignored (silence): {message}")
-            return JSONResponse(status_code=200, content={"reply": "", "source": "System"})
-        # ========================================
-
-        # 3. CONVERSATION STATE MACHINE (The "Gods' Logic")
-        # Deterministic control before AI capabilities
-        next_state = chatbot_provider.detect_conversation_state(message)
-        
-        # ========================================
-        # GREETING SILENCE LOGIC (Phase 11)
-        # Only respond to first greeting per session
-        # ========================================
-        if next_state == "GREETING":
-            greeting_count = session_metadata[session_id].get("greeting_count", 0)
-            if greeting_count > 0:
-                # Subsequent greeting -> silence
-                logger.info(f"🔇 Silencing subsequent greeting (count: {greeting_count})")
-                next_state = "SILENT"
-            else:
-                # First greeting -> respond
-                session_metadata[session_id]["greeting_count"] = 1
-        # ========================================
-        
-        # ========================================
-        # RESPONSE MODE MAPPING (Phase 2)
-        # Determines HOW to respond based on state
-        # ========================================
-        if next_state in ["GREETING", "AMBIGUOUS", "SILENT"]:
-            response_mode = "CONVERSATION"  # Casual, minimal
-        elif next_state == "INFO":
-            response_mode = "ANSWER_ONLY"   # Answer what was asked, nothing more
-        else:
-            response_mode = "ANSWER_ONLY"   # Default safe mode
-        
-        session_metadata[session_id]["response_mode"] = response_mode
-        logger.info(f"📝 Response Mode: {response_mode}")
-        # ========================================
-        
-        # Session Persistence Logic for EXIT
-        if next_state == "EXIT":
-            session_metadata[session_id]["exit_acknowledged"] = True
-
-        logger.info(f"🧠 State: {next_state.upper()} (Prev: {current_state}) | Mode: {response_mode}")
-
-        # 4. EXECUTE RESPONSE STRATEGY
+        # 4. LLM HANDLES EVERYTHING NATURALLY (No state gates, no predefined rules)
         response_text = ""
-        portfolio_context = "" # Only used for telemetry/logging
+        portfolio_context = ""
         
-        # ========================================
-        # DETERMINISTIC DATE HANDLING (Phase 12)
-        # Date queries MUST NOT reach LLM
-        # ========================================
-        date_keywords = ["date", "today", "when", "what day", "current date", "todays date", "what's the date"]
-        if any(keyword in message.lower() for keyword in date_keywords):
-            # from datetime import datetime  <-- REMOVED: Shadows global import causing UnboundLocalError
-            current_date = datetime.now().strftime("%B %d, %Y")
-            response_text = f"Today is {current_date}."
-            logger.info(f"📅 Deterministic date response: {response_text}")
-        # ========================================
+        # A. Intent Detection for Retrieval
+        intent, _, intent_scores = detect_intent_priority(message)
         
-        elif next_state in ["EXIT", "ABUSE"]:
-            # ONLY intercept EXIT/ABUSE - hard stops needed
-            response_text = chatbot_provider.generate_response_by_state(next_state, message)
-            
+        # B. Smart RAG retrieval based on intent
+        if intent == "conversation":
+            # For casual talk, provide general profile context
+            rag_intent = "profile"
         else:
-            # ALL OTHER STATES (INFO, GREETING, AMBIGUOUS, SILENT) -> LLM handles intelligently
-            # This allows System Prompt to inject personality for "Hi", "Ok", "Hwy", etc.
-            
-            # A. Intent Detection for Retrieval
-            intent, _, intent_scores = detect_intent_priority(message)
-            
-            # B. Retrieval (smart routing)
             rag_intent = intent
-            if rag_intent == "conversation" or next_state == "GREETING": 
-                 # For greetings, fetch profile context (in case "Hi, who are you?")
-                 rag_intent = "profile"
-            elif rag_intent == "conversation":
-                 # Fallback for ambiguous conversation
-                 rag_intent = "projects" if intent_scores.get("projects", 0) > 0 else "profile"
-                 
-            portfolio_context, _ = await get_portfolio_context(message, rag_intent)
             
-            # C. Determine if this is first interaction (for golden greeting)
-            is_first_interaction = session_metadata[session_id].get("greeting_count", 0) == 0
-            
-            # D. LLM Generation with first interaction flag
-            response_text = chatbot_provider.generate_response(
-                query=message,
-                context=portfolio_context,
-                history=history,
-                sentiment="neutral",
-                is_first_interaction=is_first_interaction
-            )
-            
-            # E. Increment greeting count after first interaction
-            if is_first_interaction:
-                session_metadata[session_id]["greeting_count"] = 1
+        portfolio_context, _ = await get_portfolio_context(message, rag_intent)
+        
+        # C. Check if first interaction for personalized greeting
+        is_first_interaction = session_metadata[session_id].get("greeting_count", 0) == 0
+        
+        # D. Let LLM handle everything naturally
+        response_text = chatbot_provider.generate_response(
+            query=message,
+            context=portfolio_context,
+            history=history,
+            sentiment="neutral",
+            is_first_interaction=is_first_interaction
+        )
+        
+        # E. Track interaction count
+        if is_first_interaction:
+            session_metadata[session_id]["greeting_count"] = 1
 
         duration = (datetime.now() - start_time).total_seconds()
         
-        # 5. UPDATE STATE PERSISTENCE
-        
-        # Phase 9: Auto-Lock to HOLD after INFO response
-        if next_state == "INFO":
-             next_state = "HOLD"
-             
-        session_metadata[session_id]["state"] = next_state
-        session_metadata[session_id]["disengagement_count"] = disengagement_count
+        # 5. UPDATE STATE (simplified - just track conversation flow)
+        session_metadata[session_id]["state"] = "ACTIVE"
+        session_metadata[session_id]["disengagement_count"] = 0
         
         # 6. TELEMETRY LOGGING
         est_input_tok = (len(message) + len(portfolio_context)) / 4
@@ -1319,31 +1155,20 @@ async def ask_agent(query: dict):
             "session_id": session_id,
             "timestamp": datetime.utcnow().isoformat(),
             "normalized_input": message.lower().strip()[:50],
-            "intent_scores": intent_scores if next_state == "INFO" else {},
-            "final_state": next_state,
-            "rag_used": next_state == "INFO",
-            "model_used": "multi-tier-chain" if next_state == "INFO" else "deterministic",
+            "intent": intent,
             "input_tokens": int(est_input_tok),
             "output_tokens": int(est_output_tok),
             "latency_ms": int(duration * 1000)
         }
         logger.info(json.dumps(telemetry_log))
         
-        # Update conversations
-        # Only append valid interactions (Skip SILENT if needed, but keeping for continuity is safer)
-        history.append({"role": "user", "content": message})
+        # Update conversation history
         history.append({"role": "assistant", "content": response_text})
-        if len(history) > 4:
-            history = history[-4:]
-        conversation_sessions[session_id] = history
-        
-        # Cache active interactions (Only INFO/RAG)
-        if next_state == "INFO":
-            response_cache.set(message, response_text, history)
+        session_metadata[session_id]["history"] = history[-10:]
         
         return JSONResponse(
             status_code=200,
-            content={"reply": response_text, "source": "Multi-Provider AI"}
+            content={"reply": response_text, "source": "AI Assistant"}
         )
         
     except Exception as e:
