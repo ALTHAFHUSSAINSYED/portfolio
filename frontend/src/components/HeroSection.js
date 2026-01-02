@@ -128,7 +128,7 @@ const HeroSection = ({ personalInfo }) => {
             <img
               ref={profilePicRef} // Attach ref to profile picture
               src="/profile-pic.jpg?v=updated3"
-              alt={personalInfo.name}
+              alt="Althaf Hussain Syed - DevOps Engineer and Cloud Architect specializing in AWS, Azure, Kubernetes"
               className="w-full h-full object-cover transform scale-125 transition-transform duration-500 group-hover:scale-135"
             />
           </div>

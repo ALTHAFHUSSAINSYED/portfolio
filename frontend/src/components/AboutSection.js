@@ -91,7 +91,7 @@ const AboutSection = ({ personalInfo, achievements, education }) => {
                         <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-white/90 p-1 flex items-center justify-center">
                           <img
                             src="/assets/anu.png"
-                            alt="Acharya Nagarjuna University"
+                            alt="Acharya Nagarjuna University - B.Tech Computer Science and Engineering"
                             className="w-full h-full object-contain"
                           />
                         </div>

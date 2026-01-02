@@ -244,7 +244,7 @@ const BlogDetailPage = () => {
                 <div className="w-12 h-12 rounded-full border-2 border-primary overflow-hidden">
                   <img
                     src="/profile-pic.jpg"
-                    alt="Althaf Hussain Syed"
+                    alt="Althaf Hussain Syed - Certified DevOps Engineer and Cloud Solutions Architect"
                     className="w-full h-full object-cover transform scale-125 hover:scale-110 transition-transform duration-300"
                   />
                 </div>
