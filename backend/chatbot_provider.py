@@ -230,9 +230,17 @@ class ChatbotProvider:
         if t in exit_phrases or any(t.startswith(w + " ") for w in exit_phrases):
              return "EXIT"
              
-        # 3. GREETING
+        # 3. GREETING (differentiate pure greeting vs greeting + question)
         greetings = ["hi", "hello", "hey", "yo", "hy", "hai", "hii", "hola", "good morning", "good evening", "greetings"]
-        if t in greetings or any(t.startswith(w + " ") for w in greetings):
+        has_greeting = t in greetings or any(t.startswith(w + " ") for w in greetings)
+        
+        # Check if it's a hybrid (greeting + question)
+        question_words = ["what", "how", "why", "when", "where", "who", "which", "can", "could", "would", "should", "tell", "show", "explain", "describe"]
+        has_question = any(qw in t.split() for qw in question_words) or "?" in text
+        
+        if has_greeting and has_question:
+            return "GREETING_WITH_QUESTION"
+        elif has_greeting:
             return "GREETING"
             
         # 4. SILENT / FILLER
@@ -611,8 +619,25 @@ class ChatbotProvider:
         max_tokens = self._detect_query_complexity(query)
         logger.info(f"Query complexity: {max_tokens} tokens")
         
-        # Format messages
+        # Detect conversation state to determine greeting behavior
+        state = self.detect_conversation_state(query)
+        
+        # Conditionally inject golden greeting based on state and first interaction
+        greeting_instruction = ""
+        if is_first_interaction:
+            if state == "GREETING":
+                # Pure greeting → Send golden greeting
+                greeting_instruction = "\n\nIMPORTANT: Start your response with: 'Hi, I am Allu Bot. How can I assist you with Althaf's Portfolio Info Today?'"
+            elif state == "GREETING_WITH_QUESTION":
+                # Greeting + question → Hybrid format
+                greeting_instruction = "\n\nIMPORTANT: Start your response with: 'Hi, I am Allu Bot, and' then directly answer the question in a natural narrative paragraph."
+            # For INFO/EXIT states → No greeting injection, just answer directly
+        
+        # Format messages with conditional greeting
         messages = self._format_messages(query, context, history, sentiment)
+        if greeting_instruction:
+            # Inject into system message
+            messages[0]['content'] += greeting_instruction
         
         # Runtime Guard: Input Token Budget Check (Task 5)
         # Estimate: 4 chars ~= 1 token
