@@ -20,18 +20,31 @@ const Chatbot = () => {
   // Initialize audio on mount
   useEffect(() => {
     console.log("🔊 Initializing audio...");
-    loadingSoundRef.current = new Audio("/typing-sound.mp3");
+    
+    // Use PUBLIC_URL for production compatibility
+    const audioPath = `${process.env.PUBLIC_URL}/typing-sound.mp3`;
+    console.log("🔗 Audio path:", audioPath);
+    
+    loadingSoundRef.current = new Audio(audioPath);
     loadingSoundRef.current.loop = true;
     loadingSoundRef.current.volume = 0.8;
     loadingSoundRef.current.preload = "auto";
     
     // Test if audio loaded successfully
     loadingSoundRef.current.addEventListener('canplaythrough', () => {
-      console.log("✅ Audio loaded successfully");
+      console.log("✅ Audio loaded successfully from:", audioPath);
     });
     
     loadingSoundRef.current.addEventListener('error', (e) => {
-      console.error("❌ Audio failed to load:", e);
+      console.error("❌ Audio failed to load from:", audioPath);
+      console.error("Error details:", e);
+      // Try alternative path
+      const fallbackPath = "/typing-sound.mp3";
+      if (audioPath !== fallbackPath) {
+        console.log("🔄 Trying fallback path:", fallbackPath);
+        loadingSoundRef.current.src = fallbackPath;
+        loadingSoundRef.current.load();
+      }
     });
 
     return () => {
