@@ -6,14 +6,14 @@ RUN apt-get update \
     && apt-get install -y build-essential curl \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt \
     && apt-get remove -y build-essential curl \
     && apt-get autoremove -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /root/.cache/pip /tmp/*
 
-COPY . backend/
+COPY backend/ backend/
 
 ENV PYTHONPATH=/app
 
