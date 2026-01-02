@@ -10,12 +10,12 @@ def test_token_constants():
     with open(PROVIDER_PATH, 'r', encoding='utf-8') as f:
         content = f.read()
         
-    # Check MAX_INPUT_TOKENS
+    # Check MAX_INPUT_TOKENS (Mistral 7B supports 8K, we use 6K for safety margin)
     import re
     input_match = re.search(r'MAX_INPUT_TOKENS\s*=\s*(\d+)', content)
     if input_match:
         max_in = int(input_match.group(1))
-        assert max_in <= 4000, f"GATE FAILURE: Input Budget {max_in} > 4000"
+        assert max_in <= 6000, f"GATE FAILURE: Input Budget {max_in} > 6000"
     
     # Check MAX_OUTPUT_TOKENS
     output_match = re.search(r'MAX_OUTPUT_TOKENS\s*=\s*(\d+)', content)
