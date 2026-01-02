@@ -93,7 +93,9 @@
 }
 
 .chatbot-window {
-  background-color: transparent; /* Transparent container */
+  background-color: rgba(255, 255, 255, 0.02); /* 98% transparent */
+  backdrop-filter: blur(2px); /* 2% blur */
+  -webkit-backdrop-filter: blur(2px); /* Safari support */
   color: var(--chat-text-color-light);
   border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 16px;
