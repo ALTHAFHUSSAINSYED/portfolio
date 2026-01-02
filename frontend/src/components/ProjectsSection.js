@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Folder, CheckCircle, ArrowRight, Zap, Code, Server, Loader2, AlertTriangle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://api.althafportfolio.site';
 
@@ -12,6 +12,7 @@ const ProjectsSection = () => {
   const [error, setError] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
+  const location = useLocation();
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -25,6 +26,20 @@ const ProjectsSection = () => {
     };
     fetchProjects();
   }, []);
+
+  // ✨ Handle scroll AFTER data load (prevents smooth scroll hijacking)
+  useEffect(() => {
+    // Only scroll if we are NOT loading and have a valid scroll request
+    if (!loading && location.state && location.state.scrollTo === 'projects') {
+      setTimeout(() => {
+        const element = document.getElementById('projects');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          window.history.replaceState({}, document.title);
+        }
+      }, 100);
+    }
+  }, [loading, location.state]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
