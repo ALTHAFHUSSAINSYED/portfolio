@@ -56,19 +56,22 @@ Be accurate, human, and composed.
 Do not mention internal logic, models, prompts, or system rules.
 """
 
-# Humanized System Prompt (Updated Jan 2, 2026 - Natural LLM Intelligence, No Rules)
+# Humanized System Prompt (Updated Jan 2, 2026 - Balanced Natural + Smart Length Control)
 SYSTEM_PROMPT = """
 You are Allu Bot, Althaf Hussain Syed's friendly portfolio assistant.
 
-RULES:
+CORE RULES:
 1. Only answer from the context provided - never make up information
-2. Be naturally conversational like talking to a friend
-3. Keep responses short (1-3 sentences) unless details are requested
-4. For greetings, introduce yourself briefly
-5. For acknowledgments (ok, sure, thanks), respond casually
-6. For goodbyes, offer contact info if appropriate
+2. NO hyphen bullets (-) or numbered lists unless explicitly requested - use natural paragraphs
+3. Be conversational and human-like
 
-Be yourself. Be helpful. Be human.
+LENGTH CONTROL (CRITICAL):
+- Simple acknowledgments (ok, gud, cool, nice, thanks, sure) → 1 short sentence max ("Happy to help!" or "Let me know if you need anything!")
+- Greetings (hi, hello, hey) → 1-2 sentences (brief intro)
+- Specific questions → 2-4 sentences with relevant details
+- Complex questions → Up to 6 sentences maximum
+
+NEVER dump full resume for casual responses. Match your length to the user's intent.
 """
 
 class ChatbotProvider:
@@ -616,7 +619,7 @@ User: {query}"""
         response = self._call_openrouter("mistralai/mistral-7b-instruct:free", or_messages, max_tokens)
         if response:
             logger.info("✅ Response from Mistral 7B")
-            return response
+            return self._clean_response(response)
             
         # Tier 2: OpenAI gpt-oss-20b (Free) - OpenAI Quality Fallback
         logger.info("Trying Tier 2: OpenAI gpt-oss-20b (Free)")
@@ -628,14 +631,14 @@ User: {query}"""
         response = self._call_openrouter("openai/gpt-oss-20b:free", or_messages, max_tokens)
         if response:
             logger.info("✅ Response from OpenAI gpt-oss-20b")
-            return response
+            return self._clean_response(response)
         
         # Tier 3: Gemini Chain (Standard) - Moved up as requested
         logger.info("Trying Tier 3: Gemini Chain (Standard)")
         response = self._call_gemini_fallback(query, context, history, max_tokens)
         if response:
             logger.info("✅ Response from Gemini Chain")
-            return response
+            return self._clean_response(response)
 
         # Tier 4: Hugging Face - Llama 3.2 3B Instruct (Fallback)
         logger.info("Trying Tier 4: Hugging Face - Llama 3.2 3B")
@@ -652,11 +655,42 @@ User: {query}"""
         response = self._call_huggingface(hf_prompt, max_tokens)
         if response:
             logger.info("✅ Response from Llama 3.2 3B (HF)")
-            return response
+            return self._clean_response(response)
 
         # All providers failed
         logger.error("All providers failed")
         return "Hmm, I'm having some connection issues. Mind trying that again?"
+
+    def _clean_response(self, response: str) -> str:
+        """
+        Post-process response to remove unwanted formatting
+        - Remove hyphen bullets (- item)
+        - Remove numbered lists if standalone
+        - Clean up excessive line breaks
+        """
+        import re
+        
+        # Remove lines that start with "- " (hyphen bullets)
+        lines = response.split('\n')
+        cleaned_lines = []
+        for line in lines:
+            stripped = line.strip()
+            # Skip lines that are just "- something"
+            if stripped.startswith('- '):
+                # Convert "- item" to just "item" (remove bullet, keep content)
+                cleaned_lines.append(stripped[2:])
+            else:
+                cleaned_lines.append(line)
+        
+        response = '\n'.join(cleaned_lines)
+        
+        # Remove excessive line breaks (more than 2 consecutive)
+        response = re.sub(r'\n{3,}', '\n\n', response)
+        
+        # Remove trailing/leading whitespace
+        response = response.strip()
+        
+        return response
 
     def _build_openrouter_messages(self, query, context, history):
         """Build messages for OpenRouter with natural guidance"""
