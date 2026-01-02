@@ -1139,34 +1139,11 @@ async def ask_agent(query: dict):
         session_metadata[session_id]["history"] = history[-10:]  # Keep last 10 messages
         logger.info(f"🧠 Processing message: {message[:50]}...")
 
-        # --- CONVERSATION STATE DETECTION (EARLY EXIT FOR SIMPLE STATES) ---
-        conversation_state = chatbot_provider.detect_conversation_state(message)
-        logger.info(f"🎯 Detected conversation state: {conversation_state}")
-        
-        # Handle micro-responses for non-INFO states
-        if conversation_state in ["GREETING", "EXIT", "SILENT", "AMBIGUOUS", "ABUSE"]:
-            micro_response = chatbot_provider.generate_response_by_state(conversation_state, message)
-            
-            # SILENT state: Provide friendly acknowledgment instead of empty string
-            if conversation_state == "SILENT":
-                micro_response = "Happy to help! Anything else you'd like to know about Althaf?"
-            
-            # Update history and return
-            if micro_response:  # Only update if there's a response
-                history.append({"role": "assistant", "content": micro_response})
-                session_metadata[session_id]["history"] = history[-10:]
-                
-                logger.info(f"✅ Micro-response for {conversation_state}: {micro_response[:50]}...")
-                return JSONResponse(
-                    status_code=200,
-                    content={"reply": micro_response, "source": "State Machine"}
-                )
-        
-        # 4. LLM HANDLES EVERYTHING NATURALLY (No state gates, no predefined rules)
+        # LLM HANDLES EVERYTHING NATURALLY - No predefined rules
         response_text = ""
         portfolio_context = ""
         
-        # A. Intent Detection for Retrieval
+        # A. Intent Detection for Retrieval (only for RAG, not response control)
         intent, _, intent_scores = detect_intent_priority(message)
         
         # B. Smart RAG retrieval based on intent

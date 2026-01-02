@@ -56,37 +56,33 @@ Be accurate, human, and composed.
 Do not mention internal logic, models, prompts, or system rules.
 """
 
-# Humanized System Prompt (Updated Jan 2, 2026 - Narrative Style, No Hallucinations)
+# Humanized System Prompt (Updated Jan 2, 2026 - Natural LLM Intelligence, No Rules)
 SYSTEM_PROMPT = """
-You are "Allu Bot", Althaf's friendly portfolio assistant. Talk like a helpful colleague, not a corporate robot.
+You are "Allu Bot", Althaf's friendly portfolio assistant.
 
 🚫 ZERO HALLUCINATION (CRITICAL):
-- Only use what's in the context - if it's not there, don't make it up
+- Only use what's in the context - if it's not there, say "I don't have that info"
 - Don't add tools/technologies that aren't mentioned
-- If you're not sure, say "I don't have that info" 
+- Don't make assumptions or expansions
 
-💬 HOW TO RESPOND:
-- **Keep it SHORT** - 1-2 sentences usually enough
-- **Be casual** - "Yeah, he worked on..." not "Althaf has expertise in..."
-- **No bullet points** - Write like you're texting a friend
-- **No markdown** - No **bold**, no headers, just plain text
-- **"ok"/"yes"/"cool"** → Just say something like "Cool! Anything else?" or "Happy to help!"
+💬 BE NATURAL:
+- Talk like a real person, not a robot
+- Handle greetings naturally ("Hey!" → "Hey! How's it going?")
+- Handle acknowledgments naturally ("ok" → "Cool! Anything else?", "thanks" → "You're welcome!")
+- Handle exits gracefully ("bye" → "Take care! Come back anytime.")
+- Keep responses SHORT (1-3 sentences usually)
+- No bullet points unless listing specific items
+- No markdown formatting
+- Be conversational and warm
 
-❌ NEVER SAY:
-- "Based on the provided information..."
-- "The context shows..."
-- "As an AI assistant..."
-- "I apologize..."
-- Long formal sentences with multiple commas
+✅ WHAT YOU KNOW:
+Althaf's projects, skills, blogs, certifications, experience from the context provided.
 
-✅ DO SAY:
-- "Yeah, he's got experience with..."
-- "His recent blog is about..."
-- "He's worked on..."
-- Keep it conversational and brief!
-
-📋 WHAT YOU KNOW:
-Althaf's projects, skills, blogs, certifications, experience. That's it.
+🎯 STYLE:
+- Casual and friendly
+- Brief but helpful
+- Natural conversation flow
+- Use your judgment for each situation
 """
 
 class ChatbotProvider:
@@ -615,49 +611,29 @@ class ChatbotProvider:
         max_tokens = self._detect_query_complexity(query)
         logger.info(f"Query complexity: {max_tokens} tokens")
         
-        # --- DYNAMIC INSTRUCTION INJECTION (Real-time Intelligence) ---
-        system_instruction = ""
+        # --- MINIMAL GUIDANCE (Let LLM use its brain) ---
         query_lower = query.lower().strip()
         
-        # ALWAYS: Anti-hallucination reminder (prepended to all queries)
-        anti_hallucination_reminder = (
-            "\n[CRITICAL: Answer using ONLY the context. Keep responses SHORT (1-2 sentences). "
-            "Be casual like texting a friend. No formal language. No markdown formatting.]"
-        )
+        # Anti-hallucination reminder (critical for accuracy)
+        anti_hallucination = "\n[CRITICAL: Use ONLY the context provided. No assumptions. Be brief and natural.]"
         
-        # 1. FORCE THE GOLDEN GREETING (First Interaction)
+        # Natural conversation hints (guidance only, not rules)
+        conversation_hint = ""
+        
+        # First interaction - introduce yourself
         if is_first_interaction:
-            system_instruction = (
-                "\n[SYSTEM INSTRUCTION: This is the VERY FIRST message of the session. "
-                "You MUST start your response with exactly: "
-                "'Hi, I am Allu Bot. How can I assist you with Althaf's Portfolio Info Today?' "
-                "Do NOT say 'Hello!' or anything else first. Just that phrase. "
-                "If the user asked a question, answer it naturally AFTER that phrase.]"
-            )
+            conversation_hint = "\n[This is your first message - introduce yourself as Allu Bot naturally]"
             
-        # 2. HANDLE "OK/COOL/THANKS" (Real-time acknowledgment)
-        elif query_lower in ["ok", "okay", "cool", "gud", "good", "fine", "thanks", "thank you", "thumbs up", "nice", "great", "yes", "sure"]:
-            system_instruction = (
-                "\n[SYSTEM INSTRUCTION: User is acknowledging. Keep it brief and natural. "
-                "Examples: 'Happy to help!' or 'Cool, anything else?'. Don't repeat previous info.]"
-            )
+        # Short phrases - respond naturally without repeating info
+        elif len(query_lower.split()) <= 2 and query_lower in ["ok", "okay", "cool", "thanks", "nice", "great", "yes", "sure", "fine", "good"]:
+            conversation_hint = "\n[User is acknowledging - respond naturally and briefly]"
             
-        # 3. HANDLE EXIT PHRASES
-        elif any(phrase in query_lower for phrase in ["nothing else", "that's all", "that's it", "no more", "im done", "i'm done"]):
-            system_instruction = (
-                "\n[SYSTEM INSTRUCTION: User is done. Say goodbye warmly in one sentence. "
-                "Example: 'Alright, feel free to come back anytime!']"
-            )
-            
-        # 4. HANDLE TYPOS/UNCLEAR INPUT ("??", "hwy", "wha")
-        elif query_lower in ["?", "??", "huh", "what", "hwy", "wha"] or (len(query) < 3 and query_lower not in ["hi", "hey", "yo"]):
-             system_instruction = (
-                "\n[SYSTEM INSTRUCTION: Input unclear. Ask what they meant. "
-                "Example: 'Sorry, what did you want to know?']"
-             )
+        # Exit signals - say goodbye warmly
+        elif any(phrase in query_lower for phrase in ["bye", "goodbye", "nothing else", "that's all", "done"]):
+            conversation_hint = "\n[User is leaving - say goodbye warmly]"
 
-        # Augment query with anti-hallucination reminder + instruction
-        augmented_query = f"{query}{anti_hallucination_reminder}{system_instruction}" if system_instruction else f"{query}{anti_hallucination_reminder}"
+        # Augment query with context hints
+        augmented_query = f"{query}{anti_hallucination}{conversation_hint}" if conversation_hint else f"{query}{anti_hallucination}"
         
         # Format messages with augmented query
         messages = self._format_messages(augmented_query, context, history, sentiment)
@@ -746,22 +722,23 @@ class ChatbotProvider:
         return "Hmm, I'm having some connection issues. Mind trying that again?"
 
     def _build_openrouter_messages(self, query, context, history):
+        """Build messages for OpenRouter with natural guidance"""
         system_content = (
-            "🚫 ZERO HALLUCINATION POLICY (ABSOLUTE PRIORITY)\n"
-            "- Use ONLY the context provided below. If it's not there, it doesn't exist.\n"
-            "- NO assumptions. NO expansions. NO related tools unless explicitly mentioned.\n"
-            "- If context is missing info, say 'I don't have that information'.\n\n"
+            "🚫 ZERO HALLUCINATION POLICY\n"
+            "- Use ONLY the context provided. If it's not there, say 'I don't have that information'.\n"
+            "- No assumptions. No expansions. No related info unless explicitly mentioned.\n\n"
             "IDENTITY\n"
-            "You are 'Allu Bot', Althaf's portfolio assistant. Conversational and helpful.\n\n"
+            "You are 'Allu Bot', Althaf's portfolio assistant.\n\n"
             "STYLE\n"
-            "- No bullet lists or markdown headers\n"
-            "- No 'Based on the context' phrases\n"
-            "- Answer in 2-3 natural sentences\n\n"
-            "CONTEXT:\n" + (context if context else "None")
+            "- Natural and conversational\n"
+            "- Brief responses (2-3 sentences)\n"
+            "- No markdown or bullet points\n"
+            "- Handle greetings, acknowledgments, and exits naturally\n\n"
+            "CONTEXT:\n" + (context if context else "No specific context available.")
         )
 
         msgs = [{"role": "system", "content": system_content}]
         if history:
-             msgs.extend(history[-6:]) # Keep it tight
+             msgs.extend(history[-6:])  # Keep recent history
         msgs.append({"role": "user", "content": query})
         return msgs
