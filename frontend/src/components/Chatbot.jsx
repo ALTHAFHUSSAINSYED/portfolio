@@ -21,8 +21,9 @@ const Chatbot = () => {
   useEffect(() => {
     console.log("🔊 Initializing audio...");
     
-    // Use PUBLIC_URL for production compatibility
-    const audioPath = `${process.env.PUBLIC_URL}/typing-sound.mp3`;
+    // Use absolute path from public folder (works in both dev and production)
+    // PUBLIC_URL is empty in production when homepage is not set in package.json
+    const audioPath = `${process.env.PUBLIC_URL || ''}/typing-sound.mp3`.replace('//', '/');
     console.log("🔗 Audio path:", audioPath);
     
     loadingSoundRef.current = new Audio(audioPath);
@@ -38,13 +39,6 @@ const Chatbot = () => {
     loadingSoundRef.current.addEventListener('error', (e) => {
       console.error("❌ Audio failed to load from:", audioPath);
       console.error("Error details:", e);
-      // Try alternative path
-      const fallbackPath = "/typing-sound.mp3";
-      if (audioPath !== fallbackPath) {
-        console.log("🔄 Trying fallback path:", fallbackPath);
-        loadingSoundRef.current.src = fallbackPath;
-        loadingSoundRef.current.load();
-      }
     });
 
     return () => {
