@@ -93,11 +93,11 @@
 }
 
 .chatbot-window {
-  background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent white */
-  backdrop-filter: blur(20px) saturate(180%); /* Glass effect */
-  -webkit-backdrop-filter: blur(20px) saturate(180%); /* Safari support */
+  background-color: rgba(255, 255, 255, 0.15); /* Very transparent - see-through */
+  backdrop-filter: blur(5px); /* Minimal blur for readability */
+  -webkit-backdrop-filter: blur(5px); /* Safari support */
   color: var(--chat-text-color-light);
-  border: 1px solid rgba(255, 255, 255, 0.3); /* Subtle border */
+  border: 1px solid rgba(255, 255, 255, 0.4); /* Visible border */
   border-radius: 16px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
   width: 320px !important;
