@@ -93,11 +93,9 @@
 }
 
 .chatbot-window {
-  background-color: rgba(255, 255, 255, 0.15); /* Very transparent - see-through */
-  backdrop-filter: blur(5px); /* Minimal blur for readability */
-  -webkit-backdrop-filter: blur(5px); /* Safari support */
+  background-color: transparent; /* Transparent container */
   color: var(--chat-text-color-light);
-  border: 1px solid rgba(255, 255, 255, 0.4); /* Visible border */
+  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 16px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
   width: 320px !important;
@@ -258,6 +256,7 @@
   gap: 12px;
   scroll-behavior: smooth;
   min-height: 0;
+  background-color: rgba(255, 255, 255, 0.1); /* Very transparent - see website background */
 }
 
 .chatbot-message {
@@ -381,11 +380,13 @@
 .chatbot-form {
   display: flex;
   padding: 12px 16px;
-  background-color: rgba(0, 0, 0, 0.02);
+  background-color: #ffffff; /* Solid white - not transparent */
   border-top: 1px solid rgba(229, 231, 235, 0.5);
   height: 64px;
   box-sizing: border-box;
   align-items: center;
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
 }
 
 .chatbot-input {

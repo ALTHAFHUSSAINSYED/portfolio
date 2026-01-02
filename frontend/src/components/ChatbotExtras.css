@@ -49,6 +49,9 @@
   font-size: 11px;
   color: #94a3b8;
   text-align: center;
+  background-color: #ffffff; /* Solid white - not transparent */
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
 }
 
 .chatbot-footer a {
