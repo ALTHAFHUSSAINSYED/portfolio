@@ -370,10 +370,14 @@ backend/
 │       ├── DevOps-2025-12-30-070005/   # Previous job
 │       └── (other job directories)
 │
-└── .github-runner/                     # Self-hosted GitHub Actions runner
-    ├── _work/                          # Workspace
-    ├── _diag/                          # Diagnostics
-    └── config.sh                       # Runner configuration
+└── actions-runner/                      # Self-hosted GitHub Actions runner
+    ├── _work/                          # Workspace (742MB)
+    ├── _diag/                          # Diagnostics (auto-cleanup at 7GB)
+    ├── bin.2.330.0/                    # Runner binaries (79MB)
+    ├── externals.2.330.0/              # External dependencies (583MB)
+    ├── config.sh                       # Runner configuration
+    ├── svc.sh                          # Service management script
+    └── .credentials                    # GitHub authentication (PAT)
 ```
 
 ### Docker Container
@@ -431,7 +435,24 @@ Structure:
 **System Logs:**
 ```
 Docker: journalctl -u docker
-Runner: /home/ec2-user/.github-runner/_diag/
+Runner: /home/ec2-user/actions-runner/_diag/
+Runner Service: sudo systemctl status actions.runner.ALTHAFHUSSAINSYED-portfolio.portfolio.service
+```
+
+**Disk Space Management:**
+```bash
+# Check disk usage
+df -h /
+
+# Clean Docker cache (frees ~15GB)
+docker builder prune -af
+docker image prune -af
+
+# Clean runner diagnostics (frees ~7GB when full)
+rm -rf /home/ec2-user/actions-runner/_diag/*
+
+# Clean system logs (frees ~300MB)
+sudo journalctl --vacuum-size=50M
 ```
 
 ---
@@ -1005,13 +1026,18 @@ if job['outline']:
 
 **Location:** `.github/workflows/`
 
-| Workflow | Trigger | Purpose |
-|----------|---------|---------|
-| `backend-deploy.yml` | Push to `main` (backend changes) | Deploy backend to EC2 |
-| `frontend-deploy.yml` | Push to `main` (frontend changes) | Notify Amplify deployment |
-| `repopulate-chromadb.yml` | Manual | Sync ChromaDB |
-| `codeql.yml` | Push/PR | Security scanning |
-| `ai-chatbot-gates.yml` | Manual | Chatbot validation |
+| Workflow | Trigger | Purpose | Runner |
+|----------|---------|---------|--------|
+| `backend-deploy.yml` | Push to `main` (backend changes) | Deploy backend to EC2 | self-hosted (EC2) |
+| `ai-chatbot-gates.yml` | Push/PR (backend/tests changes) | Chatbot validation | ubuntu-latest |
+| `repopulate-chromadb.yml` | Manual | Sync ChromaDB | self-hosted (EC2) |
+
+**Authentication Requirements (Private Repository):**
+- Self-hosted runner requires GitHub Personal Access Token (PAT)
+- Token permissions: `Contents: Read-only`, `Metadata: Read-only`
+- Configuration: Git credential helper with PAT in remote URL
+- Token expiration: 90 days (renewable)
+- See: [DEPLOYMENT_FIXED.md](DEPLOYMENT_FIXED.md) for setup instructions
 
 ### Backend Deployment Flow
 
@@ -1046,54 +1072,102 @@ on:
 
 jobs:
   deploy:
-    runs-on: self-hosted  # Runs ON the EC2 instance
+    runs-on: self-hosted  # Runs ON the EC2 instance (requires PAT auth)
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create environment file
+      - name: Repopulate ChromaDB (if data files changed)
         run: |
+          cp backend/populate_vector_db.py /home/ec2-user/portfolio/backend/populate_vector_db.py
           cd /home/ec2-user/portfolio/backend
-          cat > .env <<EOF
-          MONGO_URL=${{ secrets.MONGO_URL }}
-          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
-          CHROMA_API_KEY=${{ secrets.CHROMA_API_KEY }}
-          # (other secrets)
-          EOF
+          
+          # Use .env.local (already exists with all secrets)
+          if git diff HEAD~1 HEAD --name-only | grep -E "(portfolio_data\.json|formatted_data\.json|fixed_data\.json)"; then
+            echo "[INFO] Data files changed - repopulating ChromaDB..."
+            python3 populate_vector_db.py
+            echo "[SUCCESS] ChromaDB repopulated!"
+          else
+            echo "[INFO] No data file changes detected - skipping."
+          fi
 
       - name: Kill process on port 8000
         run: |
           PID=$(sudo lsof -ti:8000 || true)
           if [ -n "$PID" ]; then
             sudo kill -9 $PID
+            echo "Killed process $PID on port 8000."
+          else
+            echo "No process found on port 8000."
           fi
+          exit 0
 
       - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ec2-user/portfolio
+
+            # FORCE RESET (prevents corrupted files surviving)
+            git fetch --all
+            git reset --hard origin/main
+            git pull origin main
+
+            # Update environment file (.env.local contains all production secrets)
+            # ONLY create .env.local if it doesn't exist (preserves manual updates)
+            cd backend
+            if [ ! -f .env.local ]; then
+              echo "[WORKFLOW] Creating new .env.local file..."
+              echo "MONGO_URL=${{ secrets.MONGO_URL }}" > .env.local
+              echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> .env.local
+              echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> .env.local
+              echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> .env.local
+              echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env.local
+              echo "CHROMA_API_KEY=${{ secrets.CHROMA_API_KEY }}" >> .env.local
+              echo "CHROMA_TENANT_ID=${{ secrets.CHROMA_TENANT }}" >> .env.local
+              echo "CHROMA_DB_NAME=Development" >> .env.local
+              echo "BLOG_KEY=${{ secrets.BLOG_KEY }}" >> .env.local
+              echo "CHATBOT_NEW_KEY=${{ secrets.CHATBOT_NEW_KEY }}" >> .env.local
+              echo "CHATBOT=${{ secrets.CHATBOT }}" >> .env.local
+              echo "GEMINI_BLOG_API_KEY=${{ secrets.GEMINI_BLOG_API_KEY }}" >> .env.local
+              echo "SERPER_API_KEY=${{ secrets.SERPER_API_KEY }}" >> .env.local
+              echo "RESEND_KEY=${{ secrets.RESEND_KEY }}" >> .env.local
+              echo "EMAIL_ADDRESS=${{ secrets.TO_EMAIL }}" >> .env.local
+              echo "USE_LEGACY_COLLECTIONS=false" >> .env.local
+            else
+              echo "[WORKFLOW] Using existing .env.local file (preserving manual updates)"
+            fi
+            cd ..
+
+            # HARD CLEAN Docker (important after crash loops)
+            docker stop portfolio-backend || true
+            docker rm portfolio-backend || true
+            docker image prune -f
+
+            # Rebuild & run
+            docker build --no-cache -t portfolio-backend -f backend/Dockerfile .
+            docker run -d \
+              --memory=5g \
+              --name portfolio-backend \
+              --restart always \
+              -p 8000:8000 \
+              -v /home/ec2-user/portfolio-logs:/app/backend/logs \
+              --env-file /home/ec2-user/portfolio/backend/.env.local \
+              portfolio-backend
+
+      - name: Wait for container to start
         run: |
-          cd /home/ec2-user/portfolio
-          git fetch --all
-          git reset --hard origin/main
-          git pull origin main
-          
-          # Docker cleanup
-          docker stop portfolio-backend || true
-          docker rm portfolio-backend || true
-          docker system prune -af --volumes
-          
-          # Rebuild & run
-          docker build --no-cache -t portfolio-backend backend
-          docker run -d \
-            --memory=5g \
-            --name portfolio-backend \
-            --restart always \
-            -p 8000:8000 \
-            --env-file backend/.env.local \
-            -v /home/ec2-user/portfolio-logs:/app/backend/logs \
-            portfolio-backend
+          echo "Waiting for container to start..."
+          sleep 10
+          sudo docker logs portfolio-backend --tail 50
 
       - name: Health check
         run: |
+          echo "Running health check..."
           max_attempts=60
           attempt=0
           while [ $attempt -lt $max_attempts ]; do
@@ -1101,11 +1175,13 @@ jobs:
               echo "Backend is healthy!"
               exit 0
             fi
+            echo "Attempt $((attempt+1))/$max_attempts: Server not ready..."
             sleep 5
             attempt=$((attempt+1))
           done
-          echo "Health check failed!"
-          docker logs portfolio-backend --tail 100
+
+          echo "Backend health check failed!"
+          sudo docker logs portfolio-backend --tail 100
           exit 1
 ```
 
@@ -1123,29 +1199,82 @@ graph TB
     Deploy --> Done[✅ Live on Amplify]
 ```
 
-**Workflow File (`frontend-deploy.yml`):**
-```yaml
-name: Deploy Frontend to Amplify
+**Note:** Frontend deployment is fully automated via AWS Amplify's GitHub integration. No workflow file needed - Amplify auto-deploys on push to `main` when frontend changes are detected.
 
-on:
-  push:
-    paths:
-      - 'frontend/**'
-      - 'amplify.yml'
-    branches:
-      - main
+### Self-Hosted Runner Setup
 
-jobs:
-  notify:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Frontend changes detected
-        run: |
-          echo "[SUCCESS] Frontend changes detected!"
-          echo "[INFO] AWS Amplify will automatically deploy"
+**Service Management:**
+```bash
+# Check status
+sudo systemctl status actions.runner.ALTHAFHUSSAINSYED-portfolio.portfolio.service
+
+# Start/Stop/Restart
+cd /home/ec2-user/actions-runner
+sudo ./svc.sh start
+sudo ./svc.sh stop
+sudo ./svc.sh restart
+
+# View logs
+journalctl -u actions.runner.ALTHAFHUSSAINSYED-portfolio.portfolio.service -f
 ```
 
-**Note:** Amplify deployment is fully automated via AWS console connection to GitHub repository.
+**Authentication Configuration (Private Repository):**
+```bash
+# Configure git credential storage
+git config --global credential.helper store
+
+# Set remote URL with Personal Access Token
+cd /home/ec2-user/portfolio
+git remote set-url origin https://ALTHAFHUSSAINSYED:<PAT_TOKEN>@github.com/ALTHAFHUSSAINSYED/portfolio.git
+
+# Test authentication
+git fetch --all
+# Should succeed without password prompt
+
+# Restart runner to apply
+cd /home/ec2-user/actions-runner
+sudo ./svc.sh restart
+```
+
+**Troubleshooting:**
+- **Error: "could not read Username"** → PAT token not configured or expired
+- **Error: "No space left on device"** → Run disk cleanup (see Disk Space Management above)
+- **Workflow not triggering** → Check runner service status, ensure it's running
+- **Build fails** → Check Docker logs: `docker logs portfolio-backend --tail 100`
+
+### Why Self-Hosted Runner is Required
+
+**Cannot Use GitHub-Hosted Runners (`runs-on: ubuntu-latest`) Because:**
+
+1. **Direct EC2 Filesystem Access Needed**
+   - Workflow copies files to `/home/ec2-user/portfolio/` (doesn't exist on GitHub servers)
+   - ChromaDB repopulation script reads local `.env.local` file
+   - Environment file at `/home/ec2-user/portfolio/backend/.env.local` is EC2-specific
+
+2. **Port Management on EC2**
+   - Kills process on EC2's port 8000 (`sudo lsof -ti:8000`)
+   - GitHub-hosted runner can't access EC2's process table
+
+3. **Docker Build Context**
+   - Builds image using EC2's local filesystem (entire repo as context)
+   - No container registry configured for push/pull
+
+4. **Docker Container Management**
+   - Starts/stops containers on EC2's Docker daemon
+   - GitHub-hosted runner has its own Docker, not connected to EC2
+
+5. **Volume Mounts**
+   - Uses EC2 host path `/home/ec2-user/portfolio-logs` for persistent logs
+   - Path doesn't exist on GitHub runners
+
+6. **Health Checks**
+   - Tests `localhost:8000` which is EC2's FastAPI app
+   - GitHub-hosted runner's localhost is a different machine
+
+**Self-Hosted Runner = Commands execute ON the EC2 instance**  
+**GitHub-Hosted Runner = Commands execute on GitHub's infrastructure (wrong server)**
+
+See [GITHUB_HOSTED_RUNNER_ANALYSIS.md](GITHUB_HOSTED_RUNNER_ANALYSIS.md) for detailed technical analysis.
 
 ---
 
