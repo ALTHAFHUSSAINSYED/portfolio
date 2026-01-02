@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Folder, CheckCircle, ArrowRight, Zap, Code, Server, Loader2, AlertTriangle } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://api.althafportfolio.site';
 
@@ -12,7 +12,6 @@ const ProjectsSection = () => {
   const [error, setError] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
-  const location = useLocation();
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -26,18 +25,6 @@ const ProjectsSection = () => {
     };
     fetchProjects();
   }, []);
-
-  // ✨ IMMEDIATE scroll on navigation (before data loads)
-  useEffect(() => {
-    if (location.state && location.state.scrollTo === 'projects') {
-      const element = document.getElementById('projects');
-      if (element) {
-        // Use 'auto' for instant snap (no delay)
-        element.scrollIntoView({ behavior: 'auto', block: 'start' });
-        window.history.replaceState({}, document.title);
-      }
-    }
-  }, [location.state]); // Only depends on location, not loading
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {

@@ -33,20 +33,27 @@ const BlogsSection = () => {
     fetchBlogs();
   }, []);
 
-  // ✨ IMMEDIATE scroll on navigation (before data loads)
-  // This prevents the "stuck at Hero for 2 seconds" issue
+  // ✨ Handle scroll AFTER data load (fixes double-jump glitch)
   useEffect(() => {
-    if (location.state && location.state.scrollTo === 'blogs') {
-      // Scroll IMMEDIATELY - don't wait for data
-      // Use 'auto' for instant snap (no smooth animation)
-      const element = document.getElementById('blogs');
-      if (element) {
-        element.scrollIntoView({ behavior: 'auto', block: 'start' });
-        // Clear state immediately
-        window.history.replaceState({}, document.title);
-      }
+    // Only scroll if:
+    // 1. We are NOT loading anymore
+    // 2. We have a valid location state requesting a scroll
+    // 3. The target is 'blogs'
+    if (!loading && location.state && location.state.scrollTo === 'blogs') {
+      
+      // Small timeout to ensure the DOM has fully painted the new content
+      setTimeout(() => {
+        const element = document.getElementById('blogs');
+        if (element) {
+          // Use 'start' to align the top of the section with the top of the viewport
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          
+          // Clear the state so it doesn't scroll again on refresh
+          window.history.replaceState({}, document.title);
+        }
+      }, 100);
     }
-  }, [location.state]); // Only depends on location change, not loading state
+  }, [loading, location.state]);
 
   // Check URL for category parameter
   useEffect(() => {
