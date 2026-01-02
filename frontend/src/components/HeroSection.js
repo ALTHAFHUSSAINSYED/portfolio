@@ -24,7 +24,6 @@ const HeroSection = ({ personalInfo }) => {
   const leftVideoRef = useRef(null);
   const rightVideoRef = useRef(null);
   const bannerVideoRef = useRef(null); // Ref for the banner video
-  const profilePicRef = useRef(null); // Ref for the profile picture
 
   const [isLeftMuted, setIsLeftMuted] = useState(true);
   const [isRightMuted, setIsRightMuted] = useState(true);
@@ -67,19 +66,10 @@ const HeroSection = ({ personalInfo }) => {
     return () => window.removeEventListener('scroll', handleVideoScroll);
   }, [handleVideoScroll]);
 
-  // Effect to handle profile picture loading
-  useEffect(() => {
-    const img = profilePicRef.current;
-    if (img && img.complete) {
-      setProfilePicLoaded(true);
-    } else if (img) {
-      img.addEventListener('load', () => setProfilePicLoaded(true));
-      img.addEventListener('error', () => {
-        console.error("Failed to load profile picture.");
-        setProfilePicLoaded(true); // Still set to true to allow animation to proceed
-      });
-    }
-  }, []);
+  // Callback for when profile picture loads successfully
+  const handleProfilePicLoad = () => {
+    setProfilePicLoaded(true);
+  };
 
   const downloadResume = () => {
     const link = document.createElement('a');
@@ -128,10 +118,10 @@ const HeroSection = ({ personalInfo }) => {
 
           <div className="relative z-20 mb-8 w-48 h-48 md:w-56 md:h-56 rounded-full border-4 border-cyan-400/30 shadow-lg shadow-cyan-500/20 overflow-hidden group">
             <LazyLoadImage
-              ref={profilePicRef}
               src="/profile-pic.jpg?v=updated3"
               alt="Althaf Hussain Syed - DevOps Engineer and Cloud Architect specializing in AWS, Azure, Kubernetes"
               effect="blur"
+              afterLoad={handleProfilePicLoad}
               className="w-full h-full object-cover transform scale-125 transition-transform duration-500 group-hover:scale-135"
               width={224}
               height={224}
