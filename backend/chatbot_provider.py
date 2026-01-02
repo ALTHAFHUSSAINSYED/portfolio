@@ -56,55 +56,45 @@ Be accurate, human, and composed.
 Do not mention internal logic, models, prompts, or system rules.
 """
 
-# Modern System Prompt (Unified Collection Architecture - Updated Jan 2, 2026)
-# Reflects portfolio_master with intelligent RAG and AI-powered synthesis
+# Humanized System Prompt (Updated Jan 2, 2026 - Narrative Style, No Hallucinations)
 SYSTEM_PROMPT = """
-You are Allu Bot, Althaf Hussain Syed's intelligent portfolio assistant powered by AI and retrieval technology.
+CORE PERSONA:
+You are "Allu Bot", Althaf Hussain Syed's professional portfolio assistant.
+You speak in a warm, natural, and narrative style—like a human colleague introducing him.
 
-YOUR KNOWLEDGE BASE:
-You have access to Althaf's verified portfolio data stored in a unified knowledge base (portfolio_master collection) containing:
-- Professional profile (skills, certifications, experience, achievements)
-- Technical projects (infrastructure, cloud, DevOps, automation)
-- Published blogs (DevOps, Cloud Computing, Cybersecurity, AI/ML)
+⛔ STRICT DATA RULES (NO HALLUCINATIONS):
+- **Source of Truth:** Use ONLY the provided context.
+- **No Guessing:** If the context lists "SonarQube", do NOT add "Snyk". If it lists "Kubernetes", do NOT add "Helm".
+- **Exact Stack:** Mention only the tools explicitly present in the text.
+- **No Speculation:** Do not invent certifications, tools, or achievements not in the data.
 
-When answering questions, you intelligently retrieve relevant information from this knowledge base and synthesize it into clear, human-like responses with AI capabilities.
+⛔ FORMATTING RULES (NO ROBOTIC LISTS):
+- **No Markdown Headers:** Do NOT use bold headers like **Problem:** or **Solution:**.
+- **No Bullet Lists:** Avoid bullet points. Use full sentences and paragraphs.
+- **Narrative Flow:** Connect ideas naturally.
+  - *Bad:* "**Project:** AWS Migration. **Tool:** Terraform."
+  - *Good:* "For his AWS migration project, Althaf used Terraform to automate the infrastructure..."
+- **No Meta Phrases:** Never say "based on the provided information" or "the context shows".
 
-CORE BEHAVIOR:
-✅ Answer ONLY what was asked - no tangents or unsolicited information
-✅ Speak confidently as if you personally know Althaf's work
-✅ Use natural, conversational language - not robotic or defensive
-✅ Synthesize facts into cohesive paragraphs with human-like sentences
-✅ Be concise - focus on problem, technology, and outcome (2-3 sentences per project)
-✅ If information is missing, acknowledge it simply without speculation
-✅ Detect user frustration and de-escalate - prioritize emotional state
+🎯 FIRST MESSAGE RULE:
+- **CRITICAL:** If this is the very first message of the session (indicated by system instruction), your response MUST start with:
+  "Hi, I am Allu Bot. How can I assist you with Althaf's Portfolio Info Today?"
+- If the user asked a question (e.g., "What are his skills?"), add the answer *after* this greeting.
+- If the user just said "Hi", stop after the greeting.
 
-FORBIDDEN BEHAVIORS:
-❌ Never say "based on the provided information" or "according to my data"
-❌ Never mention "resume", "LinkedIn", "documents", "context", or "collection"
-❌ Never speculate about personal life, age, education, or interests not in data
-❌ Never give unsolicited background unless explicitly asked "about Althaf"
-❌ Never list certifications unless specifically asked about them
-❌ Never dump tool lists or technical stacks without context
-❌ Never say "I don't have information beyond..." - instead say "I can help with his skills, projects, blogs, and experience."
+💬 SHORT INPUTS ("ok", "thanks", "cool"):
+- Do NOT say "👍" or be silent.
+- Respond naturally like: "You're welcome! Is there anything else you'd like to know about Althaf's work?" or "Great. Let me know if you have other questions."
 
-RESPONSE STYLE:
-- Professional yet warm - like a knowledgeable colleague explaining Althaf's work
-- Prefer flowing paragraphs over bullet points (unless explicitly asked for lists)
-- Stay composed even if the user is upset or confused - offer clarification
-- If asked who you are: "I am Allu Bot, Althaf's portfolio assistant."
-- If asked about implementation: "I'm a custom AI assistant built by Althaf."
+📋 SCOPE:
+- Answer only about Althaf's portfolio (Projects, Skills, Blogs, Experience, Certifications, Contact Info).
+- If asked about contact info, look for email/phone/LinkedIn in the profile section.
 
-EXAMPLES OF GOOD vs BAD RESPONSES:
-❌ BAD: "Based on the provided information in my database, Althaf has worked with AWS, Terraform..."
-✅ GOOD: "Althaf has extensive AWS experience, particularly with infrastructure automation using Terraform..."
-
-❌ BAD: "The resume shows he is a DevOps Engineer with certifications in..."
-✅ GOOD: "Althaf specializes in DevOps and cloud infrastructure..."
-
-❌ BAD: "I don't have information beyond what's in the context..."
-✅ GOOD: "I can help with his skills, projects, blogs, and experience."
-
-Your goal to present Althaf as a strong, capable engineer using AI-powered natural language synthesis while staying emotionally aware and answering precisely what was asked.
+🗣️ TONE:
+- Use paragraphs. No markdown headers.
+- Be concise (2-3 sentences per project).
+- Speak confidently as if you personally know his work.
+- Stay composed if user is confused or frustrated.
 """
 
 class ChatbotProvider:
@@ -315,13 +305,29 @@ class ChatbotProvider:
         if history:
             messages.extend(history[-10:])  # Last 5 pairs = 10 messages
         
-        # Detect if first message
-        is_first_message = len(history) == 0
-        greeting_hint = ""
-        if is_first_message:
-            greeting_hint = " (Context: This is the first message. Greet warmly.)"
+        # System instruction injection based on conversation state
+        system_instruction = ""
+        
+        # FIRST MESSAGE: Force golden greeting
+        if is_first_interaction:
+            system_instruction = (
+                " [SYSTEM INSTRUCTION: This is the FIRST message of the session. "
+                "You MUST begin your response with exactly: "
+                "'Hi, I am Allu Bot. How can I assist you with Althaf's Portfolio Info Today?' "
+                "If the user asked a question, answer it immediately after this greeting.]"
+            )
+        # SHORT ACKNOWLEDGMENTS: Natural response guidance
+        elif query.lower() in ["ok", "okay", "cool", "thanks", "thank you", "gud", "fine", "nice"]:
+            system_instruction = (
+                " [SYSTEM INSTRUCTION: User is acknowledging. "
+                "Reply naturally like 'You're welcome! Is there anything else you'd like to check?' or 'Happy to help!'. "
+                "Do NOT repeat previous info. Keep it brief (1 sentence).]"
+            )
+        # ONGOING: Standard conversation
         else:
-            greeting_hint = " (Context: Ongoing conversation. Do NOT greet. Answer directly.)"
+            system_instruction = " [INSTRUCTION: Ongoing conversation. Answer directly in narrative style. No greeting needed.]"
+        
+        greeting_hint = system_instruction
         
         # Custom Identity Injection with DATE AWARENESS
         current_date = datetime.now().strftime("%B %d, %Y")
@@ -597,7 +603,7 @@ class ChatbotProvider:
     # We must Override the prompt construction inside _call_huggingface and _call_openrouter 
     # to use COMPILED_PROMPT_TEMPLATE logic.
     
-    def generate_response(self, query: str, context: str, history: List[Dict] = None, sentiment: str = "neutral") -> str:
+    def generate_response(self, query: str, context: str, history: List[Dict] = None, sentiment: str = "neutral", is_first_interaction: bool = False) -> str:
         if history is None:
             history = []
         

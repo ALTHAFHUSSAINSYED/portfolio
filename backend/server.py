@@ -1280,13 +1280,21 @@ async def ask_agent(query: dict):
                  
             portfolio_context, _ = await get_portfolio_context(message, rag_intent)
             
-            # C. LLM Generation
+            # C. Determine if this is first interaction (for golden greeting)
+            is_first_interaction = session_metadata[session_id].get("greeting_count", 0) == 0
+            
+            # D. LLM Generation with first interaction flag
             response_text = chatbot_provider.generate_response(
                 query=message,
                 context=portfolio_context,
                 history=history,
-                sentiment="neutral" # Context is already filtered/safe
+                sentiment="neutral", # Context is already filtered/safe
+                is_first_interaction=is_first_interaction
             )
+            
+            # E. Increment greeting count after first interaction
+            if is_first_interaction:
+                session_metadata[session_id]["greeting_count"] = 1
 
         duration = (datetime.now() - start_time).total_seconds()
         
