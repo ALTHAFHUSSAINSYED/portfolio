@@ -59,9 +59,10 @@
   },
   "scripts": {
     "start": "craco start",
-    "build": "node scripts/generate-sitemap.js && craco build && react-snap",
+    "build": "node scripts/generate-dynamic-sitemap.js && craco build && react-snap",
     "test": "craco test",
-    "generate-sitemap": "node scripts/generate-sitemap.js"
+    "generate-sitemap": "node scripts/generate-dynamic-sitemap.js",
+    "sitemap": "node scripts/generate-dynamic-sitemap.js"
   },
   "reactSnap": {
     "include": [
