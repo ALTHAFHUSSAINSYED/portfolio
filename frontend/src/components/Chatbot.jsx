@@ -14,7 +14,6 @@ const Chatbot = () => {
   const [hasUnread, setHasUnread] = useState(true);
   const [hasInteracted, setHasInteracted] = useState(false); // New state to track interaction
   const [isMaximized, setIsMaximized] = useState(false);
-  const [audioEnabled, setAudioEnabled] = useState(false); // Track if audio is enabled
   const messagesEndRef = useRef(null);
   const loadingSoundRef = useRef(null);
 
@@ -22,7 +21,8 @@ const Chatbot = () => {
   useEffect(() => {
     loadingSoundRef.current = new Audio("/typing-sound.mp3");
     loadingSoundRef.current.loop = true; // Loop while loading
-    loadingSoundRef.current.volume = 0.3; // 30% volume
+    loadingSoundRef.current.volume = 0.8; // 80% volume
+    loadingSoundRef.current.preload = "auto"; // Preload audio
 
     return () => {
       // Cleanup on unmount
@@ -33,29 +33,19 @@ const Chatbot = () => {
     };
   }, []);
 
-  // Enable audio on first user interaction (required for browser autoplay policies)
+  // Play/stop sound based on loading state (simplified - no audioEnabled check)
   useEffect(() => {
-    if (isOpen && !audioEnabled) {
-      const enableAudio = () => {
-        setAudioEnabled(true);
-        // Remove listener after first interaction
-        document.removeEventListener('click', enableAudio);
-      };
-      document.addEventListener('click', enableAudio);
-      return () => document.removeEventListener('click', enableAudio);
-    }
-  }, [isOpen, audioEnabled]);
-
-  // Play/stop sound based on loading state
-  useEffect(() => {
-    if (isLoading && loadingSoundRef.current && audioEnabled) {
+    if (isLoading && loadingSoundRef.current) {
       loadingSoundRef.current.currentTime = 0;
-      loadingSoundRef.current.play().catch(e => console.log("Audio play failed:", e));
+      // Try to play, ignore errors if browser blocks autoplay
+      loadingSoundRef.current.play().catch(e => {
+        console.log("Audio autoplay blocked by browser - will work after user interaction");
+      });
     } else if (!isLoading && loadingSoundRef.current) {
       loadingSoundRef.current.pause();
       loadingSoundRef.current.currentTime = 0;
     }
-  }, [isLoading, audioEnabled]);
+  }, [isLoading]);
 
   // Conversation memory to track context - MOVED TO COMPONENT LEVEL
   const conversationMemory = useRef({
@@ -120,6 +110,12 @@ const Chatbot = () => {
     if (!isOpen) {
       setHasUnread(false); // Clear unread indicator when opening chat
       setHasInteracted(true); // Stop shake animation permanently
+      
+      // Initialize audio context on user interaction (required by browsers)
+      if (loadingSoundRef.current) {
+        loadingSoundRef.current.load(); // Reload audio to enable playback
+      }
+      
       // Scroll to latest message when opening
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
