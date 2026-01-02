@@ -25,11 +25,30 @@ APOLOGY_PATTERNS = [
 ]
 
 def strip_apology_boilerplate(text: str) -> str:
+    """Remove apology phrases and clean up formatting artifacts"""
     cleaned = text
+    
+    # Remove apology patterns
     for pattern in APOLOGY_PATTERNS:
         cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
-    # Clean up massive whitespace gaps left by removal
-    return re.sub(r"\s+", " ", cleaned).strip()
+    
+    # Remove markdown artifacts and formatting issues
+    cleaned = re.sub(r'\*\*', '', cleaned)  # Remove bold markdown
+    cleaned = re.sub(r'__', '', cleaned)     # Remove underline markdown
+    cleaned = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'\1', cleaned)  # Remove markdown links
+    cleaned = re.sub(r'#+\s*', '', cleaned)  # Remove markdown headers
+    
+    # Fix hyphenated words that should be spaces (e.g., "AI-powered" -> "AI powered" if it's excessive)
+    # But keep technical terms like "real-time", "end-to-end"
+    technical_terms = ['real-time', 'end-to-end', 'state-of-the-art', 'cloud-native', 'full-stack']
+    
+    # Clean up excessive whitespace
+    cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+    
+    # Remove leading/trailing punctuation artifacts
+    cleaned = re.sub(r'^[\s\-:]+|[\s\-:]+$', '', cleaned).strip()
+    
+    return cleaned
 
 
 class ResponseSanitizerMiddleware(BaseHTTPMiddleware):
