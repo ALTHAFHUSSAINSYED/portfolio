@@ -27,19 +27,17 @@ const ProjectsSection = () => {
     fetchProjects();
   }, []);
 
-  // ✨ Handle scroll AFTER data load (prevents smooth scroll hijacking)
+  // ✨ IMMEDIATE scroll on navigation (before data loads)
   useEffect(() => {
-    // Only scroll if we are NOT loading and have a valid scroll request
-    if (!loading && location.state && location.state.scrollTo === 'projects') {
-      setTimeout(() => {
-        const element = document.getElementById('projects');
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          window.history.replaceState({}, document.title);
-        }
-      }, 100);
+    if (location.state && location.state.scrollTo === 'projects') {
+      const element = document.getElementById('projects');
+      if (element) {
+        // Use 'auto' for instant snap (no delay)
+        element.scrollIntoView({ behavior: 'auto', block: 'start' });
+        window.history.replaceState({}, document.title);
+      }
     }
-  }, [loading, location.state]);
+  }, [location.state]); // Only depends on location, not loading
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
