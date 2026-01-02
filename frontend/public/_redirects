@@ -24,8 +24,8 @@ https://www.althafportfolio.site/*  https://althafportfolio.site/:splat  301!
 /*.pdf   200
 /*.json  200
 
-# Explicit rules for critical SEO files - proxy sitemap to backend
-/sitemap.xml  https://api.althafportfolio.site/sitemap.xml  200
+# Explicit rules for critical SEO files
+/sitemap.xml  /sitemap.xml  200!
 /robots.txt   /robots.txt   200!
 
 # API calls - proxy to backend
