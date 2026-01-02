@@ -60,7 +60,7 @@ const TechAssistant = () => {
     <div className="min-h-screen bg-background relative">
       <SEO
         title="Althaf Hussain | DevOps Engineer & Cloud Architect Portfolio"
-        description="Expert DevOps Engineer specializing in AWS, Azure, Kubernetes, CI/CD pipelines, and Infrastructure as Code. Explore my projects, technical blogs, certifications, and professional experience in cloud computing and automation."
+        description="Certified AWS & Azure Cloud Solutions Architect with 3+ years of hands-on experience in DevOps automation, Kubernetes orchestration, and CI/CD pipeline development. Proven track record in infrastructure as code (Terraform, CloudFormation), microservices deployment, and cloud cost optimization. Browse 10+ real-world DevOps projects, technical blogs on AWS/Azure, and industry certifications. Based in India, available for remote DevOps consulting and full-time opportunities."
         keywords="DevOps Engineer, Cloud Architect, AWS Certified Solutions Architect, Azure DevOps, Kubernetes Expert, Docker, CI/CD Automation, Terraform, Ansible, Infrastructure as Code, Cloud Migration, Site Reliability Engineering, DevOps Portfolio, Cloud Native, Microservices, GitOps, Container Orchestration, Jenkins, GitHub Actions, AWS ECS, EKS, CloudFormation"
         url="https://althafportfolio.site"
         type="website"

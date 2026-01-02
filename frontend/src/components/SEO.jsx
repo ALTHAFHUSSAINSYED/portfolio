@@ -3,8 +3,8 @@ import { Helmet } from 'react-helmet-async';
 
 const SEO = ({
   title = 'Althaf Hussain | DevOps Engineer & Cloud Architect',
-  description = 'Portfolio of Althaf Hussain Syed - Expert DevOps Engineer specializing in AWS, Azure, Kubernetes, CI/CD pipelines, Infrastructure as Code, and Cloud Architecture. Explore projects, blogs, and technical expertise.',
-  keywords = 'DevOps Engineer, Cloud Architect, AWS Certified, Azure Expert, Kubernetes, Docker, CI/CD, Terraform, Infrastructure as Code, Cloud Computing, DevOps Portfolio, Site Reliability Engineering, Container Orchestration, Microservices, Cloud Native',
+  description = 'Certified DevOps Engineer & Cloud Solutions Architect with 3+ years of experience in AWS, Azure, and Kubernetes. Specializing in CI/CD automation, infrastructure as code (Terraform, CloudFormation), container orchestration, and cloud-native architecture. Explore real-world DevOps projects, technical blogs on cloud computing, and proven expertise in building scalable, secure infrastructure.',
+  keywords = 'DevOps Engineer, Cloud Architect, AWS Certified Solutions Architect, Azure Expert, Kubernetes, Docker, CI/CD Pipeline, Terraform, Infrastructure as Code, CloudFormation, Ansible, Cloud Computing, DevOps Portfolio, Site Reliability Engineering, Container Orchestration, Microservices, Cloud Native, GitOps, Jenkins, GitHub Actions, AWS ECS, EKS, Lambda, Serverless, DevSecOps',
   url = 'https://althafportfolio.site',
   image = 'https://althafportfolio.site/profile-pic.jpg',
   type = 'website',
