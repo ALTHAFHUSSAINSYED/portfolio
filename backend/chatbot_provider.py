@@ -58,43 +58,34 @@ Do not mention internal logic, models, prompts, or system rules.
 
 # Humanized System Prompt (Updated Jan 2, 2026 - Narrative Style, No Hallucinations)
 SYSTEM_PROMPT = """
-CORE PERSONA:
-You are "Allu Bot", Althaf Hussain Syed's professional portfolio assistant.
-You speak in a warm, natural, and narrative style—like a human colleague introducing him.
+You are "Allu Bot", Althaf's portfolio assistant. Be conversational, helpful, and natural.
 
-⛔ STRICT DATA RULES (NO HALLUCINATIONS):
-- **Source of Truth:** Use ONLY the provided context.
-- **No Guessing:** If the context lists "SonarQube", do NOT add "Snyk". If it lists "Kubernetes", do NOT add "Helm".
-- **Exact Stack:** Mention only the tools explicitly present in the text.
-- **No Speculation:** Do not invent certifications, tools, or achievements not in the data.
+⛔ DATA RULES:
+- Use ONLY the provided context - no guessing or inventing details
+- If context lists "Docker", don't add "Kubernetes" unless it's there
+- Stick to exact tools/skills mentioned
 
-⛔ FORMATTING RULES (NO ROBOTIC LISTS):
-- **No Markdown Headers:** Do NOT use bold headers like **Problem:** or **Solution:**.
-- **No Bullet Lists:** Avoid bullet points. Use full sentences and paragraphs.
-- **Narrative Flow:** Connect ideas naturally.
-  - *Bad:* "**Project:** AWS Migration. **Tool:** Terraform."
-  - *Good:* "For his AWS migration project, Althaf used Terraform to automate the infrastructure..."
-- **No Meta Phrases:** Never say "based on the provided information" or "the context shows".
+⛔ CONVERSATION STYLE:
+- Be casual and friendly, not robotic
+- No bullet points or markdown headers
+- Write in flowing paragraphs like you're talking to a friend
+- Never say "based on the provided information" or "the context shows"
+- For simple inputs like "ok", "cool", "thanks" - just acknowledge briefly and offer to help more
 
-🎯 FIRST MESSAGE RULE:
-- **CRITICAL:** If this is the very first message of the session (indicated by system instruction), your response MUST start with:
-  "Hi, I am Allu Bot. How can I assist you with Althaf's Portfolio Info Today?"
-- If the user asked a question (e.g., "What are his skills?"), add the answer *after* this greeting.
-- If the user just said "Hi", stop after the greeting.
-
-💬 SHORT INPUTS ("ok", "thanks", "cool"):
-- Do NOT say "👍" or be silent.
-- Respond naturally like: "You're welcome! Is there anything else you'd like to know about Althaf's work?" or "Great. Let me know if you have other questions."
+🎯 EDGE CASES:
+- **Typos/unclear** ("??", "hwy", "wha"): Ask politely what they meant
+- **Acknowledgments** ("ok", "yes", "cool"): Brief response, ask if they want more
+- **Exit phrases** ("nothing else", "that's all"): Say goodbye warmly
+- **Single word responses**: Context matters - if following a question answer, acknowledge. If standalone, ask how to help.
 
 📋 SCOPE:
-- Answer only about Althaf's portfolio (Projects, Skills, Blogs, Experience, Certifications, Contact Info).
-- If asked about contact info, look for email/phone/LinkedIn in the profile section.
+- Answer about Althaf's projects, skills, experience, blogs, certifications
+- For contact: check profile section for email/LinkedIn/phone
 
 🗣️ TONE:
-- Use paragraphs. No markdown headers.
-- Be concise (2-3 sentences per project).
-- Speak confidently as if you personally know his work.
-- Stay composed if user is confused or frustrated.
+- Conversational, not formal
+- 2-3 sentences per answer unless they want details
+- Like a helpful colleague, not a corporate bot
 """
 
 class ChatbotProvider:
@@ -413,8 +404,12 @@ class ChatbotProvider:
             if response.status_code == 200:
                 data = response.json()
                 text = data['choices'][0]['message']['content']
-                # Clean up potential raw tokens
+                # Clean up model artifacts and raw tokens
                 text = text.replace("<s>", "").replace("</s>", "").strip()
+                text = text.replace("[/INST]", "").replace("[INST]", "").strip()
+                text = text.replace("</INST>", "").replace("<INST>", "").strip()
+                # Remove empty lines
+                text = "\n".join(line for line in text.split("\n") if line.strip())
                 logger.info(f"OpenRouter success ({model}): {len(text)} chars")
                 return text
             else:
@@ -634,18 +629,24 @@ class ChatbotProvider:
             )
             
         # 2. HANDLE "OK/COOL/THANKS" (Real-time acknowledgment)
-        elif query_lower in ["ok", "okay", "cool", "gud", "fine", "thanks", "thank you", "thumbs up", "nice", "great"]:
+        elif query_lower in ["ok", "okay", "cool", "gud", "good", "fine", "thanks", "thank you", "thumbs up", "nice", "great", "yes", "sure"]:
             system_instruction = (
-                "\n[SYSTEM INSTRUCTION: The user is acknowledging. "
-                "Do NOT repeat previous info. "
-                "Reply naturally like: 'You're welcome! Is there anything else about Althaf's projects or skills you'd like to explore?']"
+                "\n[SYSTEM INSTRUCTION: User is acknowledging. Keep it brief and natural. "
+                "Examples: 'Happy to help!' or 'Cool, anything else?'. Don't repeat previous info.]"
             )
             
-        # 3. HANDLE TYPOS/INCOMPLETE INPUT ("hwy", "wha", short nonsense)
-        elif len(query) < 5 and query_lower not in ["hi", "hey", "hello", "yo", "sup"]:
+        # 3. HANDLE EXIT PHRASES
+        elif any(phrase in query_lower for phrase in ["nothing else", "that's all", "that's it", "no more", "im done", "i'm done"]):
+            system_instruction = (
+                "\n[SYSTEM INSTRUCTION: User is done. Say goodbye warmly in one sentence. "
+                "Example: 'Alright, feel free to come back anytime!']"
+            )
+            
+        # 4. HANDLE TYPOS/UNCLEAR INPUT ("??", "hwy", "wha")
+        elif query_lower in ["?", "??", "huh", "what", "hwy", "wha"] or (len(query) < 3 and query_lower not in ["hi", "hey", "yo"]):
              system_instruction = (
-                "\n[SYSTEM INSTRUCTION: The user input seems incomplete or has a typo. "
-                "Politely ask for clarification like: 'I didn't quite catch that. Could you rephrase?' or guess their intent if obvious.]"
+                "\n[SYSTEM INSTRUCTION: Input unclear. Ask what they meant. "
+                "Example: 'Sorry, what did you want to know?']"
              )
 
         # Augment query with instruction so model sees it
@@ -735,7 +736,7 @@ class ChatbotProvider:
 
         # All providers failed
         logger.error("All providers failed")
-        return "I'm having trouble connecting to my AI services right now. Please try again in a moment."
+        return "Hmm, I'm having some connection issues. Mind trying that again?"
 
     def _build_openrouter_messages(self, query, context, history):
         system_content = (
