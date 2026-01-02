@@ -57,10 +57,32 @@
 .chatbot-footer a {
   color: white; /* White link on blue background */
   text-decoration: none;
+  font-weight: 600; /* Make it bold */
+  background: linear-gradient(90deg, #fbbf24, #f59e0b, #fbbf24); /* Gold gradient */
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 3s ease infinite; /* Animated gradient */
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 .chatbot-footer a:hover {
   text-decoration: underline;
+  transform: scale(1.05); /* Slightly bigger on hover */
+  filter: brightness(1.2); /* Brighter on hover */
 }
 
 /* Mobile responsiveness */
