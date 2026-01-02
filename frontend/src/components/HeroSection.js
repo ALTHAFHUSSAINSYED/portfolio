@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Download, Mail, Volume2, VolumeX } from 'lucide-react';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import 'react-lazy-load-image-component/src/effects/blur.css';
 
 // A simple custom hook for media queries
 const useMediaQuery = (query) => {
@@ -125,11 +127,14 @@ const HeroSection = ({ personalInfo }) => {
         <div className="relative flex flex-col items-center">
 
           <div className="relative z-20 mb-8 w-48 h-48 md:w-56 md:h-56 rounded-full border-4 border-cyan-400/30 shadow-lg shadow-cyan-500/20 overflow-hidden group">
-            <img
-              ref={profilePicRef} // Attach ref to profile picture
+            <LazyLoadImage
+              ref={profilePicRef}
               src="/profile-pic.jpg?v=updated3"
               alt="Althaf Hussain Syed - DevOps Engineer and Cloud Architect specializing in AWS, Azure, Kubernetes"
+              effect="blur"
               className="w-full h-full object-cover transform scale-125 transition-transform duration-500 group-hover:scale-135"
+              width={224}
+              height={224}
             />
           </div>
 

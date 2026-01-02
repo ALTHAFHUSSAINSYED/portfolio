@@ -8,6 +8,8 @@ import { Mail, Phone, Send, MessageCircle, MessageSquare } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
 import CustomLinkedInCard from './CustomLinkedInCard';
 import { useTheme } from '../context/ThemeContext';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import 'react-lazy-load-image-component/src/effects/blur.css';
 
 const ContactSection = ({ personalInfo }) => {
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
@@ -104,7 +106,7 @@ const ContactSection = ({ personalInfo }) => {
               <Card className={`p-4 neon-card transition-all ${isVisible ? 'scale-in stagger-3' : ''}`}>
                 <div className="flex items-center space-x-4">
                   <div className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
-                    <img src="/assets/gmail-real.png" alt="Email Contact - Reach DevOps Engineer Althaf Hussain" className="w-full h-full object-cover scale-100" />
+                    <LazyLoadImage src="/assets/gmail-real.png" alt="Email Contact - Reach DevOps Engineer Althaf Hussain" effect="blur" className="w-full h-full object-cover scale-100" width={56} height={56} />
                   </div>
                   <div>
                     <h4 className="font-semibold text-foreground">Email</h4>
@@ -115,7 +117,7 @@ const ContactSection = ({ personalInfo }) => {
               <Card className={`p-4 neon-card transition-all ${isVisible ? 'scale-in stagger-4' : ''}`}>
                 <div className="flex items-center space-x-4">
                   <div className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
-                    <img src="/assets/phone-blue.png" alt="Phone Contact - Call DevOps Consultant" className="w-full h-full object-cover scale-[1.8]" />
+                    <LazyLoadImage src="/assets/phone-blue.png" alt="Phone Contact - Call DevOps Consultant" effect="blur" className="w-full h-full object-cover scale-[1.8]" width={56} height={56} />
                   </div>
                   <div>
                     <h4 className="font-semibold text-foreground">Phone</h4>
@@ -126,7 +128,7 @@ const ContactSection = ({ personalInfo }) => {
               <Card className={`p-4 neon-card transition-all ${isVisible ? 'scale-in stagger-5' : ''}`}>
                 <div className="flex items-center space-x-4">
                   <div className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
-                    <img src="/assets/whatsapp-green.png" alt="WhatsApp Contact - Message Cloud Architect" className="w-full h-full object-cover scale-[1.8]" />
+                    <LazyLoadImage src="/assets/whatsapp-green.png" alt="WhatsApp Contact - Message Cloud Architect" effect="blur" className="w-full h-full object-cover scale-[1.8]" width={56} height={56} />
                   </div>
                   <div>
                     <h4 className="font-semibold text-foreground">WhatsApp</h4>

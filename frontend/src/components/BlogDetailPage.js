@@ -6,6 +6,8 @@ import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Newspaper, ArrowLeft, Calendar, Tag, ExternalLink, Folder } from 'lucide-react';
 import { Button } from './ui/button';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import 'react-lazy-load-image-component/src/effects/blur.css';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://api.althafportfolio.site';
 
@@ -257,10 +259,13 @@ const BlogDetailPage = () => {
             <div className="mb-6 pb-6 border-b border-border">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-12 h-12 rounded-full border-2 border-primary overflow-hidden">
-                  <img
+                  <LazyLoadImage
                     src="/profile-pic.jpg"
                     alt="Althaf Hussain Syed - Certified DevOps Engineer and Cloud Solutions Architect"
+                    effect="blur"
                     className="w-full h-full object-cover transform scale-125 hover:scale-110 transition-transform duration-300"
+                    width={48}
+                    height={48}
                   />
                 </div>
                 <div>
@@ -389,10 +394,13 @@ const BlogDetailPage = () => {
                 <h3 className="text-xl font-bold mb-4 text-foreground">About the Author</h3>
                 <div className="flex flex-col md:flex-row gap-6">
                   <div className="flex-shrink-0 w-24 h-24 rounded-full border-4 border-primary overflow-hidden">
-                    <img
+                    <LazyLoadImage
                       src="/profile-pic.jpg"
                       alt="Althaf Hussain Syed"
+                      effect="blur"
                       className="w-full h-full object-cover transform scale-125 hover:scale-110 transition-transform duration-300"
+                      width={96}
+                      height={96}
                     />
                   </div>
                   <div className="flex-1">
