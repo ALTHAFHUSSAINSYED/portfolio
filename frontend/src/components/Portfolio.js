@@ -20,12 +20,12 @@ const TechAssistant = () => {
   const homeStructuredData = {
     "@context": "https://schema.org",
     "@type": "Person",
-    "@id": "https://www.althafportfolio.site/#person",
+    "@id": "https://althafportfolio.site/#person",
     "name": "Althaf Hussain Syed",
     "jobTitle": "DevOps Engineer | Cloud & Infrastructure Engineer",
     "description": "Certified DevOps Engineer with expertise in AWS, Azure, Kubernetes, and Cloud Architecture. Specializing in CI/CD automation, infrastructure as code, and scalable cloud solutions.",
-    "url": "https://www.althafportfolio.site",
-    "image": "https://www.althafportfolio.site/profile-pic.jpg",
+    "url": "https://althafportfolio.site",
+    "image": "https://althafportfolio.site/profile-pic.jpg",
     "sameAs": [
       "https://www.linkedin.com/in/althafhussainsyed/",
       "https://github.com/ALTHAFHUSSAINSYED"
@@ -62,7 +62,7 @@ const TechAssistant = () => {
         title="Althaf Hussain | DevOps Engineer & Cloud Architect Portfolio"
         description="Expert DevOps Engineer specializing in AWS, Azure, Kubernetes, CI/CD pipelines, and Infrastructure as Code. Explore my projects, technical blogs, certifications, and professional experience in cloud computing and automation."
         keywords="DevOps Engineer, Cloud Architect, AWS Certified Solutions Architect, Azure DevOps, Kubernetes Expert, Docker, CI/CD Automation, Terraform, Ansible, Infrastructure as Code, Cloud Migration, Site Reliability Engineering, DevOps Portfolio, Cloud Native, Microservices, GitOps, Container Orchestration, Jenkins, GitHub Actions, AWS ECS, EKS, CloudFormation"
-        url="https://www.althafportfolio.site"
+        url="https://althafportfolio.site"
         type="website"
         structuredData={homeStructuredData}
       />

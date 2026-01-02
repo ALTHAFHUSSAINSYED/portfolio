@@ -3,7 +3,7 @@ User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://www.althafportfolio.site/sitemap.xml
+Sitemap: https://althafportfolio.site/sitemap.xml
 
 # Allow all major search engines and AI crawlers
 User-agent: Googlebot

@@ -13,7 +13,7 @@ import xml.etree.ElementTree as ET
 
 # Configuration
 S3_BUCKET = os.getenv('S3_BLOG_BUCKET', 'althaf-blogs-storage')
-SITE_URL = 'https://www.althafportfolio.site'
+SITE_URL = 'https://althafportfolio.site'
 OUTPUT_FILE = '/tmp/sitemap.xml'
 
 def fetch_blogs_from_s3() -> List[Dict]:

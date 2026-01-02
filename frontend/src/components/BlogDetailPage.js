@@ -135,7 +135,7 @@ const BlogDetailPage = () => {
   if (!blog) return null;
 
   // SEO meta data
-  const siteUrl = 'https://www.althafportfolio.site';
+  const siteUrl = 'https://althafportfolio.site';
   const blogUrl = `${siteUrl}/blogs/${blog.id}`;
   const imageUrl = blog.imageUrl || `${siteUrl}/profile-pic.jpg`;
   const description = blog.summary || blog.topic || 'Read this article on Althaf Hussain\'s portfolio';

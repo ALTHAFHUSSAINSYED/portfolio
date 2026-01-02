@@ -82,8 +82,8 @@ const ProjectDetailsPage = () => {
     'Cloud Computing',
     'Infrastructure Automation'
   ].join(', ');
-  const projectUrl = `https://www.althafportfolio.site/projects/${projectId}`;
-  const projectImage = project.image_url || 'https://www.althafportfolio.site/profile-pic.jpg';
+  const projectUrl = `https://althafportfolio.site/projects/${projectId}`;
+  const projectImage = project.image_url || 'https://althafportfolio.site/profile-pic.jpg';
 
   const projectStructuredData = {
     "@context": "https://schema.org",
@@ -95,14 +95,14 @@ const ProjectDetailsPage = () => {
     "author": {
       "@type": "Person",
       "name": "Althaf Hussain Syed",
-      "url": "https://www.althafportfolio.site"
+      "url": "https://althafportfolio.site"
     },
     "keywords": projectKeywords,
     "inLanguage": "en-US",
     "isPartOf": {
       "@type": "WebSite",
       "name": "Althaf Hussain Portfolio",
-      "url": "https://www.althafportfolio.site"
+      "url": "https://althafportfolio.site"
     }
   };
 

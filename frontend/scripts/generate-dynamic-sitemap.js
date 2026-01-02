@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://api.althafportfolio.site';
-const siteUrl = 'https://www.althafportfolio.site';
+const siteUrl = 'https://althafportfolio.site';
 
 // Generate dynamic sitemap from live data
 const generateDynamicSitemap = async () => {
