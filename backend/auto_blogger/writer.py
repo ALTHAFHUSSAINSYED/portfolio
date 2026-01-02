@@ -328,14 +328,24 @@ class BlogWriter:
             traceback.print_exc()
             return None
 
-    def _agent_drafter_loop(self, category: str, outline: List[str], research_data: Dict, job_id: str) -> str:
+    def _agent_drafter_loop(self, category: str, sections: List[str], research_data: Dict, job_id: str) -> str:
         """
         Agent 2: The Builder (Loop)
         Uses Llama 8B to write each section individually to maintain context and depth.
+        
+        Args:
+            category: Blog category
+            sections: List of section headings (NOT outline dict)
+            research_data: Research context
+            job_id: Job identifier for state management
         """
         model_cfg = AGENT_ROLES["drafter"]
         model_id = model_cfg["primary"]
         job_mgr = get_job_state_manager()
+        
+        # Validate input
+        if not isinstance(sections, list):
+            raise TypeError(f"Expected sections to be list, got {type(sections)}")
         
         # Load existing sections from MongoDB
         job = job_mgr.load_job(job_id)
@@ -343,17 +353,17 @@ class BlogWriter:
         
         full_draft = []
         
-        for index, section in enumerate(outline):
+        for index, section in enumerate(sections):
             # CHECK: Skip if already completed
             if index in completed_sections:
-                logger.info(f"⏭️ Section {index + 1}/{len(outline)} already completed, skipping: {section}")
+                logger.info(f"⏭️ Section {index + 1}/{len(sections)} already completed, skipping: {section}")
                 full_draft.append(completed_sections[index])
                 continue
             
             # Setup section logger
             section_logger = setup_section_logger(job_id, index, section)
-            section_logger.info(f"Starting Section {index + 1}/{len(outline)}: {section}")
-            logger.info(f"✍️ Drafting Section {index + 1}/{len(outline)}: {section}")
+            section_logger.info(f"Starting Section {index + 1}/{len(sections)}: {section}")
+            logger.info(f"✍️ Drafting Section {index + 1}/{len(sections)}: {section}")
             
             # Context Chunking: Send strict context to avoid 8k limit
             # Send: Research summary + Current Section Goal + Previous 200 words (for flow)
