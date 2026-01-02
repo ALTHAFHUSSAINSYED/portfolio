@@ -33,28 +33,6 @@ const BlogsSection = () => {
     fetchBlogs();
   }, []);
 
-  // ✨ Handle scroll AFTER data load (fixes double-jump glitch)
-  useEffect(() => {
-    // Only scroll if:
-    // 1. We are NOT loading anymore
-    // 2. We have a valid location state requesting a scroll
-    // 3. The target is 'blogs'
-    if (!loading && location.state && location.state.scrollTo === 'blogs') {
-      
-      // Small timeout to ensure the DOM has fully painted the new content
-      setTimeout(() => {
-        const element = document.getElementById('blogs');
-        if (element) {
-          // Use 'start' to align the top of the section with the top of the viewport
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          
-          // Clear the state so it doesn't scroll again on refresh
-          window.history.replaceState({}, document.title);
-        }
-      }, 100);
-    }
-  }, [loading, location.state]);
-
   // Check URL for category parameter
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);

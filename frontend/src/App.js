@@ -18,12 +18,6 @@ function App() {
     if (location.state && location.state.scrollTo) {
       const targetId = location.state.scrollTo;
 
-      // ✨ IMPORTANT: Skip scroll for 'blogs' section
-      // BlogsSection component handles this after data loads to prevent double-jump glitch
-      if (targetId === 'blogs') {
-        return;
-      }
-
       // Function to perform safe scroll
       const performScroll = (behavior = 'auto') => {
         const element = document.getElementById(targetId);
