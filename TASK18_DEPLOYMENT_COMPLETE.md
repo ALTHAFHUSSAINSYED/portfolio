@@ -98,12 +98,12 @@ docker restart portfolio-backend
 ### Environment Variables
 ```bash
 USE_LEGACY_COLLECTIONS=false  # ← NEW: Forces unified collection mode
-CHROMA_API_KEY=ck-HZd6RuPY25jchnBxXe9mE5Fn17CJSRdv8pfvqTe78emv
+CHROMA_API_KEY=<REDACTED>
 CHROMA_DATABASE=Development
-CHROMA_TENANT=7c2da124-ba75-4ae6-85b5-ff22589f0d08
-GEMINI_API_KEY=AIzaSyByY3gz9BN-rhB8EJ9CvR0j3NlS5hgpVjU
-MONGO_URL=mongodb+srv://...
-SERPER_API_KEY=4ad9b14287491ff1a076c95d6d04f50ebbcac3e4
+CHROMA_TENANT=<REDACTED>
+GEMINI_API_KEY=<REDACTED - GENERATE NEW KEY>
+MONGO_URL=mongodb+srv://<REDACTED>
+SERPER_API_KEY=<REDACTED>
 ENVIRONMENT=production
 ```
 

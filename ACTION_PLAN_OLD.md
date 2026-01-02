@@ -49,7 +49,7 @@ Add these secrets:
 | Secret Name | Description | Example |
 |------------|-------------|---------|
 | `MONGO_URL` | MongoDB connection string | `mongodb+srv://user:pass@cluster.mongodb.net/` |
-| `GEMINI_API_KEY` | Google Gemini API key | `AIzaSy...` |
+| `GEMINI_API_KEY` | Google Gemini API key | `<REDACTED>` |
 | `SERPER_API_KEY` | Serper.dev API key | `abc123...` |
 | `CORS_ORIGINS` | Allowed domains | `https://www.althafportfolio.site,https://althafportfolio.site` |
 | `CHROMA_API_KEY` | ChromaDB API key (optional) | Your key |
