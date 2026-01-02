@@ -21,9 +21,8 @@ const Chatbot = () => {
   useEffect(() => {
     console.log("🔊 Initializing audio...");
     
-    // Use absolute path from public folder (works in both dev and production)
-    // PUBLIC_URL is empty in production when homepage is not set in package.json
-    const audioPath = `${process.env.PUBLIC_URL || ''}/typing-sound.mp3`.replace('//', '/');
+    // Use Cloudinary CDN for reliable audio delivery (bypasses Amplify SPA routing issues)
+    const audioPath = "https://res.cloudinary.com/dtzaicj6s/video/upload/v1767349642/typing-sound_nmw5dl.mp3";
     console.log("🔗 Audio path:", audioPath);
     
     loadingSoundRef.current = new Audio(audioPath);
@@ -33,12 +32,11 @@ const Chatbot = () => {
     
     // Test if audio loaded successfully
     loadingSoundRef.current.addEventListener('canplaythrough', () => {
-      console.log("✅ Audio loaded successfully from:", audioPath);
+      console.log("✅ Audio loaded successfully from Cloudinary");
     });
     
     loadingSoundRef.current.addEventListener('error', (e) => {
-      console.error("❌ Audio failed to load from:", audioPath);
-      console.error("Error details:", e);
+      console.error("❌ Audio failed to load from Cloudinary:", e);
     });
 
     return () => {
