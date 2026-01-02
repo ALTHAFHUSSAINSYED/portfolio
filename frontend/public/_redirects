@@ -5,6 +5,9 @@ http://www.althafportfolio.site/*  https://althafportfolio.site/:splat  301!
 # Force non-www - redirect www to non-www (HTTPS only)
 https://www.althafportfolio.site/*  https://althafportfolio.site/:splat  301!
 
+# Deleted/removed content - return 410 Gone status
+/projects/fe400487-c431-46bd-881e-e0dd663bf9f0  /  410
+
 # Static assets - serve directly with correct MIME types (status 200!)
 # These should NOT be redirected to index.html
 /*.xml   200

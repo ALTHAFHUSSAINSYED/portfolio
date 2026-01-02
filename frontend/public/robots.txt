@@ -5,6 +5,9 @@ Allow: /
 # Sitemap location
 Sitemap: https://althafportfolio.site/sitemap.xml
 
+# Disallow deleted/removed content
+Disallow: /projects/fe400487-c431-46bd-881e-e0dd663bf9f0
+
 # Allow all major search engines and AI crawlers
 User-agent: Googlebot
 Allow: /
