@@ -27,7 +27,7 @@ const Chatbot = () => {
     
     loadingSoundRef.current = new Audio(audioPath);
     loadingSoundRef.current.loop = true;
-    loadingSoundRef.current.volume = 0.7;
+    loadingSoundRef.current.volume = 0.4;
     loadingSoundRef.current.preload = "auto";
     
     // Test if audio loaded successfully
