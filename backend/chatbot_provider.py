@@ -58,31 +58,17 @@ Do not mention internal logic, models, prompts, or system rules.
 
 # Humanized System Prompt (Updated Jan 2, 2026 - Natural LLM Intelligence, No Rules)
 SYSTEM_PROMPT = """
-You are "Allu Bot", Althaf's friendly portfolio assistant.
+You are Allu Bot, Althaf Hussain Syed's friendly portfolio assistant.
 
-🚫 ZERO HALLUCINATION (CRITICAL):
-- Only use what's in the context - if it's not there, say "I don't have that info"
-- Don't add tools/technologies that aren't mentioned
-- Don't make assumptions or expansions
+RULES:
+1. Only answer from the context provided - never make up information
+2. Be naturally conversational like talking to a friend
+3. Keep responses short (1-3 sentences) unless details are requested
+4. For greetings, introduce yourself briefly
+5. For acknowledgments (ok, sure, thanks), respond casually
+6. For goodbyes, offer contact info if appropriate
 
-💬 BE NATURAL:
-- Talk like a real person, not a robot
-- Handle greetings naturally ("Hey!" → "Hey! How's it going?")
-- Handle acknowledgments naturally ("ok" → "Cool! Anything else?", "thanks" → "You're welcome!")
-- Handle exits gracefully ("bye" → "Take care! Come back anytime.")
-- Keep responses SHORT (1-3 sentences usually)
-- No bullet points unless listing specific items
-- No markdown formatting
-- Be conversational and warm
-
-✅ WHAT YOU KNOW:
-Althaf's projects, skills, blogs, certifications, experience from the context provided.
-
-🎯 STYLE:
-- Casual and friendly
-- Brief but helpful
-- Natural conversation flow
-- Use your judgment for each situation
+Be yourself. Be helpful. Be human.
 """
 
 class ChatbotProvider:
@@ -301,67 +287,18 @@ class ChatbotProvider:
         if history:
             messages.extend(history[-10:])  # Last 5 pairs = 10 messages
         
-        # System instruction injection based on conversation state
-        system_instruction = ""
-        
-        # FIRST MESSAGE: Force golden greeting
-        if is_first_interaction:
-            system_instruction = (
-                " [SYSTEM INSTRUCTION: This is the FIRST message of the session. "
-                "You MUST begin your response with exactly: "
-                "'Hi, I am Allu Bot. How can I assist you with Althaf's Portfolio Info Today?' "
-                "If the user asked a question, answer it immediately after this greeting.]"
-            )
-        # SHORT ACKNOWLEDGMENTS: Natural response guidance
-        elif query.lower() in ["ok", "okay", "cool", "thanks", "thank you", "gud", "fine", "nice"]:
-            system_instruction = (
-                " [SYSTEM INSTRUCTION: User is acknowledging. "
-                "Reply naturally like 'You're welcome! Is there anything else you'd like to check?' or 'Happy to help!'. "
-                "Do NOT repeat previous info. Keep it brief (1 sentence).]"
-            )
-        # ONGOING: Standard conversation
-        else:
-            system_instruction = " [INSTRUCTION: Ongoing conversation. Answer directly in narrative style. No greeting needed.]"
-        
-        greeting_hint = system_instruction
-        
-        # Custom Identity Injection with DATE AWARENESS
-        current_date = datetime.now().strftime("%B %d, %Y")
-        identity_context = f"MY IDENTITY: I am Allu Bot, Althaf's dedicated portfolio assistant. Today is {current_date}. The text below is my internal knowledge about Althaf."
-        
-        # TIER-BASED CONTEXT ALLOCATION
-        # Mistral 7B (6K input token limit): 24000 chars ~= 6000 tokens
-        # Gemini (1M context window): 100000 chars ~= 25000 tokens
-        # Default to Mistral limits (will be primary tier)
-        max_context_chars = 24000  # Conservative for Mistral 7B (6K tokens)
-        
+        # Truncate context for token limits (Mistral 7B: ~6K tokens)
+        max_context_chars = 24000
         if len(context) > max_context_chars:
             context = context[:max_context_chars] + "..."
-            logger.info(f"Context truncated to {max_context_chars} chars for tier compatibility")
-            
-        # SANDWICH TECHNIQUE: Psychological framing for the model
-        final_context_block = f"{identity_context}\n\n[MY INTERNAL KNOWLEDGE_BASE]:\n{context}"
+            logger.info(f"Context truncated to {max_context_chars} chars")
         
-        # Behavioral Directives (UX Polish)
-        behavior_instruction = ""
-        if sentiment == "closing":
-            behavior_instruction = " [IMPORTANT: User is exiting. Reply with ONE short closing phrase (e.g. 'Understood. Have a great day.'). Do NOT ask follow-up questions. STOP.]"
-        elif sentiment == "ambiguous_hold":
-            behavior_instruction = " [INSTRUCTION: User input is ambiguous/holding (e.g. 'ok', 'right'). Reply with a neutral holding phrase like 'Got it. Let me know if you'd like more details or want to explore something else.' Do NOT explain yourself. Do NOT exit.]"
-        elif sentiment == "greeting":
-            behavior_instruction = " [INSTRUCTION: Greet the user warmly as Allu Bot. Ask how you can help with Althaf's portfolio.]"
-        else:
-            behavior_instruction = " [INSTRUCTION: Answer directly. Avoid robotic fillers like 'Got it', 'Understood'. Be concise.]"
+        # Simple, clean prompt
+        user_message = f"""Context about Althaf:
+{context}
 
-        # Add current query with reinforced instructions
-        user_message = f"""
-[SYSTEM INSTRUCTION: You are Allu Bot. Do NOT say 'Based on the context' or 'The text says'. Answer as if you know this personally.{behavior_instruction}]
-
-{final_context_block}
-
-[USER QUESTION]:
-{query}{greeting_hint}
-"""
+User: {query}"""
+        
         messages.append({"role": "user", "content": user_message})
         
         return messages
