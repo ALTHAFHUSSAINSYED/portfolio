@@ -47,15 +47,15 @@
   padding: 8px 12px;
   border-top: 1px solid rgba(229, 231, 235, 0.5);
   font-size: 11px;
-  color: #94a3b8;
+  color: white; /* White text on blue background */
   text-align: center;
-  background-color: #ffffff; /* Solid white - not transparent */
+  background: linear-gradient(to right, var(--chat-primary-color), #4f46e5); /* Match header blue gradient */
   border-bottom-left-radius: 16px;
   border-bottom-right-radius: 16px;
 }
 
 .chatbot-footer a {
-  color: var(--chat-primary-color);
+  color: white; /* White link on blue background */
   text-decoration: none;
 }
 
