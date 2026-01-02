@@ -1262,20 +1262,24 @@ async def ask_agent(query: dict):
             logger.info(f"📅 Deterministic date response: {response_text}")
         # ========================================
         
-        elif next_state != "INFO":
-            # MICRO-RESPONSES (Fast path, no LLM)
+        elif next_state in ["EXIT", "ABUSE"]:
+            # ONLY intercept EXIT/ABUSE - hard stops needed
             response_text = chatbot_provider.generate_response_by_state(next_state, message)
             
         else:
-            # INFO STATE -> FULL RAG PIPELINE
+            # ALL OTHER STATES (INFO, GREETING, AMBIGUOUS, SILENT) -> LLM handles intelligently
+            # This allows System Prompt to inject personality for "Hi", "Ok", "Hwy", etc.
             
             # A. Intent Detection for Retrieval
             intent, _, intent_scores = detect_intent_priority(message)
             
-            # B. Retrieval
+            # B. Retrieval (smart routing)
             rag_intent = intent
-            if rag_intent == "conversation": 
-                 # Fallback if INFO state triggered by generic keywords but intent classifier was weak
+            if rag_intent == "conversation" or next_state == "GREETING": 
+                 # For greetings, fetch profile context (in case "Hi, who are you?")
+                 rag_intent = "profile"
+            elif rag_intent == "conversation":
+                 # Fallback for ambiguous conversation
                  rag_intent = "projects" if intent_scores.get("projects", 0) > 0 else "profile"
                  
             portfolio_context, _ = await get_portfolio_context(message, rag_intent)
@@ -1288,7 +1292,7 @@ async def ask_agent(query: dict):
                 query=message,
                 context=portfolio_context,
                 history=history,
-                sentiment="neutral", # Context is already filtered/safe
+                sentiment="neutral",
                 is_first_interaction=is_first_interaction
             )
             

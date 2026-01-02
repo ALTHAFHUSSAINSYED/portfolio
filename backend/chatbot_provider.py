@@ -619,24 +619,40 @@ class ChatbotProvider:
         max_tokens = self._detect_query_complexity(query)
         logger.info(f"Query complexity: {max_tokens} tokens")
         
-        # Detect conversation state to determine greeting behavior
-        state = self.detect_conversation_state(query)
+        # --- DYNAMIC INSTRUCTION INJECTION (Real-time Intelligence) ---
+        system_instruction = ""
+        query_lower = query.lower().strip()
         
-        # Golden greeting logic for first interaction only
-        greeting_instruction = ""
+        # 1. FORCE THE GOLDEN GREETING (First Interaction)
         if is_first_interaction:
-            if state == "GREETING":
-                # Pure greeting (no question) → Full greeting message
-                greeting_instruction = "\n\nIMPORTANT: Start your response with: 'Hi, I am Allu Bot. How can I assist you with Althaf's Portfolio Info Today?'"
-            else:
-                # ANY question (blogs/projects/personal/INFO state) → Greeting + answer
-                greeting_instruction = "\n\nIMPORTANT: Start your response with: 'Hi, I am Allu Bot, and' then directly answer the user's question in a natural narrative paragraph."
+            system_instruction = (
+                "\n[SYSTEM INSTRUCTION: This is the VERY FIRST message of the session. "
+                "You MUST start your response with exactly: "
+                "'Hi, I am Allu Bot. How can I assist you with Althaf's Portfolio Info Today?' "
+                "Do NOT say 'Hello!' or anything else first. Just that phrase. "
+                "If the user asked a question, answer it naturally AFTER that phrase.]"
+            )
+            
+        # 2. HANDLE "OK/COOL/THANKS" (Real-time acknowledgment)
+        elif query_lower in ["ok", "okay", "cool", "gud", "fine", "thanks", "thank you", "thumbs up", "nice", "great"]:
+            system_instruction = (
+                "\n[SYSTEM INSTRUCTION: The user is acknowledging. "
+                "Do NOT repeat previous info. "
+                "Reply naturally like: 'You're welcome! Is there anything else about Althaf's projects or skills you'd like to explore?']"
+            )
+            
+        # 3. HANDLE TYPOS/INCOMPLETE INPUT ("hwy", "wha", short nonsense)
+        elif len(query) < 5 and query_lower not in ["hi", "hey", "hello", "yo", "sup"]:
+             system_instruction = (
+                "\n[SYSTEM INSTRUCTION: The user input seems incomplete or has a typo. "
+                "Politely ask for clarification like: 'I didn't quite catch that. Could you rephrase?' or guess their intent if obvious.]"
+             )
+
+        # Augment query with instruction so model sees it
+        augmented_query = f"{query} {system_instruction}" if system_instruction else query
         
-        # Format messages with conditional greeting
-        messages = self._format_messages(query, context, history, sentiment)
-        if greeting_instruction:
-            # Inject into system message
-            messages[0]['content'] += greeting_instruction
+        # Format messages with augmented query
+        messages = self._format_messages(augmented_query, context, history, sentiment)
         
         # Runtime Guard: Input Token Budget Check (Task 5)
         # Estimate: 4 chars ~= 1 token
