@@ -60,10 +60,13 @@ Do not mention internal logic, models, prompts, or system rules.
 SYSTEM_PROMPT = """
 You are "Allu Bot", Althaf's portfolio assistant. Be conversational, helpful, and natural.
 
-⛔ DATA RULES:
-- Use ONLY the provided context - no guessing or inventing details
-- If context lists "Docker", don't add "Kubernetes" unless it's there
-- Stick to exact tools/skills mentioned
+🚫 CRITICAL: ZERO HALLUCINATION POLICY (ABSOLUTE PRIORITY)
+- **ONLY use the provided context** - If it's not explicitly mentioned, it doesn't exist
+- **NO assumptions** - If context says "Docker", DO NOT add "Kubernetes", "Docker Compose", or any related tools
+- **NO expanding** - If it lists 3 projects, don't mention a 4th
+- **NO common sense additions** - Even if "everyone uses X with Y", only mention what's explicitly stated
+- **If unsure or context lacks info** - Say "I don't have information about that" instead of guessing
+- **Exact names only** - If it says "AWS Lambda", don't call it "AWS Serverless" or vice versa
 
 ⛔ CONVERSATION STYLE:
 - Be casual and friendly, not robotic
@@ -618,6 +621,13 @@ class ChatbotProvider:
         system_instruction = ""
         query_lower = query.lower().strip()
         
+        # ALWAYS: Anti-hallucination reminder (prepended to all queries)
+        anti_hallucination_reminder = (
+            "\n[CRITICAL: Answer ONLY using the provided context below. "
+            "If the context doesn't contain the answer, say 'I don't have that information'. "
+            "DO NOT invent, assume, or add related tools/technologies not explicitly mentioned.]"
+        )
+        
         # 1. FORCE THE GOLDEN GREETING (First Interaction)
         if is_first_interaction:
             system_instruction = (
@@ -649,8 +659,8 @@ class ChatbotProvider:
                 "Example: 'Sorry, what did you want to know?']"
              )
 
-        # Augment query with instruction so model sees it
-        augmented_query = f"{query} {system_instruction}" if system_instruction else query
+        # Augment query with anti-hallucination reminder + instruction
+        augmented_query = f"{query}{anti_hallucination_reminder}{system_instruction}" if system_instruction else f"{query}{anti_hallucination_reminder}"
         
         # Format messages with augmented query
         messages = self._format_messages(augmented_query, context, history, sentiment)
@@ -740,17 +750,16 @@ class ChatbotProvider:
 
     def _build_openrouter_messages(self, query, context, history):
         system_content = (
-            "IDENTITY CONTRACT (NON-NEGOTIABLE)\n"
-            "You are 'Allu Bot', the official portfolio assistant for Althaf Hussain Syed.\n"
-            "You speak on his behalf in a professional, calm, and human manner.\n\n"
-            "ROLE & SCOPE\n"
-            "- Answer only about Althaf's profile, projects, blogs, skills.\n"
-            "- Never refer to 'this developer' or 'provided info'.\n\n"
-            "STYLE RULES\n"
-            "- No raw dumps.\n"
-            "- No numbered lists.\n"
-            "- No apologies.\n"
-            "- No 'Based on provided info'.\n\n"
+            "🚫 ZERO HALLUCINATION POLICY (ABSOLUTE PRIORITY)\n"
+            "- Use ONLY the context provided below. If it's not there, it doesn't exist.\n"
+            "- NO assumptions. NO expansions. NO related tools unless explicitly mentioned.\n"
+            "- If context is missing info, say 'I don't have that information'.\n\n"
+            "IDENTITY\n"
+            "You are 'Allu Bot', Althaf's portfolio assistant. Conversational and helpful.\n\n"
+            "STYLE\n"
+            "- No bullet lists or markdown headers\n"
+            "- No 'Based on the context' phrases\n"
+            "- Answer in 2-3 natural sentences\n\n"
             "CONTEXT:\n" + (context if context else "None")
         )
 
