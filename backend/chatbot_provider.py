@@ -622,16 +622,15 @@ class ChatbotProvider:
         # Detect conversation state to determine greeting behavior
         state = self.detect_conversation_state(query)
         
-        # Conditionally inject golden greeting based on state and first interaction
+        # Golden greeting logic for first interaction only
         greeting_instruction = ""
         if is_first_interaction:
             if state == "GREETING":
-                # Pure greeting → Send golden greeting
+                # Pure greeting (no question) → Full greeting message
                 greeting_instruction = "\n\nIMPORTANT: Start your response with: 'Hi, I am Allu Bot. How can I assist you with Althaf's Portfolio Info Today?'"
-            elif state == "GREETING_WITH_QUESTION":
-                # Greeting + question → Hybrid format
-                greeting_instruction = "\n\nIMPORTANT: Start your response with: 'Hi, I am Allu Bot, and' then directly answer the question in a natural narrative paragraph."
-            # For INFO/EXIT states → No greeting injection, just answer directly
+            else:
+                # ANY question (blogs/projects/personal/INFO state) → Greeting + answer
+                greeting_instruction = "\n\nIMPORTANT: Start your response with: 'Hi, I am Allu Bot, and' then directly answer the user's question in a natural narrative paragraph."
         
         # Format messages with conditional greeting
         messages = self._format_messages(query, context, history, sentiment)
