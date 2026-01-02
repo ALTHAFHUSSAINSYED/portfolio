@@ -4,6 +4,7 @@ import logging
 import uuid
 import json
 import threading
+import boto3
 from pathlib import Path
 from datetime import datetime, timezone
 from typing import List, Optional, Union, Tuple
@@ -699,6 +700,35 @@ async def get_portfolio_context(query: str, intent: str) -> str:
 @app.get("/")
 def welcome():
     return {"message": "Server is running. API is at /api"}
+
+# --- SITEMAP ENDPOINT ---
+@app.get("/sitemap.xml")
+async def serve_sitemap():
+    """Serve sitemap from S3 with proper XML content-type to bypass Amplify SPA routing."""
+    import boto3
+    from fastapi.responses import Response
+    
+    try:
+        # Fetch sitemap from S3
+        s3 = boto3.client('s3')
+        response = s3.get_object(
+            Bucket='althaf-blogs-storage',
+            Key='sitemap.xml'
+        )
+        sitemap_content = response['Body'].read()
+        
+        # Return with XML content-type
+        return Response(
+            content=sitemap_content,
+            media_type="application/xml",
+            headers={
+                "Cache-Control": "max-age=3600",
+                "X-Content-Type-Options": "nosniff"
+            }
+        )
+    except Exception as e:
+        logger.error(f"Failed to fetch sitemap from S3: {e}")
+        raise HTTPException(status_code=500, detail="Sitemap unavailable")
 
 # --- GET SINGLE PROJECT ---
 @api_router.get("/projects/{project_id}", response_model=Project)
