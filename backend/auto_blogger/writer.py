@@ -135,7 +135,16 @@ class BlogWriter:
             blog_summary = f"Comprehensive guide to {category}."
             sections = outline
         
-        logger.info("✅ Outline Ready. Starting Section Drafting Loop (Agent 2)...")
+        # Validate sections is a list
+        if not isinstance(sections, list):
+            logger.error(f"❌ Expected sections to be list, got {type(sections)}")
+            raise ValueError(f"Invalid sections format: {type(sections)}")
+        
+        if not sections:
+            logger.error("❌ No sections found in outline")
+            raise ValueError("Outline has no sections to draft")
+        
+        logger.info(f"✅ Outline Ready with {len(sections)} sections. Starting Section Drafting Loop (Agent 2)...")
         job_mgr.update_status(job_id, "DRAFTING")
 
         # Step 2: Loop through sections and draft content (RESUMABLE)

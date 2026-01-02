@@ -315,14 +315,11 @@ class BlogPublisher:
                     "published_date": blog.get('createdAt', '')[:10] if 'createdAt' in blog else datetime.now().strftime('%Y-%m-%d')
                 }
                 
-                # Dual-Write Strategy: Write to both collections
+                # Write to unified collection only (migration complete)
+                # portfolio_master with category='blog' for blog posts
                 collections_to_write = [
-                    ("Blogs_data", metadata),  # Legacy collection
-                    ("portfolio_master", {**metadata, "subcategory": blog['category']})  # Unified collection with category='blog'
+                    ("portfolio_master", {**metadata, "category": "blog", "subcategory": blog['category']})  # Unified collection
                 ]
-                
-                # Update portfolio_master metadata to include main category tag
-                collections_to_write[1][1]["category"] = "blog"  # Override with 'blog' for unified collection
                 
                 for collection_name, collection_metadata in collections_to_write:
                     for attempt in range(max_retries):
