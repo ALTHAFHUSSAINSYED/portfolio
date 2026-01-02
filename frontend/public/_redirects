@@ -1,3 +1,10 @@
+# Force HTTPS - redirect all HTTP traffic to HTTPS
+http://althafportfolio.site/*  https://althafportfolio.site/:splat  301!
+http://www.althafportfolio.site/*  https://althafportfolio.site/:splat  301!
+
+# Force non-www - redirect www to non-www (HTTPS only)
+https://www.althafportfolio.site/*  https://althafportfolio.site/:splat  301!
+
 # Static assets - serve directly with correct MIME types (status 200!)
 # These should NOT be redirected to index.html
 /*.xml   200
@@ -12,8 +19,6 @@
 /*.svg   200
 /*.ico   200
 /*.pdf   200
-/*.txt   200
-/*.xml   200
 /*.json  200
 
 # Explicit rules for critical SEO files
