@@ -82,13 +82,26 @@ class BlogCleanup:
                         # Delete File
                         os.remove(filepath)
                         
-                        # Delete from ChromaDB
+                        # Delete from ChromaDB (portfolio_master with category filter)
                         if self.chroma_client:
                              try:
-                                collection = self.chroma_client.get_collection("Blogs_data")
-                                collection.delete(ids=[blog_id])
+                                collection = self.chroma_client.get_collection("portfolio_master")
+                                
+                                # Verify it's a blog before deletion (safety check)
+                                try:
+                                    results = collection.get(ids=[blog_id])
+                                    if results and results['metadatas'] and len(results['metadatas']) > 0:
+                                        if results['metadatas'][0].get('category') == 'blog':
+                                            collection.delete(ids=[blog_id])
+                                            logger.info(f"✅ Deleted {blog_id} from portfolio_master")
+                                        else:
+                                            logger.warning(f"⚠️ Skipped {blog_id}: Not a blog (category={results['metadatas'][0].get('category')})")
+                                    else:
+                                        logger.info(f"ℹ️ {blog_id} not found in ChromaDB")
+                                except Exception as verify_error:
+                                    logger.warning(f"⚠️ Could not verify category for {blog_id}: {verify_error}")
                              except Exception as e:
-                                 logger.warning(f"Failed to delete {blog_id} from Chroma: {e}")
+                                 logger.warning(f"Failed to delete {blog_id} from ChromaDB: {e}")
 
                         deleted_count += 1
                         deleted_files.append(filename)
