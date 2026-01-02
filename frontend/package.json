@@ -59,16 +59,17 @@
   },
   "scripts": {
     "start": "craco start",
-    "build": "node scripts/generate-dynamic-sitemap.js && craco build && react-snap",
+    "build": "node scripts/generate-dynamic-sitemap.js && craco build && bash scripts/post-build-seo.sh",
     "test": "craco test",
     "generate-sitemap": "node scripts/generate-dynamic-sitemap.js",
     "sitemap": "node scripts/generate-dynamic-sitemap.js"
   },
   "reactSnap": {
     "include": [
-      "/",
-      "/blogs/Low-Code_No-Code_1759057460"
+      "/"
     ],
+    "skipThirdPartyRequests": true,
+    "cacheAjaxRequests": false,
     "puppeteerArgs": [
       "--no-sandbox",
       "--disable-setuid-sandbox"

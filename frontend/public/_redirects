@@ -1,5 +1,7 @@
 # Static assets - serve directly with correct MIME types (status 200!)
 # These should NOT be redirected to index.html
+/*.xml   200
+/*.txt   200
 /*.mp3   200
 /*.wav   200  
 /*.ogg   200
@@ -13,6 +15,10 @@
 /*.txt   200
 /*.xml   200
 /*.json  200
+
+# Explicit rules for critical SEO files
+/sitemap.xml  /sitemap.xml  200!
+/robots.txt   /robots.txt   200!
 
 # API calls - proxy to backend
 /api/*  https://api.althafportfolio.site/api/:splat  200

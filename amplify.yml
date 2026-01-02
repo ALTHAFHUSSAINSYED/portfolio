@@ -18,6 +18,18 @@ applications:
           - node_modules/**/*
     customHttp:
       customHeaders:
+        - pattern: '**/*.xml'
+          headers:
+            - key: 'Content-Type'
+              value: 'application/xml'
+            - key: 'Cache-Control'
+              value: 'public, max-age=3600'
+        - pattern: '**/*.txt'
+          headers:
+            - key: 'Content-Type'
+              value: 'text/plain'
+            - key: 'Cache-Control'
+              value: 'public, max-age=3600'
         - pattern: '**/*.mp3'
           headers:
             - key: 'Content-Type'
