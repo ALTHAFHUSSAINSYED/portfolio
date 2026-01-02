@@ -1,0 +1,21 @@
+# Static assets - serve directly with correct MIME types (status 200!)
+# These should NOT be redirected to index.html
+/*.mp3   200
+/*.wav   200  
+/*.ogg   200
+/*.png   200
+/*.jpg   200
+/*.jpeg  200
+/*.gif   200
+/*.svg   200
+/*.ico   200
+/*.pdf   200
+/*.txt   200
+/*.xml   200
+/*.json  200
+
+# API calls - proxy to backend
+/api/*  https://api.althafportfolio.site/api/:splat  200
+
+# SPA routing - everything else goes to index.html
+/*      /index.html  200
