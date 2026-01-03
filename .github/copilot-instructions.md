@@ -1,7 +1,7 @@
 # Portfolio Project - AI Coding Agent Instructions
 
-**Last Updated:** January 1, 2026  
-**Version:** 2.0  
+**Last Updated:** January 3, 2026  
+**Version:** 2.1  
 **Status:** Production
 
 ## Project Overview
@@ -56,16 +56,16 @@ FastAPI app with lifespan context manager that:
 
 **Auto-Blogger System (13):**
 8. `auto_blogger/scheduler.py` - Cron scheduler (7:00 AM daily, category rotation)
-9. `auto_blogger/writer.py` - 4-agent blog generation orchestrator
+9. `auto_blogger/writer.py` - 4-agent blog generation orchestrator (outliner + drafter)
 10. `auto_blogger/critic.py` - Quality validation (score ≥90 required)
 11. `auto_blogger/publisher.py` - S3 upload + ChromaDB embedding
 12. `auto_blogger/researcher.py` - SERPER API web research
-13. `auto_blogger/job_state.py` - Resumable job management
+13. `auto_blogger/job_state.py` - Resumable job management (MongoDB)
 14. `auto_blogger/logger_utils.py` - Structured logging system
 15. `auto_blogger/notifier.py` - Email success/failure notifications
 16. `auto_blogger/cleanup.py` - Old job cleanup (>7 days)
 17. `auto_blogger/watchdog.py` - Process health monitoring
-18. `auto_blogger/worker.py` - Background task worker
+18. `auto_blogger/worker.py` - Background task worker (orchestrates agents + extracts metadata)
 19. `auto_blogger/models/model_config.py` - Agent model definitions
 20. `auto_blogger/models/model_benchmarker.py` - Model performance testing
 
@@ -140,6 +140,12 @@ def detect_conversation_state(text: str) -> str:
    ↓ (if failed)
 Reject blog + log failure
 ```
+
+**Metadata Extraction Flow:**
+- `writer.py` returns dict: `{"title": "...", "summary": "...", "content": "...", "category": "..."}`
+- `worker.py` extracts title/summary from dict before passing to publisher
+- **CRITICAL:** Never use category name as title (e.g., "Cloud_Computing" → actual blog title)
+- Validation rejects outlines with generic "Technical Deep Dive" titles
 
 **Job Management:**
 - Resumable jobs with `job_state.py` (stores outline, sections, metadata)
