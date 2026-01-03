@@ -20,13 +20,18 @@ const BlogsSection = () => {
   const location = useLocation();
 
   // ONLY THESE 6 CATEGORIES ALLOWED - ALL OTHERS PERMANENTLY REMOVED
+  // Also accept legacy underscore format for backward compatibility
   const allowedCategories = [
     'Low-Code/No-Code',
+    'Low-Code_No-Code',  // Legacy format
     'Cybersecurity',
     'Software Development',
+    'Software_Development',  // Legacy format
     'DevOps',
     'AI and ML',
-    'Cloud Computing'
+    'AI_and_ML',  // Legacy format
+    'Cloud Computing',
+    'Cloud_Computing'  // Legacy format
   ];
 
   useEffect(() => {

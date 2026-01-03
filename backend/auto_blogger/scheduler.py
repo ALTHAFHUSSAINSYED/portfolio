@@ -34,13 +34,14 @@ class BlogScheduler:
         # CRITICAL FIX: Move state file to persistent volume (not code directory)
         # This prevents state loss during Docker rebuilds and git pulls
         self.state_file = "/app/backend/logs/auto_blogger/scheduler_state.json"
+        # FIXED: Use frontend-compatible category names (spaces instead of underscores)
         self.categories = [
-            "AI_and_ML",
-            "Cloud_Computing", 
+            "AI and ML",
+            "Cloud Computing", 
             "Cybersecurity",
             "DevOps",
-            "Low-Code_No-Code",
-            "Software_Development"
+            "Low-Code/No-Code",
+            "Software Development"
         ]
         
         # Components
