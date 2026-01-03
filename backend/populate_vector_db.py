@@ -58,10 +58,8 @@ def clean_text(text):
 def safe_meta(val):
     return "Unknown" if val is None else str(val)
 
-def dual_write_with_category(client, embed_function, uid, doc, meta, category, subcategory=None):
-    """Helper function for dual-write with category tagging (Task 13)
-    
-    Writes data to both legacy collection AND portfolio_master with category tags.
+def write_to_portfolio_master(client, embed_function, uid, doc, meta, category, subcategory=None):
+    """Write data to portfolio_master collection with category tagging (Task 21 - Migration Complete)
     
     Args:
         client: ChromaDB client
@@ -70,63 +68,38 @@ def dual_write_with_category(client, embed_function, uid, doc, meta, category, s
         doc: Document text content
         meta: Original metadata dict
         category: Main category ('profile', 'project', 'blog')
-        subcategory: Optional subcategory (e.g., blog's DevOps/Cloud category)
+        subcategory: Optional subcategory (e.g., blog's Cloud Computing/DevOps)
     
     Returns:
-        Tuple (legacy_success, master_success)
+        bool: Success status
     """
-    legacy_success = False
-    master_success = False
-    
-    # Determine legacy collection based on category
-    if category == 'profile':
-        legacy_col_name = 'portfolio'
-    elif category == 'project':
-        legacy_col_name = 'Projects_data'
-    elif category == 'blog':
-        legacy_col_name = 'Blogs_data'
-    else:
-        print(f"[WARN] Unknown category '{category}' for ID {uid}")
-        return (False, False)
-    
     try:
-        # 1. Write to legacy collection (if enabled)
-        if USE_LEGACY_COLLECTIONS or True:  # Always write to legacy during dual-write phase
-            legacy_col = client.get_or_create_collection(legacy_col_name, embedding_function=embed_function)
-            existing = legacy_col.get(ids=[uid])
-            if not existing or not existing['ids']:
-                legacy_col.add(ids=[uid], documents=[doc], metadatas=[meta])
-                legacy_success = True
-            else:
-                legacy_success = True  # Already exists, count as success
+        # Write ONLY to portfolio_master (unified collection)
+        master_col = client.get_or_create_collection('portfolio_master', embedding_function=embed_function)
         
-        # 2. Write to portfolio_master (unified collection)
-        if not USE_LEGACY_COLLECTIONS or True:  # Always write to master during dual-write phase
-            master_col = client.get_or_create_collection('portfolio_master', embedding_function=embed_function)
-            
-            # Add category tags to metadata
-            master_meta = meta.copy()
-            master_meta['category'] = category
-            if subcategory:
-                master_meta['subcategory'] = subcategory
-            
-            existing = master_col.get(ids=[uid])
-            if not existing or not existing['ids']:
-                master_col.add(ids=[uid], documents=[doc], metadatas=[master_meta])
-                master_success = True
-            else:
-                master_success = True  # Already exists, count as success
+        # Add category tags to metadata
+        master_meta = meta.copy()
+        master_meta['category'] = category
+        if subcategory:
+            master_meta['subcategory'] = subcategory
         
-        return (legacy_success, master_success)
+        existing = master_col.get(ids=[uid])
+        if not existing or not existing['ids']:
+            master_col.add(ids=[uid], documents=[doc], metadatas=[master_meta])
+            print(f"[OK] Added to portfolio_master: {uid} (category={category})")
+        else:
+            print(f"[SKIP] Already exists in portfolio_master: {uid}")
+        
+        return True
         
     except Exception as e:
-        print(f"[ERROR] Dual-write failed for {uid}: {e}")
-        return (legacy_success, master_success)
+        print(f"[ERROR] Failed to write {uid} to portfolio_master: {e}")
+        return False
 
 def sync_blogs_from_s3(chroma_client, embed_function):
     """
-    Sync all blogs from S3 bucket (source of truth) to ChromaDB Blogs_data collection.
-    Downloads index.json from S3 and embeds each blog.
+    Sync all blogs from S3 bucket (source of truth) to ChromaDB portfolio_master collection.
+    Downloads index.json from S3 and embeds each blog with category='blog'.
     """
     print("\n📚 [BLOGS] Syncing blogs from S3...")
     
@@ -190,7 +163,7 @@ def sync_blogs_from_s3(chroma_client, embed_function):
             }
             
             # Use dual_write_with_category helper
-            legacy_ok, master_ok = dual_write_with_category(
+            success = write_to_portfolio_master(
                 chroma_client,
                 embed_function,
                 blog_id,
@@ -296,7 +269,7 @@ def main():
                     metadata = {"title": title, "type": "blog", "category": blog_cat}
                     
                     # Dual-write for local blogs
-                    legacy_ok, master_ok = dual_write_with_category(
+                    success = write_to_portfolio_master(
                         client,
                         GeminiEmbeddingFunction(),
                         b_id,
@@ -341,7 +314,7 @@ def main():
                 metadata = {"name": p_name, "category": "Project", "source": "MongoDB"}
                 
                 # Dual-write for projects
-                legacy_ok, master_ok = dual_write_with_category(
+                success = write_to_portfolio_master(
                     client,
                     GeminiEmbeddingFunction(),
                     p_id,
@@ -384,7 +357,7 @@ def main():
                     resume_content = f.read()
                     if resume_content:
                         metadata = {"type": "resume", "title": "Full Resume"}
-                        legacy_ok, master_ok = dual_write_with_category(
+                        success = write_to_portfolio_master(
                             client,
                             GeminiEmbeddingFunction(),
                             "resume_full",
@@ -418,7 +391,7 @@ def main():
                            f"Key Achievements: {', '.join(exp.get('achievements', []))}"
                     metadata = {"type": "experience", "company": safe_meta(exp.get('company'))}
                     
-                    dual_write_with_category(
+                    write_to_portfolio_master(
                         client,
                         GeminiEmbeddingFunction(),
                         f"exp_{i}",
@@ -434,7 +407,7 @@ def main():
                     text = f"Skill Category: {cat}. Skills: {skill_str}."
                     metadata = {"type": "skill", "category": cat}
                     
-                    dual_write_with_category(
+                    write_to_portfolio_master(
                         client,
                         GeminiEmbeddingFunction(),
                         f"skill_{cat}",
@@ -448,7 +421,7 @@ def main():
                 for i, edu in enumerate(data["education"]):
                     text = f"Education: {edu.get('degree')} at {edu.get('institution')}. Year: {edu.get('year')}."
                     metadata = {"type": "education"}
-                    dual_write_with_category(
+                    write_to_portfolio_master(
                         client,
                         GeminiEmbeddingFunction(),
                         f"edu_{i}",
@@ -462,7 +435,7 @@ def main():
                 for i, cert in enumerate(data["certifications"]):
                     text = f"Certification: {cert.get('name')} from {cert.get('issuer')}."
                     metadata = {"type": "certification"}
-                    dual_write_with_category(
+                    write_to_portfolio_master(
                         client,
                         GeminiEmbeddingFunction(),
                         f"cert_{i}",
@@ -476,7 +449,7 @@ def main():
                 for i, ach in enumerate(data["achievements"]):
                     text = f"Achievement: {ach.get('title')}. Details: {ach.get('description')}"
                     metadata = {"type": "achievement"}
-                    dual_write_with_category(
+                    write_to_portfolio_master(
                         client,
                         GeminiEmbeddingFunction(),
                         f"ach_{i}",
@@ -492,7 +465,7 @@ def main():
                        f"Summary: {info.get('summary')}. Location: {info.get('location')}."
                 metadata = {"type": "personal_info"}
                 
-                dual_write_with_category(
+                write_to_portfolio_master(
                     client,
                     GeminiEmbeddingFunction(),
                     "personal_info",
@@ -506,7 +479,7 @@ def main():
                                f"LinkedIn: {info.get('linkedin')}. Location: {info.get('location')}."
                 contact_metadata = {"type": "contacts", "email": safe_meta(info.get('email'))}
                 
-                dual_write_with_category(
+                write_to_portfolio_master(
                     client,
                     GeminiEmbeddingFunction(),
                     "contacts_info",
