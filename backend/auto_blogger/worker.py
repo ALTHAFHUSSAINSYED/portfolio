@@ -74,11 +74,25 @@ def process_job(job_id: str):
         publisher_logger = setup_agent_logger(job_id, "publisher_result")
         publisher_logger.info("Publishing blog...")
         
+        # Extract metadata from blog_content dict (returned by writer.generate_blog)
+        if isinstance(blog_content, dict):
+            title = blog_content.get('title', category)
+            summary = blog_content.get('summary', '')
+            content = blog_content.get('content', blog_content)
+        else:
+            # Legacy string format
+            logger.warning("Blog content is string format (legacy), using category as title")
+            title = category
+            summary = ''
+            content = blog_content
+        
+        publisher_logger.info(f"Publishing with title: {title}")
         publisher = BlogPublisher()
         blog_url = publisher.publish({
-            "title": category,
+            "title": title,
+            "summary": summary,
             "category": category,
-            "content": blog_content
+            "content": content
         })
         
         publisher_logger.info(f"✅ Blog published: {blog_url}")

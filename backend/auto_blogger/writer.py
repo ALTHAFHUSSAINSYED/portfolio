@@ -126,14 +126,19 @@ class BlogWriter:
         
         # Extract metadata and sections from outline
         if isinstance(outline, dict):
-            blog_title = outline.get('title', f"{category} - Technical Deep Dive")
+            blog_title = outline.get('title')
             blog_summary = outline.get('summary', '')
             sections = outline.get('sections', [])
+            
+            # Validate title is not generic
+            if not blog_title or "Technical Deep Dive" in blog_title:
+                logger.error(f"❌ Outline has generic/missing title: {blog_title}")
+                logger.error("Outline data: %s", outline)
+                raise ValueError(f"Outliner failed to generate proper title. Got: {blog_title}")
         else:
-            # Old format - list of sections
-            blog_title = f"{category} - Technical Deep Dive"
-            blog_summary = f"Comprehensive guide to {category}."
-            sections = outline
+            # Old format - list of sections (should not happen with new outliner)
+            logger.error("❌ Outline is old list format, not dict with title/summary")
+            raise ValueError(f"Outliner returned old format (list). Expected dict with title/summary/sections.")
         
         # Validate sections is a list
         if not isinstance(sections, list):
@@ -272,8 +277,13 @@ class BlogWriter:
                             if 'sections' in outline_data:
                                 # New format with metadata
                                 sections = outline_data['sections']
-                                title = outline_data.get('title', f"{category} - Technical Deep Dive")
+                                title = outline_data.get('title')
                                 summary = outline_data.get('summary', '')
+                                
+                                # Validate title is present and not generic
+                                if not title or "Technical Deep Dive" in title:
+                                    logger.error(f"❌ Model {model_id} returned invalid title: {title}")
+                                    raise ValueError(f"Invalid title from outliner: {title}")
                                 
                                 if isinstance(sections, list) and len(sections) > 0:
                                     logger.info(f"📋 Outline created:")
@@ -294,12 +304,9 @@ class BlogWriter:
                         
                         # Handle old format: ["Section 1", "Section 2", ...]
                         elif isinstance(outline_data, list) and len(outline_data) > 0:
-                            logger.warning("⚠️ Received old list format, converting to new format")
-                            return {
-                                "title": f"{category} - Technical Deep Dive",
-                                "summary": f"Comprehensive guide to {category} covering key concepts, implementation, and best practices.",
-                                "sections": outline_data
-                            }
+                            logger.error("❌ Received old list format from outliner - this should not happen!")
+                            logger.error(f"Model {model_id} returned list instead of dict. Content: {content[:200]}")
+                            raise ValueError(f"Outliner model {model_id} failed to follow instructions. Returned list instead of dict with title/summary.")
                         else:
                             raise ValueError("Invalid outline structure")
                             
