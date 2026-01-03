@@ -19,9 +19,10 @@ CHROMA_API_KEY = os.getenv('CHROMA_API_KEY')
 CHROMA_TENANT_ID = os.getenv('CHROMA_TENANT_ID')
 CHROMA_DB_NAME = os.getenv('CHROMA_DB_NAME', 'Development')
 
-# ChromaDB Migration Toggle (Task 13)
+# ChromaDB Migration Complete (Task 21 - Jan 3, 2026)
+# Now writes ONLY to portfolio_master collection
 USE_LEGACY_COLLECTIONS = os.getenv('USE_LEGACY_COLLECTIONS', 'false').lower() == 'true'
-print(f"ChromaDB Sync Mode: {'LEGACY (3 collections)' if USE_LEGACY_COLLECTIONS else 'DUAL-WRITE (legacy + portfolio_master)'}")
+print(f"ChromaDB Sync Mode: {'LEGACY (3 collections - DEPRECATED)' if USE_LEGACY_COLLECTIONS else 'UNIFIED (portfolio_master only)'}")
 
 if not GOOGLE_API_KEY:
     print("[ERROR] GEMINI_API_KEY is missing.")

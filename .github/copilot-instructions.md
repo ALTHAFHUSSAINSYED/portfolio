@@ -78,7 +78,7 @@ FastAPI app with lifespan context manager that:
 
 ### Data Storage
 - **MongoDB (Motor):** Async `motor.motor_asyncio.AsyncIOMotorClient` for blogs/projects. Use `await db.collection.find()` patterns.
-- **ChromaDB (Cloud):** `chromadb.CloudClient` for vector search with Gemini embeddings. Monitor usage via `chromadb_monitor.py` (free tier: 1000 documents, 10GB storage).
+- **ChromaDB (Cloud):** `chromadb.CloudClient` for vector search with Gemini embeddings. **MIGRATION COMPLETE (Jan 3, 2026):** Now uses single `portfolio_master` collection with category-based filtering. Legacy collections (portfolio, Projects_data, Blogs_data) deleted.
 - **AWS S3:** Blog storage bucket `althaf-blogs-storage` with JSON posts + index.json.
 - **Cloudinary:** Image hosting configured in `server.py` with `cloudinary.uploader.upload()`.
 
@@ -123,13 +123,14 @@ def detect_conversation_state(text: str) -> str:
 
 ### Blog Generation System (4-Agent Pipeline)
 **Daily Schedule:** 7:00 AM IST (APScheduler CronTrigger)
-**Category Rotation:** DevOps → Cloud Computing → Cybersecurity → AI/ML
+**Category Rotation:** DevOps → Cloud Computing → Cybersecurity → AI and ML → Low-Code/No-Code → Software Development
+**IMPORTANT:** Category names use spaces/slashes (not underscores) to match frontend filter: "Cloud Computing", "AI and ML", "Low-Code/No-Code"
 
 **Agent System:**
 1. **Researcher** (`researcher.py`): SERPER API web research → trending topics
 2. **Writer** (`writer.py`): `mistralai/mistral-small-3.1-24b-instruct:free` → generate outline + sections
 3. **Critic** (`critic.py`): `deepseek/deepseek-r1-0528:free` → quality validation (score ≥90)
-4. **Publisher** (`publisher.py`): S3 upload + ChromaDB embedding + email notification
+4. **Publisher** (`publisher.py`): S3 upload + ChromaDB embedding (portfolio_master only) + email notification
 
 **Pipeline:**
 ```

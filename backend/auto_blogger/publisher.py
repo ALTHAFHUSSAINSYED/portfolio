@@ -295,33 +295,32 @@ class BlogPublisher:
         except Exception as e:
             logger.warning(f"Local save failed (non-critical): {e}")
 
-        # 3. Save to ChromaDB (with retry logic + dual-write to portfolio_master)
-        # Task 12: Dual-write phase - write to BOTH Blogs_data AND portfolio_master
+        # 3. Save to ChromaDB (portfolio_master collection with retry logic)
+        # Task 21 COMPLETE: Migration to single collection finished Jan 3, 2026
         if self.chroma_client:
             max_retries = 3
             retry_delay = 5
             
-            # Generate embedding once (reuse for both collections)
+            # Generate embedding
             embedding = self._get_embedding(blog['content'])
             if not embedding:
                 logger.error("Embedding generation failed - cannot save to ChromaDB")
             else:
-                # Prepare metadata
+                # Prepare metadata for portfolio_master collection
                 metadata = {
                     "title": blog['title'],
-                    "category": blog['category'],
+                    "category": "blog",  # Main category for filtering
+                    "subcategory": blog['category'],  # DevOps, Cloud Computing, etc.
                     "url": f"https://althafportfolio.site/blogs/{blog_id}",
                     "timestamp": str(int(time.time())),
                     "published_date": blog.get('createdAt', '')[:10] if 'createdAt' in blog else datetime.now().strftime('%Y-%m-%d')
                 }
                 
-                # Write to unified collection only (migration complete)
-                # portfolio_master with category='blog' for blog posts
-                collections_to_write = [
-                    ("portfolio_master", {**metadata, "category": "blog", "subcategory": blog['category']})  # Unified collection
-                ]
+                # Write to portfolio_master collection
+                collection_name = "portfolio_master"
+                collection_metadata = metadata
                 
-                for collection_name, collection_metadata in collections_to_write:
+                for attempt in range(max_retries):
                     for attempt in range(max_retries):
                         try:
                             collection = self.chroma_client.get_or_create_collection(collection_name)
@@ -350,12 +349,11 @@ class BlogPublisher:
                                     collection=collection_name,
                                     error_type="EmbeddingFailed",
                                     error_message=str(e),
-                                    severity="HIGH",  # Auto-blogger failures are HIGH (not CRITICAL)
+                                    severity="HIGH",
                                     context={
                                         "blog_id": blog_id,
                                         "category": blog.get('category', 'unknown'),
-                                        "attempts": max_retries,
-                                        "dual_write_phase": True
+                                        "attempts": max_retries
                                     }
                                 )
                             
