@@ -96,6 +96,16 @@ const Chatbot = () => {
     }
   }, [isOpen, messages.length]);
 
+  // Generate unique session ID (persists in localStorage)
+  const [sessionId] = useState(() => {
+    let id = localStorage.getItem('assistbot_session_id');
+    if (!id) {
+      id = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem('assistbot_session_id', id);
+    }
+    return id;
+  });
+
   // Load API status from localStorage
   useEffect(() => {
     try {
@@ -202,7 +212,8 @@ const Chatbot = () => {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              message: userInput
+              message: userInput,
+              session_id: sessionId  // Include unique session ID
             }),
             credentials: 'omit',
             signal: controller.signal
