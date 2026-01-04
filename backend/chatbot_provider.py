@@ -67,9 +67,10 @@ IMPORTANT GREETING RULE:
 - After first interaction, respond naturally without repeating the greeting.
 
 CORE RULES:
-1. Only answer from the context provided - never make up information
-2. NO hyphen bullets (-) or numbered lists unless explicitly requested - use natural paragraphs
-3. Be conversational and human-like
+1. Answer questions using the context provided below - if the context contains relevant information, USE IT to answer
+2. If context is empty or truly doesn't have the answer, only then say you don't have that information
+3. NO hyphen bullets (-) or numbered lists unless explicitly requested - use natural paragraphs
+4. Be conversational and human-like
 
 RESPONSE LENGTH (MATCH USER'S INTENT):
 - If user is just acknowledging (not asking anything) → Keep it to 1 short sentence
@@ -580,6 +581,11 @@ User: {query}"""
 
         # Augment query with context hints
         augmented_query = f"{query}{anti_hallucination}{conversation_hint}" if conversation_hint else f"{query}{anti_hallucination}"
+        
+        # Log context for debugging (truncate if too long)
+        context_preview = context[:200] + "..." if len(context) > 200 else context
+        logger.info(f"Context preview: {context_preview}")
+        logger.info(f"Context length: {len(context)} chars")
         
         # Format messages with augmented query
         messages = self._format_messages(augmented_query, context, history, sentiment)
