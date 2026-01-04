@@ -159,7 +159,8 @@ def sync_blogs_from_s3(chroma_client, embed_function):
                 "category": blog_category,
                 "url": url,
                 "timestamp": timestamp,
-                "published_date": published_date
+                "published_date": published_date,
+                "metadata_category": "blogs"  # Enhanced RAG tag
             }
             
             # Use dual_write_with_category helper
@@ -311,7 +312,12 @@ def main():
                 
                 # Create rich context for the project
                 text = f"Project: {p_name}. Tech Stack: {p_tech}. Summary: {p_summary}. Implementation Details: {p_details}"
-                metadata = {"name": p_name, "category": "Project", "source": "MongoDB"}
+                metadata = {
+                    "name": p_name,
+                    "category": "Project",
+                    "source": "MongoDB",
+                    "metadata_category": "projects"  # Enhanced RAG tag
+                }
                 
                 # Dual-write for projects
                 success = write_to_portfolio_master(
@@ -400,12 +406,16 @@ def main():
                         category='profile'
                     )
 
-            # 2. Skills
+            # 2. Skills with Enhanced Metadata
             if "skills" in data:
                 for cat, skills in data["skills"].items():
                     skill_str = ", ".join([s['name'] if isinstance(s, dict) else s for s in skills])
                     text = f"Skill Category: {cat}. Skills: {skill_str}."
-                    metadata = {"type": "skill", "category": cat}
+                    metadata = {
+                        "type": "skill",
+                        "category": cat,
+                        "metadata_category": "personal"  # Enhanced RAG tag
+                    }
                     
                     write_to_portfolio_master(
                         client,
@@ -416,11 +426,20 @@ def main():
                         category='profile'
                     )
 
-            # 3. Education
+            # 3. Education with Enhanced Metadata
             if "education" in data:
                 for i, edu in enumerate(data["education"]):
-                    text = f"Education: {edu.get('degree')} at {edu.get('institution')}. Year: {edu.get('year')}."
-                    metadata = {"type": "education"}
+                    degree = edu.get('degree', 'Unknown')
+                    institution = edu.get('institution', 'Unknown')
+                    year = edu.get('year', 'Unknown')
+                    
+                    text = f"Education: {degree} at {institution}. Year: {year}."
+                    metadata = {
+                        "type": "education",
+                        "degree": degree,
+                        "institution": institution,
+                        "metadata_category": "education"  # Enhanced RAG tag
+                    }
                     write_to_portfolio_master(
                         client,
                         GeminiEmbeddingFunction(),
@@ -430,11 +449,19 @@ def main():
                         category='profile'
                     )
 
-            # 4. Certifications
+            # 4. Certifications with Enhanced Metadata
             if "certifications" in data:
                 for i, cert in enumerate(data["certifications"]):
-                    text = f"Certification: {cert.get('name')} from {cert.get('issuer')}."
-                    metadata = {"type": "certification"}
+                    cert_name = cert.get('name', 'Unknown')
+                    issuer = cert.get('issuer', 'Unknown')
+                    
+                    text = f"Certification: {cert_name} from {issuer}."
+                    metadata = {
+                        "type": "certification",
+                        "name": cert_name,
+                        "issuer": issuer,
+                        "metadata_category": "certifications"  # Enhanced RAG tag
+                    }
                     write_to_portfolio_master(
                         client,
                         GeminiEmbeddingFunction(),
@@ -444,11 +471,18 @@ def main():
                         category='profile'
                     )
 
-            # 5. Achievements
+            # 5. Achievements with Enhanced Metadata
             if "achievements" in data:
                 for i, ach in enumerate(data["achievements"]):
-                    text = f"Achievement: {ach.get('title')}. Details: {ach.get('description')}"
-                    metadata = {"type": "achievement"}
+                    achievement_title = ach.get('title', 'Unknown')
+                    description = ach.get('description', '')
+                    
+                    text = f"Achievement: {achievement_title}. Details: {description}"
+                    metadata = {
+                        "type": "achievement",
+                        "title": achievement_title,
+                        "metadata_category": "achievements"  # Enhanced RAG tag
+                    }
                     write_to_portfolio_master(
                         client,
                         GeminiEmbeddingFunction(),
@@ -458,12 +492,22 @@ def main():
                         category='profile'
                     )
 
-            # 6. Personal Info
+            # 6. Personal Info (About Me) with Enhanced Metadata
             if "personal_info" in data:
                 info = data["personal_info"]
-                text = f"Personal Profile: {info.get('name')}. Title: {info.get('title')}. " \
-                       f"Summary: {info.get('summary')}. Location: {info.get('location')}."
-                metadata = {"type": "personal_info"}
+                name = info.get('name', 'Unknown')
+                title = info.get('title', 'Unknown')
+                summary = info.get('summary', '')
+                location = info.get('location', '')
+                
+                text = f"Personal Profile: {name}. Title: {title}. " \
+                       f"Summary: {summary}. Location: {location}."
+                metadata = {
+                    "type": "personal_info",
+                    "name": name,
+                    "title": title,
+                    "metadata_category": "personal"  # Enhanced RAG tag (about me)
+                }
                 
                 write_to_portfolio_master(
                     client,
@@ -474,10 +518,25 @@ def main():
                     category='profile'
                 )
 
-                # 7. Contacts
-                contact_text = f"Email: {info.get('email')}. Phone: {info.get('phone')}. " \
-                               f"LinkedIn: {info.get('linkedin')}. Location: {info.get('location')}."
-                contact_metadata = {"type": "contacts", "email": safe_meta(info.get('email'))}
+                # 7. Contacts with Enhanced Metadata (including website/portfolio)
+                email = info.get('email', '')
+                phone = info.get('phone', '')
+                linkedin = info.get('linkedin', '')
+                github = info.get('github', '')
+                website = info.get('website', 'https://www.althafportfolio.site')
+                portfolio_url = info.get('portfolio', 'https://www.althafportfolio.site')
+                
+                contact_text = f"Email: {email}. Phone: {phone}. " \
+                               f"LinkedIn: {linkedin}. GitHub: {github}. " \
+                               f"Website: {website}. Portfolio: {portfolio_url}. Location: {location}."
+                contact_metadata = {
+                    "type": "contacts",
+                    "email": safe_meta(email),
+                    "phone": safe_meta(phone),
+                    "website": safe_meta(website),
+                    "portfolio": safe_meta(portfolio_url),
+                    "metadata_category": "contact"  # Enhanced RAG tag
+                }
                 
                 write_to_portfolio_master(
                     client,
