@@ -576,10 +576,21 @@ async def get_portfolio_context(query: str, intent: str) -> str:
                         CANDIDATE_LIMIT = 3
                         INJECTION_LIMIT = 2
                 else:
-                    # Unified Mode: GLOBAL_LIMIT = 6
+                    # Unified Mode: Logic Update
+                    # Default limit
                     CANDIDATE_LIMIT = 6
                     INJECTION_LIMIT = 6  # Return all candidates in unified mode
                     search_query = query
+                    
+                    # --- FIX START: Expand blog search for date sorting ---
+                    # If we are looking for BLOGS, we must fetch more candidates
+                    # to ensure the "chronologically new" items aren't pushed out 
+                    # by "semantically relevant" old items.
+                    if intent == "blogs":
+                        CANDIDATE_LIMIT = 30  # Fetch top 30 to catch recent dates
+                        INJECTION_LIMIT = 6   # Only show top 6 after sorting
+                        logger.info("📚 Blog Query: Expanded candidate limit to 30 for date sorting.")
+                    # --- FIX END ---
                     
                     if intent == "aws_projects":
                         search_query = f"AWS Cloud Infrastructure {query}"
