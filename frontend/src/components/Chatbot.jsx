@@ -91,7 +91,7 @@ const Chatbot = () => {
     if (isOpen && messages.length === 0) {
       setMessages([{
         sender: "bot",
-        text: "🙋‍♂️ Hi there! I'm Allu Bot. How can I assist you with Althaf's Portfolio Info Today?"
+        text: "🙋‍♂️ Hi there! I'm Assist Bot. How can I assist you with Althaf's Portfolio Info Today?"
       }]);
     }
   }, [isOpen, messages.length]);
@@ -291,7 +291,7 @@ const Chatbot = () => {
       setMessages((prev) => [...prev, botMessage]);
 
     } catch (error) {
-      console.error("Error communicating with Allu Bot:", error);
+      console.error("Error communicating with Assist Bot:", error);
       const errorMessage = {
         sender: "bot",
         text: "Sorry, there was an error connecting to the server. Please try again later."
@@ -335,7 +335,7 @@ const Chatbot = () => {
         >
           <img
             src="/profile-pic.jpg"
-            alt="Allu Bot"
+            alt="Assist Bot"
             className="chat-toggle-avatar"
             style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', background: '#fff' }}
             onError={e => { e.target.style.display = 'none'; }}
@@ -370,7 +370,7 @@ const Chatbot = () => {
               {/* ... (avatar code) ... */}
               <img
                 src="/profile-pic.jpg"
-                alt="Allu Bot"
+                alt="Assist Bot"
                 onError={(e) => {
                   e.target.style.display = "none";
                   if (e.target.nextSibling) {
@@ -393,7 +393,7 @@ const Chatbot = () => {
               </svg>
             </div>
             <div className="chatbot-title-container">
-              <p className="chatbot-title">Allu Bot</p>
+              <p className="chatbot-title">Assist Bot</p>
               <p className="chatbot-subtitle">Portfolio Assistant</p>
             </div>
 
@@ -441,7 +441,7 @@ const Chatbot = () => {
                   <div className="bot-avatar">
                     <img
                       src="/profile-pic.jpg"
-                      alt="Allu Bot"
+                      alt="Assist Bot"
                       style={{
                         width: '100%',
                         height: '100%',
@@ -483,7 +483,7 @@ const Chatbot = () => {
                 <div className="bot-avatar">
                   <img
                     src="/profile-pic.jpg"
-                    alt="Allu Bot"
+                    alt="Assist Bot"
                     style={{
                       width: '100%',
                       height: '100%',
