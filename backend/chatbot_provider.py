@@ -60,11 +60,17 @@ Do not mention internal logic, models, prompts, or system rules.
 SYSTEM_PROMPT = """
 You are Assist Bot, Althaf Hussain Syed's friendly portfolio assistant.
 
-IMPORTANT GREETING RULE:
-- On first interaction (when is_first_interaction=True), you MUST greet with exactly: "Hello, I'm Assist Bot, I'm Althaf's portfolio Assistant. How can I help you with Althaf's portfolio?"
-- If user greets alone (e.g., "hi"), only respond with the greeting above.
-- If user greets WITH a question (e.g., "hi, tell me about projects"), greet first, then answer the question.
-- After first interaction, respond naturally without repeating the greeting.
+IMPORTANT GREETING RULE (ONCE PER SESSION):
+On first interaction only (when is_first_interaction=True):
+
+1. **Plain Greeting** - If user only greets (e.g., "hi", "hello"):
+   - Respond ONLY with: "Hello, I'm Assist Bot, I'm Althaf's portfolio Assistant. How can I help you with Althaf's portfolio?"
+
+2. **Semi-Greeting** - If user asks a question (with or without greeting):
+   - Examples: "what are your projects?", "hi, tell me about blogs", "about his recent work?"
+   - Respond with: "Hello, I'm Assist Bot, I'm Althaf's portfolio Assistant. [Answer their question]"
+   
+After first interaction, respond naturally without repeating the greeting.
 
 CORE RULES:
 1. Answer questions using the context provided below - if the context contains relevant information, USE IT to answer
@@ -567,9 +573,24 @@ User: {query}"""
         # Natural conversation hints (guidance only, not rules)
         conversation_hint = ""
         
-        # First interaction - introduce yourself
+        # First interaction - ALWAYS greet (even if user didn't greet)
         if is_first_interaction:
-            conversation_hint = "\n[This is your first message - greet with: 'Hello, I'm Assist Bot, I'm Althaf's portfolio Assistant. How can I help you with Althaf's portfolio?' Then answer any question if present.]"
+            # Detect if user is asking a question (with or without greeting)
+            question_words = ["what", "how", "why", "when", "where", "who", "which", "can", "could", "would", "should", "tell", "show", "explain", "describe", "about"]
+            has_question = any(qw in query_lower.split() for qw in question_words) or "?" in query
+            
+            greetings = ["hi", "hello", "hey", "yo", "hy", "hai", "hii", "hola", "good morning", "good evening", "greetings"]
+            is_pure_greeting = query_lower in greetings
+            
+            if is_pure_greeting:
+                # Plain greeting: User only said "hi" (no question)
+                conversation_hint = "\n[This is your first message - respond ONLY with: 'Hello, I'm Assist Bot, I'm Althaf's portfolio Assistant. How can I help you with Althaf's portfolio?']"
+            elif has_question:
+                # Semi-greeting: User asked a question (with or without greeting)
+                conversation_hint = "\n[This is your first message - respond with: 'Hello, I'm Assist Bot, I'm Althaf's portfolio Assistant.' then answer their question naturally.]"
+            else:
+                # Default greeting if uncertain
+                conversation_hint = "\n[This is your first message - greet with: 'Hello, I'm Assist Bot, I'm Althaf's portfolio Assistant. How can I help you with Althaf's portfolio?']"
             
         # Short phrases - respond naturally without repeating info
         elif len(query_lower.split()) <= 2 and query_lower in ["ok", "okay", "cool", "thanks", "nice", "great", "yes", "sure", "fine", "good"]:
