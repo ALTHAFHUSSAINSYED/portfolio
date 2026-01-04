@@ -91,7 +91,7 @@ const Chatbot = () => {
     if (isOpen && messages.length === 0) {
       setMessages([{
         sender: "bot",
-        text: "🙋‍♂️ Hi there! I'm Assist Bot. How can I assist you with Althaf's Portfolio Info Today?"
+        text: "Hello, I'm Assist Bot, I'm Althaf's portfolio Assistant. How can I help you with Althaf's portfolio?"
       }]);
     }
   }, [isOpen, messages.length]);
