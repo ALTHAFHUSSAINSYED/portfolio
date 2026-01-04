@@ -371,15 +371,19 @@ def detect_intent_priority(text: str) -> Tuple[str, str, dict]:
         scores["conversation"] += 3
         return "conversation", "frustrated", scores
 
+    # Projects - check FIRST with higher priority to avoid "about projects" routing to profile
+    if any(k in text_clean for k in ["project", "built", "develop", "portfolio", "app", "website", "created", "made"]):
+        scores["projects"] += 12  # Higher than profile base score
+        scores["info"] += 3
+    
     # Profile / About (General) - includes work/employment questions
-    if any(k in text_clean for k in ["who", "about", "bio", "background", "resume", "experience", "skill", "contact", "email", "working", "employed", "job", "position", "role", "company", "current"]):
+    if any(k in text_clean for k in ["who", "bio", "background", "resume", "experience", "skill", "contact", "email", "working", "employed", "job", "position", "role", "company", "current"]):
         scores["profile"] += 10
         scores["info"] += 3
         
-    # Projects (General) - REMOVED "work" to avoid conflict with "working at" questions
-    if any(k in text_clean for k in ["project", "built", "develop", "portfolio", "app", "website", "created", "made"]):
-        scores["projects"] += 10
-        scores["info"] += 3
+    # "about" keyword - context-dependent (about him = profile, about projects = already scored above)
+    if "about" in text_clean and not any(k in text_clean for k in ["project", "blog", "app", "website"]):
+        scores["profile"] += 8  # Only add if not about projects/blogs
         
     # AWS / Cloud (Specific)
     if any(k in text_clean for k in ["aws", "cloud", "terraform", "deploy", "infrastructure", "pipeline", "ci/cd"]):
