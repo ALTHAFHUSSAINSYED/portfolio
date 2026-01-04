@@ -98,10 +98,13 @@ const Chatbot = () => {
 
   // Generate unique session ID (persists in localStorage)
   const [sessionId] = useState(() => {
+    // Generate unique session ID for this browser
+    // Format: session_{timestamp}_{random_string}
     let id = localStorage.getItem('assistbot_session_id');
     if (!id) {
       id = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       localStorage.setItem('assistbot_session_id', id);
+      console.log('Generated new session ID:', id);
     }
     return id;
   });
