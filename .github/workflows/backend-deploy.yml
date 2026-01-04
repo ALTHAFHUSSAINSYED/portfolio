@@ -94,10 +94,16 @@ jobs:  # WHAT jobs to run
             fi
             cd ..
 
-            # HARD CLEAN Docker (important after crash loops)
+            # AGGRESSIVE DISK CLEANUP (prevents "No space left on device" errors)
             docker stop portfolio-backend || true
             docker rm portfolio-backend || true
-            docker image prune -f
+            docker system prune -af --volumes
+            
+            # Clean old logs to free up space (keep last 7 days)
+            find /home/ec2-user/portfolio-logs -type f -name "*.log" -mtime +7 -delete 2>/dev/null || true
+            
+            # Remove old blog generation logs
+            find /home/ec2-user/portfolio-logs/auto_blogger -type d -mtime +7 -exec rm -rf {} + 2>/dev/null || true
 
             # Rebuild & run
             docker build --no-cache -t portfolio-backend -f backend/Dockerfile .
