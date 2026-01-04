@@ -371,13 +371,13 @@ def detect_intent_priority(text: str) -> Tuple[str, str, dict]:
         scores["conversation"] += 3
         return "conversation", "frustrated", scores
 
-    # Profile / About (General)
-    if any(k in text_clean for k in ["who", "about", "bio", "background", "resume", "experience", "skill", "contact", "email"]):
-        scores["profile"] += 5
+    # Profile / About (General) - includes work/employment questions
+    if any(k in text_clean for k in ["who", "about", "bio", "background", "resume", "experience", "skill", "contact", "email", "working", "employed", "job", "position", "role", "company", "current"]):
+        scores["profile"] += 10
         scores["info"] += 3
         
-    # Projects (General)
-    if any(k in text_clean for k in ["project", "built", "work", "develop", "portfolio", "app", "website"]):
+    # Projects (General) - REMOVED "work" to avoid conflict with "working at" questions
+    if any(k in text_clean for k in ["project", "built", "develop", "portfolio", "app", "website", "created", "made"]):
         scores["projects"] += 10
         scores["info"] += 3
         
