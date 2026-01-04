@@ -501,6 +501,17 @@ Remember: You are Assist Bot (never say Allu Bot). Respond naturally in conversa
         if history is None:
             history = []
         
+        # --- STRICT CONTEXT GUARD (Prevents Hallucination) ---
+        # If we have NO context for a specific question, fallback immediately.
+        # We allow greetings (context is empty) but block specific queries.
+        is_greeting = self.detect_conversation_state(query) == "GREETING"
+        
+        # If it's not a greeting and context is effectively empty/useless
+        if not is_greeting and (not context or len(context) < 50 or "No external context" in context):
+            logger.warning(f"⛔ BLOCKING LLM CALL: No context found for query: {query[:50]}...")
+            return "I checked Althaf's portfolio, but I couldn't find specific details matching your request. You might want to ask about his 'Projects', 'Skills', or 'Experience' directly!"
+        # ------------------------------------------------------
+        
         # Detect query complexity for dynamic token allocation
         max_tokens = self._detect_query_complexity(query)
         logger.info(f"Query complexity: {max_tokens} tokens")

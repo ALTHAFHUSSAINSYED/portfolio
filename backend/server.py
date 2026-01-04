@@ -381,8 +381,14 @@ def detect_intent_priority(text: str) -> Tuple[str, str, dict]:
         scores["projects"] += 12  # Higher than profile base score
         scores["info"] += 3
     
-    # Profile / About (General) - includes work/employment questions
-    if any(k in text_clean for k in ["who", "bio", "background", "resume", "experience", "skill", "contact", "email", "working", "employed", "job", "position", "role", "company", "current"]):
+    # Profile / About (General) - includes work/employment AND education questions
+    profile_keywords = [
+        "who", "bio", "background", "resume", "experience", "skill", "contact", 
+        "email", "working", "employed", "job", "position", "role", "company", "current",
+        "education", "degree", "university", "college", "study", "studied", 
+        "master", "bachelor", "btech", "mtech", "certificate", "certification", "school", "grad", "graduate"
+    ]
+    if any(k in text_clean for k in profile_keywords):
         scores["profile"] += 10
         scores["info"] += 3
         
