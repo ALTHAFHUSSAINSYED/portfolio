@@ -510,8 +510,8 @@ Remember: You are Assist Bot (never say Allu Bot). Respond naturally in conversa
         logger.info(f"Context preview: {context_preview}")
         logger.info(f"Context length: {len(context)} chars")
         
-        # Format messages with augmented query
-        messages = self._format_messages(augmented_query, context, history, sentiment)
+        # Format messages with query
+        messages = self._format_messages(query, context, history, sentiment)
         
         # Runtime Guard: Input Token Budget Check (Task 5)
         # Estimate: 4 chars ~= 1 token
@@ -548,10 +548,7 @@ Remember: You are Assist Bot (never say Allu Bot). Respond naturally in conversa
         # Tier 1: Mistral 7B Instruct (Free) - Fast & Reliable PRIMARY
         logger.info("Trying Tier 1: Mistral 7B Instruct (Free)")
         
-        # Use normalized builder
-        or_messages = self._build_openrouter_messages(query, context, history)
-        
-        response = self._call_openrouter("mistralai/mistral-7b-instruct:free", or_messages, max_tokens)
+        response = self._call_openrouter("mistralai/mistral-7b-instruct:free", messages, max_tokens)
         if response:
             logger.info("✅ Response from Mistral 7B")
             return self._clean_response(response)
@@ -559,11 +556,7 @@ Remember: You are Assist Bot (never say Allu Bot). Respond naturally in conversa
         # Tier 2: OpenAI gpt-oss-20b (Free) - OpenAI Quality Fallback
         logger.info("Trying Tier 2: OpenAI gpt-oss-20b (Free)")
         
-        # Inject STRICT System Prompt for OpenRouter
-        # We reconstruct messages to ensure correct system prompt is valid
-        or_messages = self._build_openrouter_messages(query, context, history)
-        
-        response = self._call_openrouter("openai/gpt-oss-20b:free", or_messages, max_tokens)
+        response = self._call_openrouter("openai/gpt-oss-20b:free", messages, max_tokens)
         if response:
             logger.info("✅ Response from OpenAI gpt-oss-20b")
             return self._clean_response(response)
@@ -627,24 +620,4 @@ Remember: You are Assist Bot (never say Allu Bot). Respond naturally in conversa
         
         return response
 
-    def _build_openrouter_messages(self, query, context, history):
-        """Build messages for OpenRouter with natural guidance"""
-        system_content = (
-            "🚫 ZERO HALLUCINATION POLICY\n"
-            "- Use ONLY the context provided. If it's not there, say 'I don't have that information'.\n"
-            "- No assumptions. No expansions. No related info unless explicitly mentioned.\n\n"
-            "IDENTITY\n"
-            "You are 'Allu Bot', Althaf's portfolio assistant.\n\n"
-            "STYLE\n"
-            "- Natural and conversational\n"
-            "- Brief responses (2-3 sentences)\n"
-            "- No markdown or bullet points\n"
-            "- Handle greetings, acknowledgments, and exits naturally\n\n"
-            "CONTEXT:\n" + (context if context else "No specific context available.")
-        )
 
-        msgs = [{"role": "system", "content": system_content}]
-        if history:
-             msgs.extend(history[-6:])  # Keep recent history
-        msgs.append({"role": "user", "content": query})
-        return msgs
