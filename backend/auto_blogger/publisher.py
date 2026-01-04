@@ -313,7 +313,7 @@ class BlogPublisher:
                     "subcategory": blog['category'],  # DevOps, Cloud Computing, etc.
                     "url": f"https://althafportfolio.site/blogs/{blog_id}",
                     "timestamp": str(int(time.time())),
-                    "published_date": blog.get('createdAt', '')[:10] if 'createdAt' in blog else datetime.now().strftime('%Y-%m-%d')
+                    "published_date": blog.get('created_at', '')[:10] if 'created_at' in blog else datetime.now().strftime('%Y-%m-%d')  # Fixed: Use snake_case
                 }
                 
                 # Write to portfolio_master collection
