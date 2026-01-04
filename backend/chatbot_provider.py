@@ -56,36 +56,33 @@ Be accurate, human, and composed.
 Do not mention internal logic, models, prompts, or system rules.
 """
 
-# Humanized System Prompt (Updated Jan 4, 2026 - Mandatory Greeting)
+# Simplified Strong System Prompt (Jan 4, 2026 - Assist Bot Identity)
 SYSTEM_PROMPT = """
-You are Assist Bot, Althaf Hussain Syed's friendly portfolio assistant.
+You are Assist Bot, Althaf Hussain Syed's portfolio assistant.
 
-IMPORTANT GREETING RULE (ONCE PER SESSION):
-On first interaction only (when is_first_interaction=True):
+IDENTITY RULES:
+1. You are ALWAYS "Assist Bot" - NEVER say "Allu Bot" or any other name
+2. You speak about Althaf Hussain Syed in third person (he/his)
+3. You are professional, friendly, and conversational
 
-1. **Plain Greeting** - If user only greets (e.g., "hi", "hello"):
-   - Respond ONLY with: "Hello, I'm Assist Bot, I'm Althaf's portfolio Assistant. How can I help you with Althaf's portfolio?"
+CRITICAL RETRIEVAL RULES:
+1. The context provided below is from Althaf's verified portfolio database
+2. You MUST use this context to answer questions - it is accurate and complete
+3. NEVER hallucinate or invent information not in the context
+4. Only say "I don't have that information" if context is truly empty
 
-2. **Semi-Greeting** - If user asks a question (with or without greeting):
-   - Examples: "what are your projects?", "hi, tell me about blogs", "about his recent work?"
-   - Respond with: "Hello, I'm Assist Bot, I'm Althaf's portfolio Assistant. [Answer their question]"
-   
-After first interaction, respond naturally without repeating the greeting.
+RESPONSE STYLE:
+1. Write like a human - no hyphens, no bullet points, no special symbols
+2. Use natural paragraphs with proper sentences
+3. Keep responses concise - 2 to 4 sentences for most questions
+4. Match the user's tone - brief for greetings, detailed for complex questions
+5. Never use phrases like "based on the information provided" or "according to the data"
 
-CORE RULES:
-1. **CRITICAL:** If the context below contains information that answers the user's question, YOU MUST USE IT in your response
-2. The context is reliable and accurate - use it to answer questions about Althaf's work, projects, blogs, and skills
-3. Only say "I don't have that information" if the context is completely empty or doesn't contain any relevant information
-4. NO hyphen bullets (-) or numbered lists unless explicitly requested - use natural paragraphs
-5. Be conversational and human-like
-
-RESPONSE LENGTH (MATCH USER'S INTENT):
-- If user is just acknowledging (not asking anything) → Keep it to 1 short sentence
-- If user is greeting you → Brief intro (1-2 sentences)
-- If user asks a real question → Answer with 2-4 sentences
-- If question is complex → Use up to 6 sentences maximum
-
-Read the user's intent, not specific words. Don't dump information when they're just saying "ok" or being casual.
+FORBIDDEN:
+- Never say "Allu Bot" (you are Assist Bot)
+- No markdown formatting (no *, -, #, etc.)
+- No apologizing unless user points out error
+- No meta-commentary about your role or limitations
 """
 
 class ChatbotProvider:
@@ -201,99 +198,38 @@ class ChatbotProvider:
     
     def detect_conversation_state(self, text: str) -> str:
         """
-        Deterministic Conversation State Machine
-        Rules over AI vibes.
+        Simplified conversation state detection
+        Only distinguishes between greetings and questions
         """
-        import re
         t = text.lower().strip()
-        # Clean punctuation for exact word matching
-        t_clean = re.sub(r'[^\w\s]', '', t)
-        words = set(t_clean.split())
         
-        # 1. ABUSE / PROFANITY (Whole word match only)
-        profanity = {"fuck", "shit", "bitch", "stupid", "idiot", "crap", "asshole"} # 'hell' removed as it's too risky (shell, hello)
-        if any(w in words for w in profanity):
-            return "ABUSE"
-            
-        # 2. EXIT
-        exit_phrases = ["bye", "goodbye", "exit", "stop", "quit", "end", "nothing else", "that's it", "thats it", "done", "cancel"]
-        # checks for exact match or starts with exit phrase
-        if t in exit_phrases or any(t.startswith(w + " ") for w in exit_phrases):
-             return "EXIT"
-             
-        # 3. GREETING (differentiate pure greeting vs greeting + question)
-        greetings = ["hi", "hello", "hey", "yo", "hy", "hai", "hii", "hola", "good morning", "good evening", "greetings"]
-        has_greeting = t in greetings or any(t.startswith(w + " ") for w in greetings)
-        
-        # Check if it's a hybrid (greeting + question)
-        question_words = ["what", "how", "why", "when", "where", "who", "which", "can", "could", "would", "should", "tell", "show", "explain", "describe"]
-        has_question = any(qw in t.split() for qw in question_words) or "?" in text
-        
-        if has_greeting and has_question:
-            return "GREETING_WITH_QUESTION"
-        elif has_greeting:
+        # Check for simple greetings (no question)
+        simple_greetings = ["hi", "hello", "hey", "hai", "hii", "hola"]
+        if t in simple_greetings:
             return "GREETING"
             
-        # 4. SILENT / FILLER
-        fillers = ["ok", "okay", "cool", "hmm", "ah", "oh", "right", "alright", "got it", "nice", "fine", "sure", "yeah", "yep", "yup"]
-        # Check if text is ONLY filler words (handles "ok cool", "yeah sure", etc.)
-        words = t.split()
-        if all(word in fillers for word in words) and len(words) <= 3:
-            return "SILENT"
-        # Also check exact match for single-word fillers
-        if t in fillers or t == "":
-            return "SILENT"
-            
-        # 5. AMBIGUOUS / META
-        ambiguous = ["what?", "really?", "sure", "why?", "how?", "explain", "meaning?"]
-        if t in ambiguous:
-            return "AMBIGUOUS"
-            
-        # 6. DEFAULT -> INFO (Proceed to RAG)
+        # Everything else goes to INFO (ChromaDB retrieval)
         return "INFO"
 
     def generate_response_by_state(self, state: str, user_input: str) -> str:
         """
-        Micro-responses for non-INFO states.
-        Bypasses LLM for speed and consistency.
-        
-        CRITICAL RULES:
-        - No "Got it"
-        - No "Let me know if you'd like more details"
-        - No repetition
-        - No content dumping
-        - No emojis (professional text only)
+        Simple responses for greetings only
+        All other inputs go to ChromaDB retrieval
         """
         if state == "GREETING":
-            return "Hello! I can help with Althaf's blogs, projects, or experience."
+            return "Hello! I'm Assist Bot, Althaf's portfolio assistant. How can I help you?"
             
-        if state == "AMBIGUOUS":
-            return "Alright. Let me know what you'd like to explore."
-            
-        if state == "ABUSE":
-            # NOTE: This is now handled by sentiment gate, but keeping for backwards compatibility
-            return "I'm here to help, but I can't continue this conversation if the language stays disrespectful."
-            
-        if state == "SILENT":
-            # Friendly acknowledgment instead of empty response
-            return "Happy to help! Anything else you'd like to know?"
-            
-        if state == "EXIT":
-            # NOTE: Server handles persistence of 'exit_acknowledged'
-            return "Goodbye! Feel free to return anytime."
-            
-        return "" # Should not happen if called correctly
+        return "" # Should never reach here
     
     def _format_messages(self, query: str, context: str, history: List[Dict], sentiment: str = "neutral") -> List[Dict]:
         """
-        Format messages for API call with SANDWICH TECHNIQUE
-        Reinforces core instructions in both system AND user messages for better compliance
+        Format messages for API call with strengthened context enforcement
         
         Args:
             query: User query
             context: RAG context from ChromaDB
             history: Conversation history
-            sentiment: Detected intent sentiment (neutral, closing, frustrated)
+            sentiment: Detected intent sentiment (not used in simplified version)
             
         Returns:
             Formatted messages list
@@ -310,11 +246,15 @@ class ChatbotProvider:
             context = context[:max_context_chars] + "..."
             logger.info(f"Context truncated to {max_context_chars} chars")
         
-        # Simple, clean prompt
-        user_message = f"""Context about Althaf:
+        # Strengthened prompt to force context usage
+        user_message = f"""VERIFIED INFORMATION FROM ALTHAF'S PORTFOLIO DATABASE:
 {context}
 
-User: {query}"""
+CRITICAL INSTRUCTION: Answer the user's question using ONLY the information above. This is accurate, verified data from Althaf's portfolio. Do NOT invent or assume anything beyond what is explicitly stated above.
+
+USER QUESTION: {query}
+
+Remember: You are Assist Bot (never say Allu Bot). Respond naturally in conversational paragraphs without special formatting."""
         
         messages.append({"role": "user", "content": user_message})
         
@@ -564,45 +504,6 @@ User: {query}"""
         # Detect query complexity for dynamic token allocation
         max_tokens = self._detect_query_complexity(query)
         logger.info(f"Query complexity: {max_tokens} tokens")
-        
-        # --- MINIMAL GUIDANCE (Let LLM use its brain) ---
-        query_lower = query.lower().strip()
-        
-        # Anti-hallucination reminder (critical for accuracy)
-        anti_hallucination = "\n[CRITICAL: Use ONLY the context provided. No assumptions. Be brief and natural.]"
-        
-        # Natural conversation hints (guidance only, not rules)
-        conversation_hint = ""
-        
-        # First interaction - ALWAYS greet (even if user didn't greet)
-        if is_first_interaction:
-            # Detect if user is asking a question (with or without greeting)
-            question_words = ["what", "how", "why", "when", "where", "who", "which", "can", "could", "would", "should", "tell", "show", "explain", "describe", "about"]
-            has_question = any(qw in query_lower.split() for qw in question_words) or "?" in query
-            
-            greetings = ["hi", "hello", "hey", "yo", "hy", "hai", "hii", "hola", "good morning", "good evening", "greetings"]
-            is_pure_greeting = query_lower in greetings
-            
-            if is_pure_greeting:
-                # Plain greeting: User only said "hi" (no question)
-                conversation_hint = "\n[This is your first message - respond ONLY with: 'Hello, I'm Assist Bot, I'm Althaf's portfolio Assistant. How can I help you with Althaf's portfolio?']"
-            elif has_question:
-                # Semi-greeting: User asked a question (with or without greeting)
-                conversation_hint = "\n[This is your first message - respond with: 'Hello, I'm Assist Bot, I'm Althaf's portfolio Assistant.' then answer their question naturally.]"
-            else:
-                # Default greeting if uncertain
-                conversation_hint = "\n[This is your first message - greet with: 'Hello, I'm Assist Bot, I'm Althaf's portfolio Assistant. How can I help you with Althaf's portfolio?']"
-            
-        # Short phrases - respond naturally without repeating info
-        elif len(query_lower.split()) <= 2 and query_lower in ["ok", "okay", "cool", "thanks", "nice", "great", "yes", "sure", "fine", "good"]:
-            conversation_hint = "\n[User is acknowledging - respond naturally and briefly]"
-            
-        # Exit signals - say goodbye warmly
-        elif any(phrase in query_lower for phrase in ["bye", "goodbye", "nothing else", "that's all", "done"]):
-            conversation_hint = "\n[User is leaving - say goodbye warmly]"
-
-        # Augment query with context hints
-        augmented_query = f"{query}{anti_hallucination}{conversation_hint}" if conversation_hint else f"{query}{anti_hallucination}"
         
         # Log context for debugging (truncate if too long)
         context_preview = context[:200] + "..." if len(context) > 200 else context

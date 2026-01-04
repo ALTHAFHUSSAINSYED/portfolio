@@ -24,9 +24,20 @@ APOLOGY_PATTERNS = [
     r"\bi can.?t access real-time\b"
 ]
 
+# Bot name corrections
+BOT_NAME_REPLACEMENTS = [
+    (r'\bAllu Bot\b', 'Assist Bot'),
+    (r'\bAlluBot\b', 'Assist Bot'),
+    (r'\bAllu\b(?!\s*Althaf)', 'Assist Bot'),  # Replace "Allu" only if not followed by "Althaf"
+]
+
 def strip_apology_boilerplate(text: str) -> str:
-    """Remove apology phrases and clean up formatting artifacts"""
+    """Remove apology phrases, fix bot names, and clean up formatting artifacts"""
     cleaned = text
+    
+    # Fix bot name first (critical)
+    for pattern, replacement in BOT_NAME_REPLACEMENTS:
+        cleaned = re.sub(pattern, replacement, cleaned, flags=re.IGNORECASE)
     
     # Remove apology patterns
     for pattern in APOLOGY_PATTERNS:
