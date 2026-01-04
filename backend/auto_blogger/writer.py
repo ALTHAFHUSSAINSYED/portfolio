@@ -262,11 +262,18 @@ class BlogWriter:
                     # 1. Strip DeepSeek <think> tags
                     content = re.sub(r'<think>.*?</think>', '', content, flags=re.DOTALL)
                     
-                    # 2. Clean formatting
+                    # 2. Clean formatting and extract JSON
                     clean_content = content.replace("```json", "").replace("```", "").strip()
-                    match = re.search(r'\[.*\]', clean_content, re.DOTALL)
-                    if match:
-                        clean_content = match.group(0)
+                    
+                    # Try to extract JSON object {...} or array [...]
+                    dict_match = re.search(r'\{.*\}', clean_content, re.DOTALL)
+                    array_match = re.search(r'\[.*\]', clean_content, re.DOTALL)
+                    
+                    if dict_match:
+                        clean_content = dict_match.group(0)
+                    elif array_match:
+                        clean_content = array_match.group(0)
+                    # else: use clean_content as-is (already stripped)
 
                     # 3. Validate JSON immediately
                     try:
