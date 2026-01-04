@@ -371,7 +371,12 @@ def detect_intent_priority(text: str) -> Tuple[str, str, dict]:
         scores["conversation"] += 3
         return "conversation", "frustrated", scores
 
-    # Projects - check FIRST with higher priority to avoid "about projects" routing to profile
+    # AWS / Cloud (Specific) - CHECK FIRST for highest priority
+    if any(k in text_clean for k in ["aws", "cloud", "terraform", "deploy", "infrastructure", "pipeline", "ci/cd"]):
+        scores["aws_projects"] += 15  # Highest priority for specific domains
+        scores["info"] += 3
+    
+    # Projects - check SECOND with higher priority to avoid "about projects" routing to profile
     if any(k in text_clean for k in ["project", "built", "develop", "portfolio", "app", "website", "created", "made"]):
         scores["projects"] += 12  # Higher than profile base score
         scores["info"] += 3
@@ -384,11 +389,6 @@ def detect_intent_priority(text: str) -> Tuple[str, str, dict]:
     # "about" keyword - context-dependent (about him = profile, about projects = already scored above)
     if "about" in text_clean and not any(k in text_clean for k in ["project", "blog", "app", "website"]):
         scores["profile"] += 8  # Only add if not about projects/blogs
-        
-    # AWS / Cloud (Specific)
-    if any(k in text_clean for k in ["aws", "cloud", "terraform", "deploy", "infrastructure", "pipeline", "ci/cd"]):
-        scores["aws_projects"] += 10 
-        scores["info"] += 3
         
     # Blogs
     if any(k in text_clean for k in ["blog", "article", "write", "post", "read"]):
