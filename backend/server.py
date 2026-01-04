@@ -45,6 +45,9 @@ except ImportError as e:
     HAS_AGENT_SERVICE = False
     print(f"⚠️ Warning: Some backend services could not be imported: {e}")
     chromadb_monitor = None  # Monitoring disabled if import fails
+    ResponseCache = None  # Fallback for cache
+    RateLimiter = None  # Fallback for rate limiter
+    ChatbotProvider = None  # Fallback for chatbot
     def sanitize_html(text):
         return bleach.clean(text)
 
@@ -112,19 +115,22 @@ except Exception as e:
 
 # Initialize Multi-Provider Chatbot Components
 try:
-    response_cache = ResponseCache(max_size=100, ttl_seconds=3600)
-    rate_limiter = RateLimiter(max_requests_per_minute=12)  # Per-session limit: 12 RPM
-    chatbot_provider = ChatbotProvider()
-    chatbot_provider = ChatbotProvider()
-    conversation_sessions = {}  # {session_id: [messages]}
-    session_metadata = {}       # {session_id: {"state": "START", "disengagement_count": 0}}
-    logger.info("Multi-provider chatbot components initialized (per-session rate limiting: 12 RPM)")
+    if ResponseCache and RateLimiter and ChatbotProvider:
+        response_cache = ResponseCache(max_size=100, ttl_seconds=3600)
+        rate_limiter = RateLimiter(max_requests_per_minute=12)  # Per-session limit: 12 RPM
+        chatbot_provider = ChatbotProvider()
+        conversation_sessions = {}  # {session_id: [messages]}
+        session_metadata = {}       # {session_id: {"state": "START", "disengagement_count": 0}}
+        logger.info("Multi-provider chatbot components initialized (per-session rate limiting: 12 RPM)")
+    else:
+        raise ImportError("Chatbot dependencies not available")
 except Exception as e:
     logger.error(f"Failed to initialize chatbot components: {e}")
     response_cache = None
     rate_limiter = None
     chatbot_provider = None
     conversation_sessions = {}
+    session_metadata = {}
     session_metadata = {}
 
 def determine_next_state(current_state: str, scores: dict, disengagement_count: int) -> str:
