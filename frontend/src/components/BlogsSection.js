@@ -20,8 +20,18 @@ const BlogsSection = () => {
   const location = useLocation();
 
   // ONLY THESE 6 CATEGORIES ALLOWED - ALL OTHERS PERMANENTLY REMOVED
-  // Also accept legacy underscore format for backward compatibility
-  const allowedCategories = [
+  // Accept both space and underscore formats from backend, but display only space format
+  const allowedCategoriesForDisplay = [
+    'Low-Code/No-Code',
+    'Cybersecurity',
+    'Software Development',
+    'DevOps',
+    'AI and ML',
+    'Cloud Computing'
+  ];
+  
+  // For filtering: accept both formats (spaces and underscores)
+  const allowedCategoriesForFiltering = [
     'Low-Code/No-Code',
     'Low-Code_No-Code',  // Legacy format
     'Cybersecurity',
@@ -33,6 +43,16 @@ const BlogsSection = () => {
     'Cloud Computing',
     'Cloud_Computing'  // Legacy format
   ];
+  
+  // Normalize category name (convert underscores to spaces/slashes)
+  const normalizeCategory = (category) => {
+    if (!category) return category;
+    return category
+      .replace('Low-Code_No-Code', 'Low-Code/No-Code')
+      .replace('Software_Development', 'Software Development')
+      .replace('AI_and_ML', 'AI and ML')
+      .replace('Cloud_Computing', 'Cloud Computing');
+  };
 
   useEffect(() => {
     fetchBlogs();
@@ -43,8 +63,9 @@ const BlogsSection = () => {
     const searchParams = new URLSearchParams(location.search);
     const categoryParam = searchParams.get('category');
 
-    if (categoryParam && allowedCategories.includes(categoryParam)) {
-      setSelectedCategory(categoryParam);
+    if (categoryParam && allowedCategoriesForFiltering.includes(categoryParam)) {
+      // Normalize the category from URL
+      setSelectedCategory(normalizeCategory(categoryParam));
       setVisibleCount(3);
     }
   }, [location.search]);
@@ -69,13 +90,19 @@ const BlogsSection = () => {
 
       console.log(`✅ Loaded ${allBlogs.length} blogs from backend API (S3)`);
 
-      // Filter to ONLY show allowed categories
+      // Filter to ONLY show allowed categories (accept both space and underscore formats)
       const filteredData = allBlogs.filter(blog =>
-        blog.category && allowedCategories.includes(blog.category)
+        blog.category && allowedCategoriesForFiltering.includes(blog.category)
       );
+      
+      // Normalize all blog categories to space format
+      const normalizedBlogs = filteredData.map(blog => ({
+        ...blog,
+        category: normalizeCategory(blog.category)
+      }));
 
       // Sort by date (newest first) - should already be sorted from API but ensure
-      const sortedBlogs = [...filteredData].sort((a, b) => {
+      const sortedBlogs = [...normalizedBlogs].sort((a, b) => {
         const dateA = new Date(a.created_at || a.date || 0);
         const dateB = new Date(b.created_at || b.date || 0);
         return dateB - dateA;
@@ -186,7 +213,7 @@ const BlogsSection = () => {
             <div className="mt-6">
               <h3 className="text-lg font-semibold mb-3">Filter by Category:</h3>
               <div className="flex flex-wrap gap-3 justify-center">
-                {allowedCategories.map((category) => (
+                {allowedCategoriesForDisplay.map((category) => (
                   <Badge
                     key={category}
                     onClick={() => {
