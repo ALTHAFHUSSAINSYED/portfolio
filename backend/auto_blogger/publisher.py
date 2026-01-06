@@ -155,23 +155,35 @@ class S3BlogStorage:
         index_data = self.read_index()
         
         # Prepare metadata entry (lightweight)
+        excerpt = create_clean_excerpt(blog['content'])  # ✅ Clean excerpt without markdown
+        
         metadata = {
             "id": blog['id'],
             "title": blog['title'],
             "category": blog['category'],
             "slug": blog.get('slug', blog['id']),
             "created_at": blog['created_at'],
-            "excerpt": create_clean_excerpt(blog['content']),  # ✅ Clean excerpt without markdown
+            "excerpt": excerpt,
             "tags": blog.get('tags', []),
             "author": blog.get('author', 'Althaf Hussain Syed'),
             "author_title": blog.get('author_title', 'Solutions Architect')
         }
         
+        # VALIDATION: Ensure frontend-required fields are present
+        required_fields = ['id', 'title', 'category', 'excerpt', 'created_at']
+        missing = [f for f in required_fields if f not in metadata or not metadata[f]]
+        if missing:
+            raise ValueError(f"Index entry missing required fields: {missing}")
+        
+        # VALIDATION: Ensure excerpt is substantial for 3-line frontend display
+        if len(excerpt) < 100:
+            logger.warning(f"⚠️  Excerpt too short ({len(excerpt)} chars). Minimum 100 recommended for 3-line display.")
+        
         # Insert at position 0 (top of list)
         index_data['blogs'].insert(0, metadata)
         
         self.write_index(index_data)
-        logger.info(f"✅ Added {blog['id']} to index (total: {len(index_data['blogs'])})")
+        logger.info(f"✅ Added {blog['id']} to index (total: {len(index_data['blogs'])}, excerpt: {len(excerpt)} chars)")
 
 # ═══════════════════════════════════════════════════════════
 
