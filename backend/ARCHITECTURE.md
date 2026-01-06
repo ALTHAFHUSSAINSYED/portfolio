@@ -35,7 +35,7 @@
 ### API Configuration
 | Variable | Value | Purpose |
 |----------|-------|---------|
-| `CHATBOT_NEW_KEY` | `sk-or-v1-bdcbd5ad...` | **Dedicated** OpenRouter key for chatbot |
+| `CHATBOT_NEW_KEY` | `sk-or-v1-***REDACTED***` | **Dedicated** OpenRouter key for chatbot |
 | `CHATBOT` | HuggingFace token | Tier 3 fallback (HF Gradio API) |
 | `GEMINI_API_KEY` | Google API key | Tier 4 emergency fallback |
 
@@ -91,7 +91,7 @@ Error message to user
 ### API Configuration
 | Variable | Value | Purpose |
 |----------|-------|---------|
-| `BLOG_KEY` | `sk-or-v1-fb2f9e65...` | **Original** OpenRouter key for auto-blogger |
+| `BLOG_KEY` | `sk-or-v1-***REDACTED***` | **Original** OpenRouter key for auto-blogger |
 | `SERPER_API_KEY` | Serper.dev key | Web research (Google Search API) |
 
 ### Agent System (4 Agents)

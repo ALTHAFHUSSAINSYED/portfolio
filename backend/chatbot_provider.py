@@ -596,12 +596,12 @@ Remember: You are Assist Bot (never say Allu Bot). Respond naturally in conversa
             logger.info("✅ Response from Mistral 7B")
             return self._clean_response(response)
             
-        # Tier 2: AllenAI Olmo 3.1 32B Think (Free) - Advanced Reasoning Fallback
-        logger.info("Trying Tier 2: AllenAI Olmo 3.1 32B Think (Free)")
+        # Tier 2: Meta Llama 3.1 8B Instruct (Free) - Balanced Fallback
+        logger.info("Trying Tier 2: Meta Llama 3.1 8B Instruct (Free)")
         
-        response = self._call_openrouter("allenai/olmo-3.1-32b-think:free", messages, max_tokens)
+        response = self._call_openrouter("meta-llama/llama-3.1-8b-instruct:free", messages, max_tokens)
         if response:
-            logger.info("✅ Response from AllenAI Olmo 3.1 32B Think")
+            logger.info("✅ Response from Meta Llama 3.1 8B")
             return self._clean_response(response)
         
         # Tier 3: Gemini Chain (Standard) - Moved up as requested
