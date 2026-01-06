@@ -95,10 +95,11 @@ const BlogsSection = () => {
         blog.category && allowedCategoriesForFiltering.includes(blog.category)
       );
       
-      // Normalize all blog categories to space format
+      // Normalize all blog categories to space format and map excerpt to summary
       const normalizedBlogs = filteredData.map(blog => ({
         ...blog,
-        category: normalizeCategory(blog.category)
+        category: normalizeCategory(blog.category),
+        summary: blog.summary || blog.excerpt || '' // Use excerpt if summary not present
       }));
 
       // Sort by date (newest first) - should already be sorted from API but ensure
