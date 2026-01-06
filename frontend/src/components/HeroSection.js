@@ -116,7 +116,7 @@ const HeroSection = ({ personalInfo }) => {
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="relative flex flex-col items-center">
 
-          <div className="relative z-20 mb-8 w-48 h-48 md:w-56 md:h-56 rounded-full border-4 border-cyan-400/30 shadow-lg shadow-cyan-500/20 overflow-hidden group">
+          <div className="relative z-20 mb-8 w-48 h-48 md:w-56 md:h-56 rounded-full border-4 border-cyan-400/30 shadow-lg shadow-cyan-500/20 overflow-hidden group mx-auto">
             <LazyLoadImage
               src="/profile-pic.jpg?v=updated3"
               alt="Althaf Hussain Syed - DevOps Engineer and Cloud Architect specializing in AWS, Azure, Kubernetes"

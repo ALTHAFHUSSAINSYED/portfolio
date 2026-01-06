@@ -232,7 +232,8 @@ const Header = ({ personalInfo }) => {
                 { section: 'skills', icon: <Sparkles className="w-4 h-4 mr-2" /> },
                 { section: 'experience', icon: <Briefcase className="w-4 h-4 mr-2" /> },
                 { section: 'certifications', icon: <Award className="w-4 h-4 mr-2" /> },
-                { section: 'blogs', icon: <BookOpen className="w-4 h-4 mr-2" /> }
+                { section: 'blogs', icon: <BookOpen className="w-4 h-4 mr-2" /> },
+                { section: 'contact', icon: <Mail className="w-4 h-4 mr-2" /> }
               ].map(({ section, icon }, index) => (
                 <button
                   key={section}
@@ -247,19 +248,10 @@ const Header = ({ personalInfo }) => {
                 <Button
                   onClick={downloadResume}
                   size="sm"
-                  className="neon-button bg-gradient-to-r from-pink-500 to-green-500 hover:from-pink-600 hover:to-green-600 dark:from-cyan-500 dark:to-purple-600 dark:hover:from-cyan-600 dark:hover:to-purple-700 text-white font-semibold transition-all duration-300 fade-in-right stagger-6"
+                  className="neon-button bg-gradient-to-r from-pink-500 to-green-500 hover:from-pink-600 hover:to-green-600 dark:from-cyan-500 dark:to-purple-600 dark:hover:from-cyan-600 dark:hover:to-purple-700 text-white font-semibold transition-all duration-300 fade-in-right stagger-7"
                 >
                   <Download className="w-4 h-4 mr-2" />
                   Download Resume
-                </Button>
-                <Button
-                  onClick={() => scrollToSection('contact')}
-                  size="sm"
-                  id="contact-nav-button-mobile"
-                  className="neon-button bg-gradient-to-r from-pink-500 to-green-500 hover:from-pink-600 hover:to-green-600 dark:from-cyan-500 dark:to-purple-600 dark:hover:from-cyan-600 dark:hover:to-purple-700 text-white font-semibold transition-all duration-300 fade-in-right stagger-7"
-                >
-                  <Mail className="w-4 h-4 mr-2" />
-                  Contact
                 </Button>
               </div>
             </div>
