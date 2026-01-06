@@ -127,7 +127,19 @@ class S3BlogStorage:
         logger.info(f"✅ Updated S3: {self.index_key}")
     
     def upload_post(self, blog_id: str, blog_data: Dict):
-        """Upload individual blog to blogs/posts/{id}.json"""
+        """Upload individual blog to blogs/posts/{id}.json
+        
+        CRITICAL: blog_id must be URL-safe with no path separators (/, \\)
+        to ensure flat directory structure in S3.
+        """
+        # Safety check: reject any blog_id with path separators
+        if '/' in blog_id or '\\' in blog_id:
+            raise ValueError(
+                f"SAFETY VIOLATION: blog_id contains path separator: '{blog_id}'. "
+                f"This would create nested directories in S3! "
+                f"Use generate_url_safe_id() to sanitize category names."
+            )
+        
         key = f"{self.posts_prefix}{blog_id}.json"
         content = json.dumps(blog_data, indent=2)
         self.s3.put_object(
@@ -267,10 +279,29 @@ class BlogPublisher:
         logger.info("✅ Blog content validation passed")
         
         # 1. Finalize Metadata
-        blog_id = f"{blog['category'].replace(' ', '_')}_{int(time.time())}"
+        # URL-safe blog ID: replace spaces with underscores, slashes with hyphens
+        # Additional safety: remove any other URL-unsafe characters
+        category_slug = (
+            blog['category']
+            .replace(' ', '_')
+            .replace('/', '-')
+            .replace('\\', '-')  # Backslashes
+            .replace(':', '-')   # Colons
+            .replace('?', '')    # Question marks
+            .replace('&', 'and') # Ampersands
+            .replace('#', '')    # Hash symbols
+        )
+        blog_id = f"{category_slug}_{int(time.time())}"
+        
+        # Final safety check: ensure no path separators in blog_id
+        if '/' in blog_id or '\\' in blog_id:
+            raise ValueError(f"Blog ID contains path separator: {blog_id}")
+        
         blog['id'] = blog_id
         blog['published'] = True
         blog['created_at'] = datetime.now().isoformat()
+        
+        logger.info(f"✅ Generated URL-safe blog ID: {blog_id}")
         
         # 2. Save to S3 (Phase A: Persistent Storage)
         try:
