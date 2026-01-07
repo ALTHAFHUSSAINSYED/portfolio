@@ -409,7 +409,7 @@ const BlogDetailPage = () => {
                     <p className="text-muted-foreground leading-relaxed mb-4">
                       Althaf Hussain Syed is a DevOps Engineer with 3.5+ years of experience building scalable cloud infrastructure
                       and automation solutions for enterprise clients. Currently working as Analyst III Infrastructure Services at DXC Technology,
-                      he specializes in AWS cloud architecture, CI/CD automation, and containerized deployments using Docker and Kubernetes.
+                      he specializes in AWS cloud infrastructure, CI/CD automation, and containerized deployments using Docker and Kubernetes.
                     </p>
                     <p className="text-muted-foreground leading-relaxed mb-4">
                       He holds multiple cloud certifications including AWS Solutions Architect - Associate, AWS AI Practitioner,

@@ -23,7 +23,7 @@ const TechAssistant = () => {
     "@id": "https://althafportfolio.site/#person",
     "name": "Althaf Hussain Syed",
     "jobTitle": "DevOps Engineer | Cloud & Infrastructure Engineer",
-    "description": "Certified DevOps Engineer with expertise in AWS, Azure, Kubernetes, and Cloud Architecture. Specializing in CI/CD automation, infrastructure as code, and scalable cloud solutions.",
+    "description": "Certified DevOps Engineer with expertise in AWS, Azure, Kubernetes, and Cloud Infrastructure Engineering. Specializing in CI/CD automation, infrastructure as code, and scalable cloud solutions.",
     "url": "https://althafportfolio.site",
     "image": "https://althafportfolio.site/profile-pic.jpg",
     "sameAs": [

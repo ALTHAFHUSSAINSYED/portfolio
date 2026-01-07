@@ -128,7 +128,7 @@ const ContactSection = ({ personalInfo }) => {
               <Card className={`p-4 neon-card transition-all ${isVisible ? 'scale-in stagger-5' : ''}`}>
                 <div className="flex items-center space-x-4">
                   <div className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
-                    <LazyLoadImage src="/assets/whatsapp-green.png" alt="WhatsApp Contact - Message Cloud Architect" effect="blur" className="w-full h-full object-cover scale-[1.8]" width={56} height={56} />
+                    <LazyLoadImage src="/assets/whatsapp-green.png" alt="WhatsApp Contact - Message Cloud Infrastructure Engineer" effect="blur" className="w-full h-full object-cover scale-[1.8]" width={56} height={56} />
                   </div>
                   <div>
                     <h4 className="font-semibold text-foreground">WhatsApp</h4>

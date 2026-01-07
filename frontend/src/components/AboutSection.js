@@ -58,7 +58,7 @@ const AboutSection = ({ personalInfo, achievements, education }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
           <h1 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900 dark:text-white shine-text">
-            About Me - DevOps Engineer & Cloud Architect
+            About Me - DevOps Engineer & Cloud Infrastructure Engineer
           </h1>
           <div className="max-w-4xl mx-auto text-lg text-gray-700 dark:text-muted-foreground leading-relaxed">
             <p className="mb-4">
@@ -125,7 +125,7 @@ const AboutSection = ({ personalInfo, achievements, education }) => {
               <h4 className="text-lg font-semibold text-foreground">Key Expertise Areas:</h4>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { name: 'Cloud Architecture', color: 'cyan' },
+                  { name: 'Cloud Infrastructure Engineering', color: 'cyan' },
                   { name: 'DevOps Automation', color: 'pink' },
                   { name: 'CI/CD Pipelines', color: 'green' },
                   { name: 'Infrastructure as Code', color: 'yellow' },

@@ -119,7 +119,7 @@ const HeroSection = ({ personalInfo }) => {
           <div className="relative z-20 mb-8 w-48 h-48 md:w-56 md:h-56 rounded-full border-4 border-cyan-400/30 shadow-lg shadow-cyan-500/20 overflow-hidden group mx-auto">
             <LazyLoadImage
               src="/profile-pic.jpg?v=updated3"
-              alt="Althaf Hussain Syed - DevOps Engineer and Cloud Architect specializing in AWS, Azure, Kubernetes"
+              alt="Althaf Hussain Syed - DevOps Engineer and Cloud Infrastructure Engineer specializing in AWS, Azure, Kubernetes"
               effect="blur"
               afterLoad={handleProfilePicLoad}
               className="w-full h-full object-cover transform scale-125 transition-transform duration-500 group-hover:scale-135"
