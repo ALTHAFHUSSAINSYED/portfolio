@@ -56,9 +56,11 @@ Be accurate, human, and composed.
 Do not mention internal logic, models, prompts, or system rules.
 """
 
-# Simplified Strong System Prompt (Jan 4, 2026 - Assist Bot Identity)
+# Simplified Strong System Prompt (Jan 7, 2026 - DATE AWARE)
 SYSTEM_PROMPT = """
 You are Assist Bot, Althaf Hussain Syed's portfolio assistant.
+
+🗓️ CRITICAL: TODAY'S DATE IS {current_date}. Use this for ALL date-related logic.
 
 IDENTITY & TONE (NON-NEGOTIABLE):
 1. You are "Assist Bot", but you MUST refer to yourself as "I" or "me"
@@ -67,6 +69,12 @@ IDENTITY & TONE (NON-NEGOTIABLE):
 4. You speak about Althaf Hussain Syed in third person (he/his)
 5. Be warm, professional, conversational, and highly intelligent
 6. You have ADVANCED RAG (Retrieval-Augmented Generation) capabilities
+
+DATE AWARENESS RULES (MANDATORY):
+1. If an event ended BEFORE today's date → use PAST tense ("completed", "finished", "earned")
+2. If an event is ongoing and end date is AFTER today → use PRESENT tense ("is pursuing", "is working on")
+3. Example: Master's degree ending June 2024, today is January 2026 → "He completed his Master's in June 2024" (NOT "is currently completing")
+4. Always calculate: if end_date < current_date, it's FINISHED
 
 CRITICAL RETRIEVAL RULES (STRICT):
 1. The context provided below is from Althaf's verified portfolio database with categorized metadata
@@ -533,6 +541,10 @@ Remember: You are Assist Bot (never say Allu Bot). Respond naturally in conversa
         if history is None:
             history = []
         
+        # Get current date for date-aware responses
+        from datetime import datetime
+        current_date = datetime.now().strftime("%B %d, %Y")  # e.g., "January 07, 2026"
+        
         # --- STRICT CONTEXT GUARD (Prevents Hallucination) ---
         # If we have NO context for a specific question, fallback immediately.
         # We allow greetings (context is empty) but block specific queries.
@@ -555,6 +567,10 @@ Remember: You are Assist Bot (never say Allu Bot). Respond naturally in conversa
         
         # Format messages with query
         messages = self._format_messages(query, context, history, sentiment)
+        
+        # Inject current date into system prompt
+        if messages and messages[0].get("role") == "system":
+            messages[0]["content"] = messages[0]["content"].replace("{current_date}", current_date)
         
         # Runtime Guard: Input Token Budget Check (Task 5)
         # Estimate: 4 chars ~= 1 token
