@@ -147,7 +147,7 @@
         },
         {
             "title": "RAG Pipeline & AI Assistant Development",
-            "description": "Built and integrated AlluBot, an intelligent portfolio assistant powered by RAG (Retrieval Augmented Generation) architecture, connected to ChromaDB vector database for semantic search and context-aware responses."
+            "description": "Built and integrated Assist Bot, an intelligent portfolio assistant powered by RAG (Retrieval Augmented Generation) architecture, connected to ChromaDB vector database for semantic search and context-aware responses."
         }
     ],
     "certifications": [

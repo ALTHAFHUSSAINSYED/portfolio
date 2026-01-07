@@ -610,20 +610,20 @@ Remember: You are Assist Bot (never say Allu Bot). Respond naturally in conversa
         #     safe_length = int(MAX_INPUT_TOKENS * 3.5) # Safe char count
         #     messages[-1]['content'] = last_msg[:safe_length] + "\n...[Context Truncated for Safety]"
             
-        # Tier 1: Mistral 7B Instruct (Free) - Fast & Reliable PRIMARY
-        logger.info("Trying Tier 1: Mistral 7B Instruct (Free)")
+        # Tier 1: Gemma 3 27B IT (Free) - Large Model PRIMARY
+        logger.info("Trying Tier 1: Gemma 3 27B IT (Free)")
+        
+        response = self._call_openrouter("google/gemma-3-27b-it:free", messages, max_tokens)
+        if response:
+            logger.info("✅ Response from Gemma 3 27B")
+            return self._clean_response(response)
+            
+        # Tier 2: Mistral 7B Instruct (Free) - Fast Fallback
+        logger.info("Trying Tier 2: Mistral 7B Instruct (Free)")
         
         response = self._call_openrouter("mistralai/mistral-7b-instruct:free", messages, max_tokens)
         if response:
             logger.info("✅ Response from Mistral 7B")
-            return self._clean_response(response)
-            
-        # Tier 2: Meta Llama 3.1 8B Instruct (Free) - Balanced Fallback
-        logger.info("Trying Tier 2: Meta Llama 3.1 8B Instruct (Free)")
-        
-        response = self._call_openrouter("meta-llama/llama-3.1-8b-instruct:free", messages, max_tokens)
-        if response:
-            logger.info("✅ Response from Meta Llama 3.1 8B")
             return self._clean_response(response)
         
         # Tier 3: Gemini Chain (Standard) - Moved up as requested
