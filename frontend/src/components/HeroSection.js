@@ -32,6 +32,7 @@ const HeroSection = ({ personalInfo }) => {
 
   // Use useMediaQuery hook to check for large screens (Tailwind's 'lg' breakpoint)
   const isLargeScreen = useMediaQuery('(min-width: 1024px)');
+  const isMobile = useMediaQuery('(max-width: 640px)');
 
   const handleVideoScroll = useCallback(() => {
     const videoElements = [leftVideoRef.current, rightVideoRef.current, bannerVideoRef.current];
@@ -123,6 +124,7 @@ const HeroSection = ({ personalInfo }) => {
               effect="blur"
               afterLoad={handleProfilePicLoad}
               className="w-full h-full object-cover transform scale-125 transition-transform duration-500 group-hover:scale-135"
+              style={isMobile ? { objectFit: 'cover', objectPosition: '42% 20%' } : {}}
               width={224}
               height={224}
             />
