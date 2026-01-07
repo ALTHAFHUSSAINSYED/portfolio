@@ -124,9 +124,9 @@ const HeroSection = ({ personalInfo }) => {
               effect="blur"
               afterLoad={handleProfilePicLoad}
               className="w-full h-full object-cover transform scale-125 transition-transform duration-500 group-hover:scale-135"
-              style={isMobile ? { objectFit: 'cover', objectPosition: 'center 25%', transform: 'scale(1.27)' } : {}}
-              width={240}
-              height={240}
+              style={isMobile ? { objectFit: 'cover', objectPosition: 'center 30%', transform: 'scale(1.27)' } : {}}
+              width={224}
+              height={224}
             />
           </div>
 
