@@ -36,19 +36,15 @@ const Header = ({ personalInfo }) => {
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      // For Contact section, the dedicated smooth-scroll.js handles this
-      // This avoids duplicate event handling for the contact button
-      if (sectionId !== 'contact') {
-        // Get header height for proper scroll positioning
-        const headerHeight = document.querySelector('header').offsetHeight;
-        const targetPosition = element.getBoundingClientRect().top + window.pageYOffset - headerHeight;
+      // Get header height for proper scroll positioning
+      const headerHeight = document.querySelector('header').offsetHeight;
+      const targetPosition = element.getBoundingClientRect().top + window.pageYOffset - headerHeight;
 
-        // Use enhanced smooth scrolling with better positioning
-        window.scrollTo({
-          top: targetPosition,
-          behavior: 'smooth'
-        });
-      }
+      // Use enhanced smooth scrolling with better positioning
+      window.scrollTo({
+        top: targetPosition,
+        behavior: 'smooth'
+      });
     }
     setIsMenuOpen(false);
   };
