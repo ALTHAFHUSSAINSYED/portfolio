@@ -391,6 +391,10 @@ Remember: You are Assist Bot (never say Allu Bot). Respond naturally in conversa
             return None
         
         try:
+            # Get current date for date awareness
+            from datetime import datetime
+            current_date = datetime.now().strftime("%B %d, %Y")
+            
             # Gemini has 1M context window - use generous 100K chars (~25K tokens)
             max_gemini_context_chars = 100000
             truncated_context = context[:max_gemini_context_chars] if context else ""
@@ -400,7 +404,19 @@ Remember: You are Assist Bot (never say Allu Bot). Respond naturally in conversa
             
             # Build Gemini-optimized prompt with unified system instructions
             system_instruction = (
-                "You are Assist Bot, Althaf Hussain Syed's portfolio assistant.\n\n"
+                f"You are Assist Bot, Althaf Hussain Syed's portfolio assistant.\n\n"
+                f"🗓️ CRITICAL: TODAY'S DATE IS {current_date}. Use this for ALL date-related logic.\n\n"
+                "DATE AWARENESS RULES (MANDATORY):\n"
+                "1. TODAY IS " + current_date + " - memorize this\n"
+                "2. If an event's END DATE is before today → use PAST tense ('completed', 'finished', 'earned')\n"
+                "3. If an event's START DATE is before today but NO END DATE given → use PRESENT tense ('is working', 'is pursuing')\n"
+                "4. CRITICAL EXAMPLE:\n"
+                "   - Context says: 'Master's degree, December 2022 - June 2024'\n"
+                "   - Today is " + current_date + "\n"
+                "   - June 2024 was 18 MONTHS AGO\n"
+                "   - CORRECT: 'He completed his Master's degree in June 2024'\n"
+                "   - WRONG: 'He is currently completing' or 'expected to finish in June 2024'\n"
+                "5. Always mentally calculate: Is the end date BEFORE " + current_date + "? If YES → past tense\n\n"
                 "IDENTITY & TONE (NON-NEGOTIABLE):\n"
                 "1. You are 'Assist Bot', but you MUST refer to yourself as 'I' or 'me'\n"
                 "2. NEVER refer to yourself in the third person (e.g., NEVER say 'Assist Bot can help', say 'I can help')\n"
