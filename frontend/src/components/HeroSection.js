@@ -122,8 +122,7 @@ const HeroSection = ({ personalInfo }) => {
               alt="Althaf Hussain Syed - DevOps Engineer and Cloud Infrastructure Engineer specializing in AWS, Azure, Kubernetes"
               effect="blur"
               afterLoad={handleProfilePicLoad}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              style={{ objectPosition: 'center 20%' }}
+              className="w-full h-full object-cover transform scale-125 transition-transform duration-500 group-hover:scale-135"
               width={224}
               height={224}
             />
