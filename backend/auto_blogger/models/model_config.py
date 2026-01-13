@@ -14,9 +14,9 @@ AGENT_ROLES = {
     "orchestrator": {
         "role": "Outline & High-Level Logic",
         "primary": "deepseek/deepseek-r1-0528:free",
-        "fallback": "tngtech/deepseek-r1t-chimera:free",
+        "fallback": "mistralai/mistral-small-3.1-24b-instruct:free",  # Changed from deepseek-r1t-chimera for diversity
         "max_tokens": 2000,
-        "temperature": 0.6
+        "temperature": 0.3  # Lowered from 0.6 for more deterministic JSON output
     },
     "drafter": {
         "role": "Section Writer (Chunked)",

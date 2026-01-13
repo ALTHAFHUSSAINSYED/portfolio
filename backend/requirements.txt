@@ -40,3 +40,4 @@ nest_asyncio>=1.6.0
 gradio_client>=0.15.0
 openai>=1.0.0
 importlib-metadata>=6.0.0
+json-repair>=0.25.0

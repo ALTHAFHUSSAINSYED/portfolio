@@ -62,6 +62,92 @@ def strip_leaked_instructions(content: str) -> str:
     
     return content.strip()
 
+def extract_json_from_response(content: str, logger) -> dict:
+    """
+    Multi-strategy JSON extraction with fallback methods.
+    Tries progressively more aggressive extraction techniques.
+    
+    Strategies:
+    1. Strip <think> tags (DeepSeek R1 specific)
+    2. Look for ```json ... ``` code blocks
+    3. Strip all markdown code blocks
+    4. Extract JSON object {...}
+    5. Try JSON repair for common errors
+    6. Try entire cleaned content
+    7. Last resort: find first { to last }
+    """
+    import json
+    import re
+    
+    logger.debug(f"🔍 Raw model response (first 500 chars): {content[:500]}")
+    logger.debug(f"🔍 Response length: {len(content)} chars")
+    
+    # Strategy 1: Strip DeepSeek <think> tags
+    content = re.sub(r'<think>.*?</think>', '', content, flags=re.DOTALL)
+    
+    # Strategy 2: Look for ```json ... ``` code blocks first
+    json_block_match = re.search(r'```json\s*(\{.*?\})\s*```', content, re.DOTALL)
+    if json_block_match:
+        try:
+            result = json.loads(json_block_match.group(1))
+            logger.info("✅ JSON extracted from ```json block")
+            return result
+        except json.JSONDecodeError as e:
+            logger.warning(f"⚠️ Found ```json block but parsing failed: {e}")
+    
+    # Strategy 3: Strip all markdown code blocks
+    clean_content = content.replace('```json', '').replace('```', '').strip()
+    
+    # Strategy 4: Extract JSON object {...} with improved regex
+    # Use non-greedy matching and handle nested braces better
+    dict_match = re.search(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', clean_content, re.DOTALL)
+    if dict_match:
+        try:
+            result = json.loads(dict_match.group(0))
+            logger.info("✅ JSON extracted via regex {...} matching")
+            return result
+        except json.JSONDecodeError as e:
+            logger.warning(f"⚠️ Extracted {{ }} but parsing failed: {e}")
+            
+            # Strategy 5: Try to repair common JSON errors
+            try:
+                from json_repair import repair_json
+                repaired = repair_json(dict_match.group(0))
+                result = json.loads(repaired)
+                logger.info("✅ JSON repair successful!")
+                return result
+            except ImportError:
+                logger.warning("⚠️ json_repair library not installed, skipping repair")
+            except Exception as repair_error:
+                logger.warning(f"⚠️ JSON repair failed: {repair_error}")
+    
+    # Strategy 6: Try the entire cleaned content
+    try:
+        result = json.loads(clean_content)
+        logger.info("✅ JSON parsed from entire cleaned content")
+        return result
+    except json.JSONDecodeError:
+        pass
+    
+    # Strategy 7: Last resort - look for any JSON-like structure
+    # Find the first { and last }
+    first_brace = clean_content.find('{')
+    last_brace = clean_content.rfind('}')
+    
+    if first_brace != -1 and last_brace != -1 and last_brace > first_brace:
+        potential_json = clean_content[first_brace:last_brace+1]
+        try:
+            result = json.loads(potential_json)
+            logger.info("✅ JSON extracted via first/last brace matching")
+            return result
+        except json.JSONDecodeError:
+            pass
+    
+    # All strategies failed
+    logger.error(f"❌ All JSON extraction strategies failed")
+    logger.error(f"Content preview: {clean_content[:200]}...")
+    raise ValueError("Invalid JSON format - could not extract valid JSON from response")
+
 class BlogWriter:
     def __init__(self):
         self.api_key = os.getenv("BLOG_KEY") or os.getenv("OPENROUTER_API_KEY")
@@ -251,79 +337,57 @@ class BlogWriter:
                     response = self.client.chat.completions.create(
                         model=model_id,
                         messages=[
-                            {"role": "system", "content": "You are a JSON-only output assistant. Output ONLY a valid JSON list of strings."},
-                            {"role": "user", "content": prompt}
+                            {
+                                "role": "system", 
+                                "content": "You are a JSON-only API. Respond ONLY with valid JSON. No explanations, no markdown, no extra text. Just pure JSON."
+                            },
+                            {
+                                "role": "user", 
+                                "content": prompt
+                            }
                         ],
                         max_tokens=2000,
                         temperature=model_cfg["temperature"]
                     )
                     content = response.choices[0].message.content
                     
-                    # 1. Strip DeepSeek <think> tags
-                    content = re.sub(r'<think>.*?</think>', '', content, flags=re.DOTALL)
+                    # Use the new robust JSON extraction function
+                    outline_data = extract_json_from_response(content, logger)
                     
-                    # 2. Clean formatting and extract JSON
-                    clean_content = content.replace("```json", "").replace("```", "").strip()
-                    
-                    # Try to extract JSON object {...} or array [...]
-                    dict_match = re.search(r'\{.*\}', clean_content, re.DOTALL)
-                    array_match = re.search(r'\[.*\]', clean_content, re.DOTALL)
-                    
-                    if dict_match:
-                        clean_content = dict_match.group(0)
-                    elif array_match:
-                        clean_content = array_match.group(0)
-                    # else: use clean_content as-is (already stripped)
-
-                    # 3. Validate JSON immediately
-                    try:
-                        outline_data = json.loads(clean_content)
+                    # Validate structure
+                    if isinstance(outline_data, dict) and 'sections' in outline_data:
+                        sections = outline_data['sections']
+                        title = outline_data.get('title')
+                        summary = outline_data.get('summary', '')
                         
-                        # Handle new format: {title, summary, sections}
-                        if isinstance(outline_data, dict):
-                            if 'sections' in outline_data:
-                                # New format with metadata
-                                sections = outline_data['sections']
-                                title = outline_data.get('title')
-                                summary = outline_data.get('summary', '')
-                                
-                                # Validate title is present and not generic
-                                if not title or "Technical Deep Dive" in title:
-                                    logger.error(f"❌ Model {model_id} returned invalid title: {title}")
-                                    raise ValueError(f"Invalid title from outliner: {title}")
-                                
-                                if isinstance(sections, list) and len(sections) > 0:
-                                    logger.info(f"📋 Outline created:")
-                                    logger.info(f"   Title: {title}")
-                                    logger.info(f"   Summary: {summary[:100]}...")
-                                    logger.info(f"   Sections: {len(sections)}")
-                                    
-                                    # Store metadata in outline for later use
-                                    return {
-                                        "title": title,
-                                        "summary": summary,
-                                        "sections": sections
-                                    }
-                            else:
-                                # Old format - just a dict, try to extract list
-                                logger.warning("Received dict but no 'sections' key, trying to use as-is")
-                                raise ValueError("Invalid outline format")
+                        # Validate title is present and not generic
+                        generic_titles = ['Technical Deep Dive', 'Understanding', 'Best Practices']
+                        if not title or any(generic in title for generic in generic_titles):
+                            logger.error(f"❌ Invalid title from outliner: {title}")
+                            raise ValueError(f"Invalid title from outliner: {title}")
                         
-                        # Handle old format: ["Section 1", "Section 2", ...]
-                        elif isinstance(outline_data, list) and len(outline_data) > 0:
+                        if isinstance(sections, list) and len(sections) > 0:
+                            logger.info(f"📋 Outline created:")
+                            logger.info(f"   Title: {title}")
+                            logger.info(f"   Summary: {summary[:100]}...")
+                            logger.info(f"   Sections: {len(sections)}")
+                            
+                            # Store metadata in outline for later use
+                            return {
+                                "title": title,
+                                "summary": summary,
+                                "sections": sections
+                            }
+                        else:
+                            raise ValueError("Invalid outline structure - sections is not a valid list")
+                    else:
+                        # Old format or invalid structure
+                        if isinstance(outline_data, list):
                             logger.error("❌ Received old list format from outliner - this should not happen!")
-                            logger.error(f"Model {model_id} returned list instead of dict. Content: {content[:200]}")
                             raise ValueError(f"Outliner model {model_id} failed to follow instructions. Returned list instead of dict with title/summary.")
                         else:
-                            raise ValueError("Invalid outline structure")
-                            
-                    except json.JSONDecodeError:
-                        logger.warning(f"⚠️ Model {model_id} returned invalid JSON. Content: {content[:100]}...")
-                        # Fall through to 'except' or continue loop
-                        
-                    # If we got here, JSON was invalid but no exception raised yet. 
-                    # We need to trigger retry.
-                    raise ValueError("Invalid JSON format")
+                            logger.error(f"❌ Invalid outline structure: {type(outline_data)}")
+                            raise ValueError("Invalid outline format - missing 'sections' key")
 
                 except Exception as e:
                     logger.warning(f"⚠️ Model {model_id} failed: {e}")
