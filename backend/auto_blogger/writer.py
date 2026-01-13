@@ -463,11 +463,6 @@ class BlogWriter:
             - Length: Approx 300-400 words.
             - Style: Authoritative, technical, engaging.
             - If this is a code section, provide valid code snippets.
-            
-            CRITICAL RULES:
-            - Do NOT include any <img> tags or image references
-            - Do NOT add "Alt text for images" sections
-            - Focus on text content only
             - Don't write "Here is the section". Just write the content.
             """
 

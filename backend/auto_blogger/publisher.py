@@ -256,54 +256,12 @@ class BlogPublisher:
             logger.error(f"Embedding generation failed: {e}")
             return []
 
-    def clean_image_placeholders(self, content: str) -> str:
-        """Remove placeholder image tags that don't have valid URLs
-        
-        Removes:
-        1. Entire "Alt text for images:" section
-        2. Any <img> tags with relative paths (not starting with http:// or https://)
-        
-        Args:
-            content: Blog content with potential image placeholders
-            
-        Returns:
-            Cleaned content without image placeholders
-        """
-        import re
-        
-        # Remove entire "Alt text for images:" section
-        content = re.sub(
-            r'#+\s*Alt text for images:.*?(?=\n##|\Z)',
-            '',
-            content,
-            flags=re.DOTALL | re.IGNORECASE
-        )
-        
-        # Remove any remaining <img> tags with relative paths
-        # Keeps only images with absolute URLs (http:// or https://)
-        content = re.sub(
-            r'<img\s+src="(?!https?://)[^"]*"[^>]*>',
-            '',
-            content,
-            flags=re.IGNORECASE
-        )
-        
-        # Clean up excessive whitespace
-        content = re.sub(r'\n{3,}', '\n\n', content)
-        
-        return content.strip()
-
     def publish(self, blog: Dict[str, Any]) -> str:
         """Save blog and embed"""
         logger.info(f"Publishing blog: {blog.get('title')}")
         
         # VALIDATION: Check for failed sections
         content = blog.get('content', '')
-        
-        # ✅ Clean image placeholders before validation
-        content = self.clean_image_placeholders(content)
-        blog['content'] = content
-        logger.info("✅ Cleaned image placeholders from content")
         
         # Strict validation checks
         failed_indicators = [
