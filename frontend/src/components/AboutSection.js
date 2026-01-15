@@ -172,12 +172,12 @@ const AboutSection = ({ personalInfo, achievements, education }) => {
                   >
                     <div className="flex items-start space-x-4">
                       {/* Achievement Icon/Logo */}
-                      <div className={`flex-shrink-0 w-12 h-12 ${achievement.title.includes('DXC CHAMPS') ? 'bg-white' : 'bg-secondary/50'} rounded-lg flex items-center justify-center group-hover:bg-secondary/80 transition-all duration-300 border border-border/20 hover-rotate p-1`}>
+                      <div className={`flex-shrink-0 w-12 h-12 ${achievement.title.includes('DXC CHAMPS') ? 'bg-white' : 'bg-secondary/50'} rounded-lg flex items-center justify-center group-hover:bg-secondary/80 transition-all duration-300 border border-border/20 hover-rotate overflow-hidden`}>
                         {achievement.title.includes('DXC CHAMPS') ? (
                           <img
                             src="/assets/dxc-logo.png"
                             alt="DXC Technology Logo"
-                            className="w-full h-full object-contain"
+                            className="w-full h-full object-cover"
                           />
                         ) : (
                           <IconComponent className={`w-6 h-6 ${iconColor}`} />
