@@ -171,9 +171,17 @@ const AboutSection = ({ personalInfo, achievements, education }) => {
                       }`}
                   >
                     <div className="flex items-start space-x-4">
-                      {/* ✨ MODIFIED: Changed background and border to be theme-aware */}
-                      <div className={`flex-shrink-0 w-12 h-12 bg-secondary/50 rounded-lg flex items-center justify-center group-hover:bg-secondary/80 transition-all duration-300 border border-border/20 hover-rotate`}>
-                        <IconComponent className={`w-6 h-6 ${iconColor}`} />
+                      {/* Achievement Icon/Logo */}
+                      <div className={`flex-shrink-0 w-12 h-12 ${achievement.title.includes('DXC CHAMPS') ? 'bg-white' : 'bg-secondary/50'} rounded-lg flex items-center justify-center group-hover:bg-secondary/80 transition-all duration-300 border border-border/20 hover-rotate p-1`}>
+                        {achievement.title.includes('DXC CHAMPS') ? (
+                          <img
+                            src="/assets/dxc-logo.png"
+                            alt="DXC Technology Logo"
+                            className="w-full h-full object-contain"
+                          />
+                        ) : (
+                          <IconComponent className={`w-6 h-6 ${iconColor}`} />
+                        )}
                       </div>
                       <div className="flex-1">
                         {/* ✨ MODIFIED: Changed text-white to text-foreground */}
