@@ -139,11 +139,13 @@
         },
         {
             "title": "DXC CHAMPS Award – FY24 Q1",
-            "description": "Recognised for consistent delivery, ownership of priority tasks, and reliable execution of infrastructure operations and production deployments."
+            "description": "Recognised for consistent delivery, ownership of priority tasks, and reliable execution of infrastructure operations and production deployments.",
+            "awardUrl": "https://res.cloudinary.com/dtzaicj6s/image/upload/v1768479955/DXC_CHAMPS_Award_FY24_Q1_rr6aju.png"
         },
         {
             "title": "DXC CHAMPS Award – FY26 H1",
-            "description": "Awarded for sustained performance, end-to-end accountability, and operational excellence in supporting critical infrastructure services."
+            "description": "Awarded for sustained performance, end-to-end accountability, and operational excellence in supporting critical infrastructure services.",
+            "awardUrl": null
         }
     ],
     "certifications": [

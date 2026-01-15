@@ -9,6 +9,7 @@ import 'react-lazy-load-image-component/src/effects/blur.css';
 const AboutSection = ({ personalInfo, achievements, education }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [hoveredSkill, setHoveredSkill] = useState(null);
+  const [selectedAward, setSelectedAward] = useState(null);
   const sectionRef = useRef(null);
 
   const iconMap = {
@@ -174,15 +175,34 @@ const AboutSection = ({ personalInfo, achievements, education }) => {
                       <div className={`flex-shrink-0 w-12 h-12 bg-secondary/50 rounded-lg flex items-center justify-center group-hover:bg-secondary/80 transition-all duration-300 border border-border/20 hover-rotate`}>
                         <IconComponent className={`w-6 h-6 ${iconColor}`} />
                       </div>
-                      <div>
+                      <div className="flex-1">
                         {/* ✨ MODIFIED: Changed text-white to text-foreground */}
                         <h4 className="font-semibold text-foreground mb-2 group-hover:text-cyan-soft transition-colors duration-300">
                           {achievement.title}
                         </h4>
                         {/* ✨ MODIFIED: Changed text-gray-300 to text-muted-foreground */}
-                        <p className="text-muted-foreground leading-relaxed">
+                        <p className="text-muted-foreground leading-relaxed mb-3">
                           {achievement.description}
                         </p>
+                        {/* View Award Button */}
+                        {achievement.awardUrl && (
+                          <button
+                            onClick={() => setSelectedAward(achievement)}
+                            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-cyan-soft hover:text-cyan-400 bg-secondary/50 hover:bg-secondary/80 border border-cyan-400/30 hover:border-cyan-400/60 rounded-lg transition-all duration-300 hover:scale-105"
+                          >
+                            <Award className="w-4 h-4" />
+                            View Award
+                          </button>
+                        )}
+                        {achievement.awardUrl === null && achievement.title.includes('FY26') && (
+                          <button
+                            disabled
+                            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted-foreground bg-secondary/30 border border-border/20 rounded-lg cursor-not-allowed opacity-50"
+                          >
+                            <Award className="w-4 h-4" />
+                            View Award (Coming Soon)
+                          </button>
+                        )}
                       </div>
                     </div>
                   </Card>
@@ -208,6 +228,47 @@ const AboutSection = ({ personalInfo, achievements, education }) => {
             is an opportunity to make technology work better for people.
           </p>
         </div>
+
+        {/* Award Modal */}
+        {selectedAward && selectedAward.awardUrl && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+            onClick={() => setSelectedAward(null)}
+          >
+            <div
+              className="relative max-w-4xl w-full bg-background rounded-xl shadow-2xl overflow-hidden border border-cyan-400/30"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setSelectedAward(null)}
+                className="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center bg-background/90 hover:bg-background border border-border/50 hover:border-cyan-400/50 rounded-full transition-all duration-300 hover:scale-110"
+                aria-label="Close award modal"
+              >
+                <svg className="w-5 h-5 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
+              {/* Award Title */}
+              <div className="bg-gradient-to-r from-cyan-500/10 to-pink-500/10 border-b border-border/30 px-6 py-4">
+                <h3 className="text-xl font-semibold text-foreground flex items-center gap-2">
+                  <Award className="w-6 h-6 text-yellow-soft" />
+                  {selectedAward.title}
+                </h3>
+              </div>
+
+              {/* Award Image */}
+              <div className="p-6 bg-secondary/20">
+                <img
+                  src={selectedAward.awardUrl}
+                  alt={selectedAward.title}
+                  className="w-full h-auto rounded-lg shadow-lg"
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
