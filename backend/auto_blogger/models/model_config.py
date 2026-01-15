@@ -14,7 +14,7 @@ AGENT_ROLES = {
     "orchestrator": {
         "role": "Outline & High-Level Logic",
         "primary": "deepseek/deepseek-r1-0528:free",
-        "fallback": "mistralai/mistral-small-3.1-24b-instruct:free",  # Changed from deepseek-r1t-chimera for diversity
+        "fallback": "tngtech/tng-r1t-chimera:free",  # Updated: mistral-small no longer available
         "max_tokens": 2000,
         "temperature": 0.3  # Lowered from 0.6 for more deterministic JSON output
     },
@@ -34,8 +34,8 @@ AGENT_ROLES = {
     },
     "polisher": {
         "role": "Final Style & tone",
-        "primary": "mistralai/mistral-small-3.1-24b-instruct:free",
-        "fallback": "meta-llama/llama-3.2-3b-instruct:free",
+        "primary": "tngtech/deepseek-r1t2-chimera:free",  # Updated: mistral-small no longer available
+        "fallback": "tngtech/tng-r1t-chimera:free",  # Updated: llama-3.2-3b no longer available
         "max_tokens": 1000,
         "temperature": 0.6
     }
