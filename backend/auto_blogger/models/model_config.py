@@ -20,8 +20,8 @@ AGENT_ROLES = {
     },
     "drafter": {
         "role": "Section Writer (Chunked)",
-        "primary": "mistralai/mistral-small-3.1-24b-instruct:free",
-        "fallback": "meta-llama/llama-3.2-3b-instruct:free",
+        "primary": "deepseek/deepseek-r1-0528:free",
+        "fallback": "deepseek/deepseek-r1-0528:free",
         "max_tokens": 1500,
         "temperature": 0.7
     },
