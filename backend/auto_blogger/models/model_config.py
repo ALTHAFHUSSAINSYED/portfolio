@@ -22,7 +22,7 @@ AGENT_ROLES = {
         "role": "Section Writer (Chunked)",
         "primary": "deepseek/deepseek-r1-0528:free",
         "fallback": "deepseek/deepseek-r1-0528:free",
-        "max_tokens": 1500,
+        "max_tokens": 2500,  # Increased from 1500 to reduce cutoffs
         "temperature": 0.7
     },
     "critic": {

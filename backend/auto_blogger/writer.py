@@ -471,14 +471,12 @@ class BlogWriter:
             try_count = 0
             success = False
             
-            while try_count < 2 and not success:  # Retry loop (logic error here in original, fixing to iterate models)
-                 # Better logic: Try Primary (2 attempts) -> Fallback (2 attempts)
-                 # Creating unified list of attempts: [Primary, Primary, Fallback, Fallback]
-                 attempt_queue = [models_to_try[0], models_to_try[0], models_to_try[1], models_to_try[1]]
-                 
-                 for attempt_model in attempt_queue:
-                    try:
-                        logger.info(f"Trying model: {attempt_model}")
+             # Simplified retry logic: Try primary once, then fallback once (2 attempts total)
+             attempt_queue = [models_to_try[0], models_to_try[1]]
+             
+             for attempt, attempt_model in enumerate(attempt_queue):
+                try:
+                    logger.info(f"Trying model: {attempt_model} (Attempt {attempt + 1}/{len(attempt_queue)})")
                         response = self.client.chat.completions.create(
                             model=attempt_model,
                             messages=[{"role": "user", "content": prompt}],
@@ -504,20 +502,20 @@ class BlogWriter:
                             char_count = len(content)
                             log_section_completion(section_logger, index, word_count, char_count)
                             
-                            full_draft.append(formatted_section)
+                             full_draft.append(formatted_section)
                             success = True
-                            time.sleep(15)
+                            time.sleep(3)  # Reduced from 15s to 3s (OpenRouter limit: 10 req/min = 6s)
                             break
-                        else:
-                            logger.warning(f"⚠️ Generated section incomplete/cut-off. Discarding entirely. (Attempt {attempt + 1})")
-                            # Do NOT append partial content. Retry or Fail completely.
-                            
-                    except Exception as e:
-                         logger.warning(f"Drafting error ({attempt_model}): {e}")
-                         time.sleep(5)
-                 
-                 if success: break
-                 try_count = 2 # Force exit if queue exhausted (failed all models)
+                    else:
+                        logger.warning(f"⚠️ Generated section incomplete/cut-off. Discarding entirely. (Attempt {attempt + 1})")
+                        # Do NOT append partial content. Retry or Fail completely.
+                        
+                except Exception as e:
+                    logger.warning(f"Drafting error ({attempt_model}): {e}")
+                    time.sleep(3)  # Reduced from 5s to 3s
+                
+                if success:
+                    break
             
             if not success:
                  logger.error(f"❌ Failed to draft section: {section}. Skipping.")
@@ -559,37 +557,80 @@ class BlogWriter:
     def revise_blog(self, draft: str, feedback: Dict) -> str:
         """
         Refines the draft based on Critic's specific feedback.
+        
+        CRITICAL FIX: This method now sends the FULL draft (not truncated)
+        and requests TARGETED EDITS instead of full rewrites to prevent
+        content corruption where the model writes a completely new blog.
         """
         logger.info("🔧 Writer Agent: Revising draft based on feedback...")
+        logger.warning("⚠️ REVISION TRIGGERED - This is a risky operation that can corrupt content")
         
         model_cfg = AGENT_ROLES["drafter"]
         model_id = model_cfg["primary"]
         
-        prompt = f"""
-        You are a technical editor refining a blog post.
+        # Extract original title to validate it doesn't change
+        original_title = ""
+        for line in draft.split('\n')[:10]:
+            if line.strip().startswith("# "):
+                original_title = line.strip()[2:]
+                break
         
-        CRITIC FEEDBACK (WEAKNESSES TO FIX):
+        prompt = f"""
+        You are a technical editor making TARGETED IMPROVEMENTS to a blog post.
+        
+        CRITICAL INSTRUCTIONS:
+        - DO NOT rewrite the entire blog
+        - DO NOT change the topic or title
+        - Make ONLY the specific improvements mentioned in the feedback
+        - Return the COMPLETE blog with your edits applied
+        - Preserve all markdown formatting
+        
+        ORIGINAL TITLE: {original_title}
+        
+        SPECIFIC WEAKNESSES TO FIX:
         {json.dumps(feedback.get('weaknesses', []), indent=2)}
         
-        CURRENT DRAFT:
-        {draft[:6000]} # Truncated
+        FULL CURRENT DRAFT (DO NOT CHANGE THE TOPIC):
+        {draft}
         
         TASK:
-        Rewrite the blog to address the weaknesses.
-        - Improve clarity and depth.
-        - Fix any mentioned structural issues.
-        - Maintain the original markdown formatting.
+        Apply targeted fixes to address ONLY the weaknesses listed above.
+        - Keep the same title: "{original_title}"
+        - Keep the same topic and structure
+        - Improve clarity, depth, or fix specific issues mentioned
+        - Return the COMPLETE revised blog
         """
         
         try:
             response = self.client.chat.completions.create(
                 model=model_id,
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=2000, # Revision limit
+                max_tokens=4000,  # Increased from 2000 to handle full blog
                 temperature=model_cfg["temperature"]
             )
             revised_content = response.choices[0].message.content.strip()
+            
+            # Validation: Check if title changed (indicates topic drift)
+            revised_title = ""
+            for line in revised_content.split('\n')[:10]:
+                if line.strip().startswith("# "):
+                    revised_title = line.strip()[2:]
+                    break
+            
+            if original_title and revised_title and original_title != revised_title:
+                logger.error(f"❌ REVISION CORRUPTED CONTENT: Title changed from '{original_title}' to '{revised_title}'")
+                logger.error("Returning original draft to prevent corruption")
+                return draft
+            
+            # Validation: Check if content is too short (indicates incomplete generation)
+            if len(revised_content) < len(draft) * 0.7:  # If revised is <70% of original length
+                logger.error(f"❌ REVISION TRUNCATED CONTENT: Original {len(draft)} chars, Revised {len(revised_content)} chars")
+                logger.error("Returning original draft to prevent data loss")
+                return draft
+            
+            logger.info(f"✅ Revision completed. Length: {len(draft)} -> {len(revised_content)} chars")
             return revised_content
+            
         except Exception as e:
             logger.error(f"❌ Revision failed: {e}")
-            return draft # Return original if revision fails
+            return draft  # Return original if revision fails

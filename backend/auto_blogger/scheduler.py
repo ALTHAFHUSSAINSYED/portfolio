@@ -97,15 +97,22 @@ class BlogScheduler:
         """Job: 7:00 AM Generation"""
         logger.info("Running scheduled generation pipeline...")
         start_time = datetime.now()
+        logger.info(f"⏱️ Pipeline started at: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
         try:
             # 1. Select Category
             category = self.select_next_category()
             
             # 2. Research
+            research_start = datetime.now()
             research_data = self.researcher.analyze_trends(category)
+            research_time = (datetime.now() - research_start).total_seconds()
+            logger.info(f"⏱️ Research completed in {research_time:.1f}s")
             
             # 3. Write Draft
+            draft_start = datetime.now()
             blog_data = self.writer.generate_blog(category, research_data)
+            draft_time = (datetime.now() - draft_start).total_seconds()
+            logger.info(f"⏱️ Drafting completed in {draft_time:.1f}s ({draft_time/60:.1f} minutes)")
             
             # Handle new dict format from writer
             if isinstance(blog_data, dict):
@@ -128,30 +135,35 @@ class BlogScheduler:
                 self.pending_draft = None
                 return
             
-            # 4. Critique Loop (Max 3 retries)
+            # 4. Critique Loop (Max 2 iterations - reduced from 3)
+            # CRITICAL: Revision is risky and can corrupt content. Only revise if score < 75.
+            critique_start = datetime.now()
             passed = False
-            for i in range(3):
+            for i in range(2):  # Reduced from 3 to 2 iterations
                 passed, review_json = self.critic.evaluate(draft, category)
                 try:
                     review = json.loads(review_json)
                 except:
                     review = {"score": 0, "verdict": "FAIL"}
                 
-                logger.info(f"Critique Iteration {i+1}: Score {review.get('score')}")
+                score = review.get('score', 0)
+                logger.info(f"Critique Iteration {i+1}: Score {score}, Verdict: {review.get('verdict')}")
                 
-                if passed:
+                # Accept if passed OR score >= 75 (acceptable quality)
+                if passed or score >= 75:
+                    if not passed and score >= 75:
+                        logger.info(f"✅ Score {score} is acceptable (>= 75). Skipping revision to avoid corruption risk.")
                     break
                 
-                # If failed, revise based on feedback (Not implemented fully in writer yet, simple regeneration logic here)
-                # In a real rigorous system, we'd pass 'required_edits' back to writer.
-                # For now, we will retry generation if score is very low, or accept best effort if close?
-                # The prompt requested "Loop until: pass OR max iterations reached".
-                # To simplify without complex revision prompts, we might accept if > 85 on last try or just fail.
-                
-                if i < 2:
-                    logger.info("Score below gate. Revising based on feedback...")
-                    # Smart Revision Loop
+                # Only revise if score < 75 AND we have attempts left
+                if i < 1 and score < 75:  # Only 1 revision attempt (i=0)
+                    logger.warning(f"⚠️ Score {score} < 75. Attempting revision (RISKY OPERATION)...")
                     draft = self.writer.revise_blog(draft, review)
+                else:
+                    logger.info(f"Score {score} < 75 but no revision attempts left. Proceeding with current draft.")
+            
+            critique_time = (datetime.now() - critique_start).total_seconds()
+            logger.info(f"⏱️ Critique loop completed in {critique_time:.1f}s")
             
             if not passed and review.get('score', 0) < 60:
                  # Strict fail only if score is abysmal (< 60)
@@ -210,6 +222,11 @@ class BlogScheduler:
             except Exception as e:
                 logger.warning(f"Failed to persist draft to disk: {e}")
             
+            total_time = (datetime.now() - start_time).total_seconds()
+            logger.info(f"⏱️ TOTAL PIPELINE TIME: {total_time:.1f}s ({total_time/60:.1f} minutes)")
+            logger.info(f"   - Research: {research_time:.1f}s")
+            logger.info(f"   - Drafting: {draft_time:.1f}s")
+            logger.info(f"   - Critique: {critique_time:.1f}s")
             logger.info(f"Draft ready for publishing: '{title}'")
             
         except Exception as e:
