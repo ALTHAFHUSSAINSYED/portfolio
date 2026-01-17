@@ -471,41 +471,41 @@ class BlogWriter:
             try_count = 0
             success = False
             
-             # Simplified retry logic: Try primary once, then fallback once (2 attempts total)
-             attempt_queue = [models_to_try[0], models_to_try[1]]
-             
-             for attempt, attempt_model in enumerate(attempt_queue):
+            # Simplified retry logic: Try primary once, then fallback once (2 attempts total)
+            attempt_queue = [models_to_try[0], models_to_try[1]]
+            
+            for attempt, attempt_model in enumerate(attempt_queue):
                 try:
                     logger.info(f"Trying model: {attempt_model} (Attempt {attempt + 1}/{len(attempt_queue)})")
-                        response = self.client.chat.completions.create(
-                            model=attempt_model,
-                            messages=[{"role": "user", "content": prompt}],
-                            max_tokens=model_cfg["max_tokens"],
-                            temperature=model_cfg["temperature"]
-                        )
-                        content = response.choices[0].message.content.strip()
+                    response = self.client.chat.completions.create(
+                        model=attempt_model,
+                        messages=[{"role": "user", "content": prompt}],
+                        max_tokens=model_cfg["max_tokens"],
+                        temperature=model_cfg["temperature"]
+                    )
+                    content = response.choices[0].message.content.strip()
+                    
+                    # ATOMIC VALIDATION: Is this section complete?
+                    if self._validate_section(content):
+                        # Success! Format and Append
+                        if not content.startswith("#"):
+                            formatted_section = f"\n\n## {section}\n\n{content}"
+                        else:
+                            formatted_section = f"\n\n{content}"
                         
-                        # ATOMIC VALIDATION: Is this section complete?
-                        if self._validate_section(content):
-                            # Success! Format and Append
-                            if not content.startswith("#"):
-                                formatted_section = f"\n\n## {section}\n\n{content}"
-                            else:
-                                formatted_section = f"\n\n{content}"
-                            
-                            # SAVE TO MONGODB IMMEDIATELY
-                            job_mgr.save_section(job_id, index, formatted_section)
-                            section_logger.info(f"✅ Section {index} saved to MongoDB")
-                            
-                            # Log metrics
-                            word_count = len(content.split())
-                            char_count = len(content)
-                            log_section_completion(section_logger, index, word_count, char_count)
-                            
-                             full_draft.append(formatted_section)
-                            success = True
-                            time.sleep(3)  # Reduced from 15s to 3s (OpenRouter limit: 10 req/min = 6s)
-                            break
+                        # SAVE TO MONGODB IMMEDIATELY
+                        job_mgr.save_section(job_id, index, formatted_section)
+                        section_logger.info(f"✅ Section {index} saved to MongoDB")
+                        
+                        # Log metrics
+                        word_count = len(content.split())
+                        char_count = len(content)
+                        log_section_completion(section_logger, index, word_count, char_count)
+                        
+                        full_draft.append(formatted_section)
+                        success = True
+                        time.sleep(3)  # Reduced from 15s to 3s (OpenRouter limit: 10 req/min = 6s)
+                        break
                     else:
                         logger.warning(f"⚠️ Generated section incomplete/cut-off. Discarding entirely. (Attempt {attempt + 1})")
                         # Do NOT append partial content. Retry or Fail completely.
