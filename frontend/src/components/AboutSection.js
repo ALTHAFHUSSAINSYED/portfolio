@@ -260,7 +260,7 @@ const AboutSection = ({ personalInfo, achievements, education }) => {
             onClick={() => setSelectedAward(null)}
           >
             <div
-              className={`relative ${selectedAward.title.includes('FY26 H1') ? 'max-w-3xl' : 'max-w-4xl'} w-full bg-background rounded-xl shadow-2xl overflow-hidden border border-cyan-400/30`}
+              className="relative max-w-4xl w-full bg-background rounded-xl shadow-2xl overflow-hidden border border-cyan-400/30"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close Button */}
