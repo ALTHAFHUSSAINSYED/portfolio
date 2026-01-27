@@ -285,7 +285,7 @@ const AboutSection = ({ personalInfo, achievements, education }) => {
                 <img
                   src={selectedAward.awardUrl}
                   alt={selectedAward.title}
-                  className={`w-full rounded-lg shadow-lg ${selectedAward.title.includes('FY26 H1') ? 'h-auto max-h-[75vh] object-contain' : 'h-auto'}`}
+                  className={`w-full rounded-lg shadow-lg ${selectedAward.title.includes('FY26 H1') ? 'h-auto max-h-[85vh] object-contain' : 'h-auto'}`}
                 />
               </div>
             </div>
