@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
-import { Award, TrendingUp, Shield, Zap } from 'lucide-react';
+import { Award, TrendingUp, Shield, Zap, X } from 'lucide-react';
 import IntroductionVideo from './IntroductionVideo';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
@@ -28,6 +28,7 @@ const AboutSection = ({ personalInfo, achievements, education }) => {
     'RAG Pipeline & AI Assistant Development': 'text-purple-soft'
   };
 
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -44,6 +45,21 @@ const AboutSection = ({ personalInfo, achievements, education }) => {
 
     return () => observer.disconnect();
   }, []);
+
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    if (selectedAward) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [selectedAward]);
+
 
   return (
     // ✨ MODIFIED: Changed gradient to be theme-aware
@@ -175,7 +191,7 @@ const AboutSection = ({ personalInfo, achievements, education }) => {
                       <div className={`flex-shrink-0 w-12 h-12 ${achievement.title.includes('DXC CHAMPS') ? 'bg-white' : 'bg-secondary/50'} rounded-lg flex items-center justify-center group-hover:bg-secondary/80 transition-all duration-300 border border-border/20 hover-rotate overflow-hidden`}>
                         {achievement.title.includes('DXC CHAMPS') ? (
                           <img
-                            src="/assets/dxc-award.png"
+                            src={achievement.title.includes('FY26 H1') ? '/assets/dxc-award-fy26h1.png' : '/assets/dxc-award.png'}
                             alt="DXC CHAMPS Award Certificate"
                             className="w-full h-full object-cover"
                           />
@@ -253,9 +269,7 @@ const AboutSection = ({ personalInfo, achievements, education }) => {
                 className="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center bg-background/90 hover:bg-background border border-border/50 hover:border-cyan-400/50 rounded-full transition-all duration-300 hover:scale-110"
                 aria-label="Close award modal"
               >
-                <svg className="w-5 h-5 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <X className="w-5 h-5 text-foreground" />
               </button>
 
               {/* Award Title */}
