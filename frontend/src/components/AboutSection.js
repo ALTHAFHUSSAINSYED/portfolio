@@ -260,7 +260,7 @@ const AboutSection = ({ personalInfo, achievements, education }) => {
             onClick={() => setSelectedAward(null)}
           >
             <div
-              className={`relative ${selectedAward.title.includes('FY26 H1') ? 'max-w-3xl' : 'max-w-4xl'} w-full bg-background rounded-xl shadow-2xl overflow-hidden border border-cyan-400/30`}
+              className="relative max-w-4xl w-full bg-background rounded-xl shadow-2xl overflow-hidden border border-cyan-400/30"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close Button */}
@@ -285,7 +285,7 @@ const AboutSection = ({ personalInfo, achievements, education }) => {
                 <img
                   src={selectedAward.awardUrl}
                   alt={selectedAward.title}
-                  className="w-full h-auto rounded-lg shadow-lg"
+                  className={`w-full rounded-lg shadow-lg ${selectedAward.title.includes('FY26 H1') ? 'h-auto max-h-[75vh] object-contain' : 'h-auto'}`}
                 />
               </div>
             </div>
