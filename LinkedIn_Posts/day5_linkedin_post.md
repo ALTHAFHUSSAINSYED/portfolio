@@ -1,10 +1,12 @@
 # Day 5: Automating a Non-Critical Workflow (And Designing for Failure)
 
+Final day of my application series.
+
 I automated daily blog publishing. It fails often, and that's okay.
 
 Here's how I built automation that assumes failure.
 
-## The Reality: Automation Doesn't Mean "Hands-Off"
+The Reality: Automation Doesn't Mean "Hands-Off"
 
 In production, automation breaks constantly:
 - External APIs go down
@@ -12,75 +14,75 @@ In production, automation breaks constantly:
 - Outputs are unpredictable
 - Edge cases you didn't plan for
 
-**I needed automation that could fail safely without creating messes.**
+I needed automation that could fail safely without creating messes.
 
-## The Design: Assume Every Step Will Fail
+The Design: Assume Every Step Will Fail
 
 I didn't try to make it perfect. I designed for graceful failure.
 
-**Key decisions:**
-1. **Non-critical workflow** (blog publishing is nice-to-have, not core)
-2. **Human-in-the-loop** (3-hour gap: 7 AM generation → 10 AM publishing, manual override window)
-3. **Idempotent operations** (each step can retry without side effects, progress saved after each step)
+Key decisions:
+1. Non-critical workflow (nice-to-have, not core)
+2. Human-in-the-loop (3-hour gap: 7 AM → 10 AM, manual override)
+3. Idempotent operations (retry without side effects, progress saved)
 
-## How I Handle Failures
+How I Handle Failures
 
-**Problem 1: External API Failures**
-**Solution:** Retry with fallbacks—primary API fails → try secondary → both fail → save progress, notify, retry tomorrow
+Problem 1: External API Failures
+Solution: Retry with fallbacks—primary fails → try secondary → both fail → save, notify, retry tomorrow
 
-**Problem 2: Unpredictable Outputs**
-**Solution:** Validation gates (check length, validate structure, manual review window)
-**Impact:** ~10-15% fail validation
+Problem 2: Unpredictable Outputs
+Solution: Validation gates (check length, structure, manual review)
+Impact: ~10-15% fail validation
 
-**Problem 3: State Management**
-**Solution:** Persistent state (save progress after each step, atomic publishing, survives crashes)
+Problem 3: State Management
+Solution: Persistent state (save after each step, atomic publishing, survives crashes)
 
-## What I Built (High-Level)
+What I Built
 
-**Architecture:** Scheduler triggers daily job → Multi-step pipeline (Research → Generate → Review → Publish) → Each step saves progress → Failures trigger email notifications
+Architecture: Scheduler → Multi-step pipeline (Research → Generate → Review → Publish) → Save progress → Email on failures
 
-**Known issues:**
+Known issues:
 - ~10-15% fail validation
-- Free-tier API limits cause occasional failures
-- Manual intervention is rare, but intentionally supported
+- Free-tier API limits cause failures
+- Manual intervention rare but supported
 
-**Intentionally best-effort, not production-critical.**
+Intentionally best-effort, not production-critical.
 
-## The Tradeoffs
+The Tradeoffs
 
-**Gave up:** "Fully autonomous" (manual review window exists), 100% success rate, instant publishing
+Gave up: "Fully autonomous", 100% success rate, instant publishing
 
-**Gained:** $0/month cost, learning to automate unreliable workflows, understanding idempotency
+Gained: $0/month, learning to automate unreliable workflows, understanding idempotency
 
-## The Lesson
+The Lesson
 
-**Automation without guardrails is just faster failure.**
+Automation without guardrails is just faster failure.
 
 Good automation:
 - Assumes every step will fail
 - Saves progress incrementally
-- Provides observability (notifications)
+- Provides observability
 - Allows human intervention
 - Favors consistency over speed
 
-**Script vs Production:**
-- Script: "Run and hope it works"
-- Production: "Run, validate, notify, and allow intervention"
+Script vs Production:
+- Script: "Run and hope"
+- Production: "Run, validate, notify, intervene"
 
-This builds on Days 3-4's work—failure handling matters in scheduled jobs just as much as in deployments and runtime.
+This builds on Days 3-4—failure handling matters in scheduled jobs as much as deployments.
 
-## What's Next
+What's Next
 
-**Limitations:** Free-tier APIs (unstable), single scheduler, no retry backoff, manual intervention occasionally needed
+Limitations: Free-tier APIs, single scheduler, no retry backoff
 
-**Future:** Exponential backoff, dead-letter queue, CloudWatch alarms, upgrade to paid APIs if traffic justifies
+Future: Exponential backoff, dead-letter queue, CloudWatch alarms
 
 But for now: Publishes daily (when it works), $0/month, fails safely.
 
 ---
 
-🔗 **Live demo**: https://althafportfolio.site (check blogs section—content published by this system)
+🔗 Live demo: althafportfolio.site (check blogs section)
 
-**For recruiters:** Demonstrates automating non-critical workflows—designing for failure, retry logic, state persistence, human-in-the-loop safety. Hiring for AWS/DevOps? Let's connect.
+For recruiters: Demonstrates automating non-critical workflows—failure design, retry logic, state persistence, human-in-the-loop. Hiring for AWS/DevOps? Let's connect.
 
 #AWS #DevOps #Automation #SystemDesign #BuildInPublic #AWSJobs #DevOpsEngineer
