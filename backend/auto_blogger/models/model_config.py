@@ -13,29 +13,29 @@ Uses only validated OpenRouter model IDs.
 AGENT_ROLES = {
     "orchestrator": {
         "role": "Outline & High-Level Logic",
-        "primary": "deepseek/deepseek-r1-0528:free",
-        "fallback": "tngtech/tng-r1t-chimera:free",  # Updated: mistral-small no longer available
+        "primary": "qwen/qwen3-235b-a22b-thinking-2507",  # Reasoning model for structured planning
+        "fallback": "meta-llama/llama-3.3-70b-instruct:free",
         "max_tokens": 2000,
         "temperature": 0.3  # Lowered from 0.6 for more deterministic JSON output
     },
     "drafter": {
         "role": "Section Writer (Chunked)",
-        "primary": "deepseek/deepseek-r1-0528:free",
-        "fallback": "deepseek/deepseek-r1-0528:free",
+        "primary": "openai/gpt-oss-120b:free",  # Large model for content generation
+        "fallback": "qwen/qwen3-coder:free",
         "max_tokens": 2500,  # Increased from 1500 to reduce cutoffs
         "temperature": 0.7
     },
     "critic": {
         "role": "Quality Validator & Logic",
-        "primary": "deepseek/deepseek-r1-0528:free",
-        "fallback": "z-ai/glm-4.5-air:free",
+        "primary": "meta-llama/llama-3.3-70b-instruct:free",  # Analysis & validation
+        "fallback": "openai/gpt-oss-120b:free",
         "max_tokens": 1000,
         "temperature": 0.3
     },
     "polisher": {
         "role": "Final Style & tone",
-        "primary": "tngtech/deepseek-r1t2-chimera:free",  # Updated: mistral-small no longer available
-        "fallback": "tngtech/tng-r1t-chimera:free",  # Updated: llama-3.2-3b no longer available
+        "primary": "qwen/qwen3-coder:free",  # Refinement & style
+        "fallback": "openai/gpt-oss-120b:free",
         "max_tokens": 1000,
         "temperature": 0.6
     }
