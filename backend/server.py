@@ -1,3 +1,7 @@
+"""
+FastAPI Portfolio Backend Server
+Updated: March 3, 2026 - Model Configuration Update (Auto-Blogger)
+"""
 import os
 import sys
 import logging
