@@ -19,40 +19,24 @@ on:  # WHEN does this workflow run? (triggers section)
 
 jobs:  # WHAT jobs to run
   deploy:  # Job name
-    runs-on: self-hosted  # Run on YOUR EC2 server
+    runs-on: ubuntu-latest
 
     steps:  # STEPS to execute
 
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
-      # Removed: Workflow now uses .env.local only (no temporary .env creation)
-
-      - name: Repopulate ChromaDB (if data files changed)
+      - name: Detect ChromaDB data changes
+        id: data_changes
+        shell: bash
         run: |
-          cp backend/populate_vector_db.py /home/ec2-user/portfolio/backend/populate_vector_db.py
-          cd /home/ec2-user/portfolio/backend
-          
-          # Use .env.local (already exists with all secrets)
-          if git diff HEAD~1 HEAD --name-only | grep -E "(portfolio_data\.json|formatted_data\.json|fixed_data\.json)"; then
-            echo "[INFO] Data files changed - repopulating ChromaDB..."
-            # Script will use .env.local file
-            python3 populate_vector_db.py
-            echo "[SUCCESS] ChromaDB repopulated!"
+          if git diff --name-only HEAD^ HEAD | grep -Eq '(portfolio_data\.json|formatted_data\.json|fixed_data\.json)'; then
+            echo "repopulate=true" >> "$GITHUB_OUTPUT"
           else
-            echo "[INFO] No data file changes detected - skipping."
+            echo "repopulate=false" >> "$GITHUB_OUTPUT"
           fi
-
-      - name: Kill process on port 8000
-        run: |
-          PID=$(sudo lsof -ti:8000 || true)
-          if [ -n "$PID" ]; then
-            sudo kill -9 $PID
-            echo "Killed process $PID on port 8000."
-          else
-            echo "No process found on port 8000."
-          fi
-          exit 0
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
@@ -61,12 +45,21 @@ jobs:  # WHAT jobs to run
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            set -e
+
+            if [ ! -d /home/ec2-user/portfolio/.git ]; then
+              echo "[INFO] Repository not found on server. Clone it first before running this workflow."
+              exit 1
+            fi
+
             cd /home/ec2-user/portfolio
 
             # FORCE RESET (prevents corrupted files surviving)
             git fetch --all
             git reset --hard origin/main
             git pull origin main
+
+            mkdir -p /home/ec2-user/portfolio-logs
 
             # Update environment file (.env.local contains all production secrets)
             # ONLY create .env.local if it doesn't exist (preserves manual updates)
@@ -95,9 +88,9 @@ jobs:  # WHAT jobs to run
             cd ..
 
             # AGGRESSIVE DISK CLEANUP (prevents "No space left on device" errors)
-            docker stop portfolio-backend || true
-            docker rm portfolio-backend || true
-            docker system prune -af --volumes
+            sudo docker stop portfolio-backend || true
+            sudo docker rm portfolio-backend || true
+            sudo docker system prune -af --volumes || true
             
             # Clean old logs to free up space (keep last 7 days)
             find /home/ec2-user/portfolio-logs -type f -name "*.log" -mtime +7 -delete 2>/dev/null || true
@@ -105,10 +98,19 @@ jobs:  # WHAT jobs to run
             # Remove old blog generation logs
             find /home/ec2-user/portfolio-logs/auto_blogger -type d -mtime +7 -exec rm -rf {} + 2>/dev/null || true
 
+            if [ "${{ steps.data_changes.outputs.repopulate }}" = "true" ]; then
+              echo "[INFO] Data files changed - repopulating ChromaDB..."
+              cd /home/ec2-user/portfolio/backend
+              python3 populate_vector_db.py
+              echo "[SUCCESS] ChromaDB repopulated!"
+              cd ..
+            else
+              echo "[INFO] No data file changes detected - skipping ChromaDB repopulation."
+            fi
+
             # Rebuild & run
-            docker build --no-cache -t portfolio-backend -f backend/Dockerfile .
-            docker run -d \
-              --memory=5g \
+            sudo docker build --no-cache -t portfolio-backend -f backend/Dockerfile .
+            sudo docker run -d \
               --name portfolio-backend \
               --restart always \
               -p 8000:8000 \
@@ -116,28 +118,27 @@ jobs:  # WHAT jobs to run
               --env-file /home/ec2-user/portfolio/backend/.env.local \
               portfolio-backend
 
-      - name: Wait for container to start
-        run: |
-          echo "Waiting for container to start..."
-          sleep 10
-          sudo docker logs portfolio-backend --tail 50
+      - name: Health check on EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            max_attempts=60
+            attempt=0
+            while [ $attempt -lt $max_attempts ]; do
+              if curl -f http://localhost:8000/ > /dev/null 2>&1; then
+                echo "Backend is healthy!"
+                exit 0
+              fi
+              echo "Attempt $((attempt+1))/$max_attempts: Server not ready..."
+              sleep 5
+              attempt=$((attempt+1))
+            done
 
-      - name: Health check
-        run: |
-          echo "Running health check..."
-          max_attempts=60
-          attempt=0
-          while [ $attempt -lt $max_attempts ]; do
-            if curl -f http://localhost:8000/ > /dev/null 2>&1; then
-              echo "Backend is healthy!"
-              exit 0
-            fi
-            echo "Attempt $((attempt+1))/$max_attempts: Server not ready..."
-            sleep 5
-            attempt=$((attempt+1))
-          done
-
-          echo "Backend health check failed!"
-          sudo docker logs portfolio-backend --tail 100
-          exit 1
+            echo "Backend health check failed!"
+            sudo docker logs portfolio-backend --tail 100
+            exit 1
 #goodd
