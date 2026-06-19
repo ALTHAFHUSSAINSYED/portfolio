@@ -88,7 +88,12 @@ def write_to_portfolio_master(client, embed_function, uid, doc, meta, category, 
             master_col.add(ids=[uid], documents=[doc], metadatas=[master_meta])
             print(f"[OK] Added to portfolio_master: {uid} (category={category})")
         else:
-            print(f"[SKIP] Already exists in portfolio_master: {uid}")
+            existing_doc = existing['documents'][0] if existing['documents'] else None
+            if existing_doc != doc:
+                master_col.upsert(ids=[uid], documents=[doc], metadatas=[master_meta])
+                print(f"[UPDATE] Content changed for {uid}. Updated in portfolio_master.")
+            else:
+                print(f"[SKIP] Matches existing data in portfolio_master: {uid}")
         
         return True
         
@@ -174,6 +179,8 @@ def sync_blogs_from_s3(chroma_client, embed_function):
                 subcategory=blog_category
             )
             
+            legacy_ok = False
+            master_ok = success
             if legacy_ok:
                 legacy_success_count += 1
             if master_ok:
@@ -279,6 +286,8 @@ def main():
                         category='blog',
                         subcategory=blog_cat
                     )
+                    legacy_ok = False
+                    master_ok = success
                     if legacy_ok or master_ok:
                         new_blogs += 1
                         
@@ -328,6 +337,8 @@ def main():
                     metadata,
                     category='project'
                 )
+                legacy_ok = False
+                master_ok = success
                 if legacy_ok or master_ok:
                     new_projs += 1
                     
@@ -371,6 +382,8 @@ def main():
                             metadata,
                             category='profile'
                         )
+                        legacy_ok = False
+                        master_ok = success
                         if legacy_ok or master_ok:
                             resume_found = True
                             break
