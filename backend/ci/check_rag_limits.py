@@ -2,7 +2,7 @@
 import sys
 import re
 from pathlib import Path
-###
+####
 def check_rag_limits():
     """
     CI Guard to ensure Search Visibility (Candidate Limit) > Packet Safety (Injection Limit).
