@@ -179,21 +179,16 @@ def sync_blogs_from_s3(chroma_client, embed_function):
                 subcategory=blog_category
             )
             
-            legacy_ok = False
-            master_ok = success
-            if legacy_ok:
-                legacy_success_count += 1
-            if master_ok:
-                master_success_count += 1
-            if legacy_ok or master_ok:
+            if success:
                 synced_count += 1
+                master_success_count += 1
                 print(f"  ✅ Synced: {title[:50]}...")
             else:
                 skipped_count += 1
                 print(f"  ❌ Failed to sync {blog_id}")
         
         print(f"\n📊 S3 Sync Summary: {synced_count} synced, {skipped_count} skipped")
-        print(f"   └─ Legacy (Blogs_data): {legacy_success_count} | Master (portfolio_master): {master_success_count}")
+        print(f"   └─ Master (portfolio_master): {master_success_count}")
         
     except Exception as e:
         print(f"❌ S3 sync failed: {e}")
@@ -286,9 +281,7 @@ def main():
                         category='blog',
                         subcategory=blog_cat
                     )
-                    legacy_ok = False
-                    master_ok = success
-                    if legacy_ok or master_ok:
+                    if success:
                         new_blogs += 1
                         
             except Exception as e:
@@ -337,9 +330,7 @@ def main():
                     metadata,
                     category='project'
                 )
-                legacy_ok = False
-                master_ok = success
-                if legacy_ok or master_ok:
+                if success:
                     new_projs += 1
                     
             if new_projs > 0:
@@ -382,9 +373,7 @@ def main():
                             metadata,
                             category='profile'
                         )
-                        legacy_ok = False
-                        master_ok = success
-                        if legacy_ok or master_ok:
+                        if success:
                             resume_found = True
                             break
             except Exception as e:
