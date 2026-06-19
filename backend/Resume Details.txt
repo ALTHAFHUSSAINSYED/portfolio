@@ -2,13 +2,13 @@ Resume Details
 
 
 ALTHAF HUSSAIN SYED
-Analyst III Infrastructure Services | DevOps Engineer | 3.5 years of experience
+Analyst III Infrastructure Services | DevOps Engineer | 3.10 years of experience
 Email: allualthaf42@gmail.com
 Mobile No: +91 8184812249
 LinkedIn: https://www.linkedin.com/in/althafhussainsyed/
 Portfolio Website: https://www.althafportfolio.site/
 SUMMARY
-Motivated DevOps Engineer with 3.5 years of experience supporting AWS cloud environments, CI/CD pipelines, and container-based deployments. Skilled in building automation, deployment support, and environment monitoring using Terraform, Jenkins, Docker, and Kubernetes. Works effectively with cross-functional teams and follows ITIL and SDLC practices to maintain stable and compliant operations. Focused on reliability, task ownership, and continuous improvement within enterprise infrastructure.
+DevOps Engineer with 3.10 years of experience in AWS cloud infrastructure, CI/CD automation, Infrastructure as Code (IaC), application deployment, monitoring, and production support. Hands-on experience with AWS services including EC2, VPC, IAM, Route53, Auto Scaling, Lambda, CloudWatch, ECS, and EKS. Skilled in Terraform, Jenkins, GitHub Actions, AWS CodePipeline, Docker, Kubernetes, Linux, Bash, and Python scripting. Experienced in application onboarding, DevOps toolchain support, incident resolution, root cause analysis, and implementing automation solutions within Agile, SDLC, and ITIL-driven environments.
 EDUCATION
 Acharya Nagarjuna University
 Master of Science (M.Sc.) in Computer Science Dec 2022 - June 2024
