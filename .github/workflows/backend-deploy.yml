@@ -19,7 +19,7 @@ on:  # WHEN does this workflow run? (triggers section)
 
 jobs:  # WHAT jobs to run
   deploy:  # Job name
-    runs-on: ubuntu-latest
+    runs-on: self-hosted  # Run directly on EC2 runner to avoid SSH network timeouts
 
     steps:  # STEPS to execute
 
