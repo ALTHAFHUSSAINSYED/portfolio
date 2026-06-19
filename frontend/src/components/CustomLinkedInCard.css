@@ -1,0 +1,259 @@
+/* ========================================= */
+/* LINKEDIN CARD - SINGLE COLUMN WITH TOP HEADER */
+/* ========================================= */
+
+.linkedin-card {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 14px;
+    overflow: hidden;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    /* Stack header and body vertically */
+}
+
+.linkedin-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* ========================================= */
+/* HORIZONTAL HEADER - Full width top bar ^^*/
+/* ========================================= */
+
+.linkedin-header {
+    width: 100%;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    /* Align logo to left */
+}
+
+.linkedin-logo {
+    font-size: 24px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    /* Small gap between "Linked" and "in" */
+    transition: transform 0.3s ease;
+}
+
+.linkedin-logo:hover {
+    transform: scale(1.05);
+}
+
+.linkedin-logo span {
+    background: #0a66c2;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 22px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.linkedin-logo:hover span {
+    background: #004182;
+    transform: scale(1.1);
+}
+
+/* ========================================= */
+/* CONTENT AREA - Profile information */
+/* ========================================= */
+
+.linkedin-body {
+    padding: 28px 24px 24px 24px;
+}
+
+/* AVATAR */
+/* AVATAR WRAPPER - Acts as the Clipping Mask */
+.linkedin-avatar-wrapper {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    /* This clips the zoomed image */
+    margin-bottom: 16px;
+    /* Ensure the wrapper itself doesn't have a border/shadow that conflicts */
+    border: none;
+    box-shadow: none;
+}
+
+/* AVATAR IMAGE - Zoomed inside the wrapper */
+.linkedin-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: all 0.3s ease;
+    transform: scale(1.25);
+    /* Zoom to 1.25x (Matched to Hero Section) */
+
+    /* Ensure no borders on image */
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.linkedin-avatar:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(10, 102, 194, 0.5);
+}
+
+/* TEXT */
+.linkedin-name {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 12px 0;
+    line-height: 1.2;
+    position: relative;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.linkedin-name::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background-color: #0a66c2;
+    transition: width 0.3s ease;
+}
+
+.linkedin-name:hover::after {
+    width: 100%;
+}
+
+.linkedin-role {
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0 0 12px 0;
+    transition: all 0.3s ease;
+}
+
+.linkedin-role:hover {
+    transform: translateX(4px);
+    opacity: 1;
+}
+
+.linkedin-org {
+    font-size: 13px;
+    opacity: 0.85;
+    margin: 0 0 20px 0;
+    line-height: 1.4;
+    transition: all 0.3s ease;
+}
+
+.linkedin-org:hover {
+    transform: translateX(4px);
+    opacity: 1;
+}
+
+/* BUTTON */
+.linkedin-button {
+    display: inline-block;
+    padding: 10px 22px;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1.5px solid currentColor;
+    transition: all 0.2s ease;
+}
+
+.linkedin-button:hover {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 4px 12px rgba(10, 102, 194, 0.3);
+}
+
+/* ========================================= */
+/* LIGHT THEME */
+/* ========================================= */
+
+.linkedin-card.light {
+    background: #ffffff;
+    color: #000000;
+    border: 1px solid #e5e7eb;
+}
+
+.linkedin-card.light .linkedin-header {
+    background: #f3f2ef;
+    /* LinkedIn beige */
+    color: #000000;
+}
+
+.linkedin-card.light .linkedin-logo {
+    color: #0a66c2;
+    /* LinkedIn blue for "Linked" text */
+}
+
+.linkedin-card.light .linkedin-body {
+    background: #ffffff;
+}
+
+.linkedin-card.light .linkedin-avatar {
+    /* Border removed to clear white ring */
+}
+
+.linkedin-card.light .linkedin-button {
+    color: #0a66c2;
+    border-color: #0a66c2;
+}
+
+.linkedin-card.light .linkedin-button:hover {
+    background: #0a66c2;
+    color: #ffffff;
+}
+
+/* ========================================= */
+/* DARK THEME */
+/* ========================================= */
+
+.linkedin-card.dark {
+    background: #000000;
+    color: #ffffff;
+    border: 1px solid #1e293b;
+    /* Dark border instead of white */
+}
+
+.linkedin-card.dark .linkedin-header {
+    background: #3a424c;
+    color: #ffffff;
+}
+
+.linkedin-card.dark .linkedin-body {
+    background: #000000;
+}
+
+.linkedin-card.dark .linkedin-avatar {
+    /* Border removed to clear white ring */
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.linkedin-card.dark .linkedin-button {
+    color: #ffffff;
+    border-color: #ffffff;
+}
+
+.linkedin-card.dark .linkedin-button:hover {
+    background: #ffffff;
+    color: #000000;
+}
+
+/* ===================================== */
+/* LIGHT THEME - LinkedIn Card Hover */
+/* ===================================== */
+
+.linkedin-card.light:hover {
+    box-shadow: 0 12px 24px rgba(0, 119, 255, 0.15);
+    border-color: rgba(0, 119, 255, 0.3);
+}

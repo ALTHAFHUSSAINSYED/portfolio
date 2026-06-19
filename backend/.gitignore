@@ -1,0 +1,42 @@
+
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Credentials and secrets
+credentials.txt
+*credentials*
+*secret*
+*key*
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Generated content
+generated_blogs/
+*.log
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Certificates and keys
+*.pem
+*.key
+*.crt

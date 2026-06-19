@@ -1,0 +1,569 @@
+import React, { useState, useEffect, useRef } from "react";
+import "./Chatbot.css";
+import "./ChatbotExtras.css";
+import "./ChatbotUnread.css";
+
+const Chatbot = () => {
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [welcomeAnimation, setWelcomeAnimation] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(true);
+  const [hasUnread, setHasUnread] = useState(true);
+  const [hasInteracted, setHasInteracted] = useState(false); // New state to track interaction
+  const [isMaximized, setIsMaximized] = useState(false);
+  const messagesEndRef = useRef(null);
+  const loadingSoundRef = useRef(null);
+
+  // Initialize audio on mount
+  useEffect(() => {
+    console.log("🔊 Initializing audio...");
+    
+    // Use Cloudinary CDN for reliable audio delivery (bypasses Amplify SPA routing issues)
+    const audioPath = "https://res.cloudinary.com/dtzaicj6s/video/upload/v1767349642/typing-sound_nmw5dl.mp3";
+    console.log("🔗 Audio path:", audioPath);
+    
+    loadingSoundRef.current = new Audio(audioPath);
+    loadingSoundRef.current.loop = true;
+    loadingSoundRef.current.volume = 0.4;
+    loadingSoundRef.current.preload = "auto";
+    
+    // Test if audio loaded successfully
+    loadingSoundRef.current.addEventListener('canplaythrough', () => {
+      console.log("✅ Audio loaded successfully from Cloudinary");
+    });
+    
+    loadingSoundRef.current.addEventListener('error', (e) => {
+      console.error("❌ Audio failed to load from Cloudinary:", e);
+    });
+
+    return () => {
+      if (loadingSoundRef.current) {
+        loadingSoundRef.current.pause();
+        loadingSoundRef.current = null;
+      }
+    };
+  }, []);
+
+  // Play/stop sound based on loading state
+  useEffect(() => {
+    console.log("🎵 Loading state changed:", isLoading, "Audio ref:", !!loadingSoundRef.current);
+    
+    if (isLoading && loadingSoundRef.current) {
+      console.log("▶️ Attempting to play audio...");
+      loadingSoundRef.current.currentTime = 0;
+      
+      loadingSoundRef.current.play()
+        .then(() => {
+          console.log("✅ Audio playing successfully");
+        })
+        .catch(e => {
+          console.error("❌ Audio play failed:", e.message);
+          console.log("Reason: Browser may block autoplay. User interaction required.");
+        });
+    } else if (!isLoading && loadingSoundRef.current) {
+      console.log("⏸️ Stopping audio");
+      loadingSoundRef.current.pause();
+      loadingSoundRef.current.currentTime = 0;
+    }
+  }, [isLoading]);
+
+  // Conversation memory to track context - MOVED TO COMPONENT LEVEL
+  const conversationMemory = useRef({
+    lastTopic: null,
+    questionsAsked: 0,
+    topics: new Set()
+  });
+
+  // API status reference - MOVED TO COMPONENT LEVEL
+  const apiStatus = useRef({
+    attemptCount: 0,
+    successCount: 0,
+    lastAttemptTime: null,
+    lastSuccessTime: null,
+    activeEndpoints: []
+  });
+
+  // Initialize with welcome message
+  useEffect(() => {
+    if (isOpen && messages.length === 0) {
+      setMessages([{
+        sender: "bot",
+        text: "Hello, I'm Assist Bot, I'm Althaf's portfolio Assistant. How can I help you with Althaf's portfolio?"
+      }]);
+    }
+  }, [isOpen, messages.length]);
+
+  // Generate unique session ID (persists in localStorage)
+  const [sessionId] = useState(() => {
+    // Generate unique session ID for this browser
+    // Format: session_{timestamp}_{random_string}
+    let id = localStorage.getItem('assistbot_session_id');
+    if (!id) {
+      id = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem('assistbot_session_id', id);
+      console.log('Generated new session ID:', id);
+    }
+    return id;
+  });
+
+  // Load API status from localStorage
+  useEffect(() => {
+    try {
+      const storedStatus = localStorage.getItem('alluBotApiStatus');
+      if (storedStatus) {
+        const parsedStatus = JSON.parse(storedStatus);
+        // Only use stored data if it's recent (last 24 hours)
+        if (parsedStatus.lastAttemptTime &&
+          (new Date().getTime() - new Date(parsedStatus.lastAttemptTime).getTime() < 24 * 60 * 60 * 1000)) {
+          apiStatus.current = parsedStatus;
+        }
+      }
+    } catch (e) {
+      console.log("Error reading API status from localStorage:", e);
+    }
+  }, []);
+
+  useEffect(() => {
+    const theme = document.documentElement.getAttribute("data-theme");
+    document.documentElement.style.setProperty(
+      "--chat-bg-color",
+      theme === "dark" ? "var(--chat-bg-color-dark)" : "var(--chat-bg-color-light)"
+    );
+    document.documentElement.style.setProperty(
+      "--chat-text-color",
+      theme === "dark" ? "var(--chat-text-color-dark)" : "var(--chat-text-color-light)"
+    );
+
+    // Trigger welcome animation on page load
+    const timer = setTimeout(() => setWelcomeAnimation(false), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const toggleChat = () => {
+    if (!isOpen) {
+      setHasUnread(false);
+      setHasInteracted(true);
+      
+      // Prime audio on chat open (user interaction unlocks autoplay)
+      if (loadingSoundRef.current) {
+        console.log("🔓 Priming audio after user interaction");
+        loadingSoundRef.current.load();
+        // Immediately test play (silent, short duration to unlock autoplay policy)
+        loadingSoundRef.current.play()
+          .then(() => {
+            console.log("✅ Audio context unlocked");
+            loadingSoundRef.current.pause();
+            loadingSoundRef.current.currentTime = 0;
+          })
+          .catch(e => console.log("⚠️ Could not unlock audio yet:", e.message));
+      }
+      
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+    setIsOpen(!isOpen);
+  };
+
+  const handleInputChange = (e) => setInput(e.target.value);
+
+  // Scroll to bottom whenever messages change
+  // Adjusted to skip initial scroll so greeting stays visible
+  useEffect(() => {
+    if (messages.length > 1) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+
+    setShowSuggestions(false); // Hide suggestions on first interaction
+
+    const userMessage = { sender: "user", text: input };
+    setMessages((prev) => [...prev, userMessage]);
+    const userInput = input;
+    setInput("");
+    setIsLoading(true);
+
+    try {
+      let data = null;
+      let apiCallSucceeded = false;
+      let foundSource = null;
+
+      // Prepare the list of API endpoints to try
+      const possibleBaseUrls = [
+        process.env.REACT_APP_BACKEND_URL || '', // Use environment variable or fallback to relative
+      ].filter(Boolean); // Remove empty values
+
+      // Update the API attempt counter
+      apiStatus.current.attemptCount++;
+      apiStatus.current.lastAttemptTime = new Date().toISOString();
+
+      // Try to use the API to get a response
+      for (const baseUrl of possibleBaseUrls) {
+        try {
+          console.log(`Attempting API call to: ${baseUrl}/api/ask-all-u-bot`);
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 60000); // Increased timeout to 60s for ChromaDB RAG
+
+          const response = await fetch(`${baseUrl}/api/ask-all-u-bot`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              message: userInput,
+              session_id: sessionId  // Include unique session ID
+            }),
+            credentials: 'omit',
+            signal: controller.signal
+          });
+
+          clearTimeout(timeoutId);
+
+          if (response.ok) {
+            console.log(`Successful response from: ${baseUrl}/api/ask-all-u-bot`);
+            const responseText = await response.text();
+
+            if (responseText && responseText.trim()) {
+              try {
+                const responseData = JSON.parse(responseText);
+                if (responseData && responseData.reply && responseData.reply.trim()) {
+                  data = {
+                    reply: responseData.reply
+                  };
+
+                  // Store the source if available
+                  if (responseData.source) {
+                    foundSource = responseData.source;
+                  }
+
+                  apiCallSucceeded = true;
+
+                  // Record successful endpoint
+                  if (baseUrl && !apiStatus.current.activeEndpoints?.includes(baseUrl)) {
+                    apiStatus.current.activeEndpoints = [
+                      ...(apiStatus.current.activeEndpoints || []),
+                      baseUrl
+                    ];
+                  }
+
+                  apiStatus.current.successCount++;
+                  apiStatus.current.lastSuccessTime = new Date().toISOString();
+                  break; // Exit loop if we get a successful response with data
+                }
+              } catch (parseError) {
+                console.error("Failed to parse response as JSON:", parseError);
+              }
+            } else {
+              console.warn("Empty response received from server");
+            }
+          } else {
+            console.log(`Failed with status ${response.status} from: ${baseUrl}/api/ask-all-u-bot`);
+          }
+        } catch (e) {
+          console.log(`Error with ${baseUrl}/api/ask-all-u-bot:`, e.message);
+        }
+      }
+
+      // Save updated API status to localStorage
+      try {
+        localStorage.setItem('alluBotApiStatus', JSON.stringify(apiStatus.current));
+      } catch (e) {
+        console.log("Error saving API status to localStorage:", e);
+      }
+
+      // If API calls failed, show error
+      if (!apiCallSucceeded || !data) {
+        data = {
+          reply: "I'm sorry, I'm having trouble connecting to my brain right now. Please try again in a moment."
+        };
+        console.log("API failed, showing error message");
+      }
+
+      // Create the bot message, including source attribution if available
+      let messageText = data.reply || "Sorry, I couldn't process your request.";
+
+      // If we have a source from the internet, add attribution
+      if (foundSource && foundSource !== "Portfolio" && foundSource !== "None" && foundSource.startsWith("http")) {
+        try {
+          messageText += `\n\n[Source: ${new URL(foundSource).hostname}]`;
+        } catch (e) {
+          // If URL construction fails, just add the raw source
+        }
+      }
+
+      const botMessage = {
+        sender: "bot",
+        text: messageText,
+        hasSource: !!foundSource
+      };
+
+      setMessages((prev) => [...prev, botMessage]);
+
+    } catch (error) {
+      console.error("Error communicating with Assist Bot:", error);
+      const errorMessage = {
+        sender: "bot",
+        text: "Sorry, there was an error connecting to the server. Please try again later."
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Common questions suggestions
+  const suggestedQuestions = [
+    "What are Althaf's skills?",
+    "Tell me about his projects",
+    "What DevOps tools does he use?",
+    "Contact information"
+  ];
+
+  const [selectedSuggestion, setSelectedSuggestion] = useState(null);
+
+  const handleSuggestionClick = (question) => {
+    setShowSuggestions(false); // Hide suggestions immediately
+    setInput(question);
+    setSelectedSuggestion(question);
+    // Auto submit after a slight delay for better UX
+    setTimeout(() => {
+      handleSubmit({ preventDefault: () => { } });
+      setSelectedSuggestion(null);
+    }, 300);
+  };
+
+  return (
+    <div className={`chatbot-container ${welcomeAnimation ? "welcome-animation" : ""}`}>
+
+      {/* Chatbot Icon with Unread Badge and Avatar */}
+      <div style={{ position: 'relative', display: 'inline-block' }}>
+        <button
+          className={`chat-toggle-button${isOpen ? ' open' : ''}${!isOpen && !hasInteracted ? ' pop-shake' : ''}`}
+          onClick={toggleChat}
+          aria-label={isOpen ? 'Close chat' : 'Open chat'}
+        >
+          <img
+            src="/profile-pic.jpg"
+            alt="Assist Bot"
+            className="chat-toggle-avatar"
+            style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', background: '#fff' }}
+            onError={e => { e.target.style.display = 'none'; }}
+          />
+          {/* Fallback SVG if image fails */}
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            style={{ position: 'absolute', top: 4, left: 4, display: 'none' }}
+          >
+            <circle cx="12" cy="12" r="10" fill="#3b82f6" />
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#fff" />
+          </svg>
+          {/* Red unread badge */}
+          {!isOpen && hasUnread && (
+            <span className="unread-indicator">
+              1
+            </span>
+          )}
+        </button>
+      </div>
+
+
+
+      {isOpen && (
+        <div className={`chatbot-window ${isMaximized ? 'maximized' : ''}`}>
+          <div className="chatbot-header">
+            <div className="chatbot-avatar" aria-hidden="true">
+              {/* ... (avatar code) ... */}
+              <img
+                src="/profile-pic.jpg"
+                alt="Assist Bot"
+                onError={(e) => {
+                  e.target.style.display = "none";
+                  if (e.target.nextSibling) {
+                    e.target.nextSibling.style.display = "block";
+                  }
+                }}
+              />
+              <span className="online-status"></span>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                style={{ display: "none" }}
+              >
+                <circle cx="12" cy="12" r="10" fill="#3b82f6" />
+                <path
+                  d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                  fill="#fff"
+                />
+              </svg>
+            </div>
+            <div className="chatbot-title-container">
+              <p className="chatbot-title">Assist Bot</p>
+              <p className="chatbot-subtitle">Portfolio Assistant</p>
+            </div>
+
+            {/* Minimize Button */}
+            <button
+              className="header-control-button minimize-button"
+              onClick={() => setIsOpen(false)}
+              aria-label="Minimize chat"
+            >
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                <path d="M5 12H19" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
+              </svg>
+            </button>
+
+            {/* Maximize Button */}
+            <button
+              className="header-control-button maximize-button"
+              onClick={() => setIsMaximized(!isMaximized)}
+              aria-label="Maximize chat"
+            >
+              {isMaximized ? (
+                // Restore icon
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="14" height="14">
+                  <path d="M15 3V9H21M9 21H3V15" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              ) : (
+                // Maximize icon (Square)
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="14" height="14">
+                  <rect x="4" y="4" width="16" height="16" rx="2" stroke="white" strokeWidth="2.5" />
+                </svg>
+              )}
+            </button>
+
+            {/* Close Button */}
+            <button className="header-control-button close-button" onClick={toggleChat} aria-label="Close chat">×</button>
+          </div>
+
+          <div className="chatbot-messages custom-scrollbar">
+            {messages.map((msg, index) => (
+              <div
+                key={index}
+                className={`chatbot-message ${msg.sender}`}
+              >
+                {msg.sender === "bot" && (
+                  <div className="bot-avatar">
+                    <img
+                      src="/profile-pic.jpg"
+                      alt="Assist Bot"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        borderRadius: '50%',
+                        objectFit: 'cover'
+                      }}
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'block';
+                      }}
+                    />
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      style={{ display: 'none' }}
+                    >
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" fill="currentColor" />
+                    </svg>
+                  </div>
+                )}
+
+                <div className="message-content">{msg.text}</div>
+
+
+                {msg.sender === "user" && (
+                  <div className="user-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentColor" />
+                    </svg>
+                  </div>
+                )}
+              </div>
+            ))}
+            {isLoading && (
+              <div className="chatbot-message bot">
+                <div className="bot-avatar">
+                  <img
+                    src="/profile-pic.jpg"
+                    alt="Assist Bot"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      borderRadius: '50%',
+                      objectFit: 'cover'
+                    }}
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'block';
+                    }}
+                  />
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="24" height="24" style={{ display: 'none' }}>
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" fill="currentColor" />
+                  </svg>
+                </div>
+                <div className="message-content typing-indicator">
+                  <span></span><span></span><span></span>
+                </div>
+              </div>
+            )}
+
+            {/* Suggested questions - inside messages area */}
+            {/* Show only if showSuggestions is true */}
+            {showSuggestions && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
+                {suggestedQuestions.map((question, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleSuggestionClick(question)}
+                    className="suggestion-button"
+                  >
+                    {question}
+                  </button>
+                ))}
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          <form className="chatbot-form" onSubmit={handleSubmit}>
+            <input
+              type="text"
+              value={input}
+              onChange={handleInputChange}
+              placeholder="Type your message..."
+              className="chatbot-input"
+              aria-label="Message input"
+            />
+            <button type="submit" className="send-button" aria-label="Send message">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22 2L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          </form>
+
+          <div className="chatbot-footer">
+            <span>Powered by AI • <a href="#" onClick={(e) => {
+              e.preventDefault();
+              handleSuggestionClick("How does this chatbot work?");
+            }}>About this bot</a></span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default Chatbot;

@@ -1,0 +1,106 @@
+.chatbot-suggestions {
+  padding: 12px 16px;
+  border-top: 1px solid rgba(229, 231, 235, 0.5);
+  background-color: rgba(248, 250, 252, 0.8);
+  flex-shrink: 0;
+}
+
+.suggestion-title {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0 0 8px 0;
+}
+
+.suggestion-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.suggestion-button {
+  background-color: white;
+  border: 1px solid rgba(203, 213, 225, 0.8);
+  border-radius: 16px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--chat-primary-color);
+  transition: all 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.suggestion-button:hover {
+  background-color: #f8fafc;
+  border-color: var(--chat-primary-color);
+}
+
+.suggestion-button.selected {
+  background-color: var(--chat-primary-color);
+  color: white;
+  border-color: var(--chat-primary-color);
+}
+
+.chatbot-footer {
+  padding: 8px 12px;
+  border-top: 1px solid rgba(229, 231, 235, 0.5);
+  font-size: 11px;
+  color: white; /* White text on blue background */
+  text-align: center;
+  background: linear-gradient(to right, var(--chat-primary-color), #4f46e5); /* Match header blue gradient */
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+}
+
+.chatbot-footer a {
+  color: white; /* White link on blue background */
+  text-decoration: none;
+  font-weight: 600; /* Make it bold */
+  background: linear-gradient(90deg, #fbbf24, #f59e0b, #fbbf24); /* Gold gradient */
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 3s ease infinite; /* Animated gradient */
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.chatbot-footer a:hover {
+  text-decoration: underline;
+  transform: scale(1.05); /* Slightly bigger on hover */
+  filter: brightness(1.2); /* Brighter on hover */
+}
+
+/* Mobile responsiveness */
+@media (max-width: 500px) {
+  .chatbot-window {
+    width: 320px;
+    height: 480px;
+    bottom: 70px;
+  }
+  
+  .chatbot-container {
+    bottom: 10px;
+    right: 10px;
+  }
+  
+  .chatbot-header {
+    height: 60px;
+  }
+}
+
+/* Removed - causes double scrollbar issue */

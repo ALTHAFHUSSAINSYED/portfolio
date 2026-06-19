@@ -1,0 +1,266 @@
+[STARTUP] Starting Database Sync...
+/usr/local/lib/python3.10/site-packages/google/api_core/_python_version_support.py:266: FutureWarning: You are using a Python version (3.10.19) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2026-10-04). Please upgrade to the latest Python version, or at least Python 3.11, to continue receiving updates for google.api_core past that date.
+  warnings.warn(message, FutureWarning)
+/app/backend/populate_vector_db.py:6: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🚀 [START] Starting Database Population...
+[INFO] Connecting to Chroma Cloud...
+[INFO] Cleared old collection: portfolio
+[INFO] Cleared old collection: Projects_data
+[INFO] Cleared old collection: Blogs_data
+✅ Collections Ready.
+[WARN] No generated_blogs directory found.
+[SYNC] Connecting to MongoDB to fetch Projects...
+✅ Synced 3 Projects from MongoDB to 'Projects_data'.
+[SYNC] Syncing Complete Portfolio to 'portfolio'...
+✅ Resume synced from: /app/backend/Resume Details.txt
+✅ Synced 1 Experience entries.
+✅ Synced Skills.
+✅ Synced Education.
+✅ Synced Certifications.
+✅ Synced Achievements.
+✅ Synced Personal Info.
+✅ Synced Contacts.
+🎉 [SUCCESS] All Data (Projects, Blogs, FULL Portfolio) Synced Successfully!
+[STARTUP] Database Ready. Starting Server...
+/usr/local/lib/python3.10/site-packages/google/api_core/_python_version_support.py:266: FutureWarning: You are using a Python version (3.10.19) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2026-10-04). Please upgrade to the latest Python version, or at least Python 3.11, to continue receiving updates for google.api_core past that date.
+  warnings.warn(message, FutureWarning)
+/app/backend/server.py:23: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+INFO:AlluAgent:Connected to MongoDB successfully
+INFO:AlluAgent:Using Gemini AI service
+WARNING:AlluAgent:NEWS_API_KEY not found. Using RSS feeds for news content.
+INFO:backend.notification_service:Notification service initialized. Emails will be sent to: allualthaf42@gmail.com
+INFO:backend.cache_manager:Initialized ResponseCache with max_size=100, ttl=3600s
+INFO:backend.rate_limiter:Initialized RateLimiter with max_rpm=20
+INFO:httpx:HTTP Request: GET https://huggingface.co/api/spaces/huggingface-projects/llama-3.2-3B-Instruct "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://huggingface.co/api/spaces/huggingface-projects/llama-3.2-3B-Instruct/runtime "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://huggingface-projects-llama-3-2-3b-instruct.hf.space/config "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://huggingface-projects-llama-3-2-3b-instruct.hf.space/gradio_api/info?serialize=False "HTTP/1.1 200 OK"
+INFO:backend.chatbot_provider:Hugging Face client initialized
+INFO:backend.chatbot_provider:Gemini API configured
+INFO:backend.chatbot_provider:ChatbotProvider initialized with all providers
+INFO:PortfolioBackend:Multi-provider chatbot components initialized
+INFO:     Started server process [1]
+INFO:     Waiting for application startup.
+INFO:PortfolioBackend:✅ Auto-Blogger Scheduler started in background thread
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:httpx:HTTP Request: HEAD https://huggingface.co/api/telemetry/py_client/initiated "HTTP/1.1 200 OK"
+INFO:notification_service:Notification service initialized. Emails will be sent to: allualthaf42@gmail.com
+WARNING:BlogCriticAgent:Could not load feedback.md: [Errno 2] No such file or directory: '/app/backend/templates/feedback.md'. Using default criteria.
+INFO:BlogPublisher:Connecting to ChromaDB Cloud...
+INFO:chromadb.telemetry.product.posthog:Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+ERROR:BlogPublisher:ChromaDB setup failed: Header value must be str or bytes, not <class 'NoneType'>
+INFO:chromadb.telemetry.product.posthog:Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+INFO:notification_service:Notification service initialized. Emails will be sent to: allualthaf42@gmail.com
+INFO:apscheduler.scheduler:Adding job tentatively -- it will be properly scheduled when the scheduler starts
+INFO:apscheduler.scheduler:Adding job tentatively -- it will be properly scheduled when the scheduler starts
+INFO:apscheduler.scheduler:Adding job tentatively -- it will be properly scheduled when the scheduler starts
+INFO:BlogScheduler:✅ BlogScheduler started with jobs: Cleanup@6AM, Generate@7AM, Publish@10AM IST
+INFO:apscheduler.scheduler:Added job "BlogScheduler.run_cleanup_job" to job store "default"
+INFO:apscheduler.scheduler:Added job "BlogScheduler.run_generation_pipeline" to job store "default"
+INFO:apscheduler.scheduler:Added job "BlogScheduler.run_publishing_job" to job store "default"
+INFO:apscheduler.scheduler:Scheduler started
+INFO:httpx:HTTP Request: GET https://huggingface-projects-llama-3-2-3b-instruct.hf.space/gradio_api/heartbeat/a68ac90e-2450-4a32-9bf9-c68e6101e74f "HTTP/1.1 200 OK"
+✅ Connected to MongoDB: portfolioDB
+Loaded as API: https://huggingface-projects-llama-3-2-3b-instruct.hf.space
+🌍 CORS Allowed Origins: ['http://localhost:3000', 'https://www.althafportfolio.site', 'https://althafportfolio.site', 'https://api.althafportfolio.site']
+🚀 Starting Auto-Blogger Scheduler...
+INFO:     172.17.0.1:51030 - "GET / HTTP/1.1" 200 OK
+INFO:     172.17.0.1:51046 - "GET /api/projects HTTP/1.0" 200 OK
+INFO:     172.17.0.1:55488 - "GET /ecp/Current/exporttool/microsoft.exchange.ediscovery.exporttool.application HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:56564 - "GET / HTTP/1.0" 200 OK
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     172.17.0.1:36174 - "GET / HTTP/1.0" 200 OK
+INFO:     172.17.0.1:57874 - "GET /.env HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:57884 - "GET / HTTP/1.0" 200 OK
+WARNING:  Invalid HTTP request received.
+WARNING:  Unsupported upgrade request.
+WARNING:  No supported WebSocket library detected. Please use "pip install 'uvicorn[standard]'", or install 'websockets' or 'wsproto' manually.
+WARNING:  Invalid HTTP request received.
+WARNING:  Unsupported upgrade request.
+WARNING:  No supported WebSocket library detected. Please use "pip install 'uvicorn[standard]'", or install 'websockets' or 'wsproto' manually.
+WARNING:  Invalid HTTP request received.
+WARNING:  Unsupported upgrade request.
+WARNING:  No supported WebSocket library detected. Please use "pip install 'uvicorn[standard]'", or install 'websockets' or 'wsproto' manually.
+WARNING:  Invalid HTTP request received.
+WARNING:  Unsupported upgrade request.
+WARNING:  No supported WebSocket library detected. Please use "pip install 'uvicorn[standard]'", or install 'websockets' or 'wsproto' manually.
+WARNING:  Invalid HTTP request received.
+WARNING:  Unsupported upgrade request.
+WARNING:  No supported WebSocket library detected. Please use "pip install 'uvicorn[standard]'", or install 'websockets' or 'wsproto' manually.
+WARNING:  Invalid HTTP request received.
+WARNING:  Unsupported upgrade request.
+WARNING:  No supported WebSocket library detected. Please use "pip install 'uvicorn[standard]'", or install 'websockets' or 'wsproto' manually.
+WARNING:  Invalid HTTP request received.
+INFO:     172.17.0.1:43728 - "GET /.git/config HTTP/1.0" 404 Not Found
+INFO:     165.154.172.72:52298 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     45.194.70.248:37426 - "GET / HTTP/1.1" 200 OK
+INFO:     45.194.70.248:37514 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     45.194.70.248:37576 - "GET /sitemap.xml HTTP/1.1" 404 Not Found
+INFO:     45.194.70.248:37574 - "GET /robots.txt HTTP/1.1" 404 Not Found
+INFO:     172.17.0.1:39234 - "GET /.env HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:39246 - "POST / HTTP/1.0" 405 Method Not Allowed
+INFO:     172.17.0.1:50228 - "GET /.env HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:50232 - "POST / HTTP/1.0" 405 Method Not Allowed
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     172.17.0.1:46126 - "GET / HTTP/1.0" 200 OK
+INFO:     172.17.0.1:50338 - "GET /favicon.ico HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:33030 - "GET / HTTP/1.0" 200 OK
+INFO:     172.17.0.1:59744 - "GET / HTTP/1.0" 200 OK
+INFO:     206.189.1.95:37752 - "GET / HTTP/1.1" 200 OK
+INFO:     206.189.1.95:37762 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     172.17.0.1:46372 - "GET /actuator/gateway/routes HTTP/1.0" 404 Not Found
+INFO:     159.223.231.254:39420 - "GET / HTTP/1.1" 200 OK
+INFO:     172.17.0.1:59016 - "GET / HTTP/1.0" 200 OK
+INFO:     172.17.0.1:35942 - "GET //cdn.js HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:35702 - "GET /.env HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:35714 - "POST / HTTP/1.0" 405 Method Not Allowed
+INFO:     172.17.0.1:44854 - "GET /robots.txt HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:37286 - "GET / HTTP/1.0" 200 OK
+INFO:     172.17.0.1:56744 - "GET /%2BCSCOL%2B/Java.jar HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:56748 - "GET /%2BCSCOE%2B/logon_forms.js HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:56760 - "GET /%2BCSCOL%2B/a1.jar HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:56764 - "GET /%2BCSCOE%2B/transfer.js HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:56744 - "GET / HTTP/1.0" 200 OK
+INFO:     147.185.132.219:59570 - "GET / HTTP/1.1" 200 OK
+INFO:     172.17.0.1:44194 - "GET / HTTP/1.0" 200 OK
+INFO:     172.17.0.1:57636 - "GET /version HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:42252 - "GET / HTTP/1.0" 200 OK
+INFO:     172.17.0.1:42298 - "GET / HTTP/1.0" 200 OK
+INFO:apscheduler.executors.default:Running job "BlogScheduler.run_cleanup_job (trigger: cron[hour='6', minute='0'], next run at: 2025-12-27 06:00:00 IST)" (scheduled at 2025-12-26 06:00:00+05:30)
+INFO:BlogScheduler:Running scheduled cleanup...
+INFO:BlogCleanup:Starting daily cleanup...
+INFO:BlogCleanup:Cleanup complete. Deleted 0 files.
+INFO:BlogScheduler:Cleanup result: {'status': 'success', 'deleted_count': 0, 'deleted_files': []}
+INFO:apscheduler.executors.default:Job "BlogScheduler.run_cleanup_job (trigger: cron[hour='6', minute='0'], next run at: 2025-12-27 06:00:00 IST)" executed successfully
+INFO:     172.17.0.1:35004 - "GET /actuator HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:52622 - "OPTIONS / HTTP/1.0" 405 Method Not Allowed
+INFO:apscheduler.executors.default:Running job "BlogScheduler.run_generation_pipeline (trigger: cron[hour='7', minute='0'], next run at: 2025-12-27 07:00:00 IST)" (scheduled at 2025-12-26 07:00:00+05:30)
+INFO:BlogScheduler:Running scheduled generation pipeline...
+INFO:BlogScheduler:Selected category: Cloud_Computing
+INFO:BlogResearcher:Starting research for category: Cloud_Computing
+INFO:BlogResearcher:Research complete for Cloud_Computing. Found 8 sources.
+INFO:BlogWriterAgent:🚀 Starting Agentic Generation for: Cloud_Computing
+INFO:BlogWriterAgent:🤖 Output Agent calling meta-llama/llama-3.1-405b-instruct:free...
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:BlogWriterAgent:📋 Outline created with 8 sections.
+INFO:BlogWriterAgent:✅ Outline Generated. Starting Section Drafting Loop (Agent 2)...
+INFO:BlogWriterAgent:✍️ Drafting Section 1/8: Title: Embracing the Future of Cloud Computing: Trends, Challenges, and Best Practices
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:BlogWriterAgent:✍️ Drafting Section 2/8: Introduction: Unlocking the Power of Cloud Computing in 2025 and Beyond
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:BlogWriterAgent:✍️ Drafting Section 3/8: Core Concept Deep Dive: Understanding the Latest Cloud Computing Trends
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:BlogWriterAgent:✍️ Drafting Section 4/8: Technical Implementation: Building Scalable and Secure Cloud Infrastructure
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:BlogWriterAgent:✍️ Drafting Section 5/8: Real-World Use Cases: Leveraging Cloud Computing in IoT, AI, and Hybrid Environments
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:BlogWriterAgent:✍️ Drafting Section 6/8: Best Practices and Challenges: Navigating Cloud Security, Compliance, and Vendor Lock-in
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:BlogWriterAgent:✍️ Drafting Section 7/8: Future Trends: The Rise of Smart Cloud, AI Agents, and Edge Computing
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:BlogWriterAgent:✍️ Drafting Section 8/8: Conclusion: Future-Proofing Your Cloud Strategy for Success
+INFO:httpx:HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+ERROR:BlogScheduler:Pipeline failed: object of type 'NoneType' has no len()
+ERROR:notification_service:Resend API key missing. Cannot send email.
+INFO:BlogNotifier:Failure email sent
+INFO:apscheduler.executors.default:Job "BlogScheduler.run_generation_pipeline (trigger: cron[hour='7', minute='0'], next run at: 2025-12-27 07:00:00 IST)" executed successfully
+INFO:     93.123.109.222:49970 - "GET /doc/page/login.asp HTTP/1.1" 404 Not Found
+INFO:     172.17.0.1:34956 - "GET /VMS_Pages/%27%3B%7D%29%3BconfirmBox.show%28%29%3B%7Dfunction%20funSuccessMesg1%28msg%29%7B%24%28%27.Whitebackground%27%29.fadeIn%28%29%3Bvar%20confirmBox%3D%24%28%22 HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:34962 - "GET /exit%27%3B HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:34966 - "GET /login HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:39720 - "GET / HTTP/1.0" 200 OK
+INFO:     172.17.0.1:39724 - "GET /favicon.ico HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:39732 - "GET /favicon.ico HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:54776 - "GET / HTTP/1.0" 200 OK
+INFO:     172.17.0.1:54778 - "GET / HTTP/1.0" 200 OK
+INFO:     172.17.0.1:52764 - "GET / HTTP/1.0" 200 OK
+INFO:     198.235.24.121:62086 - "GET / HTTP/1.1" 200 OK
+INFO:     172.17.0.1:33768 - "GET / HTTP/1.0" 200 OK
+INFO:     172.17.0.1:33770 - "GET / HTTP/1.0" 200 OK
+INFO:     172.17.0.1:46402 - "GET /wsman HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:37166 - "GET / HTTP/1.0" 200 OK
+INFO:     172.17.0.1:37170 - "GET /auth.html HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:40688 - "GET /auth1.html HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:40694 - "GET /sslvpnLogin.html HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:40698 - "GET /api/sonicos/auth HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:40708 - "GET /api/sonicos/tfa HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:40804 - "GET / HTTP/1.0" 200 OK
+INFO:     172.17.0.1:40806 - "GET /favicon.ico HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:58472 - "GET / HTTP/1.0" 200 OK
+INFO:     172.17.0.1:38434 - "GET / HTTP/1.0" 200 OK
+WARNING:  Invalid HTTP request received.
+INFO:     222.186.13.130:54254 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     222.186.13.130:54292 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     222.186.13.130:54300 - "GET /robots.txt HTTP/1.1" 404 Not Found
+INFO:     222.186.13.130:54306 - "GET /.well-known/security.txt HTTP/1.1" 404 Not Found
+INFO:     222.186.13.130:54322 - "GET /sitemap.xml HTTP/1.1" 404 Not Found
+INFO:     222.186.13.130:54332 - "GET /llms.txt HTTP/1.1" 404 Not Found
+INFO:     172.17.0.1:43134 - "GET /actuator/health HTTP/1.0" 404 Not Found
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     178.128.231.241:47778 - "GET / HTTP/1.1" 200 OK
+INFO:     178.128.231.241:47786 - "GET /login HTTP/1.1" 404 Not Found
+INFO:     64.227.110.161:44429 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+INFO:     206.168.34.112:58432 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+INFO:     206.168.34.112:58446 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     206.168.34.112:32268 - "GET /robots.txt HTTP/1.1" 404 Not Found
+INFO:apscheduler.executors.default:Running job "BlogScheduler.run_publishing_job (trigger: cron[hour='10', minute='0'], next run at: 2025-12-27 10:00:00 IST)" (scheduled at 2025-12-26 10:00:00+05:30)
+INFO:BlogScheduler:Running scheduled publishing...
+WARNING:BlogScheduler:No pending draft to publish.
+INFO:apscheduler.executors.default:Job "BlogScheduler.run_publishing_job (trigger: cron[hour='10', minute='0'], next run at: 2025-12-27 10:00:00 IST)" executed successfully
+INFO:     172.17.0.1:58672 - "GET /.env HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:58686 - "GET / HTTP/1.0" 200 OK
+INFO:     172.17.0.1:55554 - "GET / HTTP/1.0" 200 OK
+INFO:     172.17.0.1:55556 - "GET /favicon.ico HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:39168 - "GET /sitemap.xml HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:37020 - "GET / HTTP/1.0" 200 OK
+INFO:     172.17.0.1:53854 - "GET /developmentserver/metadatauploader HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:47178 - "GET / HTTP/1.0" 200 OK
+INFO:     172.17.0.1:33828 - "GET //cdn.js HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:34284 - "GET / HTTP/1.0" 200 OK
+INFO:     172.17.0.1:38152 - "GET /%2BCSCOL%2B/Java.jar HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:38156 - "GET /%2BCSCOE%2B/logon_forms.js HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:33488 - "GET /%2BCSCOL%2B/a1.jar HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:33492 - "GET /%2BCSCOE%2B/transfer.js HTTP/1.0" 404 Not Found
+INFO:     172.17.0.1:44576 - "GET /api/projects HTTP/1.0" 200 OK
+INFO:     45.156.128.41:34757 - "GET / HTTP/1.1" 200 OK
+INFO:     45.156.128.41:38998 - "GET / HTTP/1.1" 200 OK
+INFO:     172.17.0.1:59794 - "GET /api/projects HTTP/1.0" 200 OK
+INFO:     172.17.0.1:38120 - "OPTIONS /api/ask-all-u-bot HTTP/1.0" 200 OK
+INFO:backend.chatbot_provider:Query complexity: 150 tokens
+INFO:backend.chatbot_provider:Trying Tier 1: Mistral 7B Instruct (Free)
+INFO:backend.chatbot_provider:OpenRouter success (mistralai/mistral-7b-instruct:free): 0 chars
+INFO:backend.chatbot_provider:Trying Tier 2: Llama 3.1 405B Instruct (Free)
+INFO:backend.chatbot_provider:OpenRouter success (meta-llama/llama-3.1-405b-instruct:free): 93 chars
+INFO:backend.cache_manager:Cache SET for key: 12802291... (size: 1/100)
+INFO:     172.17.0.1:38136 - "POST /api/ask-all-u-bot HTTP/1.0" 200 OK
+INFO:LocalBlogsReader:Successfully loaded 0 local blog posts
+INFO:     172.17.0.1:40116 - "GET /api/blogs HTTP/1.1" 200 OK
