@@ -15,7 +15,7 @@ from apscheduler.triggers.cron import CronTrigger
 from dotenv import load_dotenv
 
 # Load Env Vars (Critical for standalone execution)
-load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env'))
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env.local'))
 
 # Import Modules
 from .researcher import BlogResearcher

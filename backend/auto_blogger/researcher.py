@@ -18,7 +18,7 @@ logger = logging.getLogger("BlogResearcher")
 
 class BlogResearcher:
     def __init__(self):
-        load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), '.env'))
+        load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), '.env.local'))
         self.serper_api_key = os.getenv("SERPER_API_KEY")
         
         if not self.serper_api_key:

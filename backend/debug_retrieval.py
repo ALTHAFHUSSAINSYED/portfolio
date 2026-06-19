@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import google.generativeai as genai
 from chromadb import EmbeddingFunction, Documents, Embeddings
 
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env.local'))
 genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
 
 class GeminiEmbeddingFunction(EmbeddingFunction):

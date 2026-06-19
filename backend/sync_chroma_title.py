@@ -14,7 +14,7 @@ COLLECTION_NAME = "Blogs_data"
 
 def sync_chroma_title():
     # Load env vars
-    load_dotenv('/app/backend/.env')
+    load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env.local'))
     
     # Init Client
     try:

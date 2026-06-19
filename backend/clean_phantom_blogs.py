@@ -10,7 +10,7 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env.local'))
 
 def clean_phantom_blogs():
     """Remove phantom blog references from MongoDB"""

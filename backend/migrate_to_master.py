@@ -37,7 +37,7 @@ import google.generativeai as genai
 from chromadb import Documents, EmbeddingFunction, Embeddings
 
 # Load environment variables
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env.local'))
 
 # Configure logging
 logging.basicConfig(

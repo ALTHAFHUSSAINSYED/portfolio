@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 from search_utils import search_cache, rate_limiter
 
 # Load environment variables
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env.local'))
 
 def format_number(num):
     """Format a number with commas for thousands"""

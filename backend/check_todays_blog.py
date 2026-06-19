@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Load environment variables
-load_dotenv('/home/ec2-user/portfolio/backend/.env.local')
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env.local'))
 
 def check_todays_blog():
     """Check if today's blog exists in portfolio_master"""

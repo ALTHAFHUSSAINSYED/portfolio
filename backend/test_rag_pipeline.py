@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 import traceback
 
 # Load env vars
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env.local'))
 api_key = os.getenv('GEMINI_API_KEY')
 print(f"[DEBUG] GEMINI_API_KEY Loaded: {bool(api_key)}, Length: {len(api_key) if api_key else 0}", flush=True)
 

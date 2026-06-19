@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 logger = logging.getLogger('AlluAgent')
 
 # Load environment variables
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env.local'))
 
 class GeminiClient:
     """

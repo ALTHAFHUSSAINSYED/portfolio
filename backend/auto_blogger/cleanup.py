@@ -17,7 +17,7 @@ logger = logging.getLogger("BlogCleanup")
 
 class BlogCleanup:
     def __init__(self):
-        load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), '.env'))
+        load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), '.env.local'))
         
         self.storage_dir = os.path.join(
             os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 

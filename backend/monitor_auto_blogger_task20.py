@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 import pytz
 
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env.local'))
 
 IST = pytz.timezone('Asia/Kolkata')
 

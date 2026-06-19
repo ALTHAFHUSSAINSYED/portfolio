@@ -9,7 +9,7 @@ import chromadb
 from dotenv import load_dotenv
 from datetime import datetime
 
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env.local'))
 
 def main():
     print("🔧 Fixing published_date in ChromaDB for existing blogs...")

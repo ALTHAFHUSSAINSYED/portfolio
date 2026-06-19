@@ -4,7 +4,7 @@ import json
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env.local'))
 
 OPENROUTER_API_KEY = os.getenv("CHATBOT_KEY")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/models"
@@ -15,7 +15,7 @@ import json
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env.local'))
 
 OPENROUTER_API_KEY = os.getenv("BLOG_KEY") or os.getenv("OPENROUTER_API_KEY")
 BASE_URL = "https://openrouter.ai/api/v1"

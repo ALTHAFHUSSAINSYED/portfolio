@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from pymongo import MongoClient
 
 # Load environment variables
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env.local'))
 
 # --- 1. CONFIGURATION ---
 GOOGLE_API_KEY = os.getenv('GEMINI_API_KEY')

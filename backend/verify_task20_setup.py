@@ -9,7 +9,7 @@ import chromadb
 from dotenv import load_dotenv
 
 # Load environment
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env.local'))
 
 def verify_chromadb_connection():
     """Verify ChromaDB connection and portfolio_master collection exists"""

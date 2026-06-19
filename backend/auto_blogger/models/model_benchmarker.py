@@ -20,7 +20,7 @@ logger = logging.getLogger("ModelBenchmarker")
 class ModelBenchmarker:
     def __init__(self):
         # Load environment variables
-        load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), '.env'))
+        load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), '.env.local'))
         
         self.openrouter_key = os.getenv("OPENROUTER_API_KEY") or os.getenv("BLOG_KEY")
         self.gemini_key = os.getenv("GEMINI_BLOG_API_KEY")

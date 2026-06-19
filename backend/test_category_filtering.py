@@ -28,7 +28,7 @@ from dotenv import load_dotenv
 from typing import Dict, List
 
 # Load environment variables
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env.local'))
 
 # ANSI color codes
 GREEN = "\033[92m"

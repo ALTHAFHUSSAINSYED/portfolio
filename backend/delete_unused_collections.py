@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Load environment variables
-load_dotenv('/home/ec2-user/portfolio/backend/.env.local')
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env.local'))
 
 def delete_unused_collections():
     """Delete the 3 unused legacy collections from ChromaDB Cloud"""

@@ -17,7 +17,7 @@ from pymongo import MongoClient
 import chromadb
 
 # Load environment variables
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env.local'))
 
 # Categories to delete
 CATEGORIES_TO_DELETE = [

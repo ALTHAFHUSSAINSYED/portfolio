@@ -2,7 +2,7 @@ import chromadb
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env.local'))
 
 CHROMA_API_KEY = os.getenv('CHROMA_API_KEY')
 CHROMA_TENANT_ID = os.getenv('CHROMA_TENANT_ID')

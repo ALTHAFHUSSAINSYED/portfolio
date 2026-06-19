@@ -17,7 +17,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env.local'))
 
 # Configuration
 BLOG_ID = "Cybersecurity_1768537800"

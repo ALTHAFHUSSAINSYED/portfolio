@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from datetime import datetime
 
 # Load environment variables
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env.local'))
 
 class SearchEngine:
     def __init__(self):
