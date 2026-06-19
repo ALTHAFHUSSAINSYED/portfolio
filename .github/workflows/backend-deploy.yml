@@ -98,16 +98,6 @@ jobs:  # WHAT jobs to run
             # Remove old blog generation logs
             find /home/ec2-user/portfolio-logs/auto_blogger -type d -mtime +7 -exec rm -rf {} + 2>/dev/null || true
 
-            if [ "${{ steps.data_changes.outputs.repopulate }}" = "true" ]; then
-              echo "[INFO] Data files changed - repopulating ChromaDB..."
-              cd /home/ec2-user/portfolio/backend
-              python3 populate_vector_db.py
-              echo "[SUCCESS] ChromaDB repopulated!"
-              cd ..
-            else
-              echo "[INFO] No data file changes detected - skipping ChromaDB repopulation."
-            fi
-
             # Rebuild & run
             sudo docker build --no-cache -t portfolio-backend -f backend/Dockerfile .
             sudo docker run -d \
@@ -117,6 +107,17 @@ jobs:  # WHAT jobs to run
               -v /home/ec2-user/portfolio-logs:/app/backend/logs \
               --env-file /home/ec2-user/portfolio/backend/.env.local \
               portfolio-backend
+
+            # Wait 5 seconds for the container to settle
+            sleep 5
+
+            if [ "${{ steps.data_changes.outputs.repopulate }}" = "true" ]; then
+              echo "[INFO] Data files changed - repopulating ChromaDB..."
+              sudo docker exec portfolio-backend python3 populate_vector_db.py
+              echo "[SUCCESS] ChromaDB repopulated!"
+            else
+              echo "[INFO] No data file changes detected - skipping ChromaDB repopulation."
+            fi
 
       - name: Health check on EC2
         uses: appleboy/ssh-action@master

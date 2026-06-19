@@ -15,22 +15,12 @@ jobs:
           # 1. Copy the NEW script from the runner workspace to your backend folder
           cp backend/populate_vector_db.py /home/ec2-user/portfolio/backend/populate_vector_db.py
           
-          # 2. Go to the backend folder
-          cd /home/ec2-user/portfolio/backend
+          # 2. Copy the updated script into the running docker container
+          echo "[INFO] Copying updated script into running container..."
+          sudo docker cp /home/ec2-user/portfolio/backend/populate_vector_db.py portfolio-backend:/app/backend/populate_vector_db.py
           
-          # 3. Create .env file with credentials
-          cat > .env << EOF
-          CHROMA_API_KEY=${{ secrets.CHROMA_API_KEY }}
-          CHROMA_TENANT=${{ secrets.CHROMA_TENANT }}
-          CHROMA_DB_NAME=Development
-          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
-          EOF
-          
-          # 4. Run the updated script
-          echo "[INFO] Running ChromaDB repopulation script..."
-          python3 populate_vector_db.py
+          # 3. Run the script inside the container using the container's environment and dependencies
+          echo "[INFO] Running ChromaDB repopulation script inside container..."
+          sudo docker exec portfolio-backend python3 populate_vector_db.py
           
           echo "[SUCCESS] ChromaDB repopulated successfully!"
-          
-          # 5. Clean up .env
-          rm -f .env
