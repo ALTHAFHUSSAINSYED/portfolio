@@ -17,6 +17,9 @@ on:  # WHEN does this workflow run? (triggers section)
     branches:  # Only run on pushes to these branches
       - main  # Production branch
 
+permissions:
+  contents: read
+
 jobs:  # WHAT jobs to run
   deploy:  # Job name
     runs-on: self-hosted  # Run directly on EC2 runner to avoid SSH network timeouts
@@ -38,107 +41,99 @@ jobs:  # WHAT jobs to run
             echo "repopulate=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            set -e
+      - name: Deploy backend locally
+        shell: bash
+        run: |
+          set -e
 
-            if [ ! -d /home/ec2-user/portfolio/.git ]; then
-              echo "[INFO] Repository not found on server. Clone it first before running this workflow."
-              exit 1
-            fi
-
-            cd /home/ec2-user/portfolio
-
-            # FORCE RESET (prevents corrupted files surviving)
-            git fetch --all
-            git reset --hard origin/main
-            git pull origin main
-
-            mkdir -p /home/ec2-user/portfolio-logs
-
-            # Update environment file (.env.local contains all production secrets)
-            # ONLY create .env.local if it doesn't exist (preserves manual updates)
-            cd backend
-            if [ ! -f .env.local ]; then
-              echo "[WORKFLOW] Creating new .env.local file..."
-              echo "MONGO_URL=${{ secrets.MONGO_URL }}" > .env.local
-              echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> .env.local
-              echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> .env.local
-              echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> .env.local
-              echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env.local
-              echo "CHROMA_API_KEY=${{ secrets.CHROMA_API_KEY }}" >> .env.local
-              echo "CHROMA_TENANT_ID=${{ secrets.CHROMA_TENANT }}" >> .env.local
-              echo "CHROMA_DB_NAME=Development" >> .env.local
-              echo "BLOG_KEY=${{ secrets.BLOG_KEY }}" >> .env.local
-              echo "CHATBOT_NEW_KEY=${{ secrets.CHATBOT_NEW_KEY }}" >> .env.local
-              echo "CHATBOT=${{ secrets.CHATBOT }}" >> .env.local
-              echo "GEMINI_BLOG_API_KEY=${{ secrets.GEMINI_BLOG_API_KEY }}" >> .env.local
-              echo "SERPER_API_KEY=${{ secrets.SERPER_API_KEY }}" >> .env.local
-              echo "RESEND_KEY=${{ secrets.RESEND_KEY }}" >> .env.local
-              echo "EMAIL_ADDRESS=${{ secrets.TO_EMAIL }}" >> .env.local
-              echo "USE_LEGACY_COLLECTIONS=false" >> .env.local
-            else
-              echo "[WORKFLOW] Using existing .env.local file (preserving manual updates)"
-            fi
-            cd ..
-
-            # AGGRESSIVE DISK CLEANUP (prevents "No space left on device" errors)
-            sudo docker stop portfolio-backend || true
-            sudo docker rm portfolio-backend || true
-            sudo docker system prune -af --volumes || true
-            
-            # Clean old logs to free up space (keep last 7 days)
-            find /home/ec2-user/portfolio-logs -type f -name "*.log" -mtime +7 -delete 2>/dev/null || true
-            
-            # Remove old blog generation logs
-            find /home/ec2-user/portfolio-logs/auto_blogger -type d -mtime +7 -exec rm -rf {} + 2>/dev/null || true
-
-            if [ "${{ steps.data_changes.outputs.repopulate }}" = "true" ]; then
-              echo "[INFO] Data files changed - repopulating ChromaDB..."
-              cd /home/ec2-user/portfolio/backend
-              python3 populate_vector_db.py
-              echo "[SUCCESS] ChromaDB repopulated!"
-              cd ..
-            else
-              echo "[INFO] No data file changes detected - skipping ChromaDB repopulation."
-            fi
-
-            # Rebuild & run
-            sudo docker build --no-cache -t portfolio-backend -f backend/Dockerfile .
-            sudo docker run -d \
-              --name portfolio-backend \
-              --restart always \
-              -p 8000:8000 \
-              -v /home/ec2-user/portfolio-logs:/app/backend/logs \
-              --env-file /home/ec2-user/portfolio/backend/.env.local \
-              portfolio-backend
-
-      - name: Health check on EC2
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            set -e
-            max_attempts=60
-            attempt=0
-            while [ $attempt -lt $max_attempts ]; do
-              if curl -f http://localhost:8000/ > /dev/null 2>&1; then
-                echo "Backend is healthy!"
-                exit 0
-              fi
-              echo "Attempt $((attempt+1))/$max_attempts: Server not ready..."
-              sleep 5
-              attempt=$((attempt+1))
-            done
-
-            echo "Backend health check failed!"
-            sudo docker logs portfolio-backend --tail 100
+          if [ ! -d /home/ec2-user/portfolio/.git ]; then
+            echo "[INFO] Repository not found on server. Clone it first before running this workflow."
             exit 1
+          fi
+
+          cd /home/ec2-user/portfolio
+
+          # FORCE RESET (prevents corrupted files surviving)
+          git fetch --all
+          git reset --hard origin/main
+          git pull origin main
+
+          mkdir -p /home/ec2-user/portfolio-logs
+
+          # Update environment file (.env.local contains all production secrets)
+          # ONLY create .env.local if it doesn't exist (preserves manual updates)
+          cd backend
+          if [ ! -f .env.local ]; then
+            echo "[WORKFLOW] Creating new .env.local file..."
+            echo "MONGO_URL=${{ secrets.MONGO_URL }}" > .env.local
+            echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> .env.local
+            echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> .env.local
+            echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> .env.local
+            echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env.local
+            echo "CHROMA_API_KEY=${{ secrets.CHROMA_API_KEY }}" >> .env.local
+            echo "CHROMA_TENANT_ID=${{ secrets.CHROMA_TENANT }}" >> .env.local
+            echo "CHROMA_DB_NAME=Development" >> .env.local
+            echo "BLOG_KEY=${{ secrets.BLOG_KEY }}" >> .env.local
+            echo "CHATBOT_NEW_KEY=${{ secrets.CHATBOT_NEW_KEY }}" >> .env.local
+            echo "CHATBOT=${{ secrets.CHATBOT }}" >> .env.local
+            echo "GEMINI_BLOG_API_KEY=${{ secrets.GEMINI_BLOG_API_KEY }}" >> .env.local
+            echo "SERPER_API_KEY=${{ secrets.SERPER_API_KEY }}" >> .env.local
+            echo "RESEND_KEY=${{ secrets.RESEND_KEY }}" >> .env.local
+            echo "EMAIL_ADDRESS=${{ secrets.TO_EMAIL }}" >> .env.local
+            echo "USE_LEGACY_COLLECTIONS=false" >> .env.local
+          else
+            echo "[WORKFLOW] Using existing .env.local file (preserving manual updates)"
+          fi
+          cd ..
+
+          # AGGRESSIVE DISK CLEANUP (prevents "No space left on device" errors)
+          sudo docker stop portfolio-backend || true
+          sudo docker rm portfolio-backend || true
+          sudo docker system prune -af --volumes || true
+          
+          # Clean old logs to free up space (keep last 7 days)
+          find /home/ec2-user/portfolio-logs -type f -name "*.log" -mtime +7 -delete 2>/dev/null || true
+          
+          # Remove old blog generation logs
+          find /home/ec2-user/portfolio-logs/auto_blogger -type d -mtime +7 -exec rm -rf {} + 2>/dev/null || true
+
+          if [ "${{ steps.data_changes.outputs.repopulate }}" = "true" ]; then
+            echo "[INFO] Data files changed - repopulating ChromaDB..."
+            cd /home/ec2-user/portfolio/backend
+            python3 populate_vector_db.py
+            echo "[SUCCESS] ChromaDB repopulated!"
+            cd ..
+          else
+            echo "[INFO] No data file changes detected - skipping ChromaDB repopulation."
+          fi
+
+          # Rebuild & run
+          sudo docker build --no-cache -t portfolio-backend -f backend/Dockerfile .
+          sudo docker run -d \
+            --name portfolio-backend \
+            --restart always \
+            -p 8000:8000 \
+            -v /home/ec2-user/portfolio-logs:/app/backend/logs \
+            --env-file /home/ec2-user/portfolio/backend/.env.local \
+            portfolio-backend
+
+      - name: Health check
+        shell: bash
+        run: |
+          set -e
+          max_attempts=60
+          attempt=0
+          while [ $attempt -lt $max_attempts ]; do
+            if curl -f http://localhost:8000/ > /dev/null 2>&1; then
+              echo "Backend is healthy!"
+              exit 0
+            fi
+            echo "Attempt $((attempt+1))/$max_attempts: Server not ready..."
+            sleep 5
+            attempt=$((attempt+1))
+          done
+
+          echo "Backend health check failed!"
+          sudo docker logs portfolio-backend --tail 100
+          exit 1
 #goodd
