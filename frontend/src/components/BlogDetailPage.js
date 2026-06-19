@@ -432,7 +432,7 @@ const BlogDetailPage = () => {
                       </a>
 
                       <a
-                        href="mailto:allualthaf42@gmail.com"
+                        href="mailto:althafhussain.sd@gmail.com"
                         className="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1"
                       >
                         <ExternalLink className="h-4 w-4" />
