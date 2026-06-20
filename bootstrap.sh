@@ -20,7 +20,7 @@ fi
 
 # 2. Create Docker Network
 echo "🌐 Setting up Docker network..."
-docker network inspect portfolio-net >/dev/null 2>&1 || docker network create portfolio-net
+sudo docker network inspect portfolio-net >/dev/null 2>&1 || sudo docker network create portfolio-net
 
 # 3. Create the external persistent directories
 echo "📁 Creating host persistence directories..."
