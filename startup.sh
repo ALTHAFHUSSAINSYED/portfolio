@@ -10,8 +10,8 @@ echo "$PREFIX Running Startup Validations..."
 
 # Environment variables are passed via docker --env-file, so we just check if they exist
 
-if [ -z "$OPENROUTER_KEY" ]; then
-    echo "$PREFIX 🚨 ERROR: OPENROUTER_KEY is missing in .env.local!"
+if [ -z "$CHATBOT_NEW_KEY" ]; then
+    echo "$PREFIX 🚨 ERROR: CHATBOT_NEW_KEY is missing in .env.local!"
     exit 1
 fi
 
