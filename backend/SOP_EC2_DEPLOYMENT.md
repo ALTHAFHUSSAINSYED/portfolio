@@ -34,7 +34,7 @@ The system uses a **Two-Container Architecture** running on a Docker bridge netw
 ### 1. EC2 Instance Launch
 1. Launch a new EC2 Instance using **Amazon Linux 2023** (AMI).
 2. Instance type: `t3.micro` or higher (depending on CPU/Memory usage).
-3. **IAM Instance Profile**: Attach an IAM Role to the EC2 instance that allows access to S3 (see **Phase 5** below).
+3. **AWS Credentials**: S3 bucket credentials from the bucket's home account are configured directly via `.env.local` variables (see **Phase 5** below).
 
 ### 2. Security Group Configuration
 In the EC2 Security Group, allow the following inbound traffic:
@@ -108,6 +108,9 @@ SERPER_API_KEY="..."
 RESEND_KEY="..."
 EMAIL_ADDRESS="..."
 S3_BLOG_BUCKET="althaf-blogs-storage"
+AWS_ACCESS_KEY_ID="your_aws_access_key_id"
+AWS_SECRET_ACCESS_KEY="your_aws_secret_access_key"
+AWS_REGION="ap-south-1"
 ```
 
 ---
@@ -138,16 +141,22 @@ Certbot requires port 80 to be free to execute a standalone challenge to verify 
 
 ## Phase 5: S3 Bucket Access & Credentials Security
 
-To fetch and publish blogs from/to the S3 bucket (`althaf-blogs-storage`), the backend utilizes `boto3`. For security best practices, **do not hardcode AWS Access Keys**. Instead, use IAM roles.
+To fetch and publish blogs from/to the S3 bucket (`althaf-blogs-storage`), the backend utilizes `boto3`. 
 
-### 1. How Credentials Flow to the Docker Container
-1. An **IAM Instance Profile (Role)** is attached to the EC2 instance.
-2. The Docker container runs using the default network bridge.
-3. Because the container can access the host network's link-local addresses, `boto3` queries the AWS IMDS (Instance Metadata Service) at `http://169.254.169.254/latest/meta-data/iam/security-credentials/` to obtain short-lived credentials.
-4. Boto3 inside the container automatically retrieves, uses, and rotates these credentials without needing any environment variable configurations.
+### 1. Cross-Account S3 Access Solution
+Since the target S3 bucket resides in a separate (old) AWS account and cross-account IAM role assumptions are restricted/failed, we use a **dedicated IAM User** created in the bucket's owner AWS account.
 
-### 2. IAM Policy Requirements
-Create an IAM Role with the following policy and attach it to the EC2 instance:
+This user requires Programmatic Access keys which are injected into the Docker container via `.env.local` to allow `boto3` to communicate with the S3 bucket.
+
+### 2. Credentials Configuration
+Add the following keys to your `/home/ec2-user/portfolio/.env.local` file:
+- `AWS_ACCESS_KEY_ID`: Access key ID of the IAM user from the bucket's AWS account.
+- `AWS_SECRET_ACCESS_KEY`: Secret access key of the IAM user.
+- `AWS_REGION`: Set to `ap-south-1` (the region hosting the S3 bucket).
+- `S3_BLOG_BUCKET`: Set to the bucket name `althaf-blogs-storage`.
+
+### 3. IAM User Minimal Policy Setup (Old S3 Account)
+The IAM User in the bucket's owner account must have a policy attached with these minimal permissions:
 ```json
 {
     "Version": "2012-10-17",
@@ -172,6 +181,10 @@ Create an IAM Role with the following policy and attach it to the EC2 instance:
     ]
 }
 ```
+
+### 4. Docker Integration
+Because the Docker run command uses the `--env-file` parameter pointing to `/home/ec2-user/portfolio/.env.local`, these environment variables are automatically loaded into the container runtime. `boto3` detects them automatically in the container environment and uses them to authenticate S3 API calls.
+
 
 ---
 
