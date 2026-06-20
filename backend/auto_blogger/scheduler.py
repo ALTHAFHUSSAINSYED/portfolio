@@ -34,6 +34,8 @@ class BlogScheduler:
         # CRITICAL FIX: Move state file to persistent volume (not code directory)
         # This prevents state loss during Docker rebuilds and git pulls
         self.state_file = "/app/backend/logs/auto_blogger/scheduler_state.json"
+        # Ensure directories exist
+        os.makedirs(os.path.dirname(self.state_file), exist_ok=True)
         # FIXED: Use frontend-compatible category names (spaces instead of underscores)
         self.categories = [
             "AI and ML",
@@ -66,6 +68,7 @@ class BlogScheduler:
         return {"last_index": -1, "last_run": None}
 
     def _save_state(self, state: Dict[str, Any]):
+        os.makedirs(os.path.dirname(self.state_file), exist_ok=True)
         with open(self.state_file, 'w') as f:
             json.dump(state, f)
 
@@ -99,6 +102,13 @@ class BlogScheduler:
         start_time = datetime.now()
         logger.info(f"⏱️ Pipeline started at: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
         try:
+            # 0. Validate and heal models dynamically before generation starts
+            try:
+                from backend.auto_blogger.models.model_config import AGENT_ROLES
+                AGENT_ROLES.validate_and_heal(self.writer.client)
+            except Exception as e:
+                logger.error(f"Model validation check failed: {e}")
+
             # 1. Select Category
             category = self.select_next_category()
             
@@ -216,6 +226,7 @@ class BlogScheduler:
             
             # CRITICAL FIX: Persist draft to disk (survives Docker rebuilds)
             try:
+                os.makedirs(os.path.dirname(self.draft_file), exist_ok=True)
                 with open(self.draft_file, 'w') as f:
                     json.dump(self.pending_draft, f, indent=2)
                 logger.info(f"✅ Draft persisted to disk: {self.draft_file}")

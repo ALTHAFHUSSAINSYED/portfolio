@@ -12,7 +12,7 @@ import re
 import time
 from typing import Dict, List, Optional
 from openai import OpenAI
-from backend.auto_blogger.models.model_config import AGENT_ROLES, BLOG_SPECS
+from backend.auto_blogger.models.model_config import AGENT_ROLES, BLOG_SPECS, run_agent_completion
 from backend.auto_blogger.job_state import get_job_state_manager
 from backend.auto_blogger.logger_utils import (
     setup_section_logger,
@@ -191,8 +191,17 @@ class BlogWriter:
         
         logger.info(f"🚀 Starting Agentic Generation for: {category} (Job: {job_id})")
         
+        # Step -1: Run dynamic model validation and self-healing checks
+        try:
+            AGENT_ROLES.validate_and_heal(self.client)
+        except Exception as e:
+            logger.error(f"Model validation and self-healing failed: {e}")
+        
         # Create job metadata log
         create_job_metadata(job_id, category, datetime.now(IST))
+        
+        # Step 0: Summarize research data
+        research_data = self._agent_researcher_summarizer(category, research_data)
         
         # Step 1: Generate Outline (if not already done)
         if not job.get('outline'):
@@ -270,6 +279,95 @@ class BlogWriter:
             "category": category
         }
 
+    def _agent_researcher_summarizer(self, category: str, research_data: Dict) -> Dict:
+        """
+        Agent: Researcher Summarizer
+        Summarizes raw SERPER search results and snippets into synthesized structured markdown notes.
+        """
+        model_cfg = AGENT_ROLES.get("researcher_summarizer")
+        if not model_cfg:
+            return research_data
+            
+        model_id = model_cfg["primary"]
+        
+        if not research_data or (not research_data.get("headlines") and not research_data.get("key_insights")):
+            logger.warning("No search results to summarize. Skipping Researcher Summarizer LLM call.")
+            research_data["summarized_insights_text"] = """## Key Facts
+- No recent search results available.
+## Statistics
+- N/A
+## Trends
+- Standard evolution in the topic.
+## Important Technologies
+- Core technologies related to this domain.
+## Sources Mentioned
+- N/A"""
+            return research_data
+            
+        headlines_str = "\n".join([f"- {h}" for h in research_data.get("headlines", [])])
+        insights_str = "\n".join([f"- {i}" for i in research_data.get("key_insights", [])])
+        sources_list = []
+        for s in research_data.get("authoritative_sources", []):
+            sources_list.append(f"- Title: {s.get('title')}\n  Snippet: {s.get('snippet')}\n  Link: {s.get('link')}")
+        sources_str = "\n".join(sources_list)
+        
+        prompt = f"""
+        You are a technical research analyst.
+        Topic Category: {category}
+
+        RAW SEARCH RESULT HEADLINES:
+        {headlines_str}
+
+        RAW SEARCH SNIPPETS:
+        {insights_str}
+
+        RAW SOURCES DETAILS:
+        {sources_str}
+
+        TASK:
+        1. Extract key facts from the search results.
+        2. Remove duplicate information.
+        3. Identify recent trends.
+        4. Identify contradictions.
+        5. Produce concise structured notes.
+
+        Return EXACTLY the following sections in markdown format:
+        ## Key Facts
+        ## Statistics
+        ## Trends
+        ## Important Technologies
+        ## Sources Mentioned
+
+        Do not add any conversational preamble or postscript. Return only the markdown text under these headers.
+        """
+        
+        try:
+            logger.info("🤖 Researcher Summarizer calling model configuration...")
+            messages = [
+                {
+                    "role": "system",
+                    "content": "You are a research summarization assistant. Respond ONLY with markdown matching the requested headers."
+                },
+                {"role": "user", "content": prompt}
+            ]
+            content = run_agent_completion(
+                client=self.client,
+                agent_key="researcher_summarizer",
+                messages=messages
+            ).strip()
+            
+            if "## Key Facts" in content or "Key Facts" in content:
+                research_data["summarized_insights_text"] = content
+                logger.info("✅ Research successfully summarized into markdown by LLM agent.")
+                return research_data
+            else:
+                raise ValueError("Model response did not contain the required headers.")
+        except Exception as e:
+            logger.error(f"❌ Researcher Summarizer failed: {e}. Generating fallback summary text.")
+            fallback_text = f"## Key Facts\n{insights_str}\n## Statistics\n- N/A\n## Trends\n- General trends in {category}\n## Important Technologies\n- {category} tools\n## Sources Mentioned\n- Raw search data"
+            research_data["summarized_insights_text"] = fallback_text
+            return research_data
+
     def _agent_outliner(self, category: str, research_data: Dict, job_id: str = None) -> List[str]:
         """
         Agent 1: The Architect
@@ -283,8 +381,8 @@ class BlogWriter:
         You are an elite technical blog architect.
         Topic: {category}
         
-        RESEARCH SUMMARY:
-        {json.dumps(research_data, indent=2)}
+        RESEARCH SUMMARY (SYNTHESIZED INSIGHTS):
+        {research_data.get("summarized_insights_text", "No research context available.")}
 
         TASK:
         Create a detailed structural outline for a 2500-word technical blog.
@@ -329,82 +427,69 @@ class BlogWriter:
         """
 
         try:
-            models_to_try = [model_cfg["primary"], model_cfg["fallback"]]
+            logger.info("🤖 Orchestrator calling model configuration...")
+            messages = [
+                {
+                    "role": "system", 
+                    "content": "You are a JSON-only API. Respond ONLY with valid JSON. No explanations, no markdown, no extra text. Just pure JSON."
+                },
+                {
+                    "role": "user", 
+                    "content": prompt
+                }
+            ]
+            content = run_agent_completion(
+                client=self.client,
+                agent_key="orchestrator",
+                messages=messages,
+                max_tokens=2000
+            )
             
-            for model_id in models_to_try:
-                try:
-                    logger.info(f"🤖 Output Agent calling {model_id}...")
-                    response = self.client.chat.completions.create(
-                        model=model_id,
-                        messages=[
-                            {
-                                "role": "system", 
-                                "content": "You are a JSON-only API. Respond ONLY with valid JSON. No explanations, no markdown, no extra text. Just pure JSON."
-                            },
-                            {
-                                "role": "user", 
-                                "content": prompt
-                            }
-                        ],
-                        max_tokens=2000,
-                        temperature=model_cfg["temperature"]
-                    )
-                    content = response.choices[0].message.content
-                    
-                    # Use the new robust JSON extraction function
-                    outline_data = extract_json_from_response(content, logger)
-                    
-                    # Validate structure
-                    if isinstance(outline_data, dict) and 'sections' in outline_data:
-                        sections = outline_data['sections']
-                        title = outline_data.get('title')
-                        summary = outline_data.get('summary', '')
-                        
-                        # Validate title is present and not generic
-                        generic_titles = ['Technical Deep Dive', 'Understanding', 'Best Practices']
-                        if not title or any(generic in title for generic in generic_titles):
-                            logger.error(f"❌ Invalid title from outliner: {title}")
-                            raise ValueError(f"Invalid title from outliner: {title}")
-                        
-                        if isinstance(sections, list) and len(sections) > 0:
-                            logger.info(f"📋 Outline created:")
-                            logger.info(f"   Title: {title}")
-                            logger.info(f"   Summary: {summary[:100]}...")
-                            logger.info(f"   Sections: {len(sections)}")
-                            
-                            # Store metadata in outline for later use
-                            return {
-                                "title": title,
-                                "summary": summary,
-                                "sections": sections
-                            }
-                        else:
-                            raise ValueError("Invalid outline structure - sections is not a valid list")
-                    else:
-                        # Old format or invalid structure
-                        if isinstance(outline_data, list):
-                            logger.error("❌ Received old list format from outliner - this should not happen!")
-                            raise ValueError(f"Outliner model {model_id} failed to follow instructions. Returned list instead of dict with title/summary.")
-                        else:
-                            logger.error(f"❌ Invalid outline structure: {type(outline_data)}")
-                            raise ValueError("Invalid outline format - missing 'sections' key")
-
-                except Exception as e:
-                    logger.warning(f"⚠️ Model {model_id} failed: {e}")
-                    if model_id == models_to_try[-1]:
-                        logger.error("❌ All models failed for Outliner.")
-                        return None
-                    time.sleep(2)
-                    continue
+            # Use the new robust JSON extraction function
+            outline_data = extract_json_from_response(content, logger)
             
-            return None # Should be unreachable if logic is correct, but safe fallback
+            # Validate structure
+            if isinstance(outline_data, dict) and 'sections' in outline_data:
+                sections = outline_data['sections']
+                title = outline_data.get('title')
+                summary = outline_data.get('summary', '')
                 
+                # Validate title is present and not generic
+                generic_titles = ['Technical Deep Dive', 'Understanding', 'Best Practices']
+                if not title or any(generic in title for generic in generic_titles):
+                    logger.error(f"❌ Invalid title from outliner: {title}")
+                    raise ValueError(f"Invalid title from outliner: {title}")
+                
+                if isinstance(sections, list) and len(sections) > 0:
+                    logger.info(f"📋 Outline created:")
+                    logger.info(f"   Title: {title}")
+                    logger.info(f"   Summary: {summary[:100]}...")
+                    logger.info(f"   Sections: {len(sections)}")
+                    
+                    # Store metadata in outline for later use
+                    return {
+                        "title": title,
+                        "summary": summary,
+                        "sections": sections
+                    }
+                else:
+                    raise ValueError("Invalid outline structure - sections is not a valid list")
+            else:
+                # Old format or invalid structure
+                if isinstance(outline_data, list):
+                    logger.error("❌ Received old list format from outliner - this should not happen!")
+                    raise ValueError(f"Outliner model failed to follow instructions. Returned list instead of dict with title/summary.")
+                else:
+                    logger.error(f"❌ Invalid outline structure: {type(outline_data)}")
+                    raise ValueError("Invalid outline format - missing 'sections' key")
+
         except Exception as e:
-            logger.error(f"Writer Agent Error: {e}")
+            logger.error(f"Writer Agent Error during Outliner: {e}")
             print(f"DEBUG: WRITER EXCEPTION: {e}")
             import traceback
             traceback.print_exc()
             return None
+
 
     def _agent_drafter_loop(self, category: str, sections: List[str], research_data: Dict, job_id: str) -> str:
         """
@@ -453,7 +538,7 @@ class BlogWriter:
             Current Section: "{section}"
             
             Global Context (Research):
-            {json.dumps(research_data)[:3000]} # Truncated to save tokens
+            {research_data.get("summarized_insights_text", "No research context available.")}
             
             Previous Paragraph (Connect to this):
             "...{prev_context}"
@@ -466,56 +551,43 @@ class BlogWriter:
             - Don't write "Here is the section". Just write the content.
             """
 
-            models_to_try = [model_cfg["primary"], model_cfg["fallback"]]
-            
-            try_count = 0
-            success = False
-            
-            # Simplified retry logic: Try primary once, then fallback once (2 attempts total)
-            attempt_queue = [models_to_try[0], models_to_try[1]]
-            
-            for attempt, attempt_model in enumerate(attempt_queue):
-                try:
-                    logger.info(f"Trying model: {attempt_model} (Attempt {attempt + 1}/{len(attempt_queue)})")
-                    response = self.client.chat.completions.create(
-                        model=attempt_model,
-                        messages=[{"role": "user", "content": prompt}],
-                        max_tokens=model_cfg["max_tokens"],
-                        temperature=model_cfg["temperature"]
-                    )
-                    content = response.choices[0].message.content.strip()
-                    
-                    # ATOMIC VALIDATION: Is this section complete?
-                    if self._validate_section(content):
-                        # Success! Format and Append
-                        if not content.startswith("#"):
-                            formatted_section = f"\n\n## {section}\n\n{content}"
-                        else:
-                            formatted_section = f"\n\n{content}"
-                        
-                        # SAVE TO MONGODB IMMEDIATELY
-                        job_mgr.save_section(job_id, index, formatted_section)
-                        section_logger.info(f"✅ Section {index} saved to MongoDB")
-                        
-                        # Log metrics
-                        word_count = len(content.split())
-                        char_count = len(content)
-                        log_section_completion(section_logger, index, word_count, char_count)
-                        
-                        full_draft.append(formatted_section)
-                        success = True
-                        time.sleep(3)  # Reduced from 15s to 3s (OpenRouter limit: 10 req/min = 6s)
-                        break
-                    else:
-                        logger.warning(f"⚠️ Generated section incomplete/cut-off. Discarding entirely. (Attempt {attempt + 1})")
-                        # Do NOT append partial content. Retry or Fail completely.
-                        
-                except Exception as e:
-                    logger.warning(f"Drafting error ({attempt_model}): {e}")
-                    time.sleep(3)  # Reduced from 5s to 3s
+            try:
+                logger.info(f"Trying model configuration for section: {section}")
+                messages = [{"role": "user", "content": prompt}]
+                content = run_agent_completion(
+                    client=self.client,
+                    agent_key="drafter",
+                    messages=messages,
+                    max_tokens=model_cfg["max_tokens"]
+                ).strip()
                 
-                if success:
-                    break
+                # ATOMIC VALIDATION: Is this section complete?
+                if self._validate_section(content):
+                    # Success! Format and Append
+                    if not content.startswith("#"):
+                        formatted_section = f"\n\n## {section}\n\n{content}"
+                    else:
+                        formatted_section = f"\n\n{content}"
+                    
+                    # SAVE TO MONGODB IMMEDIATELY
+                    job_mgr.save_section(job_id, index, formatted_section)
+                    section_logger.info(f"✅ Section {index} saved to MongoDB")
+                    
+                    # Log metrics
+                    word_count = len(content.split())
+                    char_count = len(content)
+                    log_section_completion(section_logger, index, word_count, char_count)
+                    
+                    full_draft.append(formatted_section)
+                    success = True
+                    time.sleep(3)  # Rate limit sleep
+                else:
+                    logger.warning(f"⚠️ Generated section incomplete/cut-off. Discarding entirely.")
+                    # Do NOT append partial content. Fail completely to trigger skip logic below.
+                    
+            except Exception as e:
+                logger.warning(f"Drafting error: {e}")
+                time.sleep(3)
             
             if not success:
                  logger.error(f"❌ Failed to draft section: {section}. Skipping.")
@@ -565,9 +637,6 @@ class BlogWriter:
         logger.info("🔧 Writer Agent: Revising draft based on feedback...")
         logger.warning("⚠️ REVISION TRIGGERED - This is a risky operation that can corrupt content")
         
-        model_cfg = AGENT_ROLES["drafter"]
-        model_id = model_cfg["primary"]
-        
         # Extract original title to validate it doesn't change
         original_title = ""
         for line in draft.split('\n')[:10]:
@@ -602,13 +671,14 @@ class BlogWriter:
         """
         
         try:
-            response = self.client.chat.completions.create(
-                model=model_id,
-                messages=[{"role": "user", "content": prompt}],
-                max_tokens=4000,  # Increased from 2000 to handle full blog
-                temperature=model_cfg["temperature"]
-            )
-            revised_content = response.choices[0].message.content.strip()
+            logger.info("🔧 Calling model configuration for revision...")
+            messages = [{"role": "user", "content": prompt}]
+            revised_content = run_agent_completion(
+                client=self.client,
+                agent_key="drafter", # Revisions use the drafter model
+                messages=messages,
+                max_tokens=4000
+            ).strip()
             
             # Validation: Check if title changed (indicates topic drift)
             revised_title = ""

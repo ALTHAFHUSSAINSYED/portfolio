@@ -45,12 +45,21 @@ def test_writer(research_data):
         writer = BlogWriter()
         
         logger.info("Generating blog draft for DevOps...")
-        draft = writer.generate_blog("DevOps", research_data)
+        draft_result = writer.generate_blog("DevOps", research_data)
+        
+        # Writer now returns a dictionary
+        if isinstance(draft_result, dict):
+            draft_content = draft_result.get('content', '')
+            draft_title = draft_result.get('title', 'Unknown Title')
+        else:
+            draft_content = str(draft_result)
+            draft_title = "Unknown Title"
         
         logger.info(f"✅ Writer SUCCESS!")
-        logger.info(f"Draft length: {len(draft)} characters")
-        logger.info(f"First 200 chars: {draft[:200]}")
-        return draft
+        logger.info(f"Draft title: {draft_title}")
+        logger.info(f"Draft length: {len(draft_content)} characters")
+        logger.info(f"First 200 chars: {draft_content[:200]}")
+        return draft_content
     except Exception as e:
         logger.error(f"❌ Writer FAILED: {e}", exc_info=True)
         return None

@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "last_updated": "2026-06-20",
+  "agents": {
+    "orchestrator": {
+      "role": "Outline & High-Level Logic",
+      "primary": "qwen/qwen3-next-80b-a3b-instruct:free",
+      "fallback": "meta-llama/llama-3.3-70b-instruct:free",
+      "max_tokens": 2000,
+      "temperature": 0.3,
+      "max_retries": 2,
+      "timeout_seconds": 90,
+      "enabled": true
+    },
+    "researcher_summarizer": {
+      "role": "Research Synthesis & Summarization",
+      "primary": "openai/gpt-oss-120b:free",
+      "fallback": "qwen/qwen3-next-80b-a3b-instruct:free",
+      "max_tokens": 2000,
+      "temperature": 0.5,
+      "max_retries": 2,
+      "timeout_seconds": 90,
+      "enabled": true
+    },
+    "drafter": {
+      "role": "Section Writer (Chunked)",
+      "primary": "openai/gpt-oss-120b:free",
+      "fallback": "meta-llama/llama-3.3-70b-instruct:free",
+      "max_tokens": 2500,
+      "temperature": 0.7,
+      "max_retries": 2,
+      "timeout_seconds": 90,
+      "enabled": true
+    },
+    "critic": {
+      "role": "Quality Validator & Logic",
+      "primary": "meta-llama/llama-3.3-70b-instruct:free",
+      "fallback": "openai/gpt-oss-120b:free",
+      "max_tokens": 1000,
+      "temperature": 0.3,
+      "max_retries": 2,
+      "timeout_seconds": 90,
+      "enabled": true
+    },
+    "polisher": {
+      "role": "Final Style & Tone",
+      "primary": "qwen/qwen3-next-80b-a3b-instruct:free",
+      "fallback": "meta-llama/llama-3.3-70b-instruct:free",
+      "max_tokens": 1000,
+      "temperature": 0.6,
+      "max_retries": 2,
+      "timeout_seconds": 90,
+      "enabled": true
+    }
+  }
+}
