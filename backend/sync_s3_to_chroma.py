@@ -60,11 +60,13 @@ def sync():
         db_name = os.getenv("CHROMA_DB_NAME") # Usage of correct ENV var
         
         if api_key:
+            if not db_name:
+                db_name = "Development"
             print(f"🔌 Connecting to Chroma Cloud (DB: {db_name})...")
-            # Use local ChromaDB (HttpClient) instead of CloudClient
-            client = chromadb.HttpClient(
-                host='chroma',
-                port=8000
+            client = chromadb.CloudClient(
+                api_key=api_key,
+                tenant=tenant,
+                database=db_name
             )
         else:
             print("🔌 Connecting to Local Chroma...")
