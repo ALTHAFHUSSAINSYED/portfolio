@@ -4,7 +4,8 @@ import json
 import re
 import glob
 import boto3
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from chromadb import Documents, EmbeddingFunction, Embeddings
 from dotenv import load_dotenv
 from pymongo import MongoClient
@@ -28,8 +29,12 @@ if not GOOGLE_API_KEY:
     print("[ERROR] GEMINI_API_KEY is missing.")
     exit(1)
 
-# Configure Gemini
-genai.configure(api_key=GOOGLE_API_KEY)
+# Configure Gemini Client
+try:
+    genai_client = genai.Client(api_key=GOOGLE_API_KEY)
+except Exception as e:
+    print(f"[ERROR] Failed to initialize Gemini Client: {e}")
+    genai_client = None
 
 # --- 2. GEMINI EMBEDDING CLASS ---
 class GeminiEmbeddingFunction(EmbeddingFunction):
@@ -37,14 +42,18 @@ class GeminiEmbeddingFunction(EmbeddingFunction):
         pass
 
     def __call__(self, input: Documents) -> Embeddings:
-        model = 'models/text-embedding-004'
+        model = 'text-embedding-004'
         try:
+            if not genai_client:
+                return [[0.0] * 768 for _ in input]
             return [
-                genai.embed_content(
+                genai_client.models.embed_content(
                     model=model,
-                    content=text,
-                    task_type="retrieval_document"
-                )['embedding']
+                    contents=text,
+                    config=types.EmbedContentConfig(
+                        task_type="RETRIEVAL_DOCUMENT"
+                    )
+                ).embeddings[0].values
                 for text in input
             ]
         except Exception as e:
