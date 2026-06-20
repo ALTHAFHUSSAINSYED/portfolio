@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Install build dependencies
 RUN apt-get update \
-    && apt-get install -y build-essential curl \
+    && apt-get install -y build-essential curl dos2unix \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy python requirements and install
@@ -29,7 +29,7 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:8000/health || exit 1
 
 # Strip Windows CRLF line endings from bash script to prevent Exit Code 127
-RUN sed -i 's/\r$//' startup.sh
+RUN dos2unix startup.sh
 
 # Start the application using our custom startup script
 CMD ["bash", "startup.sh"]
