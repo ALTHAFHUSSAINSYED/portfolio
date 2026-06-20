@@ -732,6 +732,10 @@ async def get_portfolio_context(query: str, intent: str) -> str:
 def welcome():
     return {"message": "Server is running. API is at /api"}
 
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
+
 # --- SITEMAP ENDPOINT ---
 @app.get("/sitemap.xml")
 async def serve_sitemap():

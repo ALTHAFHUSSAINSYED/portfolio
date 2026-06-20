@@ -3,7 +3,8 @@ import chromadb
 import json
 import os
 import logging
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 import time
 from datetime import datetime
 
@@ -17,18 +18,23 @@ bucket = 'althaf-blogs-storage'
 
 # Gemini Setup for Embeddings
 try:
-    genai.configure(api_key=os.getenv("GEMINI_API_KEY")) 
-except:
-    pass
+    genai_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+except Exception as e:
+    logger.warning(f"Failed to initialize Gemini Client for sync: {e}")
+    genai_client = None
 
 def get_embedding(text):
     try:
-        result = genai.embed_content(
-            model="models/text-embedding-004",
-            content=text,
-            task_type="retrieval_document"
+        if not genai_client:
+            return None
+        result = genai_client.models.embed_content(
+            model="text-embedding-004",
+            contents=text,
+            config=types.EmbedContentConfig(
+                task_type="RETRIEVAL_DOCUMENT"
+            )
         )
-        return result['embedding']
+        return result.embeddings[0].values
     except Exception as e:
         logger.error(f"Embedding error: {e}")
         return None
