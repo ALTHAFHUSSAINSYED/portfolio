@@ -1,7 +1,10 @@
 # Ignore everything by default
 **
-# Allow start script (CRITICAL FIX)
+# Allow start scripts (CRITICAL FIX)
 !start.sh
+!startup.sh
+!bootstrap.sh
+!version.json
 
 # Allow backend files
 !backend/**
