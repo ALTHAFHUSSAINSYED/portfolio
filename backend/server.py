@@ -189,10 +189,11 @@ class GeminiEmbeddingFunction(EmbeddingFunction):
             embeddings = []
             for text in input:
                 response = genai_client.models.embed_content(
-                    model='text-embedding-004',
+                    model='gemini-embedding-001',
                     contents=text,
                     config=types.EmbedContentConfig(
-                        task_type="RETRIEVAL_QUERY"
+                        task_type="RETRIEVAL_QUERY",
+                        output_dimensionality=768
                     )
                 )
                 embeddings.append(response.embeddings[0].values)

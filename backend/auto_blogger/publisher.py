@@ -245,10 +245,11 @@ class BlogPublisher:
                 return []
                 
             result = self.gemini_client.models.embed_content(
-                model="text-embedding-004",
+                model="gemini-embedding-001",
                 contents=text,
                 config=types.EmbedContentConfig(
-                    task_type="RETRIEVAL_DOCUMENT"
+                    task_type="RETRIEVAL_DOCUMENT",
+                    output_dimensionality=768
                 )
             )
             return result.embeddings[0].values

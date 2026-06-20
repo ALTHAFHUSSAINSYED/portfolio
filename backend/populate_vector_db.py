@@ -42,7 +42,7 @@ class GeminiEmbeddingFunction(EmbeddingFunction):
         pass
 
     def __call__(self, input: Documents) -> Embeddings:
-        model = 'text-embedding-004'
+        model = 'gemini-embedding-001'
         try:
             if not genai_client:
                 return [[0.0] * 768 for _ in input]
@@ -51,7 +51,8 @@ class GeminiEmbeddingFunction(EmbeddingFunction):
                     model=model,
                     contents=text,
                     config=types.EmbedContentConfig(
-                        task_type="RETRIEVAL_DOCUMENT"
+                        task_type="RETRIEVAL_DOCUMENT",
+                        output_dimensionality=768
                     )
                 ).embeddings[0].values
                 for text in input
@@ -453,7 +454,7 @@ def main():
                 for i, edu in enumerate(data["education"]):
                     degree = edu.get('degree', 'Unknown')
                     institution = edu.get('institution', 'Unknown')
-                    year = edu.get('year', 'Unknown')
+                    year = edu.get('year') or edu.get('duration') or 'Unknown'
                     
                     text = f"Education: {degree} at {institution}. Year: {year}."
                     metadata = {
