@@ -3,6 +3,8 @@ Multi-Provider Chatbot Orchestration
 Handles intelligent routing across OpenRouter, Hugging Face, and Gemini
 """
 import os
+import json
+import time
 import requests
 import logging
 from typing import List, Dict, Optional
@@ -11,6 +13,112 @@ from gradio_client import Client
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
+
+class ChatbotModelRegistry:
+    """Dynamic model registry for Chatbot with mtime caching, schema validation, and self-healing"""
+    def __init__(self, config_path: str = "/app/backend/logs/chatbot/dynamic_chatbot_config.json"):
+        if not os.path.exists(os.path.dirname(config_path)):
+            config_path = os.path.join(os.path.dirname(__file__), "logs", "chatbot", "dynamic_chatbot_config.json")
+            
+        self.config_path = config_path
+        self._cached_config = None
+        self._last_mtime = 0
+        self.failed_models = {}  # {model_name: expiry_timestamp}
+        
+        self.DEFAULT_CONFIG = {
+            "tier1": {
+                "primary": "openai/gpt-oss-120b:free",
+                "fallback": "qwen/qwen3-next-80b-a3b-instruct:free"
+            },
+            "tier2": {
+                "primary": "meta-llama/llama-3.3-70b-instruct:free",
+                "fallback": "openai/gpt-oss-20b:free"
+            },
+            "tier3": {
+                "gemini_models": [
+                    "models/gemini-2.5-flash",
+                    "models/gemini-2.0-flash",
+                    "models/gemma-3-12b-it"
+                ]
+            },
+            "tier4": {
+                "huggingface_model": "huggingface-projects/llama-3.2-3B-Instruct"
+            }
+        }
+
+    def _get_config(self) -> Dict:
+        """Loads config with mtime caching and strict validation"""
+        try:
+            if not os.path.exists(self.config_path):
+                self._save_config(self.DEFAULT_CONFIG)
+                return self.DEFAULT_CONFIG
+
+            current_mtime = os.path.getmtime(self.config_path)
+            if self._cached_config and current_mtime == self._last_mtime:
+                return self._cached_config
+
+            with open(self.config_path, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+                
+            # Validation
+            required = ["tier1", "tier2", "tier3", "tier4"]
+            for key in required:
+                if key not in config:
+                    raise ValueError(f"Missing required key: {key}")
+
+            self._cached_config = config
+            self._last_mtime = current_mtime
+            logger.info("♻️ Chatbot configuration reloaded")
+            return self._cached_config
+            
+        except Exception as e:
+            logger.warning(f"Invalid chatbot config. Falling back to defaults. Error: {e}")
+            return self.DEFAULT_CONFIG
+
+    def _save_config(self, config: Dict):
+        try:
+            os.makedirs(os.path.dirname(self.config_path), exist_ok=True)
+            with open(self.config_path, 'w', encoding='utf-8') as f:
+                json.dump(config, f, indent=2)
+            self._cached_config = config
+            self._last_mtime = os.path.getmtime(self.config_path)
+        except Exception as e:
+            logger.error(f"Failed to save dynamic chatbot config: {e}")
+
+    def promote_fallback(self, tier_key: str):
+        """Self-heals by swapping primary and fallback models permanently"""
+        config = self._get_config()
+        if tier_key in config and "primary" in config[tier_key] and "fallback" in config[tier_key]:
+            old_primary = config[tier_key]["primary"]
+            new_primary = config[tier_key]["fallback"]
+            
+            logger.warning(f"⚠️ {tier_key} model {old_primary} failed. 🔄 Promoting {new_primary}")
+            
+            config[tier_key]["primary"] = new_primary
+            config[tier_key]["fallback"] = old_primary
+            self._save_config(config)
+
+    def mark_failed(self, model_name: str):
+        """Puts a model on cooldown for 10 minutes"""
+        expiry = time.time() + 600  # 10 minutes
+        self.failed_models[model_name] = expiry
+        logger.warning(f"⏳ Model {model_name} placed on 10-minute cooldown.")
+
+    def is_on_cooldown(self, model_name: str) -> bool:
+        """Checks if a model is currently on cooldown"""
+        if model_name in self.failed_models:
+            if time.time() < self.failed_models[model_name]:
+                return True
+            else:
+                del self.failed_models[model_name]
+        return False
+
+    def get_tier_config(self, tier_key: str) -> Dict:
+        config = self._get_config()
+        return config.get(tier_key, self.DEFAULT_CONFIG.get(tier_key))
+
+CHATBOT_MODELS = ChatbotModelRegistry()
+
 
 
 
@@ -339,6 +447,37 @@ Remember: You are Assist Bot (never say Allu Bot). Respond naturally in conversa
         except Exception as e:
             logger.error(f"OpenRouter error ({model}): {str(e)}")
             return None
+
+    def _call_openrouter_with_healing(self, tier_key: str, messages: List[Dict], max_tokens: int) -> Optional[str]:
+        """Calls OpenRouter with cooldown checks and self-healing fallback promotion"""
+        tier_config = CHATBOT_MODELS.get_tier_config(tier_key)
+        primary = tier_config.get("primary")
+        fallback = tier_config.get("fallback")
+
+        # Check Primary
+        if not CHATBOT_MODELS.is_on_cooldown(primary):
+            logger.info(f"🤖 {tier_key}: {primary}")
+            response = self._call_openrouter(primary, messages, max_tokens)
+            if response:
+                return response
+            # Failed
+            CHATBOT_MODELS.mark_failed(primary)
+            CHATBOT_MODELS.promote_fallback(tier_key)
+        else:
+            logger.warning(f"⏩ Skipping {primary} (on cooldown)")
+
+        # Check Fallback
+        if not CHATBOT_MODELS.is_on_cooldown(fallback):
+            logger.info(f"🤖 {tier_key} (fallback): {fallback}")
+            response = self._call_openrouter(fallback, messages, max_tokens)
+            if response:
+                return response
+            # Failed
+            CHATBOT_MODELS.mark_failed(fallback)
+        else:
+            logger.warning(f"⏩ Skipping fallback {fallback} (on cooldown)")
+            
+        return None
     
     def _call_huggingface(self, message: str, max_tokens: int) -> Optional[str]:
         """
@@ -626,41 +765,34 @@ Remember: You are Assist Bot (never say Allu Bot). Respond naturally in conversa
         #     safe_length = int(MAX_INPUT_TOKENS * 3.5) # Safe char count
         #     messages[-1]['content'] = last_msg[:safe_length] + "\n...[Context Truncated for Safety]"
             
-        # Tier 1: Gemma 3 27B IT (Free) - Large Model PRIMARY
-        logger.info("Trying Tier 1: Gemma 3 27B IT (Free)")
-        
-        response = self._call_openrouter("google/gemma-3-27b-it:free", messages, max_tokens)
+        # Tier 1: Primary Model with Self-Healing
+        response = self._call_openrouter_with_healing("tier1", messages, max_tokens)
         if response:
-            logger.info("✅ Response from Gemma 3 27B")
             return self._clean_response(response)
             
-        # Tier 2: Mistral 7B Instruct (Free) - Fast Fallback
-        logger.info("Trying Tier 2: Mistral 7B Instruct (Free)")
-        
-        response = self._call_openrouter("mistralai/mistral-7b-instruct:free", messages, max_tokens)
+        # Tier 2: Fast Fallback with Self-Healing
+        response = self._call_openrouter_with_healing("tier2", messages, max_tokens)
         if response:
-            logger.info("✅ Response from Mistral 7B")
             return self._clean_response(response)
         
         # Tier 3: Gemini Chain (Standard) - Moved up as requested
-        logger.info("Trying Tier 3: Gemini Chain (Standard)")
+        logger.info("🤖 Tier 3: Gemini Chain (Standard)")
         response = self._call_gemini_fallback(query, context, history, max_tokens)
         if response:
-            logger.info("✅ Response from Gemini Chain")
             return self._clean_response(response)
 
-        # Tier 4: Hugging Face - Llama 3.2 3B Instruct (Fallback)
-        logger.info("Trying Tier 4: Hugging Face - Llama 3.2 3B")
+        # Tier 4: Hugging Face Fallback
+        tier4_config = CHATBOT_MODELS.get_tier_config("tier4")
+        tier4_model = tier4_config.get("huggingface_model")
+        logger.info(f"🤖 Tier 4: {tier4_model} (HF)")
         
         # INLINE PROMPT INJECTION for HF (Critical)
         # HF models often ignore system role, so we force it into the User prompt with unified SYSTEM_PROMPT
         hf_prompt = f"{SYSTEM_PROMPT}\n\nVERIFIED INFORMATION FROM ALTHAF'S PORTFOLIO DATABASE:\n{context if context else 'No context.'}\n\nUSER QUESTION: {query}\n\nRemember: You are Assist Bot (never say Allu Bot). Respond naturally in conversational paragraphs without special formatting."
-        # Append history as text context if needed, or just rely on the strict Prompt
-        # For Tier 4, reliability > history
         
         response = self._call_huggingface(hf_prompt, max_tokens)
         if response:
-            logger.info("✅ Response from Llama 3.2 3B (HF)")
+            logger.info(f"✅ Response from {tier4_model} (HF)")
             return self._clean_response(response)
 
         # All providers failed

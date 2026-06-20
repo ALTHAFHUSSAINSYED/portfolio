@@ -30,6 +30,10 @@ FILES_TO_DEPLOY = [
     {
         "local": "c:/portfolio/portfolio/backend/test_auto_blogger.py",
         "remote": "/app/backend/test_auto_blogger.py"
+    },
+    {
+        "local": "c:/portfolio/portfolio/backend/chatbot_provider.py",
+        "remote": "/app/backend/chatbot_provider.py"
     }
 ]
 
