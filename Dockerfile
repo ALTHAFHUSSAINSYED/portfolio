@@ -28,5 +28,8 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:8000/health || exit 1
 
+# Strip Windows CRLF line endings from bash script to prevent Exit Code 127
+RUN sed -i 's/\r$//' startup.sh
+
 # Start the application using our custom startup script
 CMD ["bash", "startup.sh"]

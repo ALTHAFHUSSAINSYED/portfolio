@@ -8,15 +8,7 @@ echo "$PREFIX Booting Portfolio Backend Container..."
 # 1. Startup Validation
 echo "$PREFIX Running Startup Validations..."
 
-if [ ! -f "/app/.env.local" ]; then
-    echo "$PREFIX 🚨 ERROR: /app/.env.local is missing! Please mount it."
-    exit 1
-fi
-
-# Source env vars to check them
-set -a
-source /app/.env.local
-set +a
+# Environment variables are passed via docker --env-file, so we just check if they exist
 
 if [ -z "$OPENROUTER_KEY" ]; then
     echo "$PREFIX 🚨 ERROR: OPENROUTER_KEY is missing in .env.local!"
