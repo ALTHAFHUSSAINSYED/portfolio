@@ -5,7 +5,30 @@ PREFIX="[Startup]"
 
 echo "$PREFIX Booting Portfolio Backend Container..."
 
-# Print Version Metadata
+# 1. Startup Validation
+echo "$PREFIX Running Startup Validations..."
+
+if [ ! -f "/app/.env.local" ]; then
+    echo "$PREFIX 🚨 ERROR: /app/.env.local is missing! Please mount it."
+    exit 1
+fi
+
+# Source env vars to check them
+set -a
+source /app/.env.local
+set +a
+
+if [ -z "$OPENROUTER_KEY" ]; then
+    echo "$PREFIX 🚨 ERROR: OPENROUTER_KEY is missing in .env.local!"
+    exit 1
+fi
+
+if [ -z "$GEMINI_API_KEY" ]; then
+    echo "$PREFIX 🚨 ERROR: GEMINI_API_KEY is missing in .env.local!"
+    exit 1
+fi
+
+# 2. Print Version Metadata
 if [ -f "version.json" ]; then
     echo "$PREFIX Version Information:"
     cat version.json
@@ -14,18 +37,10 @@ else
     echo "$PREFIX No version.json found (Development build)"
 fi
 
+# 3. DB Sync
 echo "$PREFIX Synchronizing S3 to ChromaDB..."
 python backend/sync_s3_to_chroma.py
 
-echo "$PREFIX Starting Uvicorn (FastAPI) in the background..."
-# We run Uvicorn on 127.0.0.1:8000. Nginx will proxy pass port 80/443 to this.
-uvicorn backend.server:app --host 127.0.0.1 --port 8000 &
-
-# Optional: You can add Certbot generation logic here later if needed
-# if [ ! -d "/etc/letsencrypt/live/api.althafportfolio.site" ]; then
-#     echo "$PREFIX Warning: No SSL certificates found."
-# fi
-
-echo "$PREFIX Starting Nginx..."
-# Start Nginx in the foreground so the Docker container stays alive
-nginx -g 'daemon off;'
+# 4. Start Server
+echo "$PREFIX Starting Uvicorn (FastAPI) in the foreground..."
+exec uvicorn backend.server:app --host 0.0.0.0 --port 8000

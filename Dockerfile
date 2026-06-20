@@ -2,9 +2,9 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Install dependencies, Nginx, and Certbot
+# Install build dependencies
 RUN apt-get update \
-    && apt-get install -y build-essential curl nginx certbot python3-certbot-nginx \
+    && apt-get install -y build-essential curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy python requirements and install
@@ -21,13 +21,12 @@ RUN mkdir -p /app/backend/logs /app/backend/runtime_configs
 # Copy the entire project
 COPY . .
 
-# Copy Nginx configuration to standard location
-# Note: Ensure backend/nginx.conf.ec2 is properly configured to proxy pass to 127.0.0.1:8000
-RUN cp backend/nginx.conf.ec2 /etc/nginx/nginx.conf
+# Expose HTTP port for Uvicorn
+EXPOSE 8000
 
-# Expose HTTP and HTTPS ports
-EXPOSE 80
-EXPOSE 443
+# Add Health Check (Assuming your FastAPI app has a /health endpoint, if not, it will check the root)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8000/health || exit 1
 
 # Start the application using our custom startup script
 CMD ["bash", "startup.sh"]

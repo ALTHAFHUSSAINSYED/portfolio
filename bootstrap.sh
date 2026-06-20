@@ -3,17 +3,17 @@
 
 set -e
 
-echo "🚀 Bootstrapping Althaf's Portfolio Backend Server..."
+echo "🚀 Bootstrapping Althaf's Portfolio Server (Two-Container Architecture)..."
 
-# 1. Install Docker if not present
+# 1. Install Docker and Certbot if not present
 if ! command -v docker &> /dev/null; then
-    echo "🐳 Installing Docker..."
+    echo "🐳 Installing Docker & Certbot..."
     sudo dnf update -y
-    sudo dnf install docker -y
+    sudo dnf install docker certbot -y
     sudo systemctl enable docker
     sudo systemctl start docker
     sudo usermod -aG docker ec2-user
-    echo "✅ Docker installed and started."
+    echo "✅ Docker & Certbot installed and started."
 else
     echo "✅ Docker already installed."
 fi
@@ -23,8 +23,7 @@ echo "📁 Creating host persistence directories..."
 mkdir -p /home/ec2-user/portfolio/configs
 mkdir -p /home/ec2-user/portfolio/logs/chatbot
 mkdir -p /home/ec2-user/portfolio/logs/auto_blogger
-mkdir -p /home/ec2-user/portfolio/certbot
-mkdir -p /home/ec2-user/portfolio/ssl
+mkdir -p /home/ec2-user/portfolio/nginx
 
 # 3. Create .env.local if it doesn't exist
 if [ ! -f /home/ec2-user/portfolio/.env.local ]; then
@@ -41,19 +40,26 @@ echo "Next Steps:"
 echo "1. Log out and log back in (to apply Docker group permissions)."
 echo "2. Edit your environment variables:"
 echo "   nano /home/ec2-user/portfolio/.env.local"
-echo "3. Pull and run the immutable container:"
+echo "3. Pull and run the backend container:"
 echo "   docker pull kubealthaf/portfolio-backend:latest"
 echo ""
 echo "   docker run -d \\"
 echo "   --name portfolio-backend \\"
-echo "   -p 80:80 \\"
-echo "   -p 443:443 \\"
-echo "   -p 8000:8000 \\"
 echo "   --restart unless-stopped \\"
 echo "   --env-file /home/ec2-user/portfolio/.env.local \\"
 echo "   -v /home/ec2-user/portfolio/configs:/app/backend/runtime_configs \\"
 echo "   -v /home/ec2-user/portfolio/logs:/app/backend/logs \\"
-echo "   -v /home/ec2-user/portfolio/certbot:/etc/letsencrypt \\"
-echo "   -v /home/ec2-user/portfolio/ssl:/app/ssl \\"
 echo "   kubealthaf/portfolio-backend:latest"
+echo ""
+echo "4. Pull and run the Nginx container:"
+echo "   docker run -d \\"
+echo "   --name portfolio-nginx \\"
+echo "   --link portfolio-backend:backend \\"
+echo "   -p 80:80 \\"
+echo "   -p 443:443 \\"
+echo "   --restart unless-stopped \\"
+echo "   -v /home/ec2-user/portfolio/nginx/nginx.conf:/etc/nginx/nginx.conf \\"
+echo "   -v /etc/letsencrypt:/etc/letsencrypt \\"
+echo "   nginx:alpine"
 echo "=========================================================="
+
