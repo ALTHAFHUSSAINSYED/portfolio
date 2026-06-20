@@ -97,6 +97,9 @@ ssh -i "portfolio.key.pem" ec2-user@<YOUR_EC2_IP>
 
 ## Phase 4: Configure Environment Variables
 
+- **Local Project Template Path**: `c:/portfolio/portfolio/backend/.env.example`
+- **Target EC2 File Path**: `/home/ec2-user/portfolio/.env.local`
+
 Edit the environment file on the host:
 ```bash
 nano /home/ec2-user/portfolio/.env.local
@@ -265,6 +268,8 @@ docker run -d \
 ```
 
 ### 4. Sync ChromaDB Vector Database
+- **Local Project Script Path**: `c:/portfolio/portfolio/backend/populate_vector_db.py`
+
 To sync all portfolio assets and blogs from the S3 bucket into the ChromaDB collection:
 ```bash
 docker exec -it portfolio-backend python3 populate_vector_db.py
@@ -273,6 +278,8 @@ docker exec -it portfolio-backend python3 populate_vector_db.py
 ---
 
 ## Phase 8: Connect Frontend with Backend
+
+- **Local Project Path**: `c:/portfolio/portfolio/frontend/.env`
 
 To connect your frontend application to the new backend:
 1. Open the frontend `.env` configuration file and set `REACT_APP_API_URL` to point to the secure subdomain:
