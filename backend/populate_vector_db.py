@@ -224,10 +224,21 @@ def main():
         return
 
     # --- 4. PREPARE COLLECTIONS ---
-    # We use get_or_create to preserve existing data (Smart Sync)
-    portfolio_col = client.get_or_create_collection("portfolio", embedding_function=GeminiEmbeddingFunction())
-    projects_col = client.get_or_create_collection("Projects_data", embedding_function=GeminiEmbeddingFunction())
-    blogs_col = client.get_or_create_collection("Blogs_data", embedding_function=GeminiEmbeddingFunction())
+    # We use get_or_create to preserve existing data (Smart Sync), falling back to get_collection on conflict
+    try:
+        portfolio_col = client.get_or_create_collection("portfolio", embedding_function=GeminiEmbeddingFunction())
+    except Exception:
+        portfolio_col = client.get_collection("portfolio")
+        
+    try:
+        projects_col = client.get_or_create_collection("Projects_data", embedding_function=GeminiEmbeddingFunction())
+    except Exception:
+        projects_col = client.get_collection("Projects_data")
+        
+    try:
+        blogs_col = client.get_or_create_collection("Blogs_data", embedding_function=GeminiEmbeddingFunction())
+    except Exception:
+        blogs_col = client.get_collection("Blogs_data")
     
     print("✅ Collections Ready (Persistent Mode).")
 
