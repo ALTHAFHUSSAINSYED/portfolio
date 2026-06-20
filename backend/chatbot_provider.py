@@ -14,6 +14,11 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
+class OpenRouterError(Exception):
+    def __init__(self, message, status_code):
+        super().__init__(message)
+        self.status_code = status_code
+
 class ChatbotModelRegistry:
     """Dynamic model registry for Chatbot with mtime caching, schema validation, and self-healing"""
     def __init__(self, config_path: str = "/app/backend/logs/chatbot/dynamic_chatbot_config.json"):
@@ -24,6 +29,8 @@ class ChatbotModelRegistry:
         self._cached_config = None
         self._last_mtime = 0
         self.failed_models = {}  # {model_name: expiry_timestamp}
+        self.failure_count = {}  # {model_name: int}
+        self.runtime_overrides = {}  # {tier_name: model_name}
         
         self.DEFAULT_CONFIG = {
             "tier1": {
@@ -45,6 +52,7 @@ class ChatbotModelRegistry:
                 "huggingface_model": "huggingface-projects/llama-3.2-3B-Instruct"
             }
         }
+        self.FAILURE_THRESHOLD = 3
 
     def _get_config(self) -> Dict:
         """Loads config with mtime caching and strict validation"""
@@ -85,33 +93,61 @@ class ChatbotModelRegistry:
         except Exception as e:
             logger.error(f"Failed to save dynamic chatbot config: {e}")
 
-    def promote_fallback(self, tier_key: str):
-        """Self-heals by swapping primary and fallback models permanently"""
+    def promote_to_override(self, tier_key: str):
+        """Self-heals by overriding the primary model in memory"""
         config = self._get_config()
         if tier_key in config and "primary" in config[tier_key] and "fallback" in config[tier_key]:
             old_primary = config[tier_key]["primary"]
             new_primary = config[tier_key]["fallback"]
             
-            logger.warning(f"⚠️ {tier_key} model {old_primary} failed. 🔄 Promoting {new_primary}")
+            logger.warning(f"⚠️ {tier_key} model {old_primary} failed. 🔄 Runtime promotion: {tier_key} → {new_primary}")
             
-            config[tier_key]["primary"] = new_primary
-            config[tier_key]["fallback"] = old_primary
-            self._save_config(config)
+            self.runtime_overrides[tier_key] = new_primary
+
+    def record_failure(self, model_name: str) -> bool:
+        """Increments failure count and returns True if threshold met"""
+        count = self.failure_count.get(model_name, 0) + 1
+        self.failure_count[model_name] = count
+        logger.warning(f"⚠️ Failure count for {model_name}: {count}/{self.FAILURE_THRESHOLD}")
+        return count >= self.FAILURE_THRESHOLD
 
     def mark_failed(self, model_name: str):
         """Puts a model on cooldown for 10 minutes"""
         expiry = time.time() + 600  # 10 minutes
         self.failed_models[model_name] = expiry
-        logger.warning(f"⏳ Model {model_name} placed on 10-minute cooldown.")
+        logger.warning(f"⏳ Cooling model {model_name} for 10 minutes")
 
-    def is_on_cooldown(self, model_name: str) -> bool:
+    def is_on_cooldown(self, model_name: str, tier_key: str = None) -> bool:
         """Checks if a model is currently on cooldown"""
         if model_name in self.failed_models:
             if time.time() < self.failed_models[model_name]:
                 return True
             else:
+                # Cooldown expired. Recover automatically.
                 del self.failed_models[model_name]
+                if model_name in self.failure_count:
+                    del self.failure_count[model_name]
+                
+                # If there's an override for this tier, clear it so we recover back to primary
+                if tier_key and tier_key in self.runtime_overrides:
+                    del self.runtime_overrides[tier_key]
+                    logger.info(f"✅ Cooldown expired. 🔄 Restoring {tier_key} primary: {model_name}")
+                    
         return False
+
+    def get_tier_primary(self, tier_key: str) -> str:
+        """Gets the active primary model, respecting in-memory overrides"""
+        if tier_key in self.runtime_overrides:
+            return self.runtime_overrides[tier_key]
+        
+        config = self._get_config()
+        tier_config = config.get(tier_key, self.DEFAULT_CONFIG.get(tier_key))
+        return tier_config.get("primary")
+        
+    def get_tier_fallback(self, tier_key: str) -> str:
+        config = self._get_config()
+        tier_config = config.get(tier_key, self.DEFAULT_CONFIG.get(tier_key))
+        return tier_config.get("fallback")
 
     def get_tier_config(self, tier_key: str) -> Dict:
         config = self._get_config()
@@ -442,42 +478,61 @@ Remember: You are Assist Bot (never say Allu Bot). Respond naturally in conversa
                 return text
             else:
                 logger.warning(f"OpenRouter failed ({model}): {response.status_code} - {response.text[:200]}")
-                return None
+                raise OpenRouterError(f"OpenRouter API failed with status {response.status_code}", response.status_code)
                 
+        except requests.exceptions.RequestException as e:
+            logger.error(f"OpenRouter connection error ({model}): {str(e)}")
+            raise OpenRouterError(f"Connection failed: {str(e)}", 503)
+        except OpenRouterError:
+            raise
         except Exception as e:
-            logger.error(f"OpenRouter error ({model}): {str(e)}")
-            return None
+            logger.error(f"OpenRouter unexpected error ({model}): {str(e)}")
+            raise OpenRouterError(f"Unexpected error: {str(e)}", 500)
 
     def _call_openrouter_with_healing(self, tier_key: str, messages: List[Dict], max_tokens: int) -> Optional[str]:
         """Calls OpenRouter with cooldown checks and self-healing fallback promotion"""
-        tier_config = CHATBOT_MODELS.get_tier_config(tier_key)
-        primary = tier_config.get("primary")
-        fallback = tier_config.get("fallback")
-
-        # Check Primary
-        if not CHATBOT_MODELS.is_on_cooldown(primary):
-            logger.info(f"🤖 {tier_key}: {primary}")
-            response = self._call_openrouter(primary, messages, max_tokens)
-            if response:
-                return response
-            # Failed
-            CHATBOT_MODELS.mark_failed(primary)
-            CHATBOT_MODELS.promote_fallback(tier_key)
-        else:
-            logger.warning(f"⏩ Skipping {primary} (on cooldown)")
-
-        # Check Fallback
-        if not CHATBOT_MODELS.is_on_cooldown(fallback):
-            logger.info(f"🤖 {tier_key} (fallback): {fallback}")
-            response = self._call_openrouter(fallback, messages, max_tokens)
-            if response:
-                return response
-            # Failed
-            CHATBOT_MODELS.mark_failed(fallback)
-        else:
-            logger.warning(f"⏩ Skipping fallback {fallback} (on cooldown)")
+        primary = CHATBOT_MODELS.get_tier_primary(tier_key)
+        fallback = CHATBOT_MODELS.get_tier_fallback(tier_key)
+        
+        # Determine active model (if primary is on cooldown, jump straight to fallback)
+        active_model = primary
+        if CHATBOT_MODELS.is_on_cooldown(primary, tier_key):
+            active_model = fallback
             
-        return None
+        try:
+            logger.info(f"🤖 {tier_key}: {active_model}")
+            return self._call_openrouter(active_model, messages, max_tokens)
+            
+        except OpenRouterError as e:
+            # Fatal Errors: Invalid key, model removed, etc. No retries.
+            if e.status_code in [401, 403, 404]:
+                logger.error(f"🚨 Fatal OpenRouter error {e.status_code} for {active_model}. Aborting tier.")
+                return None
+                
+            # Transient / Rate Limits: Track failures and potentially promote
+            if e.status_code in [429, 502, 503, 504]:
+                if CHATBOT_MODELS.record_failure(active_model):
+                    CHATBOT_MODELS.mark_failed(active_model)
+                    
+                    # If the failed model was primary, override to fallback immediately
+                    if active_model == primary and fallback:
+                        CHATBOT_MODELS.promote_to_override(tier_key)
+                        logger.info(f"🤖 {tier_key} (fallback): {fallback}")
+                        try:
+                            return self._call_openrouter(fallback, messages, max_tokens)
+                        except Exception as fallback_e:
+                            logger.error(f"Fallback {fallback} also failed: {fallback_e}")
+                            
+            # Immediate Fallback: Try fallback for this request but don't count towards promotion
+            elif e.status_code == 408:
+                logger.warning(f"⚠️ {active_model} timed out (408). Trying fallback for this request only.")
+                if active_model == primary and fallback:
+                    try:
+                        return self._call_openrouter(fallback, messages, max_tokens)
+                    except Exception:
+                        pass
+                        
+            return None
     
     def _call_huggingface(self, message: str, max_tokens: int) -> Optional[str]:
         """
