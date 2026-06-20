@@ -56,7 +56,7 @@ const ContactSection = ({ personalInfo }) => {
     };
 
     try {
-      const apiUrl = `${process.env.REACT_APP_API_URL || 'https://althaf-portfolio.onrender.com'}/api/contact`;
+      const apiUrl = `${process.env.REACT_APP_API_URL || 'https://api.althafportfolio.site'}/api/contact`;
 
       const response = await axios.post(apiUrl, payload);
 
