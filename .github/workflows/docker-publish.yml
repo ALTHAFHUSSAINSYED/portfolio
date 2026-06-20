@@ -36,5 +36,5 @@ jobs:
           context: .
           push: true
           tags: |
-            althafhussainsyed/portfolio-backend:latest
-            althafhussainsyed/portfolio-backend:v${{ github.run_number }}
+            kubealthaf/portfolio-backend:latest
+            kubealthaf/portfolio-backend:v${{ github.run_number }}
