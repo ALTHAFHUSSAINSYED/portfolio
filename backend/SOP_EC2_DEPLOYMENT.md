@@ -41,7 +41,7 @@ ssh -i "portfolio.key.pem" ec2-user@<YOUR_EC2_IP>
 ```
 
 ### 2. Copy and Run the Bootstrap Script
-- **Local Repository File Path**: `bootstrap.sh` (located at the root of the project workspace)
+- **Local Project Path**: `c:/portfolio/portfolio/bootstrap.sh`
 - **Target EC2 File Path**: `/home/ec2-user/bootstrap.sh`
 
 Create the bootstrap script on the host:
@@ -150,7 +150,7 @@ Add the following line at the end of the file:
 
 ## Phase 6: Configure Nginx
 
-- **Local Repository File Path**: `backend/nginx.conf` (located inside the `backend/` directory of the project workspace)
+- **Local Project Path**: `c:/portfolio/portfolio/backend/nginx.conf`
 - **Target EC2 File Path**: `/home/ec2-user/portfolio/nginx/nginx.conf`
 
 Create the Nginx configuration file on the host:
