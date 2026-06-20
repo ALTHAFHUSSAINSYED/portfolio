@@ -30,11 +30,23 @@ fi
 
 # 2. Print Version Metadata
 if [ -f "version.json" ]; then
-    echo "$PREFIX Version Information:"
-    cat version.json
-    echo ""
+    echo "========================================"
+    echo "Portfolio Backend"
+    
+    # Simple grep/awk to parse the flat JSON safely without installing jq
+    VERSION=$(grep -o '"image_version": *"[^"]*"' version.json | grep -o '"[^"]*"$' | tr -d '"')
+    COMMIT=$(grep -o '"git_commit": *"[^"]*"' version.json | grep -o '"[^"]*"$' | tr -d '"')
+    BUILD=$(grep -o '"build_date": *"[^"]*"' version.json | grep -o '"[^"]*"$' | tr -d '"')
+    
+    echo "Version: $VERSION"
+    echo "Commit: $COMMIT"
+    echo "Built: $BUILD"
+    echo "========================================"
 else
-    echo "$PREFIX No version.json found (Development build)"
+    echo "========================================"
+    echo "Portfolio Backend"
+    echo "Version: Development Build"
+    echo "========================================"
 fi
 
 # 3. DB Sync
