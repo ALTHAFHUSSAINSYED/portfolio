@@ -1,57 +1,28 @@
-data "aws_vpc" "default" {
-  default = true
+module "networking" {
+  source = "./modules/networking"
 }
 
-data "aws_subnets" "default" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.default.id]
-  }
+module "security" {
+  source        = "./modules/security"
+  vpc_id        = module.networking.vpc_id
+  ingress_rules = var.ingress_rules
 }
 
-resource "aws_security_group" "portfolio_sg" {
-  name        = "portfolio-sg"
-  description = "Security group for portfolio app"
-  vpc_id      = data.aws_vpc.default.id
-
-  dynamic "ingress" {
-    for_each = var.ingress_rules
-
-    content {
-      from_port   = ingress.value.from_port
-      to_port     = ingress.value.to_port
-      protocol    = ingress.value.protocol
-      cidr_blocks = ingress.value.cidr_blocks
-    }
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "portfolio-sg"
-  }
+module "compute" {
+  source             = "./modules/compute"
+  instance_type      = var.instance_type
+  key_name           = var.key_name
+  subnet_id          = module.networking.subnet_ids[0]
+  security_group_ids = [module.security.security_group_id]
 }
 
-resource "aws_instance" "portfolio_instance" {
-  ami                    = data.aws_ami.amazon_linux.id
-  instance_type          = var.instance_type
-  key_name               = var.key_name
-  subnet_id              = data.aws_subnets.default.ids[0]
-  vpc_security_group_ids = [aws_security_group.portfolio_sg.id]
+# Declarative moved blocks to preserve state without recreation
+moved {
+  from = aws_security_group.portfolio_sg
+  to   = module.security.aws_security_group.portfolio_sg
+}
 
-  root_block_device {
-    volume_size = 30
-    volume_type = "gp3"
-    encrypted   = true
-  }
-
-  tags = {
-    Name = "portfolio-backend"
-  }
-
+moved {
+  from = aws_instance.portfolio_instance
+  to   = module.compute.aws_instance.portfolio_instance
 }

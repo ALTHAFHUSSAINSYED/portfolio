@@ -278,7 +278,7 @@ class ChatbotProvider:
                 logger.warning(f"Failed to initialize HF client: {e}")
         
         # Gemini (fallback)
-        self.gemini_key = os.getenv('GEMINI_API_KEY')
+        self.gemini_key = os.getenv('CHATBOT_GEMINI_KEY')
         self.gemini_client = None
         if self.gemini_key:
             try:

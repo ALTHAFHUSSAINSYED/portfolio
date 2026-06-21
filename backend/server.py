@@ -112,7 +112,7 @@ cloudinary.config(
 # Configure Gemini Client
 # genai.configure(api_key=os.getenv('GEMINI_API_KEY')) # Legacy
 try:
-    genai_client = genai.Client(api_key=os.getenv('GEMINI_API_KEY'))
+    genai_client = genai.Client(api_key=os.getenv('CHATBOT_GEMINI_KEY') or os.getenv('GEMINI_API_KEY'))
 except Exception as e:
     print(f"Warning: Failed to init global Gemini Client: {e}")
     genai_client = None
