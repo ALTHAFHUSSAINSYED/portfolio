@@ -42,8 +42,8 @@ else
 fi
 
 # 3. DB Sync
-echo "$PREFIX Synchronizing S3 to ChromaDB..."
-python backend/sync_s3_to_chroma.py
+echo "$PREFIX Synchronizing S3 to ChromaDB portfolio_master..."
+python backend/populate_vector_db.py
 
 # 4. Start Server
 echo "$PREFIX Starting Uvicorn (FastAPI) in the foreground..."

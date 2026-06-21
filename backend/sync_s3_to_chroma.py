@@ -41,6 +41,11 @@ def get_embedding(text):
         return None
 
 def sync():
+    print("❌ ERROR: sync_s3_to_chroma.py is DEPRECATED and should not be used.")
+    print("👉 Please use backend/populate_vector_db.py for the unified portfolio_master collection.")
+    import sys
+    sys.exit(1)
+
     print("🚀 Starting S3 -> ChromaDB Sync...")
 
     # 1. Get S3 Index
