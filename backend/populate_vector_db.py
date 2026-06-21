@@ -42,24 +42,51 @@ class GeminiEmbeddingFunction(EmbeddingFunction):
         pass
 
     def __call__(self, input: Documents) -> Embeddings:
+        import time
+        import random
         model = 'gemini-embedding-001'
-        try:
-            if not genai_client:
-                return [[0.0] * 768 for _ in input]
-            return [
-                genai_client.models.embed_content(
-                    model=model,
-                    contents=text,
-                    config=types.EmbedContentConfig(
-                        task_type="RETRIEVAL_DOCUMENT",
-                        output_dimensionality=768
-                    )
-                ).embeddings[0].values
-                for text in input
-            ]
-        except Exception as e:
-            print(f"[ERROR] Embedding failed: {e}")
+        if not genai_client:
             return [[0.0] * 768 for _ in input]
+            
+        embeddings_list = []
+        batch_size = 10  # Use batching to reduce api roundtrips and prevent quota hits
+        
+        for i in range(0, len(input), batch_size):
+            batch = input[i:i+batch_size]
+            retries = 5
+            backoff = 2.0
+            
+            while retries > 0:
+                try:
+                    response = genai_client.models.embed_content(
+                        model=model,
+                        contents=batch,
+                        config=types.EmbedContentConfig(
+                            task_type="RETRIEVAL_DOCUMENT",
+                            output_dimensionality=768
+                        )
+                    )
+                    batch_embeddings = [emb.values for emb in response.embeddings]
+                    embeddings_list.extend(batch_embeddings)
+                    break
+                except Exception as e:
+                    err_str = str(e)
+                    if "429" in err_str or "quota" in err_str.lower() or "limit" in err_str.lower():
+                        sleep_time = backoff + random.uniform(0, 1)
+                        print(f"[WARN] 429 Rate Limit hit. Retrying in {sleep_time:.2f}s... Details: {e}")
+                        time.sleep(sleep_time)
+                        retries -= 1
+                        backoff *= 2.0
+                    else:
+                        print(f"[ERROR] Embedding failed: {e}")
+                        # Fallback for this batch if it's a non-retryable error
+                        embeddings_list.extend([[0.0] * 768 for _ in batch])
+                        break
+            else:
+                print(f"[ERROR] Failed to embed batch after multiple retries. Using dummy values.")
+                embeddings_list.extend([[0.0] * 768 for _ in batch])
+                
+        return embeddings_list
 
 def clean_text(text):
     if not text: return ""
@@ -178,12 +205,15 @@ def sync_blogs_from_s3(chroma_client, embed_function):
                 "metadata_category": "blogs"  # Enhanced RAG tag
             }
             
+            # Truncate content to avoid exceeding Chroma Cloud document size limit (16KB)
+            text_to_embed = f"Blog Title: {title}. Content: {content[:6000]}..."
+            
             # Use dual_write_with_category helper
             success = write_to_portfolio_master(
                 chroma_client,
                 embed_function,
                 blog_id,
-                clean_text(content),
+                clean_text(text_to_embed),
                 metadata,
                 category='blog',
                 subcategory=blog_category
