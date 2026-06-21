@@ -8,15 +8,17 @@ PORTFOLIO_DIR="/home/ec2-user/portfolio"
 echo "🏁 Starting Deployment Pipeline..."
 
 # 1. Idempotent Software Installation
-if ! command -v docker &> /dev/null || ! command -v certbot &> /dev/null; then
-  echo "📦 Installing Docker & Certbot..."
+if ! command -v docker &> /dev/null || ! command -v certbot &> /dev/null || ! command -v crontab &> /dev/null; then
+  echo "📦 Installing Docker, Certbot, and Cronie..."
   sudo dnf update -y
-  sudo dnf install docker certbot python3-certbot-nginx -y
+  sudo dnf install docker certbot python3-certbot-nginx cronie -y
   sudo systemctl enable docker
   sudo systemctl start docker
+  sudo systemctl enable crond
+  sudo systemctl start crond
   sudo usermod -aG docker ec2-user
 else
-  echo "✅ Docker & Certbot are already installed."
+  echo "✅ Docker, Certbot, and Cronie are already installed."
 fi
 
 # 2. Setup Directories
@@ -37,7 +39,7 @@ mv /tmp/nginx.conf "$PORTFOLIO_DIR/nginx/nginx.conf"
 mv /tmp/.env.local "$PORTFOLIO_DIR/.env.local"
 
 # 5. Idempotent SSL Certificate Setup
-if [ ! -d "/etc/letsencrypt/live/$DOMAIN" ]; then
+if ! sudo test -d "/etc/letsencrypt/live/$DOMAIN"; then
   echo "🔒 Requesting SSL Certificate via Certbot standalone..."
   sudo systemctl stop nginx || true
   sudo certbot certonly --standalone -d "$DOMAIN" --agree-tos --email "$EMAIL" --non-interactive
@@ -82,7 +84,7 @@ sudo docker run -d \
 
 # 9. Sync ChromaDB Vector Database
 echo "📥 Syncing ChromaDB Vector Database..."
-sudo docker exec portfolio-backend python3 populate_vector_db.py
+sudo docker exec -w /app/backend portfolio-backend python3 populate_vector_db.py
 
 echo "🎉 Deployment complete!"
 
