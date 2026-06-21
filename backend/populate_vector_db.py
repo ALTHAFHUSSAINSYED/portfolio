@@ -140,100 +140,147 @@ def write_to_portfolio_master(client, embed_function, uid, doc, meta, category, 
 
 def sync_blogs_from_s3(chroma_client, embed_function):
     """
-    Sync all blogs from S3 bucket (source of truth) to ChromaDB portfolio_master collection.
-    Downloads index.json from S3 and embeds each blog with category='blog'.
+    Sync ONLY the 30 latest blogs (S3 + local fallback) to ChromaDB portfolio_master collection,
+    and delete/prune any older blogs from ChromaDB.
     """
-    print("\n📚 [BLOGS] Syncing blogs from S3...")
+    print("\n📚 [BLOGS] Starting Unified Blog Sync (limit to 30 latest)...")
     
+    all_blogs = []
+    
+    # 1. Fetch S3 blogs
     try:
         s3 = boto3.client('s3')
         bucket = os.getenv('S3_BLOG_BUCKET', 'althaf-blogs-storage')
         
-        # Download index.json from S3
-        try:
-            response = s3.get_object(Bucket=bucket, Key='blogs/index.json')
-            index_data = json.loads(response['Body'].read().decode('utf-8'))
-            
-            # Handle nested structure: {"blogs": [...]}
-            if isinstance(index_data, dict):
-                if 'blogs' in index_data:
-                    # Extract blogs array from wrapper
-                    index_data = index_data['blogs']
-                else:
-                    # Single blog object - wrap in list
-                    index_data = [index_data]
-            
-            print(f"✅ Found {len(index_data)} blogs in S3 index.json")
-        except Exception as e:
-            print(f"❌ Could not fetch S3 index.json: {e}")
-            return
+        response = s3.get_object(Bucket=bucket, Key='blogs/index.json')
+        index_data = json.loads(response['Body'].read().decode('utf-8'))
         
-        # Dual-write mode: Track both legacy and master collections
-        synced_count = 0
-        skipped_count = 0
-        legacy_success_count = 0
-        master_success_count = 0
-        
-        for blog in index_data:
-            blog_id = blog.get('id')
-            if not blog_id:
-                continue
-            
-            # Prepare content for embedding
-            content = blog.get('content', '')
-            if not content:
-                # Fallback to description if content missing
-                content = blog.get('description', blog.get('title', ''))
-            
-            if not content or len(content) < 50:
-                print(f"⚠️ Skipping {blog_id}: Content too short")
-                continue
-            
-            # Dual-write with category tagging (Task 13)
-            title = safe_meta(blog.get('title', 'Untitled'))
-            blog_category = safe_meta(blog.get('category', 'General'))
-            url = f"https://althafportfolio.site/blogs/{blog_id}"
-            timestamp = safe_meta(blog.get('created_at', ''))  # Fixed: Use snake_case
-            published_date = timestamp[:10] if len(timestamp) >= 10 else ''
-            
-            metadata = {
-                "title": title,
-                "category": blog_category,
-                "url": url,
-                "timestamp": timestamp,
-                "published_date": published_date,
-                "metadata_category": "blogs"  # Enhanced RAG tag
-            }
-            
-            # Truncate content to avoid exceeding Chroma Cloud document size limit (16KB)
-            text_to_embed = f"Blog Title: {title}. Content: {content[:6000]}..."
-            
-            # Use dual_write_with_category helper
-            success = write_to_portfolio_master(
-                chroma_client,
-                embed_function,
-                blog_id,
-                clean_text(text_to_embed),
-                metadata,
-                category='blog',
-                subcategory=blog_category
-            )
-            
-            if success:
-                synced_count += 1
-                master_success_count += 1
-                print(f"  ✅ Synced: {title[:50]}...")
+        if isinstance(index_data, dict):
+            if 'blogs' in index_data:
+                s3_blogs = index_data['blogs']
             else:
-                skipped_count += 1
-                print(f"  ❌ Failed to sync {blog_id}")
-        
-        print(f"\n📊 S3 Sync Summary: {synced_count} synced, {skipped_count} skipped")
-        print(f"   └─ Master (portfolio_master): {master_success_count}")
-        
+                s3_blogs = [index_data]
+        else:
+            s3_blogs = index_data
+            
+        print(f"✅ Found {len(s3_blogs)} blogs in S3 index.json")
+        all_blogs.extend(s3_blogs)
     except Exception as e:
-        print(f"❌ S3 sync failed: {e}")
-        import traceback
-        traceback.print_exc()
+        print(f"⚠️ Could not fetch S3 blogs: {e}")
+        
+    # 2. Fetch local blogs (fallback)
+    blog_dir = "generated_blogs"
+    if not os.path.exists(blog_dir):
+        blog_dir = "backend/generated_blogs"
+        
+    if os.path.exists(blog_dir):
+        files = glob.glob(f"{blog_dir}/*.json")
+        print(f"✅ Found {len(files)} local blogs on disk")
+        for filepath in files:
+            try:
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    blog = json.load(f)
+                    blog_id = blog.get('id') or os.path.basename(filepath).replace('.json', '')
+                    title = blog.get('title')
+                    content = blog.get('content')
+                    created_at = blog.get('created_at') or blog.get('timestamp') or ''
+                    blog_cat = blog.get('tags', ['General'])[0]
+                    
+                    all_blogs.append({
+                        "id": blog_id,
+                        "title": title,
+                        "content": content,
+                        "category": blog_cat,
+                        "created_at": created_at
+                    })
+            except Exception as e:
+                print(f"⚠️ Skipped local blog {filepath}: {e}")
+
+    # 3. Deduplicate
+    seen_ids = set()
+    unique_blogs = []
+    for blog in all_blogs:
+        blog_id = blog.get('id')
+        if blog_id and blog_id not in seen_ids:
+            seen_ids.add(blog_id)
+            unique_blogs.append(blog)
+            
+    # 4. Sort by creation date (newest first)
+    unique_blogs.sort(key=lambda x: x.get('created_at', x.get('timestamp', '')), reverse=True)
+    
+    # 5. Keep ONLY the 30 latest blogs
+    active_blogs = unique_blogs[:30]
+    active_ids = set(b.get('id') for b in active_blogs)
+    print(f"📋 Enforcing 30 latest blogs policy. Active blogs: {len(active_blogs)}")
+    
+    # 6. Sync the active 30 blogs
+    synced_count = 0
+    skipped_count = 0
+    
+    for blog in active_blogs:
+        blog_id = blog.get('id')
+        content = blog.get('content', '')
+        if not content:
+            content = blog.get('description', blog.get('title', ''))
+            
+        if not content or len(content) < 50:
+            print(f"⚠️ Skipping {blog_id}: Content too short")
+            continue
+            
+        title = safe_meta(blog.get('title', 'Untitled'))
+        blog_category = safe_meta(blog.get('category', 'General'))
+        url = f"https://althafportfolio.site/blogs/{blog_id}"
+        timestamp = safe_meta(blog.get('created_at', blog.get('timestamp', '')))
+        published_date = timestamp[:10] if len(timestamp) >= 10 else ''
+        
+        metadata = {
+            "title": title,
+            "category": blog_category,
+            "url": url,
+            "timestamp": timestamp,
+            "published_date": published_date,
+            "metadata_category": "blogs"
+        }
+        
+        # Truncate content to avoid exceeding Chroma Cloud document size limit (16KB)
+        text_to_embed = f"Blog Title: {title}. Content: {content[:6000]}..."
+        
+        success = write_to_portfolio_master(
+            chroma_client,
+            embed_function,
+            blog_id,
+            clean_text(text_to_embed),
+            metadata,
+            category='blog',
+            subcategory=blog_category
+        )
+        
+        if success:
+            synced_count += 1
+        else:
+            skipped_count += 1
+            
+    print(f"📊 Sync summary: {synced_count} synced, {skipped_count} skipped")
+    
+    # 7. Delete/Prune old blogs from ChromaDB
+    try:
+        master_col = chroma_client.get_collection('portfolio_master')
+        existing = master_col.get(where={"category": "blog"})
+        
+        if existing and existing['ids']:
+            pruned_count = 0
+            for record_id in existing['ids']:
+                if record_id not in active_ids:
+                    print(f"🗑️ Pruning stale blog from ChromaDB: {record_id}")
+                    master_col.delete(ids=[record_id])
+                    pruned_count += 1
+            if pruned_count > 0:
+                print(f"🧹 Successfully pruned {pruned_count} old blogs from ChromaDB.")
+            else:
+                print("✅ ChromaDB is clean. No pruning required.")
+    except Exception as e:
+        print(f"⚠️ Error pruning old blogs from ChromaDB: {e}")
+
 
 def main():
     print("🚀 [START] Starting Database Population...")
@@ -295,55 +342,7 @@ def main():
     # ==========================================
     sync_blogs_from_s3(client, GeminiEmbeddingFunction())
 
-    # ==========================================
-    # 2. SYNC LOCAL BLOGS (LEGACY FALLBACK)
-    # ==========================================
-    blog_dir = "generated_blogs"
-    if not os.path.exists(blog_dir):
-        blog_dir = "backend/generated_blogs" # Fallback if running from root
-
-    if os.path.exists(blog_dir):
-        files = glob.glob(f"{blog_dir}/*.json")
-        print(f"[SYNC] Scanning {len(files)} local blogs...")
-        
-        new_blogs = 0
-        for i, filepath in enumerate(files):
-            try:
-                with open(filepath, 'r', encoding='utf-8') as f:
-                    blog = json.load(f)
-                    
-                    # Use stable ID from filename or content
-                    b_id = blog.get('id') or os.path.basename(filepath).replace('.json', '')
-                    title = safe_meta(blog.get('title'))
-                    content = safe_meta(blog.get('content'))
-                    
-                    # Store structured blog data
-                    text = f"Blog Title: {title}. Content: {content[:4000]}..." # Limit chunk size (Safe < 16KB)
-                    blog_cat = safe_meta(blog.get('tags', ['General'])[0])
-                    metadata = {"title": title, "type": "blog", "category": blog_cat}
-                    
-                    # Dual-write for local blogs
-                    success = write_to_portfolio_master(
-                        client,
-                        GeminiEmbeddingFunction(),
-                        b_id,
-                        clean_text(text),
-                        metadata,
-                        category='blog',
-                        subcategory=blog_cat
-                    )
-                    if success:
-                        new_blogs += 1
-                        
-            except Exception as e:
-                print(f"[WARN] Skipped blog {filepath}: {e}")
-        
-        if new_blogs > 0:
-            print(f"✅ Added {new_blogs} new blogs.")
-        else:
-            print("✅ All blogs up to date.")
-    else:
-        print("[WARN] No generated_blogs directory found.")
+    # Redundant local blogs sync removed. All S3 + local fallback blogs are processed in sync_blogs_from_s3.
 
     # ==========================================
     # 2. SYNC PROJECTS -> 'Projects_data' (FROM MONGODB)

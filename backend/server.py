@@ -979,7 +979,10 @@ async def get_blogs():
         # 4. Sort by creation date (newest first)
         unique_blogs.sort(key=lambda x: x.get('created_at', ''), reverse=True)
         
-        logger.info(f"Total blogs served: {len(unique_blogs)} (local + S3, deduplicated)")
+        # Enforce 30 latest blogs policy to prevent page lag and keep database clean
+        unique_blogs = unique_blogs[:30]
+        
+        logger.info(f"Total blogs served: {len(unique_blogs)} (local + S3, deduplicated, limited to 30)")
         return {"blogs": unique_blogs}
         
     except Exception as e:
