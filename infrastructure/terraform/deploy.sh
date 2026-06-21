@@ -8,17 +8,17 @@ PORTFOLIO_DIR="/home/ec2-user/portfolio"
 echo "🏁 Starting Deployment Pipeline..."
 
 # 1. Idempotent Software Installation
-if ! command -v docker &> /dev/null || ! command -v certbot &> /dev/null || ! command -v crontab &> /dev/null; then
-  echo "📦 Installing Docker, Certbot, and Cronie..."
+if ! command -v docker &> /dev/null || ! command -v certbot &> /dev/null || ! command -v crontab &> /dev/null || ! command -v vim &> /dev/null || ! command -v git &> /dev/null || ! command -v unzip &> /dev/null; then
+  echo "📦 Installing Docker, Certbot, Cronie, Vim, Git, and Unzip..."
   sudo dnf update -y
-  sudo dnf install docker certbot python3-certbot-nginx cronie -y
+  sudo dnf install docker certbot python3-certbot-nginx cronie vim git unzip -y
   sudo systemctl enable docker
   sudo systemctl start docker
   sudo systemctl enable crond
   sudo systemctl start crond
   sudo usermod -aG docker ec2-user
 else
-  echo "✅ Docker, Certbot, and Cronie are already installed."
+  echo "✅ Required software packages are already installed."
 fi
 
 # 2. Setup Directories
