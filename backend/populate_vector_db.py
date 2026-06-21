@@ -138,12 +138,54 @@ def write_to_portfolio_master(client, embed_function, uid, doc, meta, category, 
         print(f"[ERROR] Failed to write {uid} to portfolio_master: {e}")
         return False
 
+def filter_active_blogs(blogs):
+    """
+    Filters blogs: keeps all blogs newer than 60 days.
+    If the count of such blogs is less than 30, it keeps the latest 30 blogs overall
+    to guarantee a minimum of 30 blogs are always displayed and indexed.
+    """
+    import datetime
+    # Sort all blogs by date (newest first)
+    blogs_sorted = sorted(
+        blogs, 
+        key=lambda x: x.get('created_at', x.get('timestamp', '')), 
+        reverse=True
+    )
+    
+    cutoff_date = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=60)
+    
+    active_blogs = []
+    for blog in blogs_sorted:
+        created_at_str = blog.get('created_at', blog.get('timestamp', ''))
+        is_new = True
+        if created_at_str:
+            try:
+                date_part = created_at_str[:10]
+                blog_date = datetime.datetime.strptime(date_part, "%Y-%m-%d").replace(tzinfo=datetime.timezone.utc)
+                if blog_date < cutoff_date:
+                    is_new = False
+            except Exception:
+                pass
+        
+        if is_new:
+            active_blogs.append(blog)
+        else:
+            if len(active_blogs) < 30:
+                active_blogs.append(blog)
+            else:
+                break
+                
+    if len(active_blogs) < 30 and len(blogs_sorted) > len(active_blogs):
+        active_blogs = blogs_sorted[:30]
+        
+    return active_blogs
+
 def sync_blogs_from_s3(chroma_client, embed_function):
     """
-    Sync ONLY the 30 latest blogs (S3 + local fallback) to ChromaDB portfolio_master collection,
+    Sync ONLY the active blogs (newer than 60 days, minimum 30) to ChromaDB portfolio_master collection,
     and delete/prune any older blogs from ChromaDB.
     """
-    print("\n📚 [BLOGS] Starting Unified Blog Sync (limit to 30 latest)...")
+    print("\n📚 [BLOGS] Starting Unified Blog Sync...")
     
     all_blogs = []
     
@@ -205,15 +247,12 @@ def sync_blogs_from_s3(chroma_client, embed_function):
             seen_ids.add(blog_id)
             unique_blogs.append(blog)
             
-    # 4. Sort by creation date (newest first)
-    unique_blogs.sort(key=lambda x: x.get('created_at', x.get('timestamp', '')), reverse=True)
-    
-    # 5. Keep ONLY the 30 latest blogs
-    active_blogs = unique_blogs[:30]
+    # 4. Filter active blogs (newer than 60 days, minimum of 30 latest)
+    active_blogs = filter_active_blogs(unique_blogs)
     active_ids = set(b.get('id') for b in active_blogs)
-    print(f"📋 Enforcing 30 latest blogs policy. Active blogs: {len(active_blogs)}")
+    print(f"📋 Enforcing retention policy. Active blogs to index: {len(active_blogs)}")
     
-    # 6. Sync the active 30 blogs
+    # 5. Sync the active blogs
     synced_count = 0
     skipped_count = 0
     
@@ -262,7 +301,7 @@ def sync_blogs_from_s3(chroma_client, embed_function):
             
     print(f"📊 Sync summary: {synced_count} synced, {skipped_count} skipped")
     
-    # 7. Delete/Prune old blogs from ChromaDB
+    # 6. Delete/Prune old blogs from ChromaDB
     try:
         master_col = chroma_client.get_collection('portfolio_master')
         existing = master_col.get(where={"category": "blog"})

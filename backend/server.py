@@ -977,13 +977,38 @@ async def get_blogs():
                 unique_blogs.append(blog)
         
         # 4. Sort by creation date (newest first)
-        unique_blogs.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+        unique_blogs.sort(key=lambda x: x.get('created_at', x.get('timestamp', '')), reverse=True)
         
-        # Enforce 30 latest blogs policy to prevent page lag and keep database clean
-        unique_blogs = unique_blogs[:30]
+        # Apply 60-day retention policy (guaranteeing a minimum of 30 latest blogs)
+        import datetime
+        cutoff_date = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=60)
         
-        logger.info(f"Total blogs served: {len(unique_blogs)} (local + S3, deduplicated, limited to 30)")
-        return {"blogs": unique_blogs}
+        active_blogs = []
+        for blog in unique_blogs:
+            created_at_str = blog.get('created_at', blog.get('timestamp', ''))
+            is_new = True
+            if created_at_str:
+                try:
+                    date_part = created_at_str[:10]
+                    blog_date = datetime.datetime.strptime(date_part, "%Y-%m-%d").replace(tzinfo=datetime.timezone.utc)
+                    if blog_date < cutoff_date:
+                        is_new = False
+                except Exception:
+                    pass
+            
+            if is_new:
+                active_blogs.append(blog)
+            else:
+                if len(active_blogs) < 30:
+                    active_blogs.append(blog)
+                else:
+                    break
+                    
+        if len(active_blogs) < 30 and len(unique_blogs) > len(active_blogs):
+            active_blogs = unique_blogs[:30]
+            
+        logger.info(f"Total blogs served: {len(active_blogs)} (retention active: older than 60 days pruned except minimum 30)")
+        return {"blogs": active_blogs}
         
     except Exception as e:
         logger.error(f"Error loading blogs: {e}")
