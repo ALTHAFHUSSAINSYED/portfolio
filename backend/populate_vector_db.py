@@ -17,8 +17,8 @@ load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env.local
 GOOGLE_API_KEY = os.getenv('GEMINI_API_KEY')
 MONGO_URL = os.getenv('MONGO_URL')
 CHROMA_API_KEY = os.getenv('CHROMA_API_KEY')
-CHROMA_TENANT_ID = os.getenv('CHROMA_TENANT_ID')
-CHROMA_DB_NAME = os.getenv('CHROMA_DB_NAME', 'Development')
+CHROMA_TENANT_ID = os.getenv('CHROMA_TENANT') or os.getenv('CHROMA_TENANT_ID') or 'default'
+CHROMA_DB_NAME = os.getenv('CHROMA_DATABASE') or os.getenv('CHROMA_DB_NAME') or 'Development'
 
 # ChromaDB Migration Complete (Task 21 - Jan 3, 2026)
 # Now writes ONLY to portfolio_master collection
@@ -340,41 +340,13 @@ def main():
         print(f"[ERROR] Chroma Connection Failed: {e}")
         return
 
-    # --- 4. PREPARE COLLECTIONS ---
-    # We use get_or_create to preserve existing data (Smart Sync), falling back to get_collection on conflict
+    # --- 4. PREPARE UNIFIED COLLECTION ---
     try:
-        portfolio_col = client.get_or_create_collection("portfolio", embedding_function=GeminiEmbeddingFunction())
+        master_col = client.get_or_create_collection("portfolio_master", embedding_function=GeminiEmbeddingFunction())
     except Exception:
-        portfolio_col = client.get_collection("portfolio")
-        
-    try:
-        projects_col = client.get_or_create_collection("Projects_data", embedding_function=GeminiEmbeddingFunction())
-    except Exception:
-        projects_col = client.get_collection("Projects_data")
-        
-    try:
-        blogs_col = client.get_or_create_collection("Blogs_data", embedding_function=GeminiEmbeddingFunction())
-    except Exception:
-        blogs_col = client.get_collection("Blogs_data")
+        master_col = client.get_collection("portfolio_master")
     
-    print("✅ Collections Ready (Persistent Mode).")
-
-    def upsert_if_new(collection, uid, doc, meta):
-        """Upserts data only if it doesn't exist yet (avoid duplicates)."""
-        try:
-            # Check if ID exists (lightweight)
-            existing = collection.get(ids=[uid])
-            if existing and existing['ids']:
-                # print(f"[SKIP] {uid} already exists.") # Verbose off
-                return False  # Already exists, skip
-            
-            # Add if missing
-            collection.add(ids=[uid], documents=[doc], metadatas=[meta])
-            print(f"[ADD] + Inserted new item: {uid}")
-            return True
-        except Exception as e:
-            print(f"[ERR] Failed to insert {uid}: {e}")
-            return False
+    print("✅ portfolio_master Collection Ready (Unified Mode).")
 
     # ==========================================
     # 1. SYNC BLOGS FROM S3 -> 'Blogs_data'

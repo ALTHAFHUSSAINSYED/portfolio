@@ -21,11 +21,11 @@ def delete_unused_collections():
     
     # Connect to ChromaDB Cloud
     api_key = os.getenv('CHROMA_API_KEY')
-    tenant_id = os.getenv('CHROMA_TENANT_ID')
-    db_name = os.getenv('CHROMA_DB_NAME', 'Development')
+    tenant_id = os.getenv('CHROMA_TENANT') or os.getenv('CHROMA_TENANT_ID') or 'default'
+    db_name = os.getenv('CHROMA_DATABASE') or os.getenv('CHROMA_DB_NAME') or 'Development'
     
-    if not api_key or not tenant_id:
-        logger.error("Missing CHROMA_API_KEY or CHROMA_TENANT_ID in environment")
+    if not api_key:
+        logger.error("Missing CHROMA_API_KEY in environment")
         return False
     
     try:
