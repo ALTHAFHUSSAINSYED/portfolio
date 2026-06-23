@@ -1,12 +1,12 @@
 {
     "personal_info": {
         "name": "Althaf Hussain Syed",
-        "title": "Analyst III Infrastructure Services | DevOps Engineer",
-        "email": "althafhussain.sd@gmail.com",
+        "title": "DevOps Engineer | Cloud & Platform Engineer",
+        "email": "allualthaf42@gmail.com",
         "phone": "+91 8184812249",
         "location": "Hyderabad, India",
         "linkedin": "https://www.linkedin.com/in/althafhussainsyed/",
-        "summary": "DevOps Engineer with 3.10 years of experience in AWS cloud infrastructure, CI/CD automation, Infrastructure as Code (IaC), application deployment, monitoring, and production support. Hands-on experience with AWS services including EC2, VPC, IAM, Route53, Auto Scaling, Lambda, CloudWatch, ECS, and EKS. Skilled in Terraform, Jenkins, GitHub Actions, AWS CodePipeline, Docker, Kubernetes, Linux, Bash, and Python scripting. Experienced in application onboarding, DevOps toolchain support, incident resolution, root cause analysis, and implementing automation solutions within Agile, SDLC, and ITIL-driven environments."
+        "summary": "DevOps Engineer with 3.10 years of experience in cloud infrastructure automation, CI/CD pipeline implementation, Infrastructure as Code (Terraform), containerization, and monitoring solutions. Hands-on experience with AWS, Docker, Kubernetes, Jenkins, GitHub Actions, Python, and Linux administration. Proven track record of automating deployments, reducing manual effort by 70%, and supporting highly available production environments through Agile, ITIL, and DevOps best practices."
     },
     "skills": {
         "Cloud Platforms": [
@@ -18,7 +18,8 @@
             "Terraform",
             "Ansible",
             "Bash scripting",
-            "Python"
+            "Python",
+            "YAML"
         ],
         "CI/CD": [
             "Jenkins",
@@ -91,24 +92,19 @@
     "experience": [
         {
             "company": "DXC Technology",
-            "role": "Analyst III Infrastructure Services | DevOps Engineer",
-            "duration": "Aug 2022 – Present",
+            "role": "DevOps Engineer | Cloud & Platform Engineer",
+            "duration": "Aug 2022 – June 2026",
             "location": "Hyderabad, India",
-            "description": "Cloud Platform Automation & Delivery | AWS Managed Services. Supporting automation, deployment, and environment operations in an AWS Managed Services setup. Involved in CI/CD execution, environment monitoring, and change coordination aligned with ITIL and SDLC frameworks to ensure smooth delivery.",
+            "description": "DevOps Engineer | Cloud & Platform Engineer. Supported automation, deployment, and environment operations in an AWS Managed Services setup. Managed CI/CD pipelines, container orchestration, and infrastructure provisioning using Terraform.",
             "achievements": [
-                "Supporting automation, deployment, and environment operations in an AWS Managed Services setup.",
-                "Involved in CI/CD execution, environment monitoring, and change coordination aligned with ITIL and SDLC frameworks.",
-                "Attended daily stand-up meetings to share progress, discuss incident status, and coordinate upcoming deployment or change activities.",
-                "Worked on provisioning and managing AWS services based on approved change requests.",
-                "Used Terraform templates to standardise configurations and maintain production consistency.",
-                "Maintained Jenkins pipelines and GitHub Actions for build, test, and deployment.",
-                "Integrated Maven, SonarQube quality gates, and Docker image builds pushed to Amazon ECR.",
-                "Configured Slack notifications for build and deployment updates.",
-                "Implemented end-to-end CI/CD automation, improving delivery efficiency and reducing manual effort by ~70%.",
-                "Containerised applications using Docker and supported deployments in Kubernetes environments.",
-                "Monitored system health and logs using CloudWatch, Grafana, Prometheus and Dynatrace.",
-                "Managed incidents and change requests via ServiceNow.",
-                "Created and maintained Standard Operating Procedures (SOPs) and runbooks."
+                "[Project] Cloud-Native Kubernetes Platform on Amazon EKS | AWS Managed Services (Mar 2024 – Apr 2026): Implemented a cloud-native container platform on Amazon EKS using Infrastructure as Code (IaC) and Kubernetes orchestration, provisioning EKS clusters and AWS infrastructure using Terraform.",
+                "[Project] Cloud-Native CI/CD Automation Platform (Jul 2023 – Feb 2024): Implemented an AWS-native CI/CD platform for automated build, testing, and deployment workflows, integrating AWS Developer Tools and implementing Blue-Green / Rolling deployments.",
+                "[Project] Enterprise Cloud Migration & Modernization Platform (Nov 2022 – Jun 2023): Implemented a highly available three-tier architecture on AWS by migrating legacy workloads, provisioning VPC networking, ASGs, ALBs, RDS, RabbitMQ, and Memcached.",
+                "Automation & Environment Support: Designed, implemented, and supported CI/CD pipelines and AWS Infrastructure automation using Terraform for AWS Managed Services environments.",
+                "CI/CD & Deployment Management: Designed and maintained Jenkins and GitHub Actions CI/CD pipelines, integrating Maven, SonarQube, Docker, and Amazon ECR, while implementing end-to-end automation that reduced manual effort by ~70%.",
+                "Cloud Provisioning & Containerisation: Provisioned and managed AWS services using Infrastructure as Code (IaC) principles and deployed containerized applications on Docker, Kubernetes, Amazon ECS, and Amazon EKS environments.",
+                "Monitoring & ITIL Operations: Monitored infrastructure health using Amazon CloudWatch, Grafana, Prometheus, and Dynatrace, and managed incidents and change requests through ServiceNow in accordance with ITIL processes and CAB procedures.",
+                "Collaboration & Documentation: Collaborated with development, QA, and infrastructure teams during Agile ceremonies, coordinated deployment and change activities, and created Standard Operating Procedures (SOPs) and operational runbooks."
             ]
         }
     ],
