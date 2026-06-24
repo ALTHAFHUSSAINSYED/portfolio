@@ -297,6 +297,7 @@ class Project(BaseModel):
     key_outcomes: Optional[str] = None
     github_url: Optional[str] = None
     live_url: Optional[str] = None
+    duration: Optional[str] = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
 class BlogPostRequest(BaseModel):
@@ -798,6 +799,7 @@ async def get_project_details(project_id: str):
                     "key_outcomes": project.get("key_outcomes", ""),
                     "github_url": project.get("github_url", ""),
                     "live_url": project.get("live_url", ""),
+                    "duration": project.get("duration", project.get("project_duration", project.get("projectDuration", ""))),
                     "timestamp": project.get("timestamp", datetime.utcnow())
                 }
         except Exception as e:
@@ -827,6 +829,7 @@ async def get_project_details(project_id: str):
                                 "key_outcomes": p.get("key_outcomes", ""),
                                 "github_url": p.get("github_url", ""),
                                 "live_url": p.get("live_url", ""),
+                                "duration": p.get("duration", p.get("project_duration", p.get("projectDuration", ""))),
                                 "timestamp": p.get("timestamp", datetime.utcnow())
                             }
         except Exception:
@@ -855,6 +858,7 @@ async def get_projects():
                     "key_outcomes": p.get("key_outcomes", ""),
                     "github_url": p.get("github_url", ""),
                     "live_url": p.get("live_url", ""),
+                    "duration": p.get("duration", p.get("project_duration", p.get("projectDuration", ""))),
                     "timestamp": p.get("timestamp", datetime.utcnow())
                 })
             if mongo_projects:
@@ -903,7 +907,9 @@ async def create_project(
     details: str = Form(...),
     technologies: str = Form(...),
     key_outcomes: str = Form(...),
-    file: UploadFile = File(...)
+    file: UploadFile = File(...),
+    duration: Optional[str] = Form(None),
+    project_duration: Optional[str] = Form(None)
 ):
     if db is None:
         raise HTTPException(status_code=503, detail="Database unavailable")
@@ -913,6 +919,7 @@ async def create_project(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Image upload failed: {str(e)}")
 
+    final_duration = duration or project_duration or ""
     project_data = {
         "id": str(uuid.uuid4()),
         "name": bleach.clean(name),
@@ -923,6 +930,7 @@ async def create_project(
         "image_url": image_url,
         "technologies": [t.strip() for t in bleach.clean(technologies).split(',')],
         "key_outcomes": bleach.clean(key_outcomes),
+        "duration": bleach.clean(final_duration) if final_duration else "",
         "timestamp": datetime.utcnow()
     }
     await db.projects.insert_one(project_data)
@@ -1053,7 +1061,9 @@ async def update_project(
     details: Optional[str] = Form(None),
     technologies: Optional[str] = Form(None),
     key_outcomes: Optional[str] = Form(None),
-    file: Optional[UploadFile] = File(None)
+    file: Optional[UploadFile] = File(None),
+    duration: Optional[str] = Form(None),
+    project_duration: Optional[str] = Form(None)
 ):
     """Update an existing project."""
     if db is None:
@@ -1074,6 +1084,10 @@ async def update_project(
     if details: update_data["details"] = sanitize_html(details)
     if technologies: update_data["technologies"] = [t.strip() for t in bleach.clean(technologies).split(',')]
     if key_outcomes: update_data["key_outcomes"] = bleach.clean(key_outcomes)
+    
+    final_duration = duration or project_duration
+    if final_duration is not None:
+        update_data["duration"] = bleach.clean(final_duration)
 
     if file:
         try:
@@ -1103,6 +1117,7 @@ async def update_project(
         "key_outcomes": updated_project.get("key_outcomes", ""),
         "github_url": updated_project.get("github_url", ""),
         "live_url": updated_project.get("live_url", ""),
+        "duration": updated_project.get("duration", updated_project.get("project_duration", updated_project.get("projectDuration", ""))),
         "timestamp": updated_project.get("timestamp", datetime.utcnow())
     }
 
