@@ -22,8 +22,7 @@ const isSectionHeader = (line) => {
     /^(🎯|👨💻|🛠️|⚡|📌|🏆|🔹)?\s*key responsibilities/i,
     /^(🎯|👨💻|🛠️|⚡|📌|🏆|🔹)?\s*responsibilities/i,
     /^(🎯|👨💻|🛠️|⚡|📌|🏆|🔹)?\s*architecture/i,
-    /^(🎯|👨💻|🛠️|⚡|📌|🏆|🔹)?\s*challenges/i,
-    /^(🎯|👨💻|🛠️|⚡|📌|🏆|🔹)?\s*summary/i
+    /^(🎯|👨💻|🛠️|⚡|📌|🏆|🔹)?\s*challenges/i
   ];
   return headerPatterns.some(pattern => pattern.test(trimmed)) && trimmed.length < 40;
 };

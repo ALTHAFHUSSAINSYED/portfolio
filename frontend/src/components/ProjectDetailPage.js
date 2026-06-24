@@ -424,16 +424,16 @@ const ProjectDetailsPage = () => {
       <Card className="w-full p-8 neon-card">
         <h1 className="text-3xl font-bold text-foreground mb-4">{project.name}</h1>
         
+        {project.image_url && (
+          <img src={project.image_url} alt={project.name} className="w-full h-auto rounded-lg mb-8 shadow-md"/>
+        )}
+
         {/* Render Project Duration if present */}
         {(project.duration || project.project_duration || project.projectDuration || project['Project Duration']) && (
           <div className="flex items-center text-sm text-muted-foreground mb-6 gap-2 bg-muted/30 w-fit px-3 py-1.5 rounded-md border border-border/50">
             <Calendar className="w-4 h-4 text-cyan-soft" />
             <span>Duration: <strong className="text-foreground">{project.duration || project.project_duration || project.projectDuration || project['Project Duration']}</strong></span>
           </div>
-        )}
-        
-        {project.image_url && (
-          <img src={project.image_url} alt={project.name} className="w-full h-auto rounded-lg mb-8 shadow-md"/>
         )}
 
         {sections.summary.length > 0 && (
@@ -596,9 +596,12 @@ const ProjectDetailsPage = () => {
                   );
                 case 'paragraph':
                   return (
-                    <p key={idx} className="text-base leading-relaxed text-gray-800 dark:text-gray-300 pl-3 my-4 font-sans">
-                      {parseBoldText(block.text)}
-                    </p>
+                    <div key={idx} className="flex items-start gap-3 pl-3 my-2.5 font-sans">
+                      <span className="w-2 h-2 rounded-full bg-cyan-500 dark:bg-cyan-400 mt-2.5 flex-shrink-0 shadow-[0_0_8px_rgba(6,182,212,0.6)]"></span>
+                      <p className="text-base leading-relaxed text-gray-800 dark:text-gray-300">
+                        {parseBoldText(cleanAllBulletPrefixes(block.text))}
+                      </p>
+                    </div>
                   );
                 case 'empty':
                 default:
