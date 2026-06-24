@@ -17,7 +17,7 @@ const cleanAllBulletPrefixes = (text) => {
   trimmed = trimmed.replace(bulletRegex, '').trim();
   
   // Strip common bullet emojis/symbols (including Pin and Book/Library symbols)
-  const emojiRegex = /^(✔️|✅|✔|☑️|☑|⚠️|🚨|🔥|⚙️|🛠️|🔧|☸️|🐳|📦|🚀|⚡|🎯|🏆|🔹|🔷|▪️|▫️|👉|📌|📚)\s*/;
+  const emojiRegex = /^(✔️|✅|✔|☑️|☑|⚠️|🚨|🔥|⚙️|🛠️|🔧|☸️|🐳|📦|🚀|⚡|🎯|🏆|🔹|🔷|▪️|▫️|👉|📌|📚)\s*/u;
   trimmed = trimmed.replace(emojiRegex, '').trim();
   
   return trimmed;
