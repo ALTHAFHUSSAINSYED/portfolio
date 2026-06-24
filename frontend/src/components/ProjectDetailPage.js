@@ -47,8 +47,8 @@ const cleanAllBulletPrefixes = (text) => {
   const bulletRegex = /^([-*•▪▫◦⬡○●■□▲▼◆◇👉]\s*)+/u;
   trimmed = trimmed.replace(bulletRegex, '').trim();
   
-  // Strip common bullet emojis/symbols
-  const emojiRegex = /^(✔️|✅|✔|☑️|☑|⚠️|🚨|🔥|⚙️|🛠️|🔧|☸️|🐳|📦|🚀|⚡|🎯|🏆|🔹|🔷|▪️|▫️|👉|📌|📚)\s*/u;
+  // Strip common bullet emojis/symbols (including Unicode replacement character)
+  const emojiRegex = /^(✔️|✅|✔|☑️|☑|⚠️|🚨|🔥|⚙️|🛠️|🔧|☸️|🐳|📦|🚀|⚡|🎯|🏆|🔹|🔷|▪️|▫️|👉|📌|📚|)\s*/u;
   trimmed = trimmed.replace(emojiRegex, '').trim();
   
   return trimmed;
@@ -230,16 +230,16 @@ const extractProjectSections = (project) => {
     if (line === '') continue;
     
     const cleanLine = line.toLowerCase();
-    // Section match rules
-    if (cleanLine.includes('summary') && (cleanLine.includes('📌') || cleanLine.includes('👉') || cleanLine.startsWith('summary'))) {
+    // Section match rules (robust against corrupted icons/emojis)
+    if (cleanLine.includes('summary') && (cleanLine.length < 30 || cleanLine.includes('📌') || cleanLine.includes('👉') || cleanLine.startsWith('summary') || cleanLine.includes(''))) {
       currentSection = 'summary';
       continue;
     }
-    if (cleanLine.includes('objective') && (cleanLine.includes('🎯') || cleanLine.includes('target') || cleanLine.startsWith('objective'))) {
+    if (cleanLine.includes('objective') && (cleanLine.length < 30 || cleanLine.includes('🎯') || cleanLine.includes('target') || cleanLine.startsWith('objective') || cleanLine.includes(''))) {
       currentSection = 'objective';
       continue;
     }
-    if (cleanLine.includes('responsibilities') && (cleanLine.includes('👨') || cleanLine.includes('key') || cleanLine.startsWith('responsibilities') || cleanLine.startsWith('key responsibilities'))) {
+    if (cleanLine.includes('responsibilities') && (cleanLine.length < 40 || cleanLine.includes('👨') || cleanLine.includes('key') || cleanLine.startsWith('responsibilities') || cleanLine.startsWith('key responsibilities') || cleanLine.includes(''))) {
       currentSection = 'responsibilities';
       continue;
     }

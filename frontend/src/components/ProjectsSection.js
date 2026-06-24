@@ -16,8 +16,8 @@ const cleanAllBulletPrefixes = (text) => {
   const bulletRegex = /^([-*•▪▫◦⬡○●■□▲▼◆◇👉]\s*)+/u;
   trimmed = trimmed.replace(bulletRegex, '').trim();
   
-  // Strip common bullet emojis/symbols (including Pin and Book/Library symbols)
-  const emojiRegex = /^(✔️|✅|✔|☑️|☑|⚠️|🚨|🔥|⚙️|🛠️|🔧|☸️|🐳|📦|🚀|⚡|🎯|🏆|🔹|🔷|▪️|▫️|👉|📌|📚)\s*/u;
+  // Strip common bullet emojis/symbols (including Pin, Book/Library symbols and Unicode replacement char)
+  const emojiRegex = /^(✔️|✅|✔|☑️|☑|⚠️|🚨|🔥|⚙️|🛠️|🔧|☸️|🐳|📦|🚀|⚡|🎯|🏆|🔹|🔷|▪️|▫️|👉|📌|📚|)\s*/u;
   trimmed = trimmed.replace(emojiRegex, '').trim();
   
   return trimmed;
@@ -149,13 +149,13 @@ const ProjectsSection = () => {
                         if (!cleaned) return null;
 
                         // Check if this line is the Summary header
-                        const isSummaryHeader = cleaned.toLowerCase() === 'summary';
+                        const isSummaryHeader = /\bsummary\b/i.test(cleaned);
 
                         if (isSummaryHeader) {
                           return (
                             <div key={idx} className="flex items-center space-x-2 mt-1 mb-2">
                               <Pin className="w-3.5 h-3.5 text-cyan-soft flex-shrink-0 transform rotate-45" />
-                              <span className="font-bold text-foreground text-xs tracking-wider uppercase">{cleaned}</span>
+                              <span className="font-bold text-foreground text-xs tracking-wider uppercase">SUMMARY</span>
                             </div>
                           );
                         }
