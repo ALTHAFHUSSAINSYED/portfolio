@@ -926,7 +926,9 @@ async def create_project(
         "timestamp": datetime.utcnow()
     }
     await db.projects.insert_one(project_data)
-    # Background sync removed to prevent OOM
+    # Remove ObjectId to prevent FastAPI serialization error
+    if "_id" in project_data:
+        del project_data["_id"]
     return project_data
 
 # --- GET /api/blogs (Merged: Local + S3) ---
