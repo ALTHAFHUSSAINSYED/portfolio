@@ -1,17 +1,25 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
-import { Folder, CheckCircle, ArrowRight, Zap, Code, Server, Loader2, AlertTriangle, Calendar } from 'lucide-react';
+import { Folder, CheckCircle, ArrowRight, Zap, Code, Server, Loader2, AlertTriangle, Calendar, Pin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://api.althafportfolio.site';
 
 const cleanAllBulletPrefixes = (text) => {
   let trimmed = (text || '').trim();
+  
+  // Clean raw HTML entities if present
+  trimmed = trimmed.replace(/&amp;/g, '&');
+  
+  // Strip standard markdown/plain bullet prefixes (repeatable)
   const bulletRegex = /^([-*•▪▫◦⬡○●■□▲▼◆◇👉]\s*)+/;
   trimmed = trimmed.replace(bulletRegex, '').trim();
-  const emojiRegex = /^(✔️|✅|✔|☑️|☑|⚠️|🚨|🔥|⚙️|🛠️|🔧|☸️|🐳|📦|🚀|⚡|🎯|🏆|🔹|🔷|▪️|▫️|👉)\s*/;
+  
+  // Strip common bullet emojis/symbols (including Pin and Book/Library symbols)
+  const emojiRegex = /^(✔️|✅|✔|☑️|☑|⚠️|🚨|🔥|⚙️|🛠️|🔧|☸️|🐳|📦|🚀|⚡|🎯|🏆|🔹|🔷|▪️|▫️|👉|📌|📚)\s*/;
   trimmed = trimmed.replace(emojiRegex, '').trim();
+  
   return trimmed;
 };
 
@@ -139,6 +147,19 @@ const ProjectsSection = () => {
                       return displayLines.map((line, idx) => {
                         const cleaned = cleanAllBulletPrefixes(line);
                         if (!cleaned) return null;
+
+                        // Check if this line is the Summary header
+                        const isSummaryHeader = cleaned.toLowerCase() === 'summary';
+
+                        if (isSummaryHeader) {
+                          return (
+                            <div key={idx} className="flex items-center space-x-2 mt-1 mb-2">
+                              <Pin className="w-3.5 h-3.5 text-cyan-soft flex-shrink-0 transform rotate-45" />
+                              <span className="font-bold text-foreground text-xs tracking-wider uppercase">{cleaned}</span>
+                            </div>
+                          );
+                        }
+
                         return (
                           <div key={idx} className="flex items-start space-x-3">
                             <ArrowRight className="w-4 h-4 text-cyan-soft mt-1 flex-shrink-0" />
