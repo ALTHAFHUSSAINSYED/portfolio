@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import SEO from './SEO';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
-import { ArrowLeft, Loader2, AlertTriangle, Zap, Code, CheckCircle, Newspaper } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertTriangle, Zap, Code, CheckCircle, Newspaper, Calendar, CheckCircle2, Terminal, AlertCircle, Cpu, Shield, Sparkles } from 'lucide-react';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://api.althafportfolio.site';
 
@@ -13,6 +13,10 @@ const isCodeLine = (line) => {
   // Exclude markdown headings
   if (trimmedLine.startsWith('# ') || trimmedLine.startsWith('## ') || trimmedLine.startsWith('### ')) {
     return false;
+  }
+  // Check if it's a code block marker
+  if (trimmedLine.startsWith('```')) {
+    return true;
   }
   const codeKeywords = ['from', 'workdir', 'copy', 'run', 'env', 'cmd', 'pipeline', 'agent', 'stages', 'stage', 'steps', 'sh', 'docker', 'kubectl', 'helm', 'apiversion', 'kind', 'metadata', 'spec'];
   return (
@@ -29,10 +33,66 @@ const parseBoldText = (text) => {
   const parts = text.split(/(\*\*.*?\*\*)/g);
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={i} className="font-semibold text-foreground">{part.slice(2, -2)}</strong>;
+      return <strong key={i} className="font-semibold text-gray-900 dark:text-white">{part.slice(2, -2)}</strong>;
     }
     return part;
   });
+};
+
+// Helper function to recursively strip ALL bullet-like prefixes, emojis, and symbols from the start of a list item
+const cleanAllBulletPrefixes = (text) => {
+  let trimmed = (text || '').trim();
+  
+  // Strip standard markdown/plain bullet prefixes (repeatable)
+  const bulletRegex = /^([-*•▪▫◦⬡○●■□▲▼◆◇👉]\s*)+/;
+  trimmed = trimmed.replace(bulletRegex, '').trim();
+  
+  // Strip common bullet emojis/symbols
+  const emojiRegex = /^(✔️|✅|✔|☑️|☑|⚠️|🚨|🔥|⚙️|🛠️|🔧|☸️|🐳|📦|🚀|⚡|🎯|🏆|🔹|🔷|▪️|▫️|👉)\s*/;
+  trimmed = trimmed.replace(emojiRegex, '').trim();
+  
+  return trimmed;
+};
+
+// Identify the icon type and clean the text of starting symbols
+const parseBulletLine = (text) => {
+  let trimmed = (text || '').trim();
+  
+  // 1. First strip standard markdown/plain bullet prefixes
+  const bulletRegex = /^([-*•▪▫◦⬡○●■□▲▼◆◇👉]\s*)+/;
+  trimmed = trimmed.replace(bulletRegex, '').trim();
+  
+  // 2. Identify the icon type based on leading emojis or keywords
+  let iconType = 'default';
+  
+  // Check for checkmarks / success
+  if (trimmed.startsWith('✔️') || trimmed.startsWith('✅') || trimmed.startsWith('✔') || trimmed.startsWith('☑️') || trimmed.startsWith('☑')) {
+    iconType = 'success';
+  } 
+  // Check for warning / alert / important
+  else if (trimmed.startsWith('⚠️') || trimmed.startsWith('🚨') || trimmed.startsWith('🔥')) {
+    iconType = 'warning';
+  }
+  // Check for tech / tools / engineering
+  else if (trimmed.startsWith('⚙️') || trimmed.startsWith('🛠️') || trimmed.startsWith('🔧') || trimmed.startsWith('☸️') || trimmed.startsWith('🐳') || trimmed.startsWith('📦')) {
+    iconType = 'tech';
+  }
+  // Check for actions / performance / speed / rocket
+  else if (trimmed.startsWith('🚀') || trimmed.startsWith('⚡') || trimmed.startsWith('🎯') || trimmed.startsWith('🏆')) {
+    iconType = 'action';
+  }
+  // Check for generic blue/cyan diamond or square
+  else if (trimmed.startsWith('🔹') || trimmed.startsWith('🔷') || trimmed.startsWith('▪️') || trimmed.startsWith('▫️')) {
+    iconType = 'bullet-cyan';
+  }
+  
+  // 3. Clean all bullet and emoji prefixes from the text
+  const cleanedText = cleanAllBulletPrefixes(trimmed);
+  
+  return {
+    text: cleanedText,
+    iconType
+  };
 };
 
 // Group lines into rich blocks (paragraphs, headings, lists, and code blocks)
@@ -45,28 +105,95 @@ const groupLines = (detailsText) => {
     const line = lines[i];
     const trimmed = line.trim();
 
-    if (isCodeLine(line)) {
-      if (!currentCodeBlock) {
-        currentCodeBlock = { type: 'code', lines: [] };
+    if (trimmed === '') {
+      if (currentCodeBlock) {
+        currentCodeBlock.lines.push('');
+      } else {
+        blocks.push({ type: 'empty' });
+      }
+      continue;
+    }
+
+    // Handle code blocks marked with triple backticks
+    if (trimmed.startsWith('```')) {
+      if (currentCodeBlock) {
+        currentCodeBlock = null; // End of code block
+      } else {
+        const lang = trimmed.substring(3).trim();
+        currentCodeBlock = { type: 'code', lang: lang || 'config', lines: [] };
         blocks.push(currentCodeBlock);
       }
+      continue;
+    }
+
+    if (currentCodeBlock) {
       currentCodeBlock.lines.push(line);
-    } else {
-      currentCodeBlock = null; // Reset code block
-      
-      if (trimmed.startsWith('### ')) {
-        blocks.push({ type: 'h3', text: trimmed.replace('### ', '') });
-      } else if (trimmed.startsWith('## ')) {
-        blocks.push({ type: 'h2', text: trimmed.replace('## ', '') });
-      } else if (trimmed.startsWith('# ')) {
-        blocks.push({ type: 'h1', text: trimmed.replace('# ', '') });
-      } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-        blocks.push({ type: 'bullet', text: trimmed.substring(2) });
-      } else if (/^\d+\.\s/.test(trimmed)) {
-        const match = trimmed.match(/^(\d+)\.\s(.*)/);
-        blocks.push({ type: 'number', num: match[1], text: match[2] });
-      } else if (trimmed === '') {
-        blocks.push({ type: 'empty' });
+      continue;
+    }
+
+    // 1. Markdown headings
+    if (trimmed.startsWith('# ')) {
+      blocks.push({ type: 'h1', text: cleanAllBulletPrefixes(trimmed.replace('# ', '')) });
+    } else if (trimmed.startsWith('## ')) {
+      blocks.push({ type: 'h2', text: cleanAllBulletPrefixes(trimmed.replace('## ', '')) });
+    } else if (trimmed.startsWith('### ')) {
+      blocks.push({ type: 'h3', text: cleanAllBulletPrefixes(trimmed.replace('### ', '')) });
+    } 
+    // 2. Keycap emoji headings (e.g., 1️⃣ Architecture Overview, 1\ufe0f\u20e3 Architecture Overview, 🔟 Key Outcomes)
+    else if (/^(?:[0-9]\ufe0f?\u20e3|\ud83d\udd1f|🔟|1\ufe0f\u20e31\ufe0f\u20e3)+\s*(.*)/.test(trimmed)) {
+      const match = trimmed.match(/^(?:[0-9]\ufe0f?\u20e3|\ud83d\udd1f|🔟|1\ufe0f\u20e31\ufe0f\u20e3)+\s*(.*)/);
+      const headingText = match[1].trim();
+      const emojiPrefix = trimmed.substring(0, trimmed.indexOf(headingText)).trim();
+      blocks.push({ type: 'emoji-heading', emoji: emojiPrefix, text: cleanAllBulletPrefixes(headingText) });
+    }
+    // 3. Known text headings or section breaks
+    else if (
+      trimmed === 'Architecture Overview' || 
+      trimmed === 'Terraform Folder Structure' ||
+      trimmed === 'Remote Backend Configuration' ||
+      trimmed === 'Key Outcomes' ||
+      trimmed === 'Challenges & Solutions' ||
+      trimmed === 'Automation Benefits' ||
+      trimmed === 'Security Controls Implemented'
+    ) {
+      blocks.push({ type: 'h2', text: trimmed });
+    }
+    // 4. Bullet lists
+    else if (
+      trimmed.startsWith('- ') || 
+      trimmed.startsWith('* ') || 
+      trimmed.startsWith('• ') || 
+      trimmed.startsWith('▪ ') || 
+      trimmed.startsWith('🔹 ') ||
+      trimmed.startsWith('🚀 ') ||
+      trimmed.startsWith('☸️ ') ||
+      trimmed.startsWith('🐳 ') ||
+      trimmed.startsWith('⚙️ ') ||
+      trimmed.startsWith('📦 ') ||
+      trimmed.startsWith('📊 ') ||
+      trimmed.startsWith('🔒 ') ||
+      trimmed.startsWith('🏆 ') ||
+      trimmed.startsWith('📌 ') ||
+      trimmed.startsWith('🎯 ') ||
+      trimmed.startsWith('✔️ ') ||
+      trimmed.startsWith('✅ ') ||
+      trimmed.startsWith('👉 ')
+    ) {
+      const parsed = parseBulletLine(trimmed);
+      blocks.push({ type: 'bullet', text: parsed.text, iconType: parsed.iconType });
+    }
+    // 5. Numbered lists
+    else if (/^\d+\.\s/.test(trimmed)) {
+      const match = trimmed.match(/^(\d+)\.\s(.*)/);
+      blocks.push({ type: 'number', num: match[1], text: cleanAllBulletPrefixes(match[2]) });
+    }
+    // 6. Normal paragraph or fallback to bullet if it starts with an emoji
+    else {
+      const bulletEmojis = ['🔹', '🚀', '☸️', '🐳', '⚙️', '📦', '📊', '🔒', '🏆', '📌', '🎯', '✔️', '✅', '👉'];
+      const startsWithBulletEmoji = bulletEmojis.some(emoji => trimmed.startsWith(emoji));
+      if (startsWithBulletEmoji) {
+        const parsed = parseBulletLine(trimmed);
+        blocks.push({ type: 'bullet', text: parsed.text, iconType: parsed.iconType });
       } else {
         blocks.push({ type: 'paragraph', text: line });
       }
@@ -197,90 +324,123 @@ const ProjectDetailsPage = () => {
       </button>
 
       <Card className="w-full p-8 neon-card">
-        <h1 className="text-3xl font-bold text-foreground mb-6">{project.name}</h1>
+        <h1 className="text-3xl font-bold text-foreground mb-4">{project.name}</h1>
         
-        {/* ✨ MODIFIED: Removed the container div to allow the image to use its natural dimensions */}
+        {/* Render Project Duration if present */}
+        {(project.duration || project.project_duration || project.projectDuration || project['Project Duration']) && (
+          <div className="flex items-center text-sm text-muted-foreground mb-6 gap-2 bg-muted/30 w-fit px-3 py-1.5 rounded-md border border-border/50">
+            <Calendar className="w-4 h-4 text-cyan-soft" />
+            <span>Duration: <strong className="text-foreground">{project.duration || project.project_duration || project.projectDuration || project['Project Duration']}</strong></span>
+          </div>
+        )}
+        
         {project.image_url && (
-          <img src={project.image_url} alt={project.name} className="w-full h-auto rounded-lg mb-8"/>
+          <img src={project.image_url} alt={project.name} className="w-full h-auto rounded-lg mb-8 shadow-md"/>
         )}
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-foreground mb-4">Summary</h2>
-          <div className="space-y-2">
+          <h2 className="text-xl font-bold text-foreground mb-4 border-b border-border pb-2">Summary</h2>
+          <div className="space-y-3">
             {(project.summary || '').split('\n').filter(line => line.trim() !== '').map((line, idx) => (
-              <div key={idx} className="flex items-start space-x-3 text-muted-foreground">
-                <Zap className="w-4 h-4 text-blue-400 mt-1 flex-shrink-0" />
-                <p>{line}</p>
+              <div key={idx} className="flex items-start space-x-3 text-gray-800 dark:text-gray-300">
+                <Zap className="w-4 h-4 text-cyan-soft mt-1.5 flex-shrink-0 animate-pulse" />
+                <p className="text-base leading-relaxed font-sans">{parseBoldText(cleanBulletText(line))}</p>
               </div>
             ))}
           </div>
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-foreground mb-4">Technologies Used</h2>
+          <h2 className="text-xl font-bold text-foreground mb-4 border-b border-border pb-2">Technologies Used</h2>
           <div className="flex flex-wrap gap-2">
-            {(project.technologies || []).map((tech) => (<Badge key={tech} variant="outline" className="border-cyan-400/30 text-cyan-soft bg-background/50">{tech}</Badge>))}
+            {(project.technologies || []).map((tech) => (<Badge key={tech} variant="outline" className="border-cyan-400/30 text-cyan-soft bg-background/50 text-sm py-1 px-3">{tech}</Badge>))}
           </div>
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-foreground mb-4">Key Outcomes</h2>
-          <div className="space-y-2">
+          <h2 className="text-xl font-bold text-foreground mb-4 border-b border-border pb-2">Key Outcomes</h2>
+          <div className="space-y-3">
             {(project.key_outcomes || '').split('\n').filter(line => line.trim() !== '').map((line, idx) => (
-              <div key={idx} className="flex items-start space-x-3 text-muted-foreground">
-                <CheckCircle className="w-4 h-4 text-green-soft mt-1 flex-shrink-0" />
-                <p>{line}</p>
+              <div key={idx} className="flex items-start space-x-3 text-gray-800 dark:text-gray-300">
+                <CheckCircle className="w-4 h-4 text-green-soft mt-1.5 flex-shrink-0" />
+                <p className="text-base leading-relaxed font-sans">{parseBoldText(cleanBulletText(line))}</p>
               </div>
             ))}
           </div>
         </section>
         
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-foreground mb-4 border-b border-border pb-2">Implementation Details</h2>
+          <h2 className="text-xl font-bold text-foreground mb-4 border-b border-border pb-2">Implementation Details</h2>
           <div className="space-y-4">
             {groupLines(project.details).map((block, idx) => {
               switch (block.type) {
                 case 'h1':
                   return (
-                    <h1 key={idx} className="text-2xl font-extrabold text-foreground mt-8 mb-4">
+                    <h1 key={idx} className="text-3xl font-extrabold text-gray-900 dark:text-white mt-12 mb-6 tracking-tight border-b-2 border-cyan-500/20 pb-3 font-sans">
                       {parseBoldText(block.text)}
                     </h1>
                   );
                 case 'h2':
                   return (
-                    <h2 key={idx} className="text-xl font-bold text-foreground mt-7 mb-3 border-b border-border/50 pb-1">
+                    <h2 key={idx} className="text-2xl font-bold text-cyan-600 dark:text-cyan-400 mt-10 mb-4 pb-2 border-b border-border/30 font-sans tracking-wide">
                       {parseBoldText(block.text)}
                     </h2>
                   );
                 case 'h3':
                   return (
-                    <h3 key={idx} className="text-lg font-semibold text-cyan-soft mt-6 mb-2 flex items-center gap-2">
-                      <Zap className="w-4 h-4 text-cyan-soft" />
+                    <h3 key={idx} className="text-xl font-bold text-pink-600 dark:text-pink-400 mt-8 mb-3 font-sans tracking-wide">
                       {parseBoldText(block.text)}
                     </h3>
                   );
-                case 'bullet':
+                case 'emoji-heading':
                   return (
-                    <div key={idx} className="flex items-start space-x-2 pl-2 text-muted-foreground my-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-soft mt-2 flex-shrink-0"></span>
-                      <p className="text-sm leading-relaxed">{parseBoldText(block.text)}</p>
+                    <div key={idx} className="flex items-center gap-3 mt-10 mb-5 pb-2 border-b border-cyan-500/20">
+                      <span className="flex items-center justify-center text-xl font-bold bg-cyan-600/10 dark:bg-cyan-400/10 text-cyan-600 dark:text-cyan-400 px-3 py-1 rounded-lg border border-cyan-600/20 dark:border-cyan-400/20 shadow-sm">
+                        {block.emoji}
+                      </span>
+                      <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white font-sans tracking-wide m-0">
+                        {parseBoldText(block.text)}
+                      </h2>
+                    </div>
+                  );
+                case 'bullet':
+                  let iconElement = <span className="w-2 h-2 rounded-full bg-cyan-600 dark:bg-cyan-400 mt-2.5 flex-shrink-0 shadow-[0_0_8px_rgba(6,182,212,0.5)]"></span>;
+                  if (block.iconType === 'success') {
+                    iconElement = <CheckCircle className="w-5 h-5 text-emerald-500 dark:text-emerald-400 mt-0.5 flex-shrink-0" />;
+                  } else if (block.iconType === 'warning') {
+                    iconElement = <AlertCircle className="w-5 h-5 text-amber-500 dark:text-amber-400 mt-0.5 flex-shrink-0" />;
+                  } else if (block.iconType === 'tech') {
+                    iconElement = <Cpu className="w-5 h-5 text-indigo-500 dark:text-indigo-400 mt-0.5 flex-shrink-0" />;
+                  } else if (block.iconType === 'action') {
+                    iconElement = <Sparkles className="w-5 h-5 text-cyan-500 dark:text-cyan-400 mt-0.5 flex-shrink-0 animate-pulse" />;
+                  } else if (block.iconType === 'bullet-cyan') {
+                    iconElement = <span className="w-2 h-2 rounded-full bg-cyan-500 dark:bg-cyan-400 mt-2.5 flex-shrink-0 shadow-[0_0_8px_rgba(6,182,212,0.6)]"></span>;
+                  }
+                  return (
+                    <div key={idx} className="flex items-start gap-3 pl-3 my-2.5">
+                      {iconElement}
+                      <p className="text-base leading-relaxed text-gray-800 dark:text-gray-300 font-sans">
+                        {parseBoldText(block.text)}
+                      </p>
                     </div>
                   );
                 case 'number':
                   return (
-                    <div key={idx} className="flex items-start space-x-2 pl-2 text-muted-foreground my-1.5">
-                      <span className="text-xs font-bold text-cyan-soft bg-cyan-soft/10 px-1.5 py-0.5 rounded flex-shrink-0 mt-0.5">
+                    <div key={idx} className="flex items-start gap-3 pl-3 my-3">
+                      <span className="flex items-center justify-center text-xs font-bold text-cyan-600 dark:text-cyan-400 bg-cyan-600/10 dark:bg-cyan-400/10 border border-cyan-600/20 dark:border-cyan-400/20 w-6 h-6 rounded-full flex-shrink-0 mt-0.5 shadow-sm">
                         {block.num}
                       </span>
-                      <p className="text-sm leading-relaxed">{parseBoldText(block.text)}</p>
+                      <p className="text-base leading-relaxed text-gray-800 dark:text-gray-300 font-sans">
+                        {parseBoldText(block.text)}
+                      </p>
                     </div>
                   );
                 case 'code':
                   return (
-                    <div key={idx} className="my-4 rounded-lg border border-border bg-slate-950 p-4 font-mono text-xs text-slate-200 overflow-x-auto shadow-md">
+                    <div key={idx} className="my-5 rounded-lg border border-border bg-slate-950 p-5 font-mono text-xs text-slate-200 overflow-x-auto shadow-lg">
                       <div className="flex justify-between items-center text-[10px] text-slate-500 uppercase tracking-wider border-b border-slate-800 pb-2 mb-3">
-                        <span className="flex items-center gap-1">
-                          <Code className="w-3 h-3 text-cyan-soft" />
+                        <span className="flex items-center gap-1.5">
+                          <Terminal className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
                           Configuration / Code Block
                         </span>
                       </div>
@@ -289,7 +449,7 @@ const ProjectDetailsPage = () => {
                   );
                 case 'paragraph':
                   return (
-                    <p key={idx} className="text-sm leading-relaxed text-muted-foreground pl-1">
+                    <p key={idx} className="text-base leading-relaxed text-gray-800 dark:text-gray-300 pl-3 my-4 font-sans">
                       {parseBoldText(block.text)}
                     </p>
                   );
