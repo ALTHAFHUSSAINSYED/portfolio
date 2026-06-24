@@ -10,8 +10,69 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://api.althafportfol
 // Helper function to check if a line is a code example
 const isCodeLine = (line) => {
   const trimmedLine = line.trim();
-  const codeKeywords = ['FROM', 'WORKDIR', 'COPY', 'RUN', 'ENV', 'CMD', 'pipeline', 'agent', 'stages', 'stage', 'steps', 'sh', 'docker', 'kubectl', 'helm'];
-  return trimmedLine.startsWith('#') || codeKeywords.some(keyword => trimmedLine.toLowerCase().startsWith(keyword)) || line.startsWith('    ') || trimmedLine.startsWith('-');
+  // Exclude markdown headings
+  if (trimmedLine.startsWith('# ') || trimmedLine.startsWith('## ') || trimmedLine.startsWith('### ')) {
+    return false;
+  }
+  const codeKeywords = ['from', 'workdir', 'copy', 'run', 'env', 'cmd', 'pipeline', 'agent', 'stages', 'stage', 'steps', 'sh', 'docker', 'kubectl', 'helm', 'apiversion', 'kind', 'metadata', 'spec'];
+  return (
+    (trimmedLine.startsWith('#') && !trimmedLine.startsWith('# ')) || // shell comments
+    codeKeywords.some(keyword => trimmedLine.toLowerCase().startsWith(keyword)) || 
+    line.startsWith('    ') || 
+    line.startsWith('\t')
+  );
+};
+
+// Helper function to parse **bold** text in markdown
+const parseBoldText = (text) => {
+  if (!text) return "";
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i} className="font-semibold text-foreground">{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
+};
+
+// Group lines into rich blocks (paragraphs, headings, lists, and code blocks)
+const groupLines = (detailsText) => {
+  const lines = (detailsText || '').split('\n');
+  const blocks = [];
+  let currentCodeBlock = null;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmed = line.trim();
+
+    if (isCodeLine(line)) {
+      if (!currentCodeBlock) {
+        currentCodeBlock = { type: 'code', lines: [] };
+        blocks.push(currentCodeBlock);
+      }
+      currentCodeBlock.lines.push(line);
+    } else {
+      currentCodeBlock = null; // Reset code block
+      
+      if (trimmed.startsWith('### ')) {
+        blocks.push({ type: 'h3', text: trimmed.replace('### ', '') });
+      } else if (trimmed.startsWith('## ')) {
+        blocks.push({ type: 'h2', text: trimmed.replace('## ', '') });
+      } else if (trimmed.startsWith('# ')) {
+        blocks.push({ type: 'h1', text: trimmed.replace('# ', '') });
+      } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+        blocks.push({ type: 'bullet', text: trimmed.substring(2) });
+      } else if (/^\d+\.\s/.test(trimmed)) {
+        const match = trimmed.match(/^(\d+)\.\s(.*)/);
+        blocks.push({ type: 'number', num: match[1], text: match[2] });
+      } else if (trimmed === '') {
+        blocks.push({ type: 'empty' });
+      } else {
+        blocks.push({ type: 'paragraph', text: line });
+      }
+    }
+  }
+  return blocks;
 };
 
 const ProjectDetailsPage = () => {
@@ -174,19 +235,69 @@ const ProjectDetailsPage = () => {
           </div>
         </section>
         
-        <section>
-          <h2 className="text-xl font-semibold text-foreground mb-4">Implementation Details</h2>
-          <div className="space-y-2">
-            {(project.details || '').split('\n').map((line, idx) => (
-              <div key={idx} className="flex items-start space-x-3 text-muted-foreground">
-                {isCodeLine(line) || line.trim() === '' ? (
-                  <div className="w-4 flex-shrink-0"></div>
-                ) : (
-                  <Code className="w-4 h-4 text-purple-400 mt-1 flex-shrink-0" />
-                )}
-                <p className="whitespace-pre-wrap font-mono text-sm break-words">{line}</p>
-              </div>
-            ))}
+        <section className="mb-8">
+          <h2 className="text-xl font-semibold text-foreground mb-4 border-b border-border pb-2">Implementation Details</h2>
+          <div className="space-y-4">
+            {groupLines(project.details).map((block, idx) => {
+              switch (block.type) {
+                case 'h1':
+                  return (
+                    <h1 key={idx} className="text-2xl font-extrabold text-foreground mt-8 mb-4">
+                      {parseBoldText(block.text)}
+                    </h1>
+                  );
+                case 'h2':
+                  return (
+                    <h2 key={idx} className="text-xl font-bold text-foreground mt-7 mb-3 border-b border-border/50 pb-1">
+                      {parseBoldText(block.text)}
+                    </h2>
+                  );
+                case 'h3':
+                  return (
+                    <h3 key={idx} className="text-lg font-semibold text-cyan-soft mt-6 mb-2 flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-cyan-soft" />
+                      {parseBoldText(block.text)}
+                    </h3>
+                  );
+                case 'bullet':
+                  return (
+                    <div key={idx} className="flex items-start space-x-2 pl-2 text-muted-foreground my-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-soft mt-2 flex-shrink-0"></span>
+                      <p className="text-sm leading-relaxed">{parseBoldText(block.text)}</p>
+                    </div>
+                  );
+                case 'number':
+                  return (
+                    <div key={idx} className="flex items-start space-x-2 pl-2 text-muted-foreground my-1.5">
+                      <span className="text-xs font-bold text-cyan-soft bg-cyan-soft/10 px-1.5 py-0.5 rounded flex-shrink-0 mt-0.5">
+                        {block.num}
+                      </span>
+                      <p className="text-sm leading-relaxed">{parseBoldText(block.text)}</p>
+                    </div>
+                  );
+                case 'code':
+                  return (
+                    <div key={idx} className="my-4 rounded-lg border border-border bg-slate-950 p-4 font-mono text-xs text-slate-200 overflow-x-auto shadow-md">
+                      <div className="flex justify-between items-center text-[10px] text-slate-500 uppercase tracking-wider border-b border-slate-800 pb-2 mb-3">
+                        <span className="flex items-center gap-1">
+                          <Code className="w-3 h-3 text-cyan-soft" />
+                          Configuration / Code Block
+                        </span>
+                      </div>
+                      <pre className="whitespace-pre leading-relaxed">{block.lines.join('\n')}</pre>
+                    </div>
+                  );
+                case 'paragraph':
+                  return (
+                    <p key={idx} className="text-sm leading-relaxed text-muted-foreground pl-1">
+                      {parseBoldText(block.text)}
+                    </p>
+                  );
+                case 'empty':
+                default:
+                  return <div key={idx} className="h-2"></div>;
+              }
+            })}
           </div>
         </section>
 
