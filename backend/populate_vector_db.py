@@ -399,6 +399,31 @@ def main():
             else:
                 print("✅ All projects up to date.")
                 
+            # Prune deleted projects from ChromaDB to keep in sync
+            try:
+                print("[SYNC] Pruning deleted projects from ChromaDB...")
+                # Re-fetch all project IDs currently in MongoDB
+                mongo_project_ids = set()
+                projects_cursor = db.projects.find({})
+                for p in projects_cursor:
+                    mongo_project_ids.add(str(p.get('id', p.get('_id'))))
+                
+                master_col = client.get_collection('portfolio_master')
+                existing_chroma_projs = master_col.get(where={"category": "project"})
+                
+                if existing_chroma_projs and 'ids' in existing_chroma_projs:
+                    pruned_projs = 0
+                    for chroma_id in existing_chroma_projs['ids']:
+                        if chroma_id not in mongo_project_ids:
+                            master_col.delete(ids=[chroma_id])
+                            pruned_projs += 1
+                    if pruned_projs > 0:
+                        print(f"🧹 Successfully pruned {pruned_projs} deleted projects from ChromaDB.")
+                    else:
+                        print("✅ ChromaDB projects are clean. No pruning required.")
+            except Exception as pe:
+                print(f"⚠️ Error pruning deleted projects from ChromaDB: {pe}")
+                
         except Exception as e:
             print(f"[ERROR] Failed to sync projects from MongoDB: {e}")
     else:

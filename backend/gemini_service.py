@@ -67,14 +67,19 @@ class GeminiClient:
             )
             
             self.is_available = True
+            self.is_available = True
             logger.info("Gemini API client initialized successfully")
             
             # Initialize model for chat completions
-            self.chat = self.ChatCompletions(self)
+            self.chat = self.Chat(self)
             
         except Exception as e:
             logger.error(f"Gemini client initialization error: {e}")
             self.is_available = False
+    
+    class Chat:
+        def __init__(self, parent):
+            self.completions = parent.ChatCompletions(parent)
     
     class ChatCompletions:
         """
@@ -83,12 +88,12 @@ class GeminiClient:
         def __init__(self, parent):
             self.parent = parent
             self.model_mapping = {
-                "gpt-3.5-turbo": "models/gemini-pro-latest",
-                "gpt-4": "models/gemini-pro-latest",  # Use Pro as default fallback
-                "gpt-4-turbo": "models/gemini-pro-latest",
+                "gpt-3.5-turbo": "gemini-2.5-flash",
+                "gpt-4": "gemini-2.5-pro",  
+                "gpt-4-turbo": "gemini-2.5-pro",
             }
         
-        def create(self, model: str, messages: List[Dict[str, str]], max_tokens: int = None, temperature: float = 0.7):
+        def create(self, model: str, messages: List[Dict[str, str]], max_tokens: int = None, temperature: float = 0.7, **kwargs):
             """
             Create a chat completion using Gemini API with the same interface as OpenAI.
             
@@ -103,7 +108,10 @@ class GeminiClient:
             """
             try:
                 # Map the model name
-                gemini_model = self.model_mapping.get(model, "gemini-pro")
+                if "gemini" in model.lower():
+                    gemini_model = model
+                else:
+                    gemini_model = self.model_mapping.get(model, "gemini-2.5-flash")
                 
                 # Create the Gemini model
                 # Create the Gemini model config

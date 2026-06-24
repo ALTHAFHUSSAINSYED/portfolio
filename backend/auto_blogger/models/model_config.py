@@ -364,7 +364,48 @@ def run_agent_completion(client, agent_key: str, messages: list, max_tokens: int
                             AGENT_ROLES.promote_fallback(agent_key)
                         except Exception as pe:
                             logger.error(f"Failed to promote fallback for agent '{agent_key}': {pe}")
-                    break
-                    
+    # Attempt direct Gemini API fallback before giving up completely
+    logger.warning(f"⚠️ All OpenRouter models failed for agent '{agent_key}'. Attempting direct Gemini API fallback...")
+    try:
+        try:
+            from backend.gemini_service import GeminiClient
+        except ImportError:
+            try:
+                from gemini_service import GeminiClient
+            except ImportError:
+                import sys
+                import os
+                sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+                from backend.gemini_service import GeminiClient
+        
+        gemini_client = GeminiClient()
+        if gemini_client.is_available:
+            # Use gemini-2.5-flash as the fallback model for direct Gemini (gemini-2.5-pro has 0 quota on free tier keys)
+            fallback_gemini_model = "gemini-2.5-flash"
+                
+            logger.info(f"🚀 Direct Gemini Client initialized. Calling model '{fallback_gemini_model}' for agent '{agent_key}'...")
+            start_time = time.time()
+            response = gemini_client.chat.completions.create(
+                model=fallback_gemini_model,
+                messages=messages,
+                max_tokens=max_tokens or config.max_tokens,
+                temperature=temperature if temperature is not None else config.temperature,
+                timeout=config.timeout_seconds
+            )
+            latency = time.time() - start_time
+            content = response.choices[0].message.content
+            
+            logger.info(
+                f"\n[Direct Gemini Fallback Success]\n"
+                f"Agent: {agent_key}\n"
+                f"Model: {fallback_gemini_model}\n"
+                f"Latency: {latency:.2f}s\n"
+            )
+            return content
+        else:
+            logger.error("Direct Gemini API is not available (is_available = False).")
+    except Exception as gemini_err:
+        logger.error(f"❌ Direct Gemini API fallback failed: {gemini_err}")
+        
     raise RuntimeError(f"All models failed for agent '{agent_key}'. Last error: {last_error}")
 
