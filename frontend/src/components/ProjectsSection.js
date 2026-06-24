@@ -40,7 +40,18 @@ const ProjectsSection = () => {
         const response = await fetch(`${API_BASE_URL}/api/projects`);
         if (!response.ok) throw new Error('Something went wrong fetching projects.');
         const data = await response.json();
-        setProjects(data);
+        
+        // Decode HTML entities in fields globally to ensure proper rendering
+        const cleanedData = (data || []).map(p => {
+          if (p.name) p.name = p.name.replace(/&amp;/g, '&');
+          if (p.title) p.title = p.title.replace(/&amp;/g, '&');
+          if (p.summary) p.summary = p.summary.replace(/&amp;/g, '&');
+          if (p.details) p.details = p.details.replace(/&amp;/g, '&');
+          if (p.key_outcomes) p.key_outcomes = p.key_outcomes.replace(/&amp;/g, '&');
+          return p;
+        });
+        
+        setProjects(cleanedData);
       } catch (err) { setError(err.message); }
       finally { setLoading(false); }
     };

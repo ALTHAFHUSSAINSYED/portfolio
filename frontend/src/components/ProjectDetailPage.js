@@ -102,8 +102,16 @@ const groupLines = (detailsText) => {
   let currentCodeBlock = null;
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const trimmed = line.trim();
+    let line = lines[i];
+    let trimmed = line.trim();
+
+    // Preprocess: Strip decorative emoji followed by keycap emoji (e.g. "📈 6️⃣" -> "6️⃣")
+    // This resolves character corruption of decorative emojis and allows proper heading classification.
+    const headingEmojiRegex = /^([^\s0-9🔟]+)\s+([0-9🔟]\ufe0f?\u20e3|1\ufe0f\u20e31\ufe0f\u20e3)/;
+    if (headingEmojiRegex.test(trimmed)) {
+      trimmed = trimmed.replace(headingEmojiRegex, '$2');
+      line = trimmed;
+    }
 
     if (trimmed === '') {
       if (currentCodeBlock) {
@@ -311,6 +319,16 @@ const ProjectDetailsPage = () => {
         const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}`);
         if (!response.ok) throw new Error('Project not found.');
         const data = await response.json();
+        
+        // Decode HTML entities in fields globally to ensure proper rendering
+        if (data) {
+          if (data.name) data.name = data.name.replace(/&amp;/g, '&');
+          if (data.title) data.title = data.title.replace(/&amp;/g, '&');
+          if (data.summary) data.summary = data.summary.replace(/&amp;/g, '&');
+          if (data.details) data.details = data.details.replace(/&amp;/g, '&');
+          if (data.key_outcomes) data.key_outcomes = data.key_outcomes.replace(/&amp;/g, '&');
+        }
+        
         setProject(data);
         
         // Fetch related blogs
