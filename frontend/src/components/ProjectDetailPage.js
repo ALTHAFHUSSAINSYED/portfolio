@@ -44,7 +44,7 @@ const cleanAllBulletPrefixes = (text) => {
   let trimmed = (text || '').trim();
   
   // Strip standard markdown/plain bullet prefixes (repeatable)
-  const bulletRegex = /^([-*•▪▫◦⬡○●■□▲▼◆◇👉]\s*)+/;
+  const bulletRegex = /^([-*•▪▫◦⬡○●■□▲▼◆◇👉]\s*)+/u;
   trimmed = trimmed.replace(bulletRegex, '').trim();
   
   // Strip common bullet emojis/symbols
