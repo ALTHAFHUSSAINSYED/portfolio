@@ -202,6 +202,101 @@ const groupLines = (detailsText) => {
   return blocks;
 };
 
+// Extract distinct sections from summary and details fields (resolves data inconsistencies)
+const extractProjectSections = (project) => {
+  const summaryText = project.summary || '';
+  const detailsText = project.details || '';
+  
+  let summary = [];
+  let objective = [];
+  let responsibilities = [];
+  let details = [];
+
+  const getLines = (text) => text.split('\n').map(l => l.trim());
+
+  // 1. Parse Summary field (extract Summary, Objective, and Responsibilities if present)
+  const summaryLines = getLines(summaryText);
+  let currentSection = 'summary';
+
+  for (const line of summaryLines) {
+    if (line === '') continue;
+    
+    const cleanLine = line.toLowerCase();
+    // Section match rules
+    if (cleanLine.includes('summary') && (cleanLine.includes('📌') || cleanLine.includes('👉') || cleanLine.startsWith('summary'))) {
+      currentSection = 'summary';
+      continue;
+    }
+    if (cleanLine.includes('objective') && (cleanLine.includes('🎯') || cleanLine.includes('target') || cleanLine.startsWith('objective'))) {
+      currentSection = 'objective';
+      continue;
+    }
+    if (cleanLine.includes('responsibilities') && (cleanLine.includes('👨') || cleanLine.includes('key') || cleanLine.startsWith('responsibilities') || cleanLine.startsWith('key responsibilities'))) {
+      currentSection = 'responsibilities';
+      continue;
+    }
+
+    if (currentSection === 'summary') {
+      summary.push(line);
+    } else if (currentSection === 'objective') {
+      objective.push(line);
+    } else if (currentSection === 'responsibilities') {
+      responsibilities.push(line);
+    }
+  }
+
+  // 2. Parse Details field (extract Objective, Key Responsibilities, and clean Implementation Details)
+  const detailsLines = detailsText.split('\n');
+  currentSection = 'details'; // starts at details until a header switches it
+
+  for (let i = 0; i < detailsLines.length; i++) {
+    const line = detailsLines[i];
+    const trimmed = line.trim();
+    if (trimmed === '') {
+      if (currentSection === 'details') {
+        details.push(line);
+      }
+      continue;
+    }
+
+    const cleanLine = trimmed.toLowerCase();
+    
+    // Check for section transitions
+    if (cleanLine.includes('objective') && (cleanLine.includes('🎯') || cleanLine.includes('target') || cleanLine.startsWith('objective') || cleanLine.startsWith('1. objective') || cleanLine.startsWith('1\ufe0f\u20e3 objective') || cleanLine.startsWith('1\ufe0f\u20e31\ufe0f\u20e3 objective'))) {
+      currentSection = 'objective';
+      continue;
+    }
+    if (cleanLine.includes('responsibilities') && (cleanLine.includes('👨') || cleanLine.includes('key') || cleanLine.startsWith('responsibilities') || cleanLine.startsWith('key responsibilities') || cleanLine.startsWith('2. key responsibilities') || cleanLine.startsWith('2\ufe0f\u20e3 key responsibilities'))) {
+      currentSection = 'responsibilities';
+      continue;
+    }
+    if (cleanLine.includes('implementation details') && (cleanLine.includes('📖') || cleanLine.includes('details') || cleanLine.startsWith('implementation') || cleanLine.startsWith('3. implementation') || cleanLine.startsWith('implementation details') || cleanLine.startsWith('3\ufe0f\u20e3 implementation details'))) {
+      currentSection = 'details';
+      continue;
+    }
+
+    if (currentSection === 'objective') {
+      objective.push(trimmed);
+    } else if (currentSection === 'responsibilities') {
+      responsibilities.push(trimmed);
+    } else {
+      details.push(line); // Keep formatting intact (tabs/spaces) for code blocks
+    }
+  }
+
+  // Fallback: If summary is empty but description exists, use description
+  if (summary.length === 0 && project.description) {
+    summary = getLines(project.description).filter(l => l !== '');
+  }
+
+  return {
+    summary: summary.filter(l => l.trim() !== ''),
+    objective: objective.filter(l => l.trim() !== ''),
+    responsibilities: responsibilities.filter(l => l.trim() !== ''),
+    details: details.join('\n')
+  };
+};
+
 const ProjectDetailsPage = () => {
   const { projectId } = useParams();
   const [project, setProject] = useState(null);
@@ -271,6 +366,9 @@ const ProjectDetailsPage = () => {
     return null; // Render nothing until the project data is available
   }
 
+  // Extract custom sections (Summary, Objective, Responsibilities, and clean Implementation Details)
+  const sections = extractProjectSections(project);
+
   // Generate SEO data for project
   const projectTitle = `${project.name} | Althaf Hussain Portfolio`;
   const projectDescription = project.summary 
@@ -338,30 +436,75 @@ const ProjectDetailsPage = () => {
           <img src={project.image_url} alt={project.name} className="w-full h-auto rounded-lg mb-8 shadow-md"/>
         )}
 
-        <section className="mb-8">
-          <h2 className="text-xl font-bold text-foreground mb-4 border-b border-border pb-2">Summary</h2>
-          <div className="space-y-3">
-            {(project.summary || '').split('\n').filter(line => line.trim() !== '').map((line, idx) => (
-              <div key={idx} className="flex items-start space-x-3 text-gray-800 dark:text-gray-300">
-                <Zap className="w-4 h-4 text-cyan-soft mt-1.5 flex-shrink-0 animate-pulse" />
-                <p className="text-base leading-relaxed font-sans">{parseBoldText(cleanAllBulletPrefixes(line))}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+        {sections.summary.length > 0 && (
+          <section className="mb-8">
+            <h2 className="text-xl font-bold text-cyan-600 dark:text-cyan-400 mb-4 border-b border-border pb-2 flex items-center gap-2 font-sans tracking-wide">
+              <Zap className="w-5 h-5 text-cyan-soft animate-pulse" />
+              Summary
+            </h2>
+            <div className="space-y-3">
+              {sections.summary.map((line, idx) => (
+                <div key={idx} className="flex items-start space-x-3 text-gray-800 dark:text-gray-300 pl-1">
+                  <Zap className="w-4 h-4 text-cyan-soft mt-1.5 flex-shrink-0 animate-pulse" />
+                  <p className="text-base leading-relaxed font-sans">{parseBoldText(cleanAllBulletPrefixes(line))}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {sections.objective.length > 0 && (
+          <section className="mb-8">
+            <h2 className="text-xl font-bold text-cyan-600 dark:text-cyan-400 mb-4 border-b border-border pb-2 flex items-center gap-2 font-sans tracking-wide">
+              <Sparkles className="w-5 h-5 text-cyan-soft" />
+              Project Objective
+            </h2>
+            <div className="space-y-3">
+              {sections.objective.map((line, idx) => (
+                <div key={idx} className="flex items-start space-x-3 text-gray-800 dark:text-gray-300 pl-1">
+                  <span className="w-2 h-2 rounded-full bg-cyan-500 dark:bg-cyan-400 mt-2.5 flex-shrink-0 shadow-[0_0_8px_rgba(6,182,212,0.6)]"></span>
+                  <p className="text-base leading-relaxed font-sans">{parseBoldText(cleanAllBulletPrefixes(line))}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {sections.responsibilities.length > 0 && (
+          <section className="mb-8">
+            <h2 className="text-xl font-bold text-cyan-600 dark:text-cyan-400 mb-4 border-b border-border pb-2 flex items-center gap-2 font-sans tracking-wide">
+              <Shield className="w-5 h-5 text-cyan-soft" />
+              Key Responsibilities
+            </h2>
+            <div className="space-y-3">
+              {sections.responsibilities.map((line, idx) => (
+                <div key={idx} className="flex items-start space-x-3 text-gray-800 dark:text-gray-300 pl-1">
+                  <span className="w-2 h-2 rounded-full bg-cyan-500 dark:bg-cyan-400 mt-2.5 flex-shrink-0 shadow-[0_0_8px_rgba(6,182,212,0.6)]"></span>
+                  <p className="text-base leading-relaxed font-sans">{parseBoldText(cleanAllBulletPrefixes(line))}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="mb-8">
-          <h2 className="text-xl font-bold text-foreground mb-4 border-b border-border pb-2">Technologies Used</h2>
+          <h2 className="text-xl font-bold text-cyan-600 dark:text-cyan-400 mb-4 border-b border-border pb-2 flex items-center gap-2 font-sans tracking-wide">
+            <Cpu className="w-5 h-5 text-cyan-soft" />
+            Technologies Used
+          </h2>
           <div className="flex flex-wrap gap-2">
             {(project.technologies || []).map((tech) => (<Badge key={tech} variant="outline" className="border-cyan-400/30 text-cyan-soft bg-background/50 text-sm py-1 px-3">{tech}</Badge>))}
           </div>
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-bold text-foreground mb-4 border-b border-border pb-2">Key Outcomes</h2>
+          <h2 className="text-xl font-bold text-cyan-600 dark:text-cyan-400 mb-4 border-b border-border pb-2 flex items-center gap-2 font-sans tracking-wide">
+            <CheckCircle2 className="w-5 h-5 text-cyan-soft" />
+            Key Outcomes
+          </h2>
           <div className="space-y-3">
             {(project.key_outcomes || '').split('\n').filter(line => line.trim() !== '').map((line, idx) => (
-              <div key={idx} className="flex items-start space-x-3 text-gray-800 dark:text-gray-300">
+              <div key={idx} className="flex items-start space-x-3 text-gray-800 dark:text-gray-300 pl-1">
                 <CheckCircle className="w-4 h-4 text-green-soft mt-1.5 flex-shrink-0" />
                 <p className="text-base leading-relaxed font-sans">{parseBoldText(cleanAllBulletPrefixes(line))}</p>
               </div>
@@ -369,10 +512,14 @@ const ProjectDetailsPage = () => {
           </div>
         </section>
         
-        <section className="mb-8">
-          <h2 className="text-xl font-bold text-foreground mb-4 border-b border-border pb-2">Implementation Details</h2>
-          <div className="space-y-4">
-            {groupLines(project.details).map((block, idx) => {
+        {sections.details && sections.details.trim() !== '' && (
+          <section className="mb-8">
+            <h2 className="text-xl font-bold text-cyan-600 dark:text-cyan-400 mb-4 border-b border-border pb-2 flex items-center gap-2 font-sans tracking-wide">
+              <Terminal className="w-5 h-5 text-cyan-soft" />
+              Implementation Details
+            </h2>
+            <div className="space-y-4">
+            {groupLines(sections.details).map((block, idx) => {
               switch (block.type) {
                 case 'h1':
                   return (
@@ -460,6 +607,7 @@ const ProjectDetailsPage = () => {
             })}
           </div>
         </section>
+      )}
 
         {/* Related Blogs Section */}
         {relatedBlogs.length > 0 && (

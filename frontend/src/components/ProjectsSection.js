@@ -1,10 +1,32 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
-import { Folder, CheckCircle, ArrowRight, Zap, Code, Server, Loader2, AlertTriangle } from 'lucide-react';
+import { Folder, CheckCircle, ArrowRight, Zap, Code, Server, Loader2, AlertTriangle, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://api.althafportfolio.site';
+
+const cleanAllBulletPrefixes = (text) => {
+  let trimmed = (text || '').trim();
+  const bulletRegex = /^([-*•▪▫◦⬡○●■□▲▼◆◇👉]\s*)+/;
+  trimmed = trimmed.replace(bulletRegex, '').trim();
+  const emojiRegex = /^(✔️|✅|✔|☑️|☑|⚠️|🚨|🔥|⚙️|🛠️|🔧|☸️|🐳|📦|🚀|⚡|🎯|🏆|🔹|🔷|▪️|▫️|👉)\s*/;
+  trimmed = trimmed.replace(emojiRegex, '').trim();
+  return trimmed;
+};
+
+const isSectionHeader = (line) => {
+  const trimmed = line.trim().toLowerCase();
+  const headerPatterns = [
+    /^(🎯|👨💻|🛠️|⚡|📌|🏆|🔹)?\s*objective/i,
+    /^(🎯|👨💻|🛠️|⚡|📌|🏆|🔹)?\s*key responsibilities/i,
+    /^(🎯|👨💻|🛠️|⚡|📌|🏆|🔹)?\s*responsibilities/i,
+    /^(🎯|👨💻|🛠️|⚡|📌|🏆|🔹)?\s*architecture/i,
+    /^(🎯|👨💻|🛠️|⚡|📌|🏆|🔹)?\s*challenges/i,
+    /^(🎯|👨💻|🛠️|⚡|📌|🏆|🔹)?\s*summary/i
+  ];
+  return headerPatterns.some(pattern => pattern.test(trimmed)) && trimmed.length < 40;
+};
 
 const ProjectsSection = () => {
   const [projects, setProjects] = useState([]);
@@ -88,20 +110,32 @@ const ProjectsSection = () => {
 
                   {/* ✨ REMOVED: The project image has been removed from this view. */}
 
+                  {/* Render Project Duration if present */}
+                  {(project.duration || project.project_duration || project.projectDuration || project['Project Duration']) && (
+                    <div className="flex items-center text-xs text-muted-foreground mb-4 gap-1.5 bg-muted/20 w-fit px-2.5 py-1 rounded-md border border-border/40">
+                      <Calendar className="w-3.5 h-3.5 text-cyan-soft" />
+                      <span>Duration: <strong className="text-foreground">{project.duration || project.project_duration || project.projectDuration || project['Project Duration']}</strong></span>
+                    </div>
+                  )}
+
                   <div className="space-y-2 mb-6">
                     {(() => {
                       const lines = (project.summary || '').split('\n').filter(line => line.trim() !== '');
                       const displayLines = [];
                       for (const line of lines) {
-                        if (line.match(/(Objective|Key Responsibilities|Architecture|Challenges)/i)) break;
+                        if (isSectionHeader(line)) break;
                         displayLines.push(line);
                       }
-                      return displayLines.map((line, idx) => (
-                        <div key={idx} className="flex items-start space-x-3">
-                          <ArrowRight className="w-4 h-4 text-cyan-soft mt-1 flex-shrink-0" />
-                          <p className="text-muted-foreground text-sm">{line}</p>
-                        </div>
-                      ));
+                      return displayLines.map((line, idx) => {
+                        const cleaned = cleanAllBulletPrefixes(line);
+                        if (!cleaned) return null;
+                        return (
+                          <div key={idx} className="flex items-start space-x-3">
+                            <ArrowRight className="w-4 h-4 text-cyan-soft mt-1 flex-shrink-0" />
+                            <p className="text-muted-foreground text-sm">{cleaned}</p>
+                          </div>
+                        );
+                      });
                     })()}
                   </div>
 
