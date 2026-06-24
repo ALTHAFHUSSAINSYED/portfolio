@@ -344,7 +344,7 @@ const ProjectDetailsPage = () => {
             {(project.summary || '').split('\n').filter(line => line.trim() !== '').map((line, idx) => (
               <div key={idx} className="flex items-start space-x-3 text-gray-800 dark:text-gray-300">
                 <Zap className="w-4 h-4 text-cyan-soft mt-1.5 flex-shrink-0 animate-pulse" />
-                <p className="text-base leading-relaxed font-sans">{parseBoldText(cleanBulletText(line))}</p>
+                <p className="text-base leading-relaxed font-sans">{parseBoldText(cleanAllBulletPrefixes(line))}</p>
               </div>
             ))}
           </div>
@@ -363,7 +363,7 @@ const ProjectDetailsPage = () => {
             {(project.key_outcomes || '').split('\n').filter(line => line.trim() !== '').map((line, idx) => (
               <div key={idx} className="flex items-start space-x-3 text-gray-800 dark:text-gray-300">
                 <CheckCircle className="w-4 h-4 text-green-soft mt-1.5 flex-shrink-0" />
-                <p className="text-base leading-relaxed font-sans">{parseBoldText(cleanBulletText(line))}</p>
+                <p className="text-base leading-relaxed font-sans">{parseBoldText(cleanAllBulletPrefixes(line))}</p>
               </div>
             ))}
           </div>
