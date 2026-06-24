@@ -107,7 +107,7 @@ const groupLines = (detailsText) => {
 
     // Preprocess: Strip decorative emoji followed by keycap emoji (e.g. "📈 6️⃣" -> "6️⃣")
     // This resolves character corruption of decorative emojis and allows proper heading classification.
-    const headingEmojiRegex = /^([^\s0-9🔟]+)\s+([0-9🔟]\ufe0f?\u20e3|1\ufe0f\u20e31\ufe0f\u20e3)/;
+    const headingEmojiRegex = /^([^\s0-9\u{1F51F}]+)\s+([0-9\u{1F51F}]\ufe0f?\u20e3|1\ufe0f\u20e31\ufe0f\u20e3)/u;
     if (headingEmojiRegex.test(trimmed)) {
       trimmed = trimmed.replace(headingEmojiRegex, '$2');
       line = trimmed;
