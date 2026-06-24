@@ -13,7 +13,7 @@ class NotificationService:
     def __init__(self):
         self.resend_api_key = os.environ.get('RESEND_KEY')
         # Set default email if environment variable is not set
-        self.to_email = os.environ.get('TO_EMAIL', 'allualthaf42@gmail.com')
+        self.to_email = os.environ.get('TO_EMAIL', 'althafhussain.sd@gmail.com')
         if self.resend_api_key:
             resend.api_key = self.resend_api_key
         logger.info(f"Notification service initialized. Emails will be sent to: {self.to_email}")
