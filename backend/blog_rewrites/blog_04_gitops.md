@@ -5,11 +5,11 @@
 
 ---
 
-In 2025, most Kubernetes deployments don't fail because of container crashes. They fail because **nobody knows what's actually running in production**—and when things break, nobody knows what changed.
+In 2025, most Kubernetes deployments don't fail because of container crashes. They fail because **nobody knows what's actually running in production**-and when things break, nobody knows what changed.
 
 I've watched teams spend days debugging production incidents only to discover someone ran `kubectl apply` directly, bypassing CI/CD, overriding the infrastructure-as-code they thought was authoritative. The deployment worked. The pipeline didn't know. The repo didn't reflect reality. **Production became a black box.**
 
-Here's the uncomfortable truth: **80% of Kubernetes incidents trace back to configuration drift and manual changes**, according to the Cloud Native Computing Foundation's 2024 report. Not infrastructure failure—**human error and process failure**.
+Here's the uncomfortable truth: **80% of Kubernetes incidents trace back to configuration drift and manual changes**, according to the Cloud Native Computing Foundation's 2024 report. Not infrastructure failure-**human error and process failure**.
 
 The root cause? **Kubernetes configuration is treated like imperative commands instead of declarative state.**
 
@@ -27,7 +27,7 @@ GitOps exists to fix this by enforcing one rule: **Git is the single source of t
 
 Most teams claim they're "doing GitOps" while still running manual kubectl commands and treating Git as documentation instead of authority. That's not GitOps. That's **version-controlled chaos**.
 
-Real GitOps follows the **Ownership-Driven Operations Model (ODOM)**—and I'll show you how to implement it without breaking your existing workflows.
+Real GitOps follows the **Ownership-Driven Operations Model (ODOM)**-and I'll show you how to implement it without breaking your existing workflows.
 
 ---
 
@@ -53,7 +53,7 @@ Traditional deployment tools make this worse because they're **imperative**:
 - CircleCI runs `helm upgrade`
 - GitHub Actions runs `kubectl set image`
 
-Each command changes state—but there's no guarantee that state matches what's in Git. Someone could have run the same command manually with different parameters. **Your CI/CD pipeline can succeed while production drifts further from source control.**
+Each command changes state-but there's no guarantee that state matches what's in Git. Someone could have run the same command manually with different parameters. **Your CI/CD pipeline can succeed while production drifts further from source control.**
 
 **Configuration drift isn't a bug. It's the inevitable result of imperative deployment.**
 
@@ -82,7 +82,7 @@ The difference is **continuous reconciliation** vs. **one-time deployment**.
 ### GitOps Core Principles
 
 **Principle #1: Git Is the Source of Truth**  
-Everything in Kubernetes—deployments, services, ingress, RBAC, network policies—lives in Git as declarative YAML.
+Everything in Kubernetes-deployments, services, ingress, RBAC, network policies-lives in Git as declarative YAML.
 
 **Principle #2: Declarative Configuration Only**  
 No imperative commands. No `kubectl patch`. No manual scaling. Everything is declared in Git.
@@ -97,7 +97,7 @@ Production changes happen through Git commits, not kubectl commands. Code review
 
 ## The Ownership-Driven Operations Model (ODOM): GitOps That Scales
 
-Most GitOps implementations fail because teams focus on tools instead of ownership. The solution is **ODOM**—a framework that makes teams accountable for production state.
+Most GitOps implementations fail because teams focus on tools instead of ownership. The solution is **ODOM**-a framework that makes teams accountable for production state.
 
 ### ODOM Pillar #1: Every Change Has an Owner
 
@@ -121,7 +121,7 @@ ODOM requires:
 - Automated deployments on merge
 - Continuous drift detection and remediation
 
-**If a human can change production without Git, they will—and that change will cause the next incident.**
+**If a human can change production without Git, they will-and that change will cause the next incident.**
 
 ### ODOM Pillar #3: Drift Is a First-Class Incident
 
@@ -218,7 +218,7 @@ Organize by environment and component:
 
 ### Step 3: Remove Manual Access to Production
 
-This is the hardest step—politically and technically.
+This is the hardest step-politically and technically.
 
 Developers will resist. Ops teams will resist. Management will worry about emergencies.
 
@@ -245,7 +245,7 @@ All production changes require:
 - Code review (peer + automated checks)
 - Merge triggers deployment
 
-**Infrastructure changes become code changes—with all the safety and review that implies.**
+**Infrastructure changes become code changes-with all the safety and review that implies.**
 
 ### Step 6: Monitor the GitOps Loop
 
@@ -271,13 +271,13 @@ GitOps isn't CI/CD. It's continuous state reconciliation.
 Drift will happen (bugs, manual fixes, cluster issues). Plan for detection and remediation.
 
 **Mistake #4: Keeping Secrets in Git**  
-GitOps requires Git as source of truth—but secrets need external management (Vault, External Secrets Operator).
+GitOps requires Git as source of truth-but secrets need external management (Vault, External Secrets Operator).
 
 ---
 
 ## The Uncomfortable Truth About Kubernetes Operations
 
-**If your production environment can be changed without a Git commit, you don't have operational discipline—you have organized chaos with YAML files.**
+**If your production environment can be changed without a Git commit, you don't have operational discipline-you have organized chaos with YAML files.**
 
 GitOps isn't optional for teams running production Kubernetes at scale. It's the baseline for:
 - Disaster recovery (Git is your backup)

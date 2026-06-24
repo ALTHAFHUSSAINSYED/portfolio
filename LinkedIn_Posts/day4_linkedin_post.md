@@ -2,7 +2,7 @@
 
 I run a chatbot powered by free-tier AI models that fail constantly.
 
-Here's how I designed around failure—treating AI like any other flaky dependency.
+Here's how I designed around failure-treating AI like any other flaky dependency.
 
 The Reality: AI Systems Are Unreliable
 
@@ -26,7 +26,7 @@ Key decisions:
 How I Handle Failures
 
 Problem 1: Rate Limits (429 Errors)
-Solution: 4-tier fallback—try primary → fails → switch to secondary → succeeds in ~5-6s
+Solution: 4-tier fallback-try primary → fails → switch to secondary → succeeds in ~5-6s
 
 Why 4 tiers? Single model = frequent failures, 4-tier = higher availability
 
@@ -68,7 +68,7 @@ Same rules apply to AI:
 - Isolate from critical paths
 - Set user expectations
 
-This builds on Day 3's CI/CD work—failure handling matters at runtime as much as deployment.
+This builds on Day 3's CI/CD work-failure handling matters at runtime as much as deployment.
 
 Demo vs Production:
 - Demo: "Look how smart the AI is"
@@ -87,6 +87,6 @@ But for now: 50+ concurrent users, $0/month, fails gracefully.
 🔗 Live demo: althafportfolio.site
 🤖 Test the chatbot: Watch how it handles failures
 
-For recruiters: Demonstrates operating non-deterministic workloads—fallback systems, API failures, isolating non-critical features. Hiring for AWS/DevOps? Let's connect.
+For recruiters: Demonstrates operating non-deterministic workloads-fallback systems, API failures, isolating non-critical features. Hiring for AWS/DevOps? Let's connect.
 
 #AWS #DevOps #SystemDesign #BuildInPublic #AWSJobs #DevOpsEngineer

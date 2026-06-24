@@ -141,7 +141,7 @@ def determine_next_state(current_state: str, scores: dict, disengagement_count: 
     """
     Finite-State Machine Transition Logic
     """
-    # HARD EXIT — terminal
+    # HARD EXIT - terminal
     if scores.get("exit", 0) >= 3:
         return "EXIT"
 

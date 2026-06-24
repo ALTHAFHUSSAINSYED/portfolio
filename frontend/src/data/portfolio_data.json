@@ -93,13 +93,13 @@
         {
             "company": "DXC Technology",
             "role": "DevOps Engineer | Cloud & Platform Engineer",
-            "duration": "Aug 2022 – June 2026",
+            "duration": "Aug 2022 - June 2026",
             "location": "Hyderabad, India",
             "description": "DevOps Engineer | Cloud & Platform Engineer. Supported automation, deployment, and environment operations in an AWS Managed Services setup. Managed CI/CD pipelines, container orchestration, and infrastructure provisioning using Terraform.",
             "achievements": [
-                "[Project] Cloud-Native Kubernetes Platform on Amazon EKS | AWS Managed Services (Mar 2024 – Apr 2026): Implemented a cloud-native container platform on Amazon EKS using Infrastructure as Code (IaC) and Kubernetes orchestration, provisioning EKS clusters and AWS infrastructure using Terraform.",
-                "[Project] Cloud-Native CI/CD Automation Platform (Jul 2023 – Feb 2024): Implemented an AWS-native CI/CD platform for automated build, testing, and deployment workflows, integrating AWS Developer Tools and implementing Blue-Green / Rolling deployments.",
-                "[Project] Enterprise Cloud Migration & Modernization Platform (Nov 2022 – Jun 2023): Implemented a highly available three-tier architecture on AWS by migrating legacy workloads, provisioning VPC networking, ASGs, ALBs, RDS, RabbitMQ, and Memcached.",
+                "[Project] Cloud-Native Kubernetes Platform on Amazon EKS | AWS Managed Services (Mar 2024 - Apr 2026): Implemented a cloud-native container platform on Amazon EKS using Infrastructure as Code (IaC) and Kubernetes orchestration, provisioning EKS clusters and AWS infrastructure using Terraform.",
+                "[Project] Cloud-Native CI/CD Automation Platform (Jul 2023 - Feb 2024): Implemented an AWS-native CI/CD platform for automated build, testing, and deployment workflows, integrating AWS Developer Tools and implementing Blue-Green / Rolling deployments.",
+                "[Project] Enterprise Cloud Migration & Modernization Platform (Nov 2022 - Jun 2023): Implemented a highly available three-tier architecture on AWS by migrating legacy workloads, provisioning VPC networking, ASGs, ALBs, RDS, RabbitMQ, and Memcached.",
                 "Automation & Environment Support: Designed, implemented, and supported CI/CD pipelines and AWS Infrastructure automation using Terraform for AWS Managed Services environments.",
                 "CI/CD & Deployment Management: Designed and maintained Jenkins and GitHub Actions CI/CD pipelines, integrating Maven, SonarQube, Docker, and Amazon ECR, while implementing end-to-end automation that reduced manual effort by ~70%.",
                 "Cloud Provisioning & Containerisation: Provisioned and managed AWS services using Infrastructure as Code (IaC) principles and deployed containerized applications on Docker, Kubernetes, Amazon ECS, and Amazon EKS environments.",
@@ -134,12 +134,12 @@
             "description": "Integrated SonarQube quality gates, ECR management, and Slack notifications for improved collaboration and feedback."
         },
         {
-            "title": "DXC CHAMPS Award – FY24 Q1",
+            "title": "DXC CHAMPS Award - FY24 Q1",
             "description": "Recognised for consistent delivery, ownership of priority tasks, and reliable execution of infrastructure operations and production deployments.",
             "awardUrl": "https://res.cloudinary.com/dtzaicj6s/image/upload/v1768479955/DXC_CHAMPS_Award_FY24_Q1_rr6aju.png"
         },
         {
-            "title": "DXC CHAMPS Award – FY26 H1",
+            "title": "DXC CHAMPS Award - FY26 H1",
             "description": "Awarded for sustained performance, end-to-end accountability, and operational excellence in supporting critical infrastructure services.",
             "awardUrl": "https://res.cloudinary.com/dtzaicj6s/image/upload/v1769527122/FY26_H1_CHAMPIONS_AWARD_hvhajr.jpg"
         },
@@ -150,7 +150,7 @@
     ],
     "certifications": [
         {
-            "name": "AWS Certified Solutions Architect – Associate",
+            "name": "AWS Certified Solutions Architect - Associate",
             "issuer": "Amazon Web Services",
             "year": "2024",
             "category": "aws",

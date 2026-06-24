@@ -135,7 +135,7 @@ Implemented comprehensive guardrails for the Allu Bot chatbot to ensure professi
   - Location: `server.py:866-1026` in `/ask-all-u-bot` endpoint
 - [ ] **Create sentiment-aware response templates** (no RAG)
   - CONFUSED: "It seems I may not have explained that clearly. What would you like me to clarify?"
-  - FRUSTRATED: "I see this is frustrating. Let's slow down—what were you expecting instead?"
+  - FRUSTRATED: "I see this is frustrating. Let's slow down-what were you expecting instead?"
   - HOSTILE: "I'm here to help, but I won't engage with abusive language."
 - [ ] **Add state reset logic after emotional stabilization**
   - Reset `last_intent` to None

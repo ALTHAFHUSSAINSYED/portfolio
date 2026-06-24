@@ -9,7 +9,7 @@ Modern Kubernetes operations are drowning in complexity. Manual kubectl commands
 
 GitOps eliminates this by enforcing one principle: **Git is the single source of truth for your entire Kubernetes state.** If it's not in Git, it doesn't exist in production.
 
-This isn't just better version control. It's a fundamental shift from imperative commands to declarative state management—where production **continuously reconciles** itself to match Git, and manual changes are automatically detected and reverted.
+This isn't just better version control. It's a fundamental shift from imperative commands to declarative state management-where production **continuously reconciles** itself to match Git, and manual changes are automatically detected and reverted.
 
 The **Ownership-Driven Operations Model (ODOM)** makes GitOps work by ensuring every change has an owner, every deviation triggers an alert, and production state is never a mystery.
 
@@ -41,7 +41,7 @@ Zero manual kubectl write access. All changes via Git pull requests. Continuous 
 
 ### Pillar #3: Drift Is Treated as an Incident
 
-Configuration drift isn't normal—it's a signal that something bypassed your process. ODOM requires immediate detection, automated remediation, and root cause analysis.
+Configuration drift isn't normal-it's a signal that something bypassed your process. ODOM requires immediate detection, automated remediation, and root cause analysis.
 
 ### Pillar #4: Observability Covers the Entire Loop
 
@@ -60,7 +60,7 @@ Monitor sync status, drift events, deployment health, and reconciliation delays.
 
 ---
 
-**If your production environment can be changed without a Git commit, you don't have operational discipline—you have organized chaos.**
+**If your production environment can be changed without a Git commit, you don't have operational discipline-you have organized chaos.**
 
 GitOps transforms Kubernetes from an imperative command playground into a declarative state machine. Production becomes reproducible, auditable, and self-healing.
 

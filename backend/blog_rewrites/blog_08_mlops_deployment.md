@@ -5,11 +5,11 @@
 
 ---
 
-AI projects fail in production not because of bad science—but because **data scientists optimize for training accuracy while production demands latency, reliability, and continuous improvement.**
+AI projects fail in production not because of bad science-but because **data scientists optimize for training accuracy while production demands latency, reliability, and continuous improvement.**
 
 Most ML models achieve impressive results in notebooks but collapse under real-world conditions: dirty data, adversarial inputs, concept drift, resource constraints. **Training accuracy measures how well you fit historical data. Production performance measures whether you solve current business problems.**
 
-The **Production-First ML Model (PFML)** framework solves this by making production viability the primary constraint—not an afterthought.
+The **Production-First ML Model (PFML)** framework solves this by making production viability the primary constraint-not an afterthought.
 
 ---
 
@@ -17,9 +17,9 @@ The **Production-First ML Model (PFML)** framework solves this by making product
 
 Traditional ML deployment: train once, deploy, forget.
 
-The problem? **Models decay over time.** Customer behavior changes. Data distributions shift. Input patterns evolve. A model trained on 2023 data performing well in 2023 will silently degrade by 2025—**and you won't know unless you're monitoring production accuracy.**
+The problem? **Models decay over time.** Customer behavior changes. Data distributions shift. Input patterns evolve. A model trained on 2023 data performing well in 2023 will silently degrade by 2025-**and you won't know unless you're monitoring production accuracy.**
 
-Most organizations don't monitor ML performance in production. They track uptime, latency, error rates—but not whether predictions are still correct.
+Most organizations don't monitor ML performance in production. They track uptime, latency, error rates-but not whether predictions are still correct.
 
 **By the time business metrics degrade, your model has been wrong for months.**
 
@@ -37,7 +37,7 @@ Bad data produces bad models, always. PFML requires automated data validation, d
 
 ### Pillar #3: Models Are Continuously Verified in Production
 
-Deployment isn't the end—it's the beginning. Monitor real-time accuracy, prediction distributions, latency/throughput, and automate rollback on degradation.
+Deployment isn't the end-it's the beginning. Monitor real-time accuracy, prediction distributions, latency/throughput, and automate rollback on degradation.
 
 ### Pillar #4: Retraining Is Automated, Not Manual
 
@@ -55,7 +55,7 @@ Models trained once are stale immediately. Automate scheduled retraining, drift-
 
 ---
 
-**If your ML model's production accuracy is a mystery until customers complain, you don't have MLOps—you have data science with deployment scripts.**
+**If your ML model's production accuracy is a mystery until customers complain, you don't have MLOps-you have data science with deployment scripts.**
 
 MLOps isn't optional for production AI. It's the difference between research projects that impress executives and production systems that create business value.
 

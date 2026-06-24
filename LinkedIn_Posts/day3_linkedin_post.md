@@ -73,8 +73,8 @@ But for now: 5-min deploys, $0/month, health checks have caught failed deploys b
 
 ---
 
-🔗 Live demo: althafportfolio.site (deployed 50+ times via this pipeline—zero manual SSH since automation)
+🔗 Live demo: althafportfolio.site (deployed 50+ times via this pipeline-zero manual SSH since automation)
 
-For recruiters: Demonstrates hands-on AWS DevOps—automated deployments, health check validation, rollback strategies, operating production services reliably. Hiring for AWS/DevOps? Let's connect.
+For recruiters: Demonstrates hands-on AWS DevOps-automated deployments, health check validation, rollback strategies, operating production services reliably. Hiring for AWS/DevOps? Let's connect.
 
 #AWS #DevOps #CICD #Docker #Automation #BuildInPublic #SystemDesign #AWSJobs #DevOpsEngineer #cloud #DevSecOps #aws     

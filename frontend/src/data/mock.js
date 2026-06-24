@@ -59,7 +59,7 @@ export const portfolioData = {
     {
       company: "DXC Technology",
       position: "Analyst III Infrastructure Services | DevOps Engineer",
-      duration: "Aug 2022 – Present",
+      duration: "Aug 2022 - Present",
       location: "Hyderabad, India",
       project: "Cloud Platform Automation & Delivery | AWS Managed Services",
       achievements: [
@@ -82,20 +82,20 @@ export const portfolioData = {
     {
       degree: "Master of Science in Computer Science",
       institution: "Acharya Nagarjuna University",
-      duration: "Dec 2022 – June 2024",
+      duration: "Dec 2022 - June 2024",
       location: "Andhra Pradesh, India"
     },
     {
       degree: "Bachelor of Science in Computer Science",
       institution: "Acharya Nagarjuna University",
-      duration: "June 2019 – June 2022",
+      duration: "June 2019 - June 2022",
       location: "Andhra Pradesh, India"
     }
   ],
 
   certifications: [
     {
-      name: "AWS Certified Solutions Architect – Associate",
+      name: "AWS Certified Solutions Architect - Associate",
       issuer: "Amazon Web Services",
       year: "2024",
       category: "aws",
@@ -170,11 +170,11 @@ export const portfolioData = {
 
   achievements: [
     {
-      title: "DXC CHAMPS Award – FY24 Q1",
+      title: "DXC CHAMPS Award - FY24 Q1",
       description: "Recognised for consistent delivery, ownership of priority tasks, and reliable execution of infrastructure operations and production deployments"
     },
     {
-      title: "DXC CHAMPS Award – FY26 H1",
+      title: "DXC CHAMPS Award - FY26 H1",
       description: "Awarded for sustained performance, end-to-end accountability, and operational excellence in supporting critical infrastructure services"
     },
     {

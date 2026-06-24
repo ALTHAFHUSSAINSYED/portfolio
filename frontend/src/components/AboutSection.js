@@ -13,16 +13,16 @@ const AboutSection = ({ personalInfo, achievements, education }) => {
   const sectionRef = useRef(null);
 
   const iconMap = {
-    'DXC CHAMPS Award – FY24 Q1': Award,
-    'DXC CHAMPS Award – FY26 H1': Award,
+    'DXC CHAMPS Award - FY24 Q1': Award,
+    'DXC CHAMPS Award - FY26 H1': Award,
     'Multi-Cloud Certified Professional': Shield,
     'CI/CD Automation Excellence': TrendingUp,
     'RAG Pipeline & AI Assistant Development': Zap
   };
 
   const iconColors = {
-    'DXC CHAMPS Award – FY24 Q1': 'text-yellow-soft',
-    'DXC CHAMPS Award – FY26 H1': 'text-yellow-soft',
+    'DXC CHAMPS Award - FY24 Q1': 'text-yellow-soft',
+    'DXC CHAMPS Award - FY26 H1': 'text-yellow-soft',
     'Multi-Cloud Certified Professional': 'text-pink-soft',
     'CI/CD Automation Excellence': 'text-cyan-soft',
     'RAG Pipeline & AI Assistant Development': 'text-purple-soft'

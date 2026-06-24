@@ -1539,7 +1539,7 @@ if cached_response:
 - name: CI Gate Status
   if: success()
   run: |
-    echo "✅ All AI Chatbot Gates Passed — Safe to Deploy"
+    echo "✅ All AI Chatbot Gates Passed - Safe to Deploy"
 ```
 
 **Result:** Only code that passes ALL 6 gates can be deployed to production.

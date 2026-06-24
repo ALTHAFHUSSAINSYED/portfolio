@@ -5,11 +5,11 @@
 
 ---
 
-Multi-cloud deployments promise vendor independence and resilience. **In reality, most organizations just create three separate cloud infrastructures instead of one coherent platform—then call it strategy.**
+Multi-cloud deployments promise vendor independence and resilience. **In reality, most organizations just create three separate cloud infrastructures instead of one coherent platform-then call it strategy.**
 
 The result? Costs increase 40-60%, operational complexity triples, and actual resilience doesn't improve. **Multi-cloud isn't inherently bad. Undisciplined multi-cloud is catastrophic.**
 
-The **Discipline-First Cloud Model (DFCM)** provides a framework for multi-cloud that actually works—by prioritizing architectural portability over deployment duplication.
+The **Discipline-First Cloud Model (DFCM)** provides a framework for multi-cloud that actually works-by prioritizing architectural portability over deployment duplication.
 
 ---
 
@@ -57,7 +57,7 @@ Don't assume portability works. Test it quarterly with disaster recovery drills,
 
 ---
 
-**If your multi-cloud strategy doesn't include a plan for when you'd actually switch clouds, it's not strategy—it's expensive insurance theater.**
+**If your multi-cloud strategy doesn't include a plan for when you'd actually switch clouds, it's not strategy-it's expensive insurance theater.**
 
 Multi-cloud works when you prioritize portability over duplication, enforce operational discipline, and measure costs honestly. Most organizations succeed with **cloud portability** rather than **multi-cloud deployment**.
 

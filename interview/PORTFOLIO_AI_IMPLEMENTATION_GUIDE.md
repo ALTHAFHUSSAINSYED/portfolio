@@ -1,6 +1,6 @@
 # Portfolio Project - Complete AI/ML Implementation Guide
 
-**For Interview Preparation: DevSecOps Consultant – AI/ML & Generative AI Focus**
+**For Interview Preparation: DevSecOps Consultant - AI/ML & Generative AI Focus**
 
 **Created:** February 2, 2026  
 **Author:** Althaf Hussain Syed  

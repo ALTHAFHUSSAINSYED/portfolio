@@ -5,17 +5,17 @@
 
 ---
 
-In 2025, most security breaches don't happen because firewalls failed. They happen because organizations still trust the wrong things—and that trust is weaponized faster than security teams can respond.
+In 2025, most security breaches don't happen because firewalls failed. They happen because organizations still trust the wrong things-and that trust is weaponized faster than security teams can respond.
 
-I've watched companies spend millions on perimeter security while attackers waltzed through employee credentials, compromised APIs, and lateral movement across "trusted" internal networks. The playbook is predictable: one phishing email, one stolen token, one misconfigured service—and suddenly your "secure" infrastructure is leaking data to Eastern Europe.
+I've watched companies spend millions on perimeter security while attackers waltzed through employee credentials, compromised APIs, and lateral movement across "trusted" internal networks. The playbook is predictable: one phishing email, one stolen token, one misconfigured service-and suddenly your "secure" infrastructure is leaking data to Eastern Europe.
 
-Here's the uncomfortable truth: **60% of data breaches originate from inside the network perimeter**, according to Verizon's 2024 Data Breach Investigations Report. That means your firewall, your VPN, your "trusted zone"—all worthless if someone's already inside.
+Here's the uncomfortable truth: **60% of data breaches originate from inside the network perimeter**, according to Verizon's 2024 Data Breach Investigations Report. That means your firewall, your VPN, your "trusted zone"-all worthless if someone's already inside.
 
 The problem isn't technology. It's **trust architecture**. Traditional security models assume: if you're inside the network, you're trusted. If you have valid credentials, you're authorized. If a service is internal, it's safe.
 
 **Every one of those assumptions is a vulnerability waiting to be exploited.**
 
-Zero Trust isn't a product. It's not a checkbox. It's a **security philosophy that assumes breach is inevitable**—and designs systems where even successful attackers can't move, can't persist, and can't exfiltrate data at scale.
+Zero Trust isn't a product. It's not a checkbox. It's a **security philosophy that assumes breach is inevitable**-and designs systems where even successful attackers can't move, can't persist, and can't exfiltrate data at scale.
 
 Most organizations claim they're "implementing Zero Trust" while still running security architectures from 2010. I call this **security theater**.
 
@@ -24,7 +24,7 @@ Real Zero Trust follows the **Security-First Accountability Model (SFAM)**, and 
 ---
 
 **TL;DR:**  
-Zero Trust isn't about eliminating trust—it's about eliminating **implicit** trust. If your security model assumes anything is inherently safe, you're already compromised.
+Zero Trust isn't about eliminating trust-it's about eliminating **implicit** trust. If your security model assumes anything is inherently safe, you're already compromised.
 
 ---
 
@@ -71,7 +71,7 @@ Authentication happens **every time**, for **every request**, using **multiple s
 Not just: "Is this a valid user?"  
 But: "Is this the SAME user, from the SAME device, in the SAME location, accessing NORMAL resources, at a NORMAL time?"
 
-If any signal deviates—**re-authenticate**.
+If any signal deviates-**re-authenticate**.
 
 ### Zero Trust Principle #2: Least Privilege Access
 
@@ -87,7 +87,7 @@ Design every system assuming attackers are **already inside**.
 
 Segment networks. Encrypt everything. Log everything. Monitor lateral movement. Limit blast radius.
 
-**When—not if—someone gets in, they should be trapped in a tiny box with nowhere to go.**
+**When-not if-someone gets in, they should be trapped in a tiny box with nowhere to go.**
 
 ---
 
@@ -117,7 +117,7 @@ Static roles don't work in Zero Trust. Authorization must be **context-aware**:
 - Time of access (is this during business hours?)
 - Resource sensitivity (does this user normally access this data?)
 
-**If context is abnormal, deny access—even if credentials are valid.**
+**If context is abnormal, deny access-even if credentials are valid.**
 
 ### SFAM Pillar #3: Micro-Segmentation Limits Blast Radius
 
@@ -125,7 +125,7 @@ Traditional networks are flat: once you're in, you can reach anything.
 
 Zero Trust networks are segmented: even compromised services are isolated.
 
-Applications can't talk to databases directly—they go through authenticated APIs. Services can't reach other services—they use service mesh with mTLS. Employees can't access everything—they get just-in-time access.
+Applications can't talk to databases directly-they go through authenticated APIs. Services can't reach other services-they use service mesh with mTLS. Employees can't access everything-they get just-in-time access.
 
 **Attackers who breach one system can't pivot. They're stuck.**
 
@@ -153,7 +153,7 @@ This is the irreversible truth about modern security. **Persistent trust is pers
 
 Let me share a painful story from a financial services client.
 
-**Week 1:** Phishing attack compromised one employee's Office 365 account. Attacker logged in from a foreign IP—but security team ignored it because "VPN users come from everywhere."
+**Week 1:** Phishing attack compromised one employee's Office 365 account. Attacker logged in from a foreign IP-but security team ignored it because "VPN users come from everywhere."
 
 **Week 2:** Attacker used compromised account to enumerate internal SharePoint sites, download financial reports, and access AWS console (because SSO was password-only, no MFA enforcement).
 
@@ -169,7 +169,7 @@ By then, they'd copied 50GB of customer financial data, deployed ransomware in a
 - Regulatory fines pending
 - Customer trust destroyed
 
-**Root cause:** We had firewalls, we had antivirus, we had "security"—but we had **zero** Zero Trust principles.
+**Root cause:** We had firewalls, we had antivirus, we had "security"-but we had **zero** Zero Trust principles.
 
 After incident response, we rebuilt everything:
 - Implemented identity-based access (Azure AD Conditional Access)
@@ -243,7 +243,7 @@ Deploy security tooling:
 ## Common Zero Trust Mistakes (That Will Get You Breached)
 
 **Mistake #1: Buying "Zero Trust" Products**  
-Zero Trust is an architecture, not a product. Vendors sell components—you must integrate them into a cohesive model.
+Zero Trust is an architecture, not a product. Vendors sell components-you must integrate them into a cohesive model.
 
 **Mistake #2: Implementing Zero Trust Halfway**  
 Partial Zero Trust is worse than none. Attackers find the gaps you left.
@@ -252,13 +252,13 @@ Partial Zero Trust is worse than none. Attackers find the gaps you left.
 If security is too painful, users will bypass it. Balance security with usability.
 
 **Mistake #4: Assuming Cloud Is Secure by Default**  
-AWS, Azure, GCP are secure platforms—but your configurations probably aren't.
+AWS, Azure, GCP are secure platforms-but your configurations probably aren't.
 
 ---
 
 ## The Uncomfortable Truth About Security
 
-**If your security model allows attackers to persist after initial compromise, you don't have security—you have an expensive breach waiting to happen.**
+**If your security model allows attackers to persist after initial compromise, you don't have security-you have an expensive breach waiting to happen.**
 
 Zero Trust isn't optional anymore. It's the baseline for organizations that handle sensitive data, operate in regulated industries, or care about customer trust.
 

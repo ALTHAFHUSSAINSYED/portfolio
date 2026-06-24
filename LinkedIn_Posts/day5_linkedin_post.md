@@ -28,7 +28,7 @@ Key decisions:
 How I Handle Failures
 
 Problem 1: External API Failures
-Solution: Retry with fallbacks—primary fails → try secondary → both fail → save, notify, retry tomorrow
+Solution: Retry with fallbacks-primary fails → try secondary → both fail → save, notify, retry tomorrow
 
 Problem 2: Unpredictable Outputs
 Solution: Validation gates (check length, structure, manual review)
@@ -69,7 +69,7 @@ Script vs Production:
 - Script: "Run and hope"
 - Production: "Run, validate, notify, intervene"
 
-This builds on Days 3-4—failure handling matters in scheduled jobs as much as deployments.
+This builds on Days 3-4-failure handling matters in scheduled jobs as much as deployments.
 
 What's Next
 
@@ -83,6 +83,6 @@ But for now: Publishes daily (when it works), $0/month, fails safely.
 
 🔗 Live demo: althafportfolio.site (check blogs section)
 
-For recruiters: Demonstrates automating non-critical workflows—failure design, retry logic, state persistence, human-in-the-loop. Hiring for AWS/DevOps? Let's connect.
+For recruiters: Demonstrates automating non-critical workflows-failure design, retry logic, state persistence, human-in-the-loop. Hiring for AWS/DevOps? Let's connect.
 
 #AWS #DevOps #Automation #SystemDesign #BuildInPublic #AWSJobs #DevOpsEngineer

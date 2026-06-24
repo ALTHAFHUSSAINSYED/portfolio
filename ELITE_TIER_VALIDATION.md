@@ -13,7 +13,7 @@
 **Target:** Forces reader to accept a non-negotiable truth about their world
 
 ### Validation:
-- [x] **Opening Irreversible Framing:** "The moment your integration architecture assumes stability, it is already obsolete—and every dollar you spend maintaining it is sunk cost"
+- [x] **Opening Irreversible Framing:** "The moment your integration architecture assumes stability, it is already obsolete-and every dollar you spend maintaining it is sunk cost"
 - [x] **Economic Reality:** "Enterprises waste 30-40% of IT budgets on integration... That's strategic failure disguised as technical necessity"
 - [x] **Non-Negotiable Truth:** "The real cost isn't the first build. It's every change after that"
 
@@ -28,7 +28,7 @@
 - [x] **Attacks Traditional Integration:** "Traditional approaches would have taken years"
 - [x] **Challenges Low-Code Hype:** "Low-code platforms are often sold as a productivity shortcut. That framing is wrong"
 - [x] **Exposes Poor Governance:** "Low-code platforms make poor governance impossible to hide" (executive-safe version of "expose incompetence")
-- [x] **Attacks "First-Build" Mentality:** "Teams that optimize for first-build speed lose—slowly at first, then catastrophically"
+- [x] **Attacks "First-Build" Mentality:** "Teams that optimize for first-build speed lose-slowly at first, then catastrophically"
 
 **Score: 15/15** ✅
 
@@ -50,7 +50,7 @@
 
 **CCIM Doctrine Section:**
 - [x] 6 declarative statements about integration
-- [x] Ends with: "If an integration violates more than one of these principles, failure is not a risk—it's a timeline"
+- [x] Ends with: "If an integration violates more than one of these principles, failure is not a risk-it's a timeline"
 - [x] Positioned after 4 pillars for reinforcement
 
 **Score: 20/20** ✅
@@ -61,11 +61,11 @@
 **Target:** 5 quotable "knife" sentences that make readers stop and think
 
 ### Validation:
-1. **Irreversible Line:** "When the cost of changing an integration exceeds the cost of replacing it, your architecture is no longer an asset—it's technical debt pretending to be infrastructure"
+1. **Irreversible Line:** "When the cost of changing an integration exceeds the cost of replacing it, your architecture is no longer an asset-it's technical debt pretending to be infrastructure"
 2. "Integration doesn't fail because systems can't connect. It fails because organizations refuse to design for change"
 3. "Speed without structure doesn't accelerate delivery. It accelerates failure"
 4. "Governance isn't bureaucracy. It's the tax you pay to move fast without breaking everything"
-5. "Low-code didn't break the system—it removed the illusion that the system was ever under control"
+5. "Low-code didn't break the system-it removed the illusion that the system was ever under control"
 
 **Count: 5 knife sentences** ✅
 
@@ -77,7 +77,7 @@
 **Target:** All 5 specific edits from feedback.md
 
 ### Validation:
-- [x] **Edit #1:** "The moment your integration architecture assumes stability, it is already obsolete—and every dollar you spend maintaining it is sunk cost" (intro)
+- [x] **Edit #1:** "The moment your integration architecture assumes stability, it is already obsolete-and every dollar you spend maintaining it is sunk cost" (intro)
 - [x] **Edit #2:** "I call this the **Change-Cost Integration Model (CCIM)**, and every failed integration violates it" (doctrine entry hardened)
 - [x] **Edit #3:** "Low-code platforms make poor governance impossible to hide" (executive-safe attack)
 - [x] **Edit #4:** "That single decision violated three CCIM pillars at once" (case study framework validation)
@@ -132,7 +132,7 @@
 
 ### TL;DR Box
 - [x] **Positioned:** After intro paragraph
-- [x] **Content:** "Most integration failures aren't technical—they're economic. If you optimize for build speed instead of change cost, low-code will expose your architectural weaknesses faster than it fixes them."
+- [x] **Content:** "Most integration failures aren't technical-they're economic. If you optimize for build speed instead of change cost, low-code will expose your architectural weaknesses faster than it fixes them."
 - [x] **Purpose:** Gives casual readers the core insight in 2 sentences
 
 ### Case Study: Healthcare Provider (Month 1-7)
@@ -149,7 +149,7 @@
 
 ### Blog Card Summary
 **Current (Elite-Tier):**
-"When integration change cost exceeds build cost, your architecture is already obsolete. Most enterprises waste 30-40% of IT budgets without realizing they're managing financial bleed, not technology—and low-code exposes this faster than it fixes it."
+"When integration change cost exceeds build cost, your architecture is already obsolete. Most enterprises waste 30-40% of IT budgets without realizing they're managing financial bleed, not technology-and low-code exposes this faster than it fixes it."
 
 **Old (Generic):**
 "Low-code integration platforms empower enterprises to connect systems, automate workflows..."

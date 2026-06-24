@@ -5,11 +5,11 @@
 
 ---
 
-In 2025, most enterprises don't fail at multi-cloud because of technology limits. They fail because **they're running three separate cloud infrastructures instead of one coherent platform**—and calling it "strategy."
+In 2025, most enterprises don't fail at multi-cloud because of technology limits. They fail because **they're running three separate cloud infrastructures instead of one coherent platform**-and calling it "strategy."
 
-I've watched organizations spend millions migrating to multi-cloud for "vendor independence," only to discover they've created three siloed operations teams, three incompatible toolchains, and three times the complexity. **AWS, Azure, and GCP all work great—but running all three doesn't make you resilient. It makes you operationally fragmented.**
+I've watched organizations spend millions migrating to multi-cloud for "vendor independence," only to discover they've created three siloed operations teams, three incompatible toolchains, and three times the complexity. **AWS, Azure, and GCP all work great-but running all three doesn't make you resilient. It makes you operationally fragmented.**
 
-Here's the uncomfortable truth: **90% of multi-cloud deployments increase costs by 40-60% while degrading operational efficiency**, according to Flexera's 2024 State of the Cloud Report. Not because multi-cloud is bad—because **most organizations confuse multi-cloud with architectural discipline**.
+Here's the uncomfortable truth: **90% of multi-cloud deployments increase costs by 40-60% while degrading operational efficiency**, according to Flexera's 2024 State of the Cloud Report. Not because multi-cloud is bad-because **most organizations confuse multi-cloud with architectural discipline**.
 
 The root problem? **Multi-cloud is treated as "deploy everywhere" instead of "abstract away vendor-specific lock-in."**
 
@@ -22,7 +22,7 @@ Traditional multi-cloud looks like this:
 
 **Running the same workload on multiple clouds doesn't reduce risk. It multiplies operational burden.**
 
-Real multi-cloud follows the **Discipline-First Cloud Model (DFCM)**—and I'll show you when multi-cloud actually makes sense and how to do it without destroying your ops team.
+Real multi-cloud follows the **Discipline-First Cloud Model (DFCM)**-and I'll show you when multi-cloud actually makes sense and how to do it without destroying your ops team.
 
 ---
 
@@ -62,7 +62,7 @@ Here's what actually happens when you go multi-cloud without discipline:
 - Handle provider-specific quirks
 - Manage three different release pipelines
 
-**The organizations that succeed with multi-cloud do it for specific technical reasons—not vague fears about vendor lock-in.**
+**The organizations that succeed with multi-cloud do it for specific technical reasons-not vague fears about vendor lock-in.**
 
 Valid multi-cloud use cases:
 - **M&A integration:** Acquired company runs on different cloud, migration isn't worth the cost
@@ -90,7 +90,7 @@ Most teams confuse multi-cloud deployment with **cloud portability**. They're no
 - App uses abstraction layers (Kubernetes, not ECS)
 - Data portable across providers (object storage, not S3-specific APIs)
 - Infrastructure-as-code vendor-neutral (Terraform, not CloudFormation)
-- Can migrate between clouds if needed—but doesn't run on multiple clouds simultaneously
+- Can migrate between clouds if needed-but doesn't run on multiple clouds simultaneously
 
 **Cloud portability gives you vendor negotiation power without operational chaos. Multi-cloud deployment gives you chaos.**
 
@@ -98,7 +98,7 @@ Most teams confuse multi-cloud deployment with **cloud portability**. They're no
 
 ## The Discipline-First Cloud Model (DFCM): Multi-Cloud That Works
 
-Most multi-cloud strategies fail because they optimize for theoretical vendor independence instead of practical operational efficiency. The solution is **DFCM**—a framework that makes architectural discipline the foundation.
+Most multi-cloud strategies fail because they optimize for theoretical vendor independence instead of practical operational efficiency. The solution is **DFCM**-a framework that makes architectural discipline the foundation.
 
 ### DFCM Pillar #1: Abstract Infrastructure, Not Duplicate It
 
@@ -113,7 +113,7 @@ Don't deploy the same thing twice. Design once with portable abstractions.
 - Kubernetes abstracts compute (runs on any cloud)
 - Object storage abstraction (S3-compatible APIs work everywhere)
 - Infrastructure-as-code uses cloud-agnostic modules
-- **Deploy to one cloud primarily, migrate if needed—don't run both**
+- **Deploy to one cloud primarily, migrate if needed-don't run both**
 
 **If you're duplicating infrastructure to achieve multi-cloud, you're doing it wrong.**
 
@@ -138,7 +138,7 @@ DFCM requires:
 - **Security baselines:** Consistent policies across all clouds
 - **Operational standards:** Same monitoring, logging, IAM patterns
 
-**If different teams use different clouds without coordination, you don't have multi-cloud strategy—you have shadow IT with a budget.**
+**If different teams use different clouds without coordination, you don't have multi-cloud strategy-you have shadow IT with a budget.**
 
 ### DFCM Pillar #4: Cloud Portability Is Continuous, Not One-Time
 
@@ -182,7 +182,7 @@ After I consulted:
 - Shut down duplicate Azure deployment
 - Kept AWS as primary platform
 - Used Kubernetes + Terraform for portability
-- Designed architecture that could migrate to Azure if needed—but didn't run on both simultaneously
+- Designed architecture that could migrate to Azure if needed-but didn't run on both simultaneously
 
 **Cost savings: $3.2M annually. Operational complexity: reduced 60%. Actual vendor independence: maintained.**
 
@@ -214,7 +214,7 @@ After I consulted:
 **Databases:** Portable engines (Postgres, MySQL, not Aurora/CosmosDB unless justified)  
 **IAM:** OIDC/SAML integration (not native cloud IAM for apps)
 
-**Abstraction layers cost performance—but they enable portability.**
+**Abstraction layers cost performance-but they enable portability.**
 
 ### Step 3: Implement Unified Observability
 
@@ -259,7 +259,7 @@ Most workloads should run on one cloud. Multi-cloud should be exception, not def
 Cross-cloud data transfer fees will destroy your budget. Design to minimize this.
 
 **Mistake #3: No Unified Operations**  
-If each cloud requires separate monitoring, deployments, and on-call rotation—you'll burn out your team.
+If each cloud requires separate monitoring, deployments, and on-call rotation-you'll burn out your team.
 
 **Mistake #4: Confusing Multi-Cloud with Hybrid Cloud**  
 Hybrid (cloud + on-prem) and multi-cloud are different strategies requiring different architectures.
@@ -268,7 +268,7 @@ Hybrid (cloud + on-prem) and multi-cloud are different strategies requiring diff
 
 ## The Uncomfortable Truth About Multi-Cloud
 
-**If your multi-cloud strategy doesn't include a specific plan for when and how you'd actually switch clouds, it's not a strategy—it's expensive insurance fraud.**
+**If your multi-cloud strategy doesn't include a specific plan for when and how you'd actually switch clouds, it's not a strategy-it's expensive insurance fraud.**
 
 Multi-cloud can work, but only when:
 - You have clear business reasons (not fear-based decisions)

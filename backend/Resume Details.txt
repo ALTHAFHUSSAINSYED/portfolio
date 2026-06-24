@@ -32,18 +32,18 @@ SKILLS
 
 EXPERIENCE
 DXC Technology
-DevOps Engineer | Cloud & Platform Engineer Aug 2022 – June 2026
+DevOps Engineer | Cloud & Platform Engineer Aug 2022 - June 2026
 
 Project Title: Cloud-Native Kubernetes Platform on Amazon EKS | AWS Managed Services
-Duration: Mar 2024 – Apr 2026
+Duration: Mar 2024 - Apr 2026
 Implemented a cloud-native container platform on Amazon EKS using Infrastructure as Code (IaC) and Kubernetes orchestration. Provisioned Amazon EKS clusters and AWS infrastructure using Terraform, implemented CI/CD pipelines with GitHub Actions and Amazon ECR, and configured auto-scaling, monitoring, and troubleshooting capabilities to ensure high availability.
 
 Project Title: Cloud-Native CI/CD Automation Platform
-Duration: Jul 2023 – Feb 2024
+Duration: Jul 2023 - Feb 2024
 Implemented an AWS-native CI/CD platform for automated build, testing, and deployment workflows. Integrated AWS Developer Tools, implemented Blue-Green and Rolling Deployment strategies, enabled Amazon CloudWatch monitoring and notifications, and improved release consistency through deployment automation.
 
 Project Title: Enterprise Cloud Migration & Modernization Platform
-Duration: Nov 2022–Jun 2023
+Duration: Nov 2022-Jun 2023
 Implemented a highly available three-tier architecture on AWS by migrating legacy workloads to the cloud. Provisioned Amazon VPC networking, implemented Auto Scaling and Application Load Balancers, configured and Amazon RDS, RabbitMQ, and Memcached services, and automated provisioning and deployments using Bash scripting and Infrastructure as Code (IaC) principles.
 
 Roles & Responsibilities:
@@ -58,17 +58,17 @@ ACHIEVEMENTS
 • Developed a custom ServiceNow dashboard for incident tracking and SLA breach reporting, improving operational transparency.
 • Integrated SonarQube quality gates, ECR management, and Slack notifications for improved collaboration and feedback.
 • Successfully designed, implemented, and deployed an AI-powered portfolio and content automation platform from scratch, integrating Terraform, AWS, Docker, GitHub Actions, and secure production hosting while independently resolving complex infrastructure and deployment challenges.
-• DXC CHAMPS Award – FY24 Q1: Recognised for consistent delivery, ownership of priority tasks, and reliable execution of infrastructure operations and production deployments.
-• DXC CHAMPS Award – FY26 H1: Awarded for sustained performance, end-to-end accountability, and operational excellence in supporting critical infrastructure services.
+• DXC CHAMPS Award - FY24 Q1: Recognised for consistent delivery, ownership of priority tasks, and reliable execution of infrastructure operations and production deployments.
+• DXC CHAMPS Award - FY26 H1: Awarded for sustained performance, end-to-end accountability, and operational excellence in supporting critical infrastructure services.
 
 PERSONAL DEVOPS PROJECT
 Project Title: AI-Powered Portfolio & Content Automation Platform
-Duration: Oct 2025 – Present
+Duration: Oct 2025 - Present
 Project URL: https://althafportfolio.site/
 Implemented and deployed an AI-powered portfolio and content automation platform by provisioning AWS infrastructure using Terraform, containerizing services with Docker, and automating CI/CD pipelines using GitHub Actions. Configured Amazon EC2, Amazon S3, Nginx, and Let's Encrypt SSL, and implemented monitoring and environment management to ensure secure and reliable production deployments.
 
 CERTIFICATES
-• AWS Certified Solutions Architect – Associate
+• AWS Certified Solutions Architect - Associate
 • AWS Certified AI Practitioner
 • AWS Cloud Practitioner
 • Google Cloud Professional Cloud Architect

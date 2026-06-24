@@ -52,7 +52,7 @@ Operational control > managed convenience.
 
 With EC2, I can fine-tune Docker limits, debug via SSH, implement custom logging, and scale on-demand.
 
-Tradeoff: manual ops burden—but that's the cost of learning how systems work.
+Tradeoff: manual ops burden-but that's the cost of learning how systems work.
 
 When to migrate:
 - Background jobs (cron, schedulers)
@@ -73,6 +73,6 @@ But for now: 50+ concurrent users, daily blogs, <$20/month.
 🔗 Live demo: https://althafportfolio.site (see how it behaves under real traffic)
 🤖 Test the chatbot: Watch the 4-tier fallback in action
 
-For recruiters: Demonstrates hands-on AWS DevOps—EC2, Dockerized services, CI/CD automation, cost optimization, operating AI-enabled workloads in production. Hiring for AWS/DevOps? Let's connect.
+For recruiters: Demonstrates hands-on AWS DevOps-EC2, Dockerized services, CI/CD automation, cost optimization, operating AI-enabled workloads in production. Hiring for AWS/DevOps? Let's connect.
 
 #AWS #DevOps #CloudMigration #Docker #CICD #FastAPI #BuildInPublic #SystemDesign #AWSJobs #DevOpsEngineer #RAG #Ai #cloud #DevSecOps

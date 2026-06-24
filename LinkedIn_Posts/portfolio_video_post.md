@@ -4,7 +4,7 @@ This is not just a portfolio. It's a live AI-powered system I built to represent
 
 **What you're seeing:**
 
-A production-grade infrastructure running on AWS—the same way I'd architect systems for real clients.
+A production-grade infrastructure running on AWS-the same way I'd architect systems for real clients.
 
 - **CI/CD automation**: Every code change is built, tested, and deployed continuously
 - **AI Assistant ("Assist Bot")**: Answers recruiter questions about my experience, projects, certifications, and technical decisions in real-time
@@ -14,7 +14,7 @@ A production-grade infrastructure running on AWS—the same way I'd architect sy
 
 Because anyone can list skills on a resume. I wanted to show what I actually build.
 
-This is cloud-native, automated, observable, and designed to scale—just like the systems I build professionally.
+This is cloud-native, automated, observable, and designed to scale-just like the systems I build professionally.
 
 **Don't just read about me. Ask my AI assistant.**
 

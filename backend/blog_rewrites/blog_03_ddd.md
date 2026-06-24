@@ -5,15 +5,15 @@
 
 ---
 
-In 2025, most software projects don't fail because of bad code. They fail because **developers and business stakeholders are speaking different languages**—and nobody realizes it until six months and $2M later.
+In 2025, most software projects don't fail because of bad code. They fail because **developers and business stakeholders are speaking different languages**-and nobody realizes it until six months and $2M later.
 
 I've watched engineering teams build technically perfect systems that solve the wrong problems, implement the wrong workflows, and model the wrong concepts. The code compiles. The tests pass. The deployments succeed. But the business can't use it because **the software doesn't reflect how the business actually works**.
 
-Here's the brutal reality: **70% of custom software projects fail to deliver expected business value**, according to the Standish Group's CHAOS Report 2024. Not because of technology—because of **misalignment between what was built and what was needed**.
+Here's the brutal reality: **70% of custom software projects fail to deliver expected business value**, according to the Standish Group's CHAOS Report 2024. Not because of technology-because of **misalignment between what was built and what was needed**.
 
 The root cause? **Software is designed around database tables and REST endpoints instead of business concepts and workflows.**
 
-Domain-Driven Design (DDD) exists to fix this. But most teams treat DDD like a technical pattern—use aggregates, define bounded contexts, draw some diagrams—and wonder why it still doesn't work.
+Domain-Driven Design (DDD) exists to fix this. But most teams treat DDD like a technical pattern-use aggregates, define bounded contexts, draw some diagrams-and wonder why it still doesn't work.
 
 **DDD isn't about technical patterns. It's about forcing developers and business experts to speak the same language, model the same concepts, and validate the same rules.**
 
@@ -37,9 +37,9 @@ Traditional software development works like this:
 5. Expensive change requests pile up
 
 Every step is a **translation layer** where meaning gets lost:
-- Business says "customer"—developers model "user"
-- Business says "order fulfillment"—developers build generic "workflows"
-- Business has complex rules—developers implement simplified logic
+- Business says "customer"-developers model "user"
+- Business says "order fulfillment"-developers build generic "workflows"
+- Business has complex rules-developers implement simplified logic
 
 **Each translation error compounds. By the time code reaches production, it's solving a problem that doesn't exist.**
 
@@ -84,7 +84,7 @@ Different parts of the business use the same words to mean different things. "Cu
 
 Business rules live in the domain model, **not** in controllers, services, or database triggers.
 
-If shipping costs change based on weight, distance, and customer tier—that logic belongs in the domain, expressed in business terms, validated by business experts.
+If shipping costs change based on weight, distance, and customer tier-that logic belongs in the domain, expressed in business terms, validated by business experts.
 
 **If business experts can't review your domain code and confirm it's correct, your model is wrong.**
 
@@ -92,7 +92,7 @@ If shipping costs change based on weight, distance, and customer tier—that log
 
 ## The Feedback-Driven Quality Model (FDQM): DDD That Actually Works
 
-Most DDD projects fail because teams focus on technical patterns instead of business collaboration. The solution is **FDQM**—a framework that makes domain experts and developers accountable to each other.
+Most DDD projects fail because teams focus on technical patterns instead of business collaboration. The solution is **FDQM**-a framework that makes domain experts and developers accountable to each other.
 
 ### FDQM Pillar #1: Continuous Business Validation
 
@@ -131,7 +131,7 @@ Business rules don't belong in:
 - Services (too generic)
 - Database stored procedures (too far from the code)
 
-They belong in **domain entities, value objects, and domain services**—where business experts can review them.
+They belong in **domain entities, value objects, and domain services**-where business experts can review them.
 
 **If you can't unit test business logic without mocking databases, your domain model is anemic.**
 
@@ -189,7 +189,7 @@ Get developers and business experts in a room. Map out:
 - Aggregates (Order, Payment, Shipment)
 - Policies (business rules connecting events)
 
-**This session reveals the real domain model—not the one developers assumed existed.**
+**This session reveals the real domain model-not the one developers assumed existed.**
 
 ### Step 2: Define Bounded Contexts
 
@@ -245,7 +245,7 @@ Weekly sessions where:
 DDD is collaborative design. If business experts aren't involved weekly, you're not doing DDD.
 
 **Mistake #2: Anemic Domain Models**  
-Entities with only getters/setters aren't domain models—they're DTOs pretending to be models.
+Entities with only getters/setters aren't domain models-they're DTOs pretending to be models.
 
 **Mistake #3: Ignoring Bounded Contexts**  
 Trying to create one unified model across the entire business **always fails**.
@@ -257,7 +257,7 @@ If your domain code talks about "repositories," "controllers," or "DTOs," it's n
 
 ## The Uncomfortable Truth About Software Quality
 
-**If your developers can't explain the codebase using business terms, you don't have a domain model—you have technical debt with a class diagram.**
+**If your developers can't explain the codebase using business terms, you don't have a domain model-you have technical debt with a class diagram.**
 
 DDD isn't optional for complex business domains. It's the difference between:
 - Software that enables business agility

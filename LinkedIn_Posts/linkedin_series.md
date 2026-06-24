@@ -117,7 +117,7 @@ Transform a static portfolio into a **fully functional, AI-powered platform** wi
 - Consistent performance without cold starts
 
 **DevOps Perspective:**
-The migration wasn't just about resources—it was about **gaining operational control**. With EC2, I could:
+The migration wasn't just about resources-it was about **gaining operational control**. With EC2, I could:
 - Fine-tune Docker memory limits
 - Monitor container health in real-time
 - Debug production issues via SSH
@@ -273,7 +273,7 @@ applications:
 - Cost-effective for static SPAs
 
 **DevOps Perspective:**
-Amplify abstracts away infrastructure complexity while providing **production-grade features**. For a React SPA, it's the optimal choice—combining **simplicity** (managed service) with **power** (AWS backbone).
+Amplify abstracts away infrastructure complexity while providing **production-grade features**. For a React SPA, it's the optimal choice-combining **simplicity** (managed service) with **power** (AWS backbone).
 
 ---
 
@@ -978,4 +978,4 @@ The 4-agent architecture transforms **content creation from a manual task** into
 ✅ **DevOps** (automation, monitoring, cost optimization)  
 ✅ **Production Engineering** (99.9% uptime, <2s latency)
 
-This is not just a portfolio—it's a **production-grade, AI-powered platform** that showcases **real-world DevOps engineering**.
+This is not just a portfolio-it's a **production-grade, AI-powered platform** that showcases **real-world DevOps engineering**.

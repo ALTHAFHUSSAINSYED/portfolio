@@ -1,6 +1,6 @@
 # Day 2: Why I Treated Frontend Hosting as an Ops Problem
 
-I deployed a React SPA with zero server management, global CDN, and automatic SSL—for $0/month.
+I deployed a React SPA with zero server management, global CDN, and automatic SSL-for $0/month.
 
 Here's why I chose a managed service over self-hosting.
 
@@ -12,7 +12,7 @@ Self-host on EC2: Nginx config, SSL renewal, CloudFront setup, manual cache inva
 
 AWS Amplify: Zero server management, automatic SSL, built-in CDN, automatic cache invalidation, Git-based deploys
 
-I chose Amplify. Not because I couldn't self-host—but because frontend hosting is a solved problem that doesn't need my attention.
+I chose Amplify. Not because I couldn't self-host-but because frontend hosting is a solved problem that doesn't need my attention.
 
 Why This Was Right
 

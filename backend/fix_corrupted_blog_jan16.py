@@ -39,7 +39,7 @@ In 2026, the cybersecurity landscape has evolved dramatically with the emergence
 
 ## The Rise of Hyperautomated Threats
 
-Hyperautomated threats represent a paradigm shift in cyber attacks. Unlike traditional malware or even AI-assisted attacks, these systems leverage agentic AI—autonomous agents capable of:
+Hyperautomated threats represent a paradigm shift in cyber attacks. Unlike traditional malware or even AI-assisted attacks, these systems leverage agentic AI-autonomous agents capable of:
 
 - **Adaptive Reconnaissance**: Continuously scanning and mapping target networks, adjusting tactics based on defensive responses
 - **Polymorphic Exploitation**: Automatically generating and testing exploit variations to bypass signature-based detection
