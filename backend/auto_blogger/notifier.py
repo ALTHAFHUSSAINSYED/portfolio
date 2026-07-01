@@ -27,7 +27,11 @@ logger = logging.getLogger("BlogNotifier")
 class BlogNotifier:
     def __init__(self):
         self.notification_service = NotificationService() if NotificationService else None
-        self.recipient = "allualthaf42@gmail.com"
+        self.recipient = os.environ.get('TO_EMAIL')
+        if not self.recipient and self.notification_service:
+            self.recipient = getattr(self.notification_service, 'to_email', None)
+        if not self.recipient:
+            self.recipient = "althafhussain.sd@gmail.com"
 
     async def send_success(self, blog: Dict[str, Any], url: str):
         """Send success email"""

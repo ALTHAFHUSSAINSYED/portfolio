@@ -5,9 +5,9 @@ import subprocess
 import time
 
 # Configuration
-SSH_KEY = "c:/portfolio/portfolio/PORTFOLIO.pem"
+SSH_KEY = "c:/portfolio/portfolio/portfolio.key.pem"
 SSH_USER = "ec2-user"
-SSH_HOST = "13.233.54.210"
+SSH_HOST = "15.207.107.6"
 CONTAINER = "portfolio-backend"
 
 FILES_TO_DEPLOY = [
